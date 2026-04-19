@@ -1,0 +1,3470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Poloidal Core Visualization — Raian Process Metaphysics</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { width: 100%; height: 100%; background: #f5efdd; overflow: hidden; font-family: Georgia, serif; }
+#scene-container { position: relative; width: 100%; height: 100%; }
+#canvas-mount { width: 100%; height: 100%; }
+canvas { display: block; }
+
+/* Control panel */
+#control-panel {
+  position: absolute; bottom: 16px; left: 16px;
+  background: rgba(245, 239, 221, 0.92);
+  border: 1px solid #a8822c;
+  border-radius: 6px;
+  padding: 6px 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 300px;
+  max-height: calc(100% - 40px);
+  overflow-y: auto;
+  font-family: Georgia, serif;
+  color: #4a3818;
+  font-size: 12px;
+}
+#control-panel.open { padding: 10px 14px; background: rgba(245, 239, 221, 0.82); }
+#panel-header {
+  display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; font-weight: bold; font-size: 14px; user-select: none;
+}
+#panel-body { margin-top: 10px; display: none; }
+#control-panel.open #panel-body { display: block; }
+.row { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 12px; }
+.row input[type="checkbox"] { cursor: pointer; }
+.row.indent { padding-left: 20px; }
+.row.indent span { font-size: 12px; }
+.row.bold span { font-weight: bold; }
+.row-disabled span { opacity: 0.5; }
+.gap { height: 8px; }
+
+/* Legend */
+#legend { margin-top: 10px; padding-top: 10px; border-top: 1px solid #c8a85c; font-size: 11px; color: #6b4a1a; line-height: 1.45; }
+#legend .swatch { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-right: 6px; }
+#legend .swatch-wide { display: inline-block; width: 30px; height: 12px; vertical-align: middle; margin-right: 6px; }
+#hint { margin-top: 10px; font-size: 11px; color: #6b4a1a; font-family: Georgia, serif; font-style: italic; }
+</style>
+</head>
+<body>
+<div id="scene-container">
+  <div id="canvas-mount"></div>
+
+  <div id="control-panel">
+    <div id="panel-header" onclick="togglePanel()">
+      <span>Poloidal Core &mdash; Zones &amp; Thresholds</span>
+      <span id="panel-arrow">&#9656;</span>
+    </div>
+    <div id="panel-body">
+      <div class="row"><input type="checkbox" data-key="zone1" checked/><span>Zone 1 &mdash; Radial Convergence</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold1" checked/><span style="font-style: italic;">Threshold 1 &mdash; The Separatrix</span></div>
+      <div class="row"><input type="checkbox" data-key="zone2" checked/><span>Zone 2 &mdash; Collision &amp; Turbulence</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold2" checked/><span style="font-style: italic;">Threshold 2 &mdash; The Semi-Spiral</span></div>
+      <div class="row"><input type="checkbox" data-key="zone3" checked/><span>Zone 3 &mdash; The Bubble</span></div>
+      <div class="row indent"><input type="checkbox" data-key="bubbleEnvelope" checked/><span>bubble envelope</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold3" checked/><span style="font-style: italic;">Threshold 3 &mdash; Post-Bubble Wake</span></div>
+      <div class="row"><input type="checkbox" data-key="zone4" checked/><span>Zone 4 &mdash; First Helical Flow</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold4" checked/><span style="font-style: italic;">Threshold 4 &mdash; Helical Breakdown</span></div>
+      <div class="row"><input type="checkbox" data-key="zone5" checked/><span>Zone 5 &mdash; Second Helical Flow</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold5" checked/><span style="font-style: italic;">Threshold 5 &mdash; Turbulent Negotiation</span></div>
+      <div class="row"><input type="checkbox" data-key="zone6" checked/><span>Zone 6 &mdash; Relaminarization</span></div>
+      <div class="row"><input type="checkbox" data-key="threshold6" checked/><span style="font-style: italic;">Threshold 6 &mdash; Apex Ignition</span></div>
+      <div class="row"><input type="checkbox" data-key="zone7" checked/><span>Zone 7 &mdash; Radial Divergence</span></div>
+      <div class="row"><input type="checkbox" data-key="ambientField" checked/><span>Ambient Toroidal Field</span></div>
+      <div class="row"><input type="checkbox" data-key="lowerSheath" checked/><span>Lower Sheath (Zone 1&ndash;Threshold 2)</span></div>
+
+      <div class="gap"></div>
+      <div class="row"><input type="checkbox" data-key="merkaba"/><span>Merkaba overlay</span></div>
+      <div class="row"><input type="checkbox" data-key="spirals"/><span>Spirals overlay (Don/Ra schematic)</span></div>
+      <div class="row"><input type="checkbox" data-key="labels" checked/><span>Labels</span></div>
+      <div class="row"><input type="checkbox" data-key="chamberLabels" checked/><span>Chamber labels</span></div>
+
+      <div class="gap"></div>
+      <div class="row bold"><input type="checkbox" data-key="pyramid"/><span>Pyramid overlay</span></div>
+      <div class="row indent"><input type="checkbox" data-key="pyramidChambers" checked/><span>chambers (RC &middot; QC &middot; KC)</span></div>
+      <div class="row indent"><input type="checkbox" data-key="pyramidRelieving" checked/><span>relieving chambers</span></div>
+      <div class="row indent"><input type="checkbox" data-key="pyramidP2" checked/><span>Position 2 marker</span></div>
+      <div class="row indent"><input type="checkbox" data-key="pyramidCorrespondence"/><span>correspondence lines</span></div>
+
+      <div id="legend">
+        <div><span class="swatch" style="background: #785c18;"></span>gold = organized flow</div>
+        <div><span class="swatch-wide" style="background: linear-gradient(180deg, #e0a028, #d4682c, #4a1420);"></span>turbulence gradient (Zone 2)</div>
+        <div><span class="swatch" style="background: #b8a018;"></span>dark yellow = semi-spiral</div>
+        <div><span class="swatch" style="background: #3a8a4a;"></span>green = micro-torus</div>
+        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8);"></span>spectrum = Zone 4</div>
+        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30);"></span>red-to-amber = Zone 5</div>
+        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a);"></span>muted = Threshold 5</div>
+        <div><span class="swatch" style="background: #3a2a7c;"></span>indigo = Zone 6</div>
+        <div><span class="swatch" style="background: #0a0614;"></span>dark gap = Threshold 6</div>
+        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff);"></span>Zone 7 jet</div>
+        <div><span class="swatch" style="background: #8a6a1e;"></span>gold = ambient toroidal field</div>
+      </div>
+      <div id="hint">Drag to orbit &middot; scroll to zoom</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Visibility state — single source of truth for all toggles
+const visibility = {
+  zone1: true, threshold1: true, zone2: true, threshold2: true, zone3: true,
+  bubbleEnvelope: true, threshold3: true, zone4: true, threshold4: true,
+  zone5: true, threshold5: true, zone6: true, threshold6: true, zone7: true,
+  ambientField: true, lowerSheath: true,
+  merkaba: false, labels: true, chamberLabels: true,
+  pyramid: false, pyramidChambers: true, pyramidRelieving: true,
+  pyramidP2: true, pyramidCorrespondence: false,
+  spirals: false,
+};
+
+// Panel open/close
+let panelOpen = false;
+function togglePanel() {
+  panelOpen = !panelOpen;
+  const panel = document.getElementById("control-panel");
+  const arrow = document.getElementById("panel-arrow");
+  if (panelOpen) {
+    panel.classList.add("open");
+    arrow.innerHTML = "&#9662;";
+  } else {
+    panel.classList.remove("open");
+    arrow.innerHTML = "&#9656;";
+  }
+}
+
+// Apply visibility to the scene — called after scene is built and whenever a toggle changes
+function updateVisibility() {
+  if (window.zone1Ref) window.zone1Ref.visible = visibility.zone1;
+  if (window.threshold1Ref) window.threshold1Ref.visible = visibility.threshold1;
+  if (window.zone2Ref) window.zone2Ref.visible = visibility.zone2;
+  if (window.threshold2Ref) window.threshold2Ref.visible = visibility.threshold2;
+  if (window.zone3Ref) window.zone3Ref.visible = visibility.zone3;
+  if (window.bubbleEnvelopeRef) window.bubbleEnvelopeRef.visible = visibility.bubbleEnvelope;
+  if (window.threshold3Ref) window.threshold3Ref.visible = visibility.threshold3;
+  if (window.zone4Ref) window.zone4Ref.visible = visibility.zone4;
+  if (window.threshold4Ref) window.threshold4Ref.visible = visibility.threshold4;
+  if (window.zone5Ref) window.zone5Ref.visible = visibility.zone5;
+  if (window.threshold5Ref) window.threshold5Ref.visible = visibility.threshold5;
+  if (window.zone6Ref) window.zone6Ref.visible = visibility.zone6;
+  if (window.threshold6Ref) window.threshold6Ref.visible = visibility.threshold6;
+  if (window.zone7Ref) window.zone7Ref.visible = visibility.zone7;
+  if (window.ambientFieldRef) window.ambientFieldRef.visible = visibility.ambientField;
+  if (window.lowerSheathRef) window.lowerSheathRef.visible = visibility.lowerSheath;
+  if (window.merkabaRef) window.merkabaRef.visible = visibility.merkaba;
+  if (window.labelsRef) window.labelsRef.visible = visibility.labels;
+  if (window.chamberLabelsRef) window.chamberLabelsRef.visible = visibility.chamberLabels;
+  if (window.spiralsRef) window.spiralsRef.visible = visibility.spirals;
+  if (window.pyramidRef) window.pyramidRef.visible = visibility.pyramid;
+  if (window.pyramidChambersRef) window.pyramidChambersRef.visible = visibility.pyramidChambers;
+  if (window.pyramidRelievingRef) window.pyramidRelievingRef.visible = visibility.pyramidRelieving;
+  if (window.pyramidP2Ref) window.pyramidP2Ref.visible = visibility.pyramidP2;
+  if (window.pyramidCorrespondenceRef) {
+    window.pyramidCorrespondenceRef.visible = visibility.pyramid && visibility.pyramidCorrespondence;
+  }
+  // Disabled state for pyramid sub-toggles
+  document.querySelectorAll('.row.indent input').forEach((el) => {
+    const key = el.dataset.key;
+    if (['pyramidChambers','pyramidRelieving','pyramidP2','pyramidCorrespondence'].includes(key)) {
+      el.disabled = !visibility.pyramid;
+      el.parentElement.classList.toggle('row-disabled', !visibility.pyramid);
+    }
+  });
+}
+
+// Wire checkboxes
+document.querySelectorAll('#panel-body input[type="checkbox"]').forEach((el) => {
+  const key = el.dataset.key;
+  if (key in visibility) el.checked = visibility[key];
+  el.addEventListener('change', () => {
+    visibility[key] = el.checked;
+    updateVisibility();
+  });
+});
+
+// ----- Build the scene ----------------------------------------------------
+// Mount reference: the div where the renderer canvas will attach
+const mount = document.getElementById('canvas-mount');
+
+// Everything below is the scene-construction code, lightly adapted from
+// the React artifact's useEffect body. The `mount` variable above takes
+// the place of `mountRef.current`. Scene-group "ref" assignments write
+// directly to `window` globals, which updateVisibility() reads.
+
+    // --- Scene setup -------------------------------------------------------
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color("#f5efdd");
+    window.sceneRef = scene;
+
+    const width = mount.clientWidth;
+    const height = mount.clientHeight;
+
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+    window.cameraRef = camera;
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.setSize(width, height);
+    mount.appendChild(renderer.domElement);
+    window.rendererRef = renderer;
+
+    // Lighting
+    const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+    scene.add(ambient);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.5);
+    dir.position.set(5, 10, 7);
+    scene.add(dir);
+
+    // --- Geometry constants ------------------------------------------------
+    const columnRadius = 1.0;
+    const columnBottom = -3.0;
+
+    // Pyramid-to-poloidal scaling: the pyramid is modeled in native cubit
+    // units (280 cubits tall) and scaled down into the scene by this
+    // factor. Declared here so the Zone 7 flame (which references pyramid
+    // height) and the pyramid overlay both read from the same source.
+    // Anchors: RC bottom -> separatrix top (y = -2.8); pyramid apex -> T6
+    // top (y = 8.0). Span: 340 cubits over 10.8 poloidal units.
+    const POLOIDAL_TO_PYRAMID_SCALE = 31.4815;
+    const PYRAMID_Y_OFFSET = -0.8941;
+
+    // Zone 1 (radial convergence) - far below
+    // Threshold 1 (separatrix bell) - just below column base
+    const separatrixBaseY = columnBottom - 0.5;
+    const separatrixTopY = columnBottom + 0.2;
+    const separatrixRimR = columnRadius * 2.2;
+    const separatrixThroatR = columnRadius * 0.9;
+
+    // Zone 2 - turbulence / proto-organization (unchanged)
+    const zone2Base = columnBottom + 0.25;
+    const zone2Top = zone2Base + 1.50;       // −1.25
+    const zone2Radius = columnRadius;
+
+    // Threshold 2 - semi-spiral
+    // Revised April 2026 (v7): shortened to 1.35 units from v6's 1.45.
+    // Top edge at y = 0.154, just below the (lowered) bubble bottom.
+    const thresh2Base = zone2Top + 0.05;
+    const thresh2Top = thresh2Base + 1.354;  // 0.154
+
+    // Zone 3 - bubble
+    // Revised April 2026 (v7): halfHeight 0.50 → 0.55 (taller). Bubble
+    // top held at y = 1.304 (unchanged); bubble bottom lowered from 0.304
+    // to 0.204 so the bubble extends down further. Bubble center shifts
+    // down to y = 0.754.
+    // The green micro-torus inside the bubble is retuned (ringVertical
+    // factor 0.75 → 0.455) so that its lower boundary sits at y = 0.504 —
+    // where the pyramid's Queen's Chamber lands. QC thus sits at the
+    // beginning of the green inner torus.
+    const bubbleCenterY = 0.754;
+    const bubbleHalfHeight = 0.55;
+    const bubbleHalfWidth = columnRadius * 0.82;
+    const lowerStagY = bubbleCenterY - bubbleHalfHeight; // 0.204
+    const upperStagY = bubbleCenterY + bubbleHalfHeight; // 1.304
+    // Green torus vertical factor — retuned so ring bottom aligns with QC
+    const bubbleRingVerticalFactor = 0.455;
+
+    // Threshold 3 - wake (unchanged)
+    const threshold3Base = upperStagY + 0.05;        // 1.354
+    const threshold3Top = threshold3Base + 0.30;     // 1.654
+
+    // Zone 4 - first helical flow with WIDENED BULGE AND KC CONVERGENCE
+    // Revised April 2026 (v8): bulge becomes a trapezoidal plateau across
+    // the King's Chamber vertical band. Across KC's vertical extent (y =
+    // 1.647 to y = 1.997), all strand radii converge toward a common radial
+    // band centered on KC's interior (r_converge = 0.82, midway between
+    // KC's inner face at r=0.63 and its outer corner at r=1.005) — so
+    // all seven color strands pass THROUGH the chamber volume. This models
+    // the resonant chamber's action as an attractor in the helical flow:
+    // all colors gather into the chamber, the bulge rotates through it,
+    // then the spectrum re-disperses above.
+    //
+    // Profile: strands spread naturally from base to KC-bottom, converge
+    // into KC across its vertical band (y = 1.647 → 1.997), then re-disperse
+    // toward Zone 4 top.
+    const zone4Base = threshold3Top;          // 1.654
+    const zone4Top = zone4Base + 1.50;        // 3.154
+    const zone4Height = zone4Top - zone4Base;
+    const zone4BulgePeakY = 1.822;            // KC center
+    const zone4BulgePeakR = 1.45;             // widened plateau radius
+    const zone4BaseR = 1.00;
+    const zone4TopR = 0.85;
+
+    // King's Chamber radial band (for strand convergence)
+    const kcYBottom = 1.647;      // KC y bottom (80 cubits / scale)
+    const kcYTop = 1.997;         // KC y top (91 cubits / scale)
+    const kcConvergeR = 0.82;     // radial center of KC interior
+
+    // Per-strand radius at y: smooth natural radius + convergence
+    // into KC band.  `naturalR` is what the strand would have under the
+    // base/peak/top profile (no convergence); across KC's vertical band,
+    // strands are blended toward the common convergence radius.
+    const zone4StrandRadiusAt = (sr, y) => {
+      // Natural radius: strand at sr, scaled by bulge envelope
+      let envelope;
+      if (y <= zone4Base) envelope = zone4BaseR;
+      else if (y >= zone4Top) envelope = zone4TopR;
+      else if (y <= zone4BulgePeakY) {
+        const t = (y - zone4Base) / (zone4BulgePeakY - zone4Base);
+        envelope = zone4BaseR + (zone4BulgePeakR - zone4BaseR) * t;
+      } else {
+        const t = (y - zone4BulgePeakY) / (zone4Top - zone4BulgePeakY);
+        envelope = zone4BulgePeakR + (zone4TopR - zone4BulgePeakR) * t;
+      }
+      const naturalR = sr * envelope;
+
+      // Convergence factor: 0 outside KC band (use naturalR), ramps up to
+      // 1 at KC center (full convergence to kcConvergeR). Smooth hump.
+      let convergeFrac = 0;
+      if (y >= kcYBottom && y <= kcYTop) {
+        // Use a cosine hump that peaks at KC center
+        const kcMid = (kcYBottom + kcYTop) / 2;
+        const kcHalfSpan = (kcYTop - kcYBottom) / 2;
+        const d = Math.abs(y - kcMid) / kcHalfSpan;   // 0 at center, 1 at edges
+        convergeFrac = 0.5 * (1 + Math.cos(d * Math.PI));  // 1 at center, 0 at edges
+        // Scale so convergence is strong but not total — 0.75 max blend
+        convergeFrac *= 0.75;
+      }
+
+      return naturalR * (1 - convergeFrac) + kcConvergeR * convergeFrac;
+    };
+
+    // Retained for backward compatibility / ambient streamlines / labels:
+    // simple envelope function without convergence.
+    const zone4RadiusAt = (y) => {
+      if (y <= zone4Base) return zone4BaseR * columnRadius;
+      if (y >= zone4Top) return zone4TopR * columnRadius;
+      if (y <= zone4BulgePeakY) {
+        const t = (y - zone4Base) / (zone4BulgePeakY - zone4Base);
+        return (zone4BaseR + (zone4BulgePeakR - zone4BaseR) * t) * columnRadius;
+      } else {
+        const t = (y - zone4BulgePeakY) / (zone4Top - zone4BulgePeakY);
+        return (zone4BulgePeakR + (zone4TopR - zone4BulgePeakR) * t) * columnRadius;
+      }
+    };
+
+    // Threshold 4 - helical breakdown (unchanged)
+    const t4Base = zone4Top;                  // 3.154
+    const t4Top = t4Base + 1.0;               // 4.154
+    const t4Height = t4Top - t4Base;
+
+    // Zone 5 - second helical flow (unchanged)
+    const zone5Base = t4Top;                  // 4.154
+    const zone5Top = zone5Base + 1.0;         // 5.154
+    const zone5Height = zone5Top - zone5Base;
+
+    // Threshold 5 - turbulent negotiation
+    // Revised April 2026 (v7): extended from 0.75 → 1.30 — significantly
+    // taller, giving the fully-turbulent Kolmogorov cascade real vertical
+    // room as the secondary helix dissolves.
+    const t5Base = zone5Top;             // 5.154
+    const t5Top = t5Base + 1.30;         // 6.454
+    const t5Height = t5Top - t5Base;
+
+    // Zone 6 - relaminarization (indigo ray, Position 2 zone)
+    // Revised April 2026 (v7): shortened from 1.85 → 1.30. Zone 6 sits
+    // between extended T5 below and the apex gap above. Geometric
+    // compression suppresses turbulence across this shorter span.
+    const zone6Base = t5Top;             // 6.454
+    const zone6Top = t5Top + 1.296;      // 7.750
+    const zone6Height = zone6Top - zone6Base;
+
+    // Threshold 6 - apex ignition (the dark gap) — unchanged
+    const t6Base = zone6Top;             // 7.750
+    const t6Top = zone6Top + 0.25;       // 8.000
+    const t6Height = t6Top - t6Base;
+    // Geometric apex point sits at the top of the gap
+    const apexY = t6Top;                 // 8.000
+
+    // Zone 7 - radial divergence (violet ray, third spiral) — unchanged
+    const zone7Base = t6Top;             // 8.000
+    const zone7Top = t6Top + 3.0;        // 11.000
+    const zone7Height = zone7Top - zone7Base;
+
+    // ======================================================================
+    // HELPERS
+    // ======================================================================
+
+    const makeTube = (points, color, emissive, tubeRadius = 0.019) => {
+      if (points.length < 2) return null;
+      const curve = new THREE.CatmullRomCurve3(points);
+      const geom = new THREE.TubeGeometry(curve, Math.max(16, points.length * 2), tubeRadius, 8, false);
+      const mat = new THREE.MeshStandardMaterial({
+        color,
+        emissive: emissive !== undefined ? emissive : color,
+        emissiveIntensity: 0.35,
+        roughness: 0.6,
+        metalness: 0.1,
+      });
+      return new THREE.Mesh(geom, mat);
+    };
+
+    // Tube with custom material options (for translucent / tube-radius variants)
+    const makeTubeMat = (points, material, tubeRadius = 0.019) => {
+      if (points.length < 2) return null;
+      const curve = new THREE.CatmullRomCurve3(points);
+      const geom = new THREE.TubeGeometry(curve, Math.max(16, points.length * 2), tubeRadius, 8, false);
+      return new THREE.Mesh(geom, material);
+    };
+
+    const addArrow = (group, position, direction, color, size = 0.12) => {
+      const arrowGeom = new THREE.ConeGeometry(size * 0.45, size * 1.3, 6);
+      const arrowMat = new THREE.MeshStandardMaterial({
+        color,
+        emissive: color,
+        emissiveIntensity: 0.5,
+        roughness: 0.5,
+      });
+      const arrow = new THREE.Mesh(arrowGeom, arrowMat);
+      arrow.position.copy(position);
+      const up = new THREE.Vector3(0, 1, 0);
+      const d = direction.clone().normalize();
+      const quaternion = new THREE.Quaternion().setFromUnitVectors(up, d);
+      arrow.quaternion.copy(quaternion);
+      group.add(arrow);
+    };
+
+    const makeLabel = (text, leftEdgePosition, fontSize = 64, textColor = "#6b4a1a") => {
+      // leftEdgePosition is the intended location of the LEFT edge of the
+      // label sprite. Since Three.js sprites are positioned by their center,
+      // we offset the center by half the sprite width. This way labels of
+      // varying lengths all line up on their left edges — no wandering ragged
+      // right edge, no labels stretching off to the left of the column.
+
+      // Measure the text first so the canvas is wide enough to contain it.
+      const measureCanvas = document.createElement("canvas");
+      const measureCtx = measureCanvas.getContext("2d");
+      measureCtx.font = `italic ${fontSize}px Georgia, serif`;
+      const textMetrics = measureCtx.measureText(text);
+      const textWidth = Math.ceil(textMetrics.width);
+
+      // Canvas: text width plus padding
+      const padding = 20;
+      const canvasWidth = textWidth + padding * 2;
+      const canvasHeight = Math.ceil(fontSize * 1.4);
+
+      const canvas = document.createElement("canvas");
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+      const ctx = canvas.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.font = `italic ${fontSize}px Georgia, serif`;
+      ctx.fillStyle = textColor;
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+      const tex = new THREE.CanvasTexture(canvas);
+      tex.needsUpdate = true;
+      const mat = new THREE.SpriteMaterial({
+        map: tex,
+        depthTest: false,
+        transparent: true,
+      });
+      const sprite = new THREE.Sprite(mat);
+
+      // Scale: preserve aspect ratio, height = 0.5 scene units
+      const spriteHeight = 0.5;
+      const aspectRatio = canvasWidth / canvasHeight;
+      const spriteWidth = spriteHeight * aspectRatio;
+      sprite.scale.set(spriteWidth, spriteHeight, 1);
+
+      // Position: offset center so the sprite's left edge is at leftEdgePosition.x
+      sprite.position.set(
+        leftEdgePosition.x + spriteWidth / 2,
+        leftEdgePosition.y,
+        leftEdgePosition.z
+      );
+      return sprite;
+    };
+
+    // Color helpers for desaturation blending
+    const hexToRgb = (h) => ({ r: (h >> 16) & 255, g: (h >> 8) & 255, b: h & 255 });
+    const rgbToHex = (r, g, b) =>
+      (Math.round(r) << 16) | (Math.round(g) << 8) | Math.round(b);
+    const lerp = (a, b, t) => a + (b - a) * t;
+    const lerpColor = (hexA, hexB, t) => {
+      const a = hexToRgb(hexA);
+      const b = hexToRgb(hexB);
+      return rgbToHex(lerp(a.r, b.r, t), lerp(a.g, b.g, t), lerp(a.b, b.b, t));
+    };
+
+    // ======================================================================
+    // CENTRAL AXIS LINE
+    // ======================================================================
+    {
+      const axisGeom = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, separatrixBaseY - 0.5, 0),
+        new THREE.Vector3(0, zone6Top, 0),
+      ]);
+      const axisMat = new THREE.LineBasicMaterial({
+        color: 0x8a6a1e,
+        transparent: true,
+        opacity: 0.25,
+      });
+      const axisLine = new THREE.Line(axisGeom, axisMat);
+      scene.add(axisLine);
+    }
+
+    // ======================================================================
+    // ZONE 1 - Radial Convergence
+    // ======================================================================
+    const zone1Group = new THREE.Group();
+    window.zone1Ref = zone1Group;
+    scene.add(zone1Group);
+    {
+      const GOLD = 0x785c18;
+      const GOLD_EM = 0x3d2a08;
+
+      // Zone 1's radial convergence is rendered as streamlines flowing up
+      // from below the separatrix (see below). Earlier iterations included
+      // an outer intake ring at r = 3.4 and, before that, 18 descending
+      // streamlines from the ambient field — both have been removed as the
+      // ambient toroidal field and these upward-ascending streamlines now
+      // carry Zone 1's full convergence narrative.
+
+      // Prana flow streamlines — Zone 1's radial convergence into the separatrix.
+      // Each streamline starts below and outside the separatrix (where the
+      // ambient field's inflow curves inward), sweeps radially inward, and
+      // rises into the base of the separatrix bell from beneath. The flow
+      // is being drawn UP and IN toward the event horizon, matching Ra's
+      // description of the "scoop" and the reverse-bathtub-vortex analogy.
+      // 18 streamlines distributed azimuthally, each with 3 arrows showing
+      // flow direction along the curve.
+      {
+        const nStreams = 18;
+        const startR = columnRadius * 3.0;      // outer start (below the intake ring)
+        const startY = -4.2;                     // well below separatrix base
+        const endR = separatrixRimR * 0.7;        // just inside the rim (r ~ 1.54)
+        const endY = separatrixBaseY + 0.05;      // entering the separatrix from below
+
+        for (let i = 0; i < nStreams; i++) {
+          const phi = (i / nStreams) * Math.PI * 2;
+
+          // Build the streamline as a curved path. The shape: starts below
+          // and outside, sweeps inward and upward in a smooth arc. Use a
+          // quadratic-like curve parameterized by t in [0, 1].
+          const pts = [];
+          const nPts = 24;
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            // Radius: decreases from startR to endR. Use ease-out so most
+            // of the radial motion happens in the first half (flow converges
+            // quickly then rises more vertically near the end).
+            const r = startR - (startR - endR) * (1 - Math.pow(1 - t, 1.6));
+            // Vertical: rises from startY to endY. Use ease-in so the flow
+            // starts mostly horizontal and turns upward as it approaches.
+            const y = startY + (endY - startY) * Math.pow(t, 1.4);
+            // Slight tangential spiral for the inward-spiraling character
+            const spiralPhi = phi + t * 0.4;
+            pts.push(new THREE.Vector3(
+              r * Math.cos(spiralPhi),
+              y,
+              r * Math.sin(spiralPhi)
+            ));
+          }
+
+          // Render streamline as a thin gold tube
+          const tube = makeTube(pts, GOLD, GOLD_EM, 0.014);
+          if (tube) zone1Group.add(tube);
+
+          // Arrows along the curve — three per streamline at different t values
+          const arrowTs = [0.30, 0.60, 0.88];
+          arrowTs.forEach((tA) => {
+            const idx = Math.floor(tA * (nPts - 1));
+            const pos = pts[idx];
+            const next = pts[Math.min(idx + 1, nPts - 1)];
+            const d = next.clone().sub(pos);
+            if (d.length() > 1e-5) addArrow(zone1Group, pos, d, GOLD, 0.13);
+          });
+        }
+      }
+    }
+
+    // ======================================================================
+    // THRESHOLD 1 - Separatrix Bell
+    // ======================================================================
+    const threshold1Group = new THREE.Group();
+    window.threshold1Ref = threshold1Group;
+    scene.add(threshold1Group);
+    {
+      const nRings = 18;
+      const nPhi = 40;
+      const vertices = [];
+      const indices = [];
+      for (let j = 0; j <= nRings; j++) {
+        const t = j / nRings;
+        const y = separatrixBaseY + (separatrixTopY - separatrixBaseY) * t;
+        const r = separatrixRimR - (separatrixRimR - separatrixThroatR) * Math.pow(t, 0.55);
+        for (let i = 0; i <= nPhi; i++) {
+          const ph = (i / nPhi) * Math.PI * 2;
+          vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+        }
+      }
+      for (let j = 0; j < nRings; j++) {
+        for (let i = 0; i < nPhi; i++) {
+          const a = j * (nPhi + 1) + i;
+          const b = a + 1;
+          const c = a + (nPhi + 1);
+          const d = c + 1;
+          indices.push(a, b, d);
+          indices.push(a, d, c);
+        }
+      }
+      const bellGeom = new THREE.BufferGeometry();
+      bellGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+      bellGeom.setIndex(indices);
+      bellGeom.computeVertexNormals();
+      const bellMat = new THREE.MeshStandardMaterial({
+        color: 0x6a1a2a,
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+      threshold1Group.add(new THREE.Mesh(bellGeom, bellMat));
+
+      for (let i = 0; i < 12; i++) {
+        const ph = (i / 12) * Math.PI * 2;
+        const mpts = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const y = separatrixBaseY + (separatrixTopY - separatrixBaseY) * t;
+          const r = separatrixRimR - (separatrixRimR - separatrixThroatR) * Math.pow(t, 0.55);
+          mpts.push(new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(mpts);
+        const m = new THREE.LineBasicMaterial({ color: 0x8a2638, transparent: true, opacity: 0.75 });
+        threshold1Group.add(new THREE.Line(g, m));
+      }
+
+      [
+        { r: separatrixRimR, y: separatrixBaseY },
+        { r: separatrixThroatR, y: separatrixTopY },
+      ].forEach(({ r, y }) => {
+        const cpts = [];
+        for (let k = 0; k <= 64; k++) {
+          const ph = (k / 64) * Math.PI * 2;
+          cpts.push(new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(cpts);
+        const m = new THREE.LineBasicMaterial({ color: 0x8a2638, transparent: true, opacity: 0.9 });
+        threshold1Group.add(new THREE.Line(g, m));
+      });
+
+      // 12 streamlines through the funnel
+      const nFunnel = 12;
+      for (let i = 0; i < nFunnel; i++) {
+        const phi0 = (i / nFunnel) * Math.PI * 2;
+        const pts = [];
+        const nPts = 28;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = separatrixBaseY + (separatrixTopY - separatrixBaseY) * t;
+          const r = separatrixRimR - (separatrixRimR - separatrixThroatR) * Math.pow(t, 0.7);
+          const phi = phi0 + t * 0.3;
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+        }
+        const tube = makeTube(pts, 0x785c18, 0x3d2a08, 0.018);
+        if (tube) threshold1Group.add(tube);
+        const mid = pts[Math.floor(nPts / 2)];
+        const next = pts[Math.floor(nPts / 2) + 1];
+        const d = next.clone().sub(mid);
+        if (d.length() > 1e-5) addArrow(threshold1Group, mid, d, 0x785c18, 0.11);
+      }
+    }
+
+    // ======================================================================
+    // ZONE 2 - Collision & Turbulence (lower) / Proto-organization (upper)
+    // ======================================================================
+    const zone2Group = new THREE.Group();
+    window.zone2Ref = zone2Group;
+    scene.add(zone2Group);
+    {
+      const z2Height = zone2Top - zone2Base;
+      const chaosTop = zone2Base + z2Height * 0.7;
+
+      const MAROON = hexToRgb(0x4a1420);
+      const ORANGE = hexToRgb(0xd4682c);
+      const ORANGE_YELLOW = hexToRgb(0xe0a028);
+      const gradientColor = (y) => {
+        let t = (y - zone2Base) / z2Height;
+        t = Math.max(0, Math.min(1, t));
+        let r, g, b;
+        if (t < 0.5) {
+          const tt = t / 0.5;
+          r = lerp(MAROON.r, ORANGE.r, tt);
+          g = lerp(MAROON.g, ORANGE.g, tt);
+          b = lerp(MAROON.b, ORANGE.b, tt);
+        } else {
+          const tt = (t - 0.5) / 0.5;
+          r = lerp(ORANGE.r, ORANGE_YELLOW.r, tt);
+          g = lerp(ORANGE.g, ORANGE_YELLOW.g, tt);
+          b = lerp(ORANGE.b, ORANGE_YELLOW.b, tt);
+        }
+        const jitter = 0.08;
+        r = Math.max(0, Math.min(255, r * (1 + (Math.random() - 0.5) * jitter)));
+        g = Math.max(0, Math.min(255, g * (1 + (Math.random() - 0.5) * jitter)));
+        b = Math.max(0, Math.min(255, b * (1 + (Math.random() - 0.5) * jitter)));
+        return rgbToHex(r, g, b);
+      };
+
+      const clampRadial = (pt, maxR) => {
+        const r = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
+        if (r > maxR) {
+          const s = maxR / r;
+          pt.x *= s;
+          pt.z *= s;
+        }
+        return pt;
+      };
+
+      const maxR = zone2Radius * 0.95;
+
+      // Long sweeping fragments
+      for (let i = 0; i < 22; i++) {
+        const pts = [];
+        const nPts = 20 + Math.floor(Math.random() * 8);
+        const startPhi = Math.random() * Math.PI * 2;
+        const startR = Math.random() * maxR * 0.85;
+        const startY = zone2Base + Math.random() * (chaosTop - zone2Base);
+        const dirPhi = Math.random() * Math.PI * 2;
+        const length = 0.3 + Math.random() * 0.5;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const jitter = 0.08 * Math.sin(t * Math.PI * 3 + i);
+          const px = startR * Math.cos(startPhi) + Math.cos(dirPhi) * length * t + jitter * Math.cos(dirPhi + Math.PI / 2);
+          const pz = startR * Math.sin(startPhi) + Math.sin(dirPhi) * length * t + jitter * Math.sin(dirPhi + Math.PI / 2);
+          const py = startY + (Math.random() - 0.5) * 0.15 + t * (Math.random() - 0.5) * 0.2;
+          const p = new THREE.Vector3(px, py, pz);
+          clampRadial(p, maxR);
+          pts.push(p);
+        }
+        const meanY = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const color = gradientColor(meanY);
+        const tube = makeTube(pts, color, color, 0.012);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Medium kinks
+      for (let i = 0; i < 26; i++) {
+        const pts = [];
+        const startR = Math.random() * maxR * 0.9;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = zone2Base + Math.random() * (chaosTop - zone2Base);
+        const len1 = 0.15 + Math.random() * 0.2;
+        const len2 = 0.15 + Math.random() * 0.2;
+        const a1 = Math.random() * Math.PI * 2;
+        const a2 = a1 + (Math.random() - 0.5) * Math.PI * 1.2;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a1) * len1,
+          p0.y + (Math.random() - 0.5) * 0.1,
+          p0.z + Math.sin(a1) * len1
+        );
+        const p2 = new THREE.Vector3(
+          p1.x + Math.cos(a2) * len2,
+          p1.y + (Math.random() - 0.5) * 0.1,
+          p1.z + Math.sin(a2) * len2
+        );
+        [p0, p1, p2].forEach((p) => clampRadial(p, maxR));
+        pts.push(p0, p1, p2);
+        const meanY = (p0.y + p1.y + p2.y) / 3;
+        const color = gradientColor(meanY);
+        const tube = makeTube(pts, color, color, 0.011);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Short darts
+      for (let i = 0; i < 40; i++) {
+        const startR = Math.random() * maxR * 0.9;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = zone2Base + Math.random() * (chaosTop - zone2Base);
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.08 + Math.random() * 0.12;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y + (Math.random() - 0.5) * 0.08,
+          p0.z + Math.sin(a) * len
+        );
+        clampRadial(p0, maxR);
+        clampRadial(p1, maxR);
+        const color = gradientColor((p0.y + p1.y) / 2);
+        const tube = makeTube([p0, p1], color, color, 0.01);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Tiny dashes
+      for (let i = 0; i < 55; i++) {
+        const startR = Math.random() * maxR * 0.9;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = zone2Base + Math.random() * (chaosTop - zone2Base);
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.03 + Math.random() * 0.05;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y,
+          p0.z + Math.sin(a) * len
+        );
+        clampRadial(p0, maxR);
+        clampRadial(p1, maxR);
+        const color = gradientColor(p0.y);
+        const tube = makeTube([p0, p1], color, color, 0.008);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Collision bursts
+      for (let i = 0; i < 10; i++) {
+        const r = Math.random() * maxR * 0.85;
+        const ph = Math.random() * Math.PI * 2;
+        const y = zone2Base + Math.random() * (chaosTop - zone2Base);
+        const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
+        const nBurst = 8;
+        const burstPts = [];
+        for (let k = 0; k < nBurst; k++) {
+          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.3;
+          const L = 0.09 + Math.random() * 0.07;
+          burstPts.push(center.x, center.y, center.z);
+          burstPts.push(
+            center.x + Math.cos(a) * L,
+            center.y + (Math.random() - 0.5) * 0.08,
+            center.z + Math.sin(a) * L
+          );
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(burstPts, 3));
+        const m = new THREE.LineBasicMaterial({
+          color: gradientColor(center.y),
+          transparent: true,
+          opacity: 0.75,
+        });
+        zone2Group.add(new THREE.LineSegments(g, m));
+      }
+
+      // Upper region: longer arcs with 80% CCW bias
+      for (let i = 0; i < 12; i++) {
+        const startR = zone2Radius * (0.3 + Math.random() * 0.55);
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = chaosTop + Math.random() * (zone2Top - chaosTop) * 0.7;
+        const ccw = Math.random() < 0.8 ? 1 : -1;
+        const turns = 0.15 + Math.random() * 0.25;
+        const dYArc = 0.1 + Math.random() * 0.15;
+        const pts = [];
+        const nPts = 20;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const phi = startPhi + ccw * turns * Math.PI * 2 * t;
+          const r = startR * (1 - t * 0.1);
+          const p = new THREE.Vector3(
+            r * Math.cos(phi),
+            startY + t * dYArc,
+            r * Math.sin(phi)
+          );
+          clampRadial(p, maxR);
+          pts.push(p);
+        }
+        const meanY = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const color = gradientColor(meanY);
+        const tube = makeTube(pts, color, color, 0.014);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Upper region: smoother medium fragments
+      for (let i = 0; i < 14; i++) {
+        const startR = Math.random() * maxR * 0.85;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = chaosTop + Math.random() * (zone2Top - chaosTop);
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.12 + Math.random() * 0.16;
+        const pts = [];
+        const nPts = 8;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const p = new THREE.Vector3(
+            startR * Math.cos(startPhi) + Math.cos(a) * len * t,
+            startY + (Math.random() - 0.5) * 0.02 + t * 0.04,
+            startR * Math.sin(startPhi) + Math.sin(a) * len * t
+          );
+          clampRadial(p, maxR);
+          pts.push(p);
+        }
+        const meanY = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+        const color = gradientColor(meanY);
+        const tube = makeTube(pts, color, color, 0.011);
+        if (tube) zone2Group.add(tube);
+      }
+
+      // Upper region: sparser tiny dashes
+      for (let i = 0; i < 18; i++) {
+        const startR = Math.random() * maxR * 0.85;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = chaosTop + Math.random() * (zone2Top - chaosTop);
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.04 + Math.random() * 0.05;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y,
+          p0.z + Math.sin(a) * len
+        );
+        clampRadial(p0, maxR);
+        clampRadial(p1, maxR);
+        const color = gradientColor(p0.y);
+        const tube = makeTube([p0, p1], color, color, 0.008);
+        if (tube) zone2Group.add(tube);
+      }
+    }
+
+    // ======================================================================
+    // THRESHOLD 2 - Semi-Spiral (3 dark-yellow helical threads)
+    // ======================================================================
+    const threshold2Group = new THREE.Group();
+    window.threshold2Ref = threshold2Group;
+    scene.add(threshold2Group);
+    {
+      const DY_COLOR = 0xb8a018;
+      const DY_EM = 0x6e5808;
+      const nThreads = 3;
+      const base = thresh2Base;
+      const top = thresh2Top;
+      const h = top - base;
+
+      for (let i = 0; i < nThreads; i++) {
+        const phi0 = (i / nThreads) * Math.PI * 2;
+        const pts = [];
+        const nPts = 80;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const turnRate = 0.5 + 4.0 * Math.pow(t, 2.2);
+          const phi = phi0 + turnRate * Math.PI;
+          const r = columnRadius * (0.85 - 0.7 * Math.pow(t, 1.1));
+          const y = base + h * t;
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+        }
+        const tube = makeTube(pts, DY_COLOR, DY_EM, 0.032);
+        if (tube) threshold2Group.add(tube);
+
+        const arrowTs = [0.12, 0.28, 0.44, 0.58, 0.72, 0.88];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(threshold2Group, pos, d, DY_COLOR, 0.14);
+        });
+      }
+    }
+
+    // ======================================================================
+    // LOWER SHEATH - tight cylindrical envelope around Zone 1, separatrix, Zone 2
+    // ======================================================================
+    // A light gold frame that visually contains the lower interior of the
+    // column. Modeled on Zone 4's blue ambient helical pattern — gives the
+    // viewer a clear flow vector: prana ascending. Width matches the
+    // separatrix throat (r = 0.9), extends from the separatrix base up to
+    // the bottom of Zone 3's bubble.
+    //
+    // Construction: 6 ascending helical streamlines + a few horizontal rings.
+    // The streamlines carry arrows showing upward flow direction.
+    //
+    // Dimensions:
+    //   Bottom: y = separatrixBaseY (-3.5)
+    //   Top:    y = lowerStagY       (0.5) — bottom of Zone 3 bubble
+    //   Radius: r = separatrixThroatR (0.9) — cylindrical
+    const lowerSheathGroup = new THREE.Group();
+    window.lowerSheathRef = lowerSheathGroup;
+    scene.add(lowerSheathGroup);
+
+    {
+      const SHEATH_COLOR = 0xa8822c;        // light gold, solid
+      const SHEATH_EM = 0x5a4018;            // emissive tone
+
+      const sheathBottomY = separatrixBaseY;   // -3.5
+      const sheathTopY = lowerStagY;           // 0.5
+      const sheathHeight = sheathTopY - sheathBottomY;  // 4.0
+      const sheathR = separatrixThroatR;       // 0.9
+
+      // Horizontal rings — structural markers at a few y-levels.
+      // Fewer rings than before, letting the helices carry most of the visual.
+      const nRings = 4;
+      for (let j = 0; j <= nRings; j++) {
+        const t = j / nRings;
+        const y = sheathBottomY + sheathHeight * t;
+        const ringPts = [];
+        for (let k = 0; k <= 48; k++) {
+          const ph = (k / 48) * Math.PI * 2;
+          ringPts.push(new THREE.Vector3(sheathR * Math.cos(ph), y, sheathR * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(ringPts);
+        const m = new THREE.LineBasicMaterial({
+          color: SHEATH_COLOR,
+          transparent: true,
+          opacity: 0.35,
+        });
+        lowerSheathGroup.add(new THREE.Line(g, m));
+      }
+
+      // Ascending helical streamlines — 6 evenly distributed around the
+      // circumference, each tracing a gentle upward spiral. The pitch is
+      // modest (0.5 turn across the full 4-unit sheath height), giving a
+      // clear upward motion with slight rotational bias.
+      const nStreams = 6;
+      const streamTurns = 0.5;
+      for (let i = 0; i < nStreams; i++) {
+        const phaseOffset = (i / nStreams) * Math.PI * 2;
+        const pts = [];
+        const nPts = 50;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = sheathBottomY + t * sheathHeight;
+          const phi = phaseOffset + streamTurns * Math.PI * 2 * t;
+          pts.push(new THREE.Vector3(
+            sheathR * Math.cos(phi),
+            y,
+            sheathR * Math.sin(phi)
+          ));
+        }
+
+        if (pts.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, Math.max(16, pts.length * 2), 0.014, 8, false);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color: SHEATH_COLOR,
+            emissive: SHEATH_EM,
+            emissiveIntensity: 0.3,
+            roughness: 0.6,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.55,
+          });
+          lowerSheathGroup.add(new THREE.Mesh(tubeGeom, tubeMat));
+        }
+
+        // Arrows along each streamline showing upward flow direction
+        const arrowTs = [0.25, 0.55, 0.85];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(lowerSheathGroup, pos, d, SHEATH_COLOR, 0.09);
+        });
+      }
+    }
+
+    // ======================================================================
+    // ZONE 3 - The Bubble (Counter-Rotating Vortex Ring)
+    // ======================================================================
+    const zone3Group = new THREE.Group();
+    window.zone3Ref = zone3Group;
+    scene.add(zone3Group);
+    {
+      // Bubble ambient colors — original rich hues restored.
+      // v8.1: transparency (not lighter color) used to reveal the dark
+      // Queen's Chamber that sits inside the bubble at the green torus's
+      // lower edge. See makeTube variants below.
+      const GOLD = 0x785c18;
+      const GOLD_EM = 0x3d2a08;
+      const GREEN = 0x3a8a4a;
+      const GREEN_EM = 0x1e4a24;
+      const GREEN_ARROW = 0x4caa5e;
+
+      // Transparent tube variant — used for bubble streamlines so the
+      // Queen's Chamber embedded inside the bubble shows through clearly.
+      const makeTubeTransparent = (points, color, emissive, tubeRadius, opacity) => {
+        if (points.length < 2) return null;
+        const curve = new THREE.CatmullRomCurve3(points);
+        const geom = new THREE.TubeGeometry(curve, Math.max(16, points.length * 2), tubeRadius, 8, false);
+        const mat = new THREE.MeshStandardMaterial({
+          color,
+          emissive: emissive !== undefined ? emissive : color,
+          emissiveIntensity: 0.35,
+          roughness: 0.6,
+          metalness: 0.1,
+          transparent: true,
+          opacity,
+          depthWrite: false,
+        });
+        return new THREE.Mesh(geom, mat);
+      };
+
+      // Macro ascending flow
+      const nMacro = 16;
+      for (let i = 0; i < nMacro; i++) {
+        const phi = (i / nMacro) * Math.PI * 2;
+        const pts = [];
+        const nPts = 40;
+        const bottomY = thresh2Top;
+        const topYMacro = upperStagY + 0.05;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = bottomY + (topYMacro - bottomY) * t;
+          const dy = y - bubbleCenterY;
+          const bubbleR = bubbleHalfWidth * Math.sqrt(Math.max(0, 1 - (dy / bubbleHalfHeight) ** 2));
+          let r;
+          if (Math.abs(dy) < bubbleHalfHeight) {
+            r = Math.max(bubbleR + 0.03, columnRadius * 0.2);
+          } else {
+            r = columnRadius * 0.8;
+          }
+          const twistPhi = phi + t * 0.5;
+          pts.push(new THREE.Vector3(r * Math.cos(twistPhi), y, r * Math.sin(twistPhi)));
+        }
+        const tube = makeTubeTransparent(pts, GOLD, GOLD_EM, 0.02, 0.55);
+        if (tube) zone3Group.add(tube);
+        const arrowTs = [0.2, 0.45, 0.68, 0.88];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone3Group, pos, d, GOLD, 0.12);
+        });
+      }
+
+      // Micro-torus
+      // v7: vertical factor reduced from 0.75 → bubbleRingVerticalFactor
+      // (0.455) so the torus's lower boundary sits at y = 0.504 — the
+      // height where the pyramid's Queen's Chamber lands. QC thus sits at
+      // the beginning of the green inner torus, inside the bubble.
+      const nMicro = 12;
+      for (let i = 0; i < nMicro; i++) {
+        const phi = (i / nMicro) * Math.PI * 2;
+        const pts = [];
+        const nPts = 60;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const loopAngle = t * Math.PI * 2;
+          const ringCenterR = bubbleHalfWidth * 0.55;
+          const ringRadial = bubbleHalfWidth * 0.50;
+          const ringVertical = bubbleHalfHeight * bubbleRingVerticalFactor;
+          const rr = ringCenterR + ringRadial * Math.cos(loopAngle + Math.PI);
+          const yy = bubbleCenterY + ringVertical * Math.sin(loopAngle + Math.PI);
+          pts.push(new THREE.Vector3(rr * Math.cos(phi), yy, rr * Math.sin(phi)));
+        }
+        const tube = makeTubeTransparent(pts, GREEN, GREEN_EM, 0.016, 0.55);
+        if (tube) zone3Group.add(tube);
+        const arrowTs = [0.1, 0.35, 0.6, 0.85];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone3Group, pos, d, GREEN_ARROW, 0.09);
+        });
+      }
+
+      // Stagnation points
+      const stagGeom = new THREE.SphereGeometry(0.06, 24, 16);
+      const stagMat = new THREE.MeshStandardMaterial({
+        color: 0xfff0c0,
+        emissive: 0xffd87a,
+        emissiveIntensity: 0.8,
+        roughness: 0.3,
+      });
+      const lowerStag = new THREE.Mesh(stagGeom, stagMat);
+      lowerStag.position.set(0, lowerStagY, 0);
+      zone3Group.add(lowerStag);
+      const upperStag = new THREE.Mesh(stagGeom, stagMat);
+      upperStag.position.set(0, upperStagY, 0);
+      zone3Group.add(upperStag);
+
+      [lowerStagY, upperStagY].forEach((y) => {
+        const ringGeom = new THREE.RingGeometry(0.08, 0.16, 32);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0xffd87a,
+          transparent: true,
+          opacity: 0.45,
+          side: THREE.DoubleSide,
+        });
+        const ring = new THREE.Mesh(ringGeom, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(0, y, 0);
+        zone3Group.add(ring);
+      });
+
+      // Bubble envelope
+      const envGroup = new THREE.Group();
+      window.bubbleEnvelopeRef = envGroup;
+      {
+        const nRings = 24;
+        const nPhi = 36;
+        const vertices = [];
+        const indices = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const yLocal = -1 + 2 * t;
+          const y = bubbleCenterY + yLocal * bubbleHalfHeight;
+          const r = bubbleHalfWidth * Math.sqrt(Math.max(0, 1 - yLocal * yLocal));
+          for (let i = 0; i <= nPhi; i++) {
+            const ph = (i / nPhi) * Math.PI * 2;
+            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+          }
+        }
+        for (let j = 0; j < nRings; j++) {
+          for (let i = 0; i < nPhi; i++) {
+            const a = j * (nPhi + 1) + i;
+            const b = a + 1;
+            const c = a + (nPhi + 1);
+            const d = c + 1;
+            indices.push(a, b, d);
+            indices.push(a, d, c);
+          }
+        }
+        const envGeom = new THREE.BufferGeometry();
+        envGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        envGeom.setIndex(indices);
+        envGeom.computeVertexNormals();
+        const envMat = new THREE.MeshStandardMaterial({
+          color: 0xa8822c,
+          transparent: true,
+          opacity: 0.10,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        envGroup.add(new THREE.Mesh(envGeom, envMat));
+      }
+      scene.add(envGroup);
+    }
+
+    // ======================================================================
+    // MERKABA OVERLAY (toggleable)
+    // ======================================================================
+    // Sized to fit inside the v7 bubble.
+    //   Bubble vertical extent:    y = 0.204 to 1.304 (halfHeight 0.55)
+    //   Bubble horizontal extent:  r = 0.82 × columnRadius
+    // Aspect 1:1.49. Merkaba fits snugly as a proper stellated octahedron.
+    const merkabaGroup = new THREE.Group();
+    window.merkabaRef = merkabaGroup;
+    scene.add(merkabaGroup);
+    {
+      const tetHeight = 1.05;         // apex-to-apex ≈ bubble height
+      const tetBaseR = 0.78;          // just inside bubble wall
+      const halfH = tetHeight / 2;    // distance from merkaba center to each apex
+
+      // Macro tetrahedron: upward-pointing (apex above, base below)
+      const macroApex = new THREE.Vector3(0, bubbleCenterY + halfH, 0);
+      const macroBaseY = bubbleCenterY - halfH;
+      const macroBaseR = tetBaseR;
+
+      // Micro tetrahedron: downward-pointing (apex below, base above)
+      const microApex = new THREE.Vector3(0, bubbleCenterY - halfH, 0);
+      const microBaseY = bubbleCenterY + halfH;
+      const microBaseR = tetBaseR;
+
+      const makeTet = (apex, baseY, baseR, color, emissive) => {
+        const tet = new THREE.Group();
+        const v0 = apex;
+        const v1 = new THREE.Vector3(baseR, baseY, 0);
+        const v2 = new THREE.Vector3(-baseR * 0.5, baseY, baseR * 0.866);
+        const v3 = new THREE.Vector3(-baseR * 0.5, baseY, -baseR * 0.866);
+        const edges = [[v0, v1], [v0, v2], [v0, v3], [v1, v2], [v2, v3], [v3, v1]];
+        edges.forEach(([a, b]) => {
+          const len = a.distanceTo(b);
+          const tubeGeom = new THREE.CylinderGeometry(0.035, 0.035, len, 8);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color,
+            emissive,
+            emissiveIntensity: 0.3,
+            roughness: 0.5,
+          });
+          const mesh = new THREE.Mesh(tubeGeom, tubeMat);
+          const mid = a.clone().add(b).multiplyScalar(0.5);
+          mesh.position.copy(mid);
+          const up = new THREE.Vector3(0, 1, 0);
+          const d = b.clone().sub(a).normalize();
+          mesh.quaternion.setFromUnitVectors(up, d);
+          tet.add(mesh);
+        });
+        [v0, v1, v2, v3].forEach((v) => {
+          const sphGeom = new THREE.SphereGeometry(0.06, 16, 12);
+          const sphMat = new THREE.MeshStandardMaterial({
+            color,
+            emissive,
+            emissiveIntensity: 0.4,
+            roughness: 0.5,
+          });
+          const sph = new THREE.Mesh(sphGeom, sphMat);
+          sph.position.copy(v);
+          tet.add(sph);
+        });
+        return tet;
+      };
+
+      merkabaGroup.add(makeTet(macroApex, macroBaseY, macroBaseR, 0x1a0f02, 0x1a0f02));
+      merkabaGroup.add(makeTet(microApex, microBaseY, microBaseR, 0x062e14, 0x062e14));
+    }
+
+    // ======================================================================
+    // THRESHOLD 3 - Post-Bubble Wake
+    // ======================================================================
+    const threshold3Group = new THREE.Group();
+    window.threshold3Ref = threshold3Group;
+    scene.add(threshold3Group);
+    {
+      // Velocity deficit core
+      {
+        const coreGeom = new THREE.CylinderGeometry(columnRadius * 0.14, columnRadius * 0.20, threshold3Top - threshold3Base, 24, 1, true);
+        const coreMat = new THREE.MeshStandardMaterial({
+          color: 0x3d2a08,
+          transparent: true,
+          opacity: 0.16,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        const core = new THREE.Mesh(coreGeom, coreMat);
+        core.position.set(0, (threshold3Base + threshold3Top) / 2, 0);
+        threshold3Group.add(core);
+      }
+
+      const nT3 = 12;
+      for (let i = 0; i < nT3; i++) {
+        const phi0 = (i / nT3) * Math.PI * 2;
+        const baseR = columnRadius * (0.35 + 0.45 * (i % 2 === 0 ? 1 : 0.7));
+
+        const pts = [];
+        const nPts = 40;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = threshold3Base + (threshold3Top - threshold3Base) * t;
+          const wobbleAmp = 0.04 + 0.08 * t;
+          const wobblePhi = Math.sin(t * Math.PI * 2.5 + phi0 * 0.5) * wobbleAmp;
+          const topKickR = t > 0.75 ? (t - 0.75) * 0.15 : 0;
+          const phi = phi0 + wobblePhi;
+          const r = baseR + topKickR * Math.cos(phi0 * 2);
+          const rWobble = 0.02 * Math.sin(t * Math.PI * 3 + phi0);
+          const rFinal = Math.max(0.1, r + rWobble);
+          pts.push(new THREE.Vector3(rFinal * Math.cos(phi), y, rFinal * Math.sin(phi)));
+        }
+
+        let color = 0x785c18;
+        let em = 0x3d2a08;
+        if (i % 4 === 0) { color = 0x8a552e; em = 0x4a2d14; }
+        else if (i % 4 === 2) { color = 0x6a4a68; em = 0x3a2638; }
+
+        const tube = makeTube(pts, color, em, 0.015);
+        if (tube) threshold3Group.add(tube);
+
+        const arrowTs = [0.3, 0.6, 0.9];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(threshold3Group, pos, d, color, 0.10);
+        });
+      }
+
+      // Near-axis sluggish streamlines
+      for (let i = 0; i < 4; i++) {
+        const phi0 = (i / 4) * Math.PI * 2;
+        const r = columnRadius * 0.12;
+        const pts = [];
+        const yStart = threshold3Base + (threshold3Top - threshold3Base) * 0.15;
+        const yEnd = threshold3Base + (threshold3Top - threshold3Base) * 0.80;
+        const nPts = 20;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = yStart + (yEnd - yStart) * t;
+          pts.push(new THREE.Vector3(r * Math.cos(phi0), y, r * Math.sin(phi0)));
+        }
+        const tube = makeTube(pts, 0x5a4a18, 0x2e2008, 0.011);
+        if (tube) threshold3Group.add(tube);
+        const mid = pts[Math.floor(nPts / 2)];
+        const next = pts[Math.floor(nPts / 2) + 1];
+        const d = next.clone().sub(mid);
+        if (d.length() > 1e-5) addArrow(threshold3Group, mid, d, 0x5a4a18, 0.07);
+      }
+    }
+
+    // ======================================================================
+    // ZONE 4 - First Helical Flow
+    // ======================================================================
+    // We track Zone 4's final state per strand (end phi, end radius, end color)
+    // so Threshold 4 can continue each strand smoothly.
+    const zone4Group = new THREE.Group();
+    window.zone4Ref = zone4Group;
+    scene.add(zone4Group);
+
+    // v8.1: DENSE RAINBOW — 24 strands forming a continuous spectrum band
+    // rather than 7 discrete color bands. Each strand is a thin tube; their
+    // collective presence reads as an unbroken rainbow passing through the
+    // King's Chamber, matching Ra 59.8's "light energy moving through the
+    // King's Chamber position in a sharply delineated form" when combined
+    // with the convergence behavior implemented below.
+    //
+    // Hues are sampled continuously from red (0°) through violet (300°) in
+    // a physical rainbow order — skipping the magenta wrap-around that would
+    // bring violet back to red. 24 steps give ~12.5° per step, well within
+    // human perceptual color resolution so the gradient reads as smooth.
+    const N_STRANDS = 24;
+    const spectrum = [];
+    // Helper: HSL -> hex (0-1 inputs for h, s, l)
+    const hslToHex = (h, s, l) => {
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const hp = h * 6;
+      const x = c * (1 - Math.abs((hp % 2) - 1));
+      let r1 = 0, g1 = 0, b1 = 0;
+      if (hp < 1)      { r1 = c; g1 = x; b1 = 0; }
+      else if (hp < 2) { r1 = x; g1 = c; b1 = 0; }
+      else if (hp < 3) { r1 = 0; g1 = c; b1 = x; }
+      else if (hp < 4) { r1 = 0; g1 = x; b1 = c; }
+      else if (hp < 5) { r1 = x; g1 = 0; b1 = c; }
+      else             { r1 = c; g1 = 0; b1 = x; }
+      const m = l - c / 2;
+      const r = Math.round((r1 + m) * 255);
+      const g = Math.round((g1 + m) * 255);
+      const b = Math.round((b1 + m) * 255);
+      return (r << 16) | (g << 8) | b;
+    };
+    for (let s = 0; s < N_STRANDS; s++) {
+      const t = s / (N_STRANDS - 1);
+      // Red (h=0) -> Violet (h=0.83 = 300°). 0.83 avoids magenta wrap.
+      const hue = t * 0.83;
+      const col = hslToHex(hue, 0.85, 0.50);       // saturated, mid-lightness
+      const em  = hslToHex(hue, 0.85, 0.22);       // dimmer emissive
+      spectrum.push({ color: col, em });
+    }
+
+    const innerR = columnRadius * 0.25;
+    const outerR = columnRadius * 0.65;
+    // Zone 4: a single sharply-delineated spiral (Ra 59.8). One full turn
+    // across the zone's vertical extent — a sweeping, regular helix, not a
+    // tight coil. Fits Ra's language of "the first spiral" (singular) and the
+    // wide aspect ratio of the pyramid geometry.
+    const strandTurns = 1.0;
+    const phiStep = (Math.PI * 2) / N_STRANDS; // azimuthal offset between strands
+
+    // Remember each strand's final state for continuation into Threshold 4
+    const strandEndState = [];
+
+    {
+      const nStrandPts = 90;
+      // v8.1: thinner tubes to accommodate denser packing. 24 strands
+      // spaced (0.65-0.25)/23 = 0.017 apart; tubeR 0.011 keeps them visibly
+      // distinct without overlapping into a solid mass.
+      const strandTubeRadius = 0.011;
+
+      for (let s = 0; s < N_STRANDS; s++) {
+        const { color, em } = spectrum[s];
+        const sr = innerR + (outerR - innerR) * (s / (N_STRANDS - 1));
+        const phi0 = s * phiStep;
+
+        const pts = [];
+        for (let k = 0; k < nStrandPts; k++) {
+          const t = k / (nStrandPts - 1);
+          const y = zone4Base + t * zone4Height;
+          const phi = phi0 + strandTurns * Math.PI * 2 * t;
+          // v8: use per-strand radius that converges toward KC interior
+          // across KC's vertical band — all colors gather into the chamber.
+          const r = zone4StrandRadiusAt(sr, y);
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+        }
+
+        const tube = makeTube(pts, color, em, strandTubeRadius);
+        if (tube) zone4Group.add(tube);
+
+        // v8.1: with 24 strands, arrows render sparsely — one per strand at
+        // mid-height, smaller size — to show flow direction without cluttering.
+        {
+          const idx = Math.floor(0.55 * (nStrandPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nStrandPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, color, 0.08);
+        }
+
+        // Record final phi and radius for Threshold 4 continuation.
+        // After bulge, strand ends at scaled radius = sr × (zone4TopR / 1.0).
+        const endPhi = phi0 + strandTurns * Math.PI * 2;
+        strandEndState.push({
+          endPhi,
+          radius: sr * zone4TopR,
+          color,
+          em,
+        });
+      }
+
+      // Ambient light-blue streamlines (record their end state too)
+      const nAmbient = 6;
+      const ambientR = columnRadius * 0.78;
+      const AMBIENT_COLOR = 0x8ab4e0;
+      const AMBIENT_EM = 0x4a6ea0;
+      const ambientEndStates = [];
+      for (let i = 0; i < nAmbient; i++) {
+        const phaseOffset = (i / nAmbient) * Math.PI * 2;
+        const pts = [];
+        const nPts = 50;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = zone4Base + t * zone4Height;
+          const phi = phaseOffset + strandTurns * Math.PI * 2 * t;
+          // v8: ambient streamlines also converge into KC band
+          const r = zone4StrandRadiusAt(ambientR, y);
+          pts.push(new THREE.Vector3(
+            r * Math.cos(phi),
+            y,
+            r * Math.sin(phi)
+          ));
+        }
+        if (pts.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, Math.max(16, pts.length * 2), 0.014, 8, false);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color: AMBIENT_COLOR,
+            emissive: AMBIENT_EM,
+            emissiveIntensity: 0.3,
+            roughness: 0.6,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.55,
+          });
+          zone4Group.add(new THREE.Mesh(tubeGeom, tubeMat));
+        }
+
+        const arrowTs = [0.25, 0.55, 0.85];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, AMBIENT_COLOR, 0.09);
+        });
+
+        ambientEndStates.push({
+          endPhi: phaseOffset + strandTurns * Math.PI * 2,
+          radius: ambientR * zone4TopR,
+        });
+      }
+
+      // Attach ambient end states to the outer scope via a property on strandEndState
+      strandEndState._ambient = ambientEndStates;
+      strandEndState._ambientColor = AMBIENT_COLOR;
+      strandEndState._ambientEm = AMBIENT_EM;
+    }
+
+    // ======================================================================
+    // THRESHOLD 4 - Helical Breakdown
+    // ======================================================================
+    // Continue the seven spectral strands from Zone 4 with:
+    //   (a) pitch lengthening (turn rate slows with height)
+    //   (b) amplitude wobble (radius fluctuates irregularly)
+    //   (c) color desaturating toward mid-gray (#7a7a7a)
+    //   (d) 2-3 strands fading to thinner tube in their upper portion
+    //       ("some turns barely distinguishable")
+    // Ambient blue streamlines also degrade in the same pattern.
+    const threshold4Group = new THREE.Group();
+    window.threshold4Ref = threshold4Group;
+    scene.add(threshold4Group);
+
+    // Boundary rings at T4 entry (y = t4Base) and exit (y = t4Top) —
+    // thin, muted gray-amber rings bracketing the breakdown region so the
+    // threshold is visually distinct from the clean Zone 4 helix below and
+    // the compact Zone 5 helix above.
+    {
+      const ringR = columnRadius * 0.82;
+      [t4Base, t4Top].forEach((y) => {
+        const ringPts = [];
+        for (let k = 0; k <= 64; k++) {
+          const ph = (k / 64) * Math.PI * 2;
+          ringPts.push(new THREE.Vector3(ringR * Math.cos(ph), y, ringR * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(ringPts);
+        const m = new THREE.LineBasicMaterial({
+          color: 0x9a7a4a,
+          transparent: true,
+          opacity: 0.55,
+        });
+        threshold4Group.add(new THREE.Line(g, m));
+      });
+    }
+
+    // Track final (phi, radius) for each strand at top of Threshold 4 — Zone 5
+    // does NOT continue these, but we need them to know where the strands end
+    // visually so Zone 5's fresh phases clearly read as "new."
+    const t4StrandEnd = [];
+    const t4AmbientEnd = [];
+
+    {
+      const MID_GRAY = 0x7a7a7a;
+      const nT4Pts = 60;
+      // v8.1: thinner tubes to match Zone 4's dense rainbow
+      const baseTubeRadius = 0.011;
+      // Pick ~1 in 3 strands to fade to thinner tubes in upper portion
+      // ("some turns barely distinguishable"). With 24 strands, picks 8.
+      const fadingStrandIndices = new Set();
+      for (let s = 0; s < strandEndState.length; s += 3) fadingStrandIndices.add(s);
+
+      for (let s = 0; s < strandEndState.length; s++) {
+        const { endPhi, radius, color, em } = strandEndState[s];
+
+        // Build points along Threshold 4
+        const pts = [];
+        const nominalPitchRate = strandTurns * Math.PI * 2 / zone4Height; // rad per unit height (Zone 4 rate)
+        let phi = endPhi;
+        let prevY = t4Base;
+        for (let k = 0; k < nT4Pts; k++) {
+          const tLocal = k / (nT4Pts - 1);
+          const y = t4Base + t4Height * tLocal;
+          // pitchFactor = 1.0 at base of T4, ~0.3 at top (pitch lengthens -> rate slows)
+          const pitchFactor = 1.0 - tLocal * 0.7;
+          // Integrate phi: advance by rate * dY (dY = y - prevY)
+          if (k > 0) {
+            const dY = y - prevY;
+            phi += nominalPitchRate * pitchFactor * dY;
+          }
+          // Amplitude wobble: per-strand noise at different frequencies
+          const radiusWobble =
+              0.08 * Math.sin(tLocal * Math.PI * 5 + s * 1.3)
+            + 0.05 * Math.sin(tLocal * Math.PI * 11 + s * 2.7);
+          const rFinal = Math.max(0.1, radius + radiusWobble);
+
+          pts.push(new THREE.Vector3(
+            rFinal * Math.cos(phi),
+            y,
+            rFinal * Math.sin(phi)
+          ));
+          prevY = y;
+        }
+
+        // Color desaturation: blend strand color toward mid-gray as t rises.
+        // For strands that fade to thinness, also reduce tube radius in upper half.
+        // Rather than per-segment color (which would require many sub-tubes),
+        // render this strand as two sub-tubes for a color-fade effect:
+        //   lower segment (tLocal 0.0 - 0.55): original color lerped 0 -> 0.33 toward gray
+        //   upper segment (tLocal 0.55 - 1.0): original color lerped 0.33 -> 0.6 toward gray
+        const splitIdx = Math.floor(nT4Pts * 0.55);
+        const lowerPts = pts.slice(0, splitIdx + 1);
+        const upperPts = pts.slice(splitIdx);
+
+        const lowerColor = lerpColor(color, MID_GRAY, 0.22);
+        const lowerEm = lerpColor(em, MID_GRAY, 0.22);
+        const upperColor = lerpColor(color, MID_GRAY, 0.55);
+        const upperEm = lerpColor(em, MID_GRAY, 0.55);
+
+        const lowerTube = makeTube(lowerPts, lowerColor, lowerEm, baseTubeRadius);
+        if (lowerTube) threshold4Group.add(lowerTube);
+
+        // Fading strands get a thinner upper segment
+        const upperRadius = fadingStrandIndices.has(s) ? baseTubeRadius * 0.45 : baseTubeRadius * 0.85;
+        const upperTube = makeTube(upperPts, upperColor, upperEm, upperRadius);
+        if (upperTube) {
+          // Make fading strand upper portions slightly translucent for "barely distinguishable"
+          if (fadingStrandIndices.has(s)) {
+            upperTube.material.transparent = true;
+            upperTube.material.opacity = 0.55;
+          }
+          threshold4Group.add(upperTube);
+        }
+
+        // Arrows: three per strand (fewer than Zone 4's four — degrading)
+        // Position arrows at tLocal = 0.2, 0.5, 0.8
+        // For fading strands, skip the top arrow (0.8) to emphasize dying
+        const arrowTs = fadingStrandIndices.has(s) ? [0.2, 0.5] : [0.2, 0.5, 0.8];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nT4Pts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nT4Pts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) {
+            // Arrow color follows where along the fade it sits
+            const fadeAmt = tA < 0.55 ? 0.22 : 0.55;
+            const arrowCol = lerpColor(color, MID_GRAY, fadeAmt);
+            addArrow(threshold4Group, pos, d, arrowCol, 0.11);
+          }
+        });
+
+        // Record top state (not used for continuation, but available)
+        t4StrandEnd.push({ endPhi: phi, radius });
+      }
+
+      // Ambient blue: pitch lengthening + slight disorder, same style
+      const ambientEndStates = strandEndState._ambient;
+      const AMBIENT_COLOR = strandEndState._ambientColor;
+      const AMBIENT_EM = strandEndState._ambientEm;
+      for (let i = 0; i < ambientEndStates.length; i++) {
+        const { endPhi, radius } = ambientEndStates[i];
+        const pts = [];
+        const nPts = 40;
+        const nominalPitchRate = strandTurns * Math.PI * 2 / zone4Height;
+        let phi = endPhi;
+        let prevY = t4Base;
+        for (let k = 0; k < nPts; k++) {
+          const tLocal = k / (nPts - 1);
+          const y = t4Base + t4Height * tLocal;
+          const pitchFactor = 1.0 - tLocal * 0.7;
+          if (k > 0) {
+            const dY = y - prevY;
+            phi += nominalPitchRate * pitchFactor * dY;
+          }
+          // slight disorder on the ambient as well
+          const radiusWobble = 0.03 * Math.sin(tLocal * Math.PI * 6 + i * 1.7)
+                             + 0.02 * Math.sin(tLocal * Math.PI * 13 + i * 3.1);
+          const r = Math.max(0.1, radius + radiusWobble);
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          prevY = y;
+        }
+
+        if (pts.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, Math.max(16, pts.length * 2), 0.014, 8, false);
+          // Ambient fades slightly toward gray too, and stays transparent
+          const fadedColor = lerpColor(AMBIENT_COLOR, MID_GRAY, 0.35);
+          const fadedEm = lerpColor(AMBIENT_EM, MID_GRAY, 0.35);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color: fadedColor,
+            emissive: fadedEm,
+            emissiveIntensity: 0.3,
+            roughness: 0.6,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.40,
+          });
+          threshold4Group.add(new THREE.Mesh(tubeGeom, tubeMat));
+        }
+
+        // Two arrows per ambient streamline (degrading from Zone 4's three)
+        const arrowTs = [0.35, 0.75];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) {
+            const fadedCol = lerpColor(AMBIENT_COLOR, MID_GRAY, 0.35);
+            addArrow(threshold4Group, pos, d, fadedCol, 0.08);
+          }
+        });
+
+        t4AmbientEnd.push({ endPhi: phi, radius });
+      }
+    }
+
+    // ======================================================================
+    // ZONE 5 - Second Helical Flow (Ra's "second spiral" — red-biased)
+    // ======================================================================
+    // Independent helical mode with its own oscillation frequency (3.5 turns
+    // across Zone 5, visibly tighter than Zone 4's 2.5), its own pitch, its
+    // own amplitude. Three strands at three distinct radii in the red/orange
+    // band. Same CCW handedness as Zone 4 but different frequency.
+    // Starting azimuthal phases are randomized so the strands read as newly
+    // born from the breakdown, not as continuations of the fading Zone 4.
+    const zone5Group = new THREE.Group();
+    window.zone5Ref = zone5Group;
+    scene.add(zone5Group);
+
+    {
+      // Zone 5 is compact (0.8 units tall) but carries 1.5 turns — giving a
+      // pitch of ~0.53 units per turn compared to Zone 4's 3.5 units per turn.
+      // That ~6.6x pitch ratio makes the "different oscillation frequency"
+      // immediately visible. The structure reads as tight and intensified,
+      // matching Ra 59.9's "spiraled once again, causing an enormous
+      // strengthening and focusing of energy."
+      const zone5Turns = 1.5;
+      const zone5Palette = [
+        { color: 0xb8261e, em: 0x5a1210 },  // deep red
+        { color: 0xd4342e, em: 0x6a1a14 },  // bright red
+        { color: 0xe07030, em: 0x6e3612 },  // orange
+      ];
+      const zone5Radii = [0.35, 0.42, 0.50]; // × columnRadius
+
+      // Seed phases that are clearly unrelated to Zone 4 end phases
+      // (use irrational-ish multipliers to avoid alignment)
+      const zone5PhaseSeeds = [0.0, 2.094, 4.189]; // 0, 2π/3, 4π/3 rad
+
+      const nZ5Pts = 100;
+      const strandTubeRadius = 0.022;
+
+      for (let s = 0; s < 3; s++) {
+        const { color, em } = zone5Palette[s];
+        const sr = columnRadius * zone5Radii[s];
+        const phi0 = zone5PhaseSeeds[s];
+
+        const pts = [];
+        for (let k = 0; k < nZ5Pts; k++) {
+          const t = k / (nZ5Pts - 1);
+          const y = zone5Base + t * zone5Height;
+          const phi = phi0 + zone5Turns * Math.PI * 2 * t; // CCW, tighter pitch
+          pts.push(new THREE.Vector3(sr * Math.cos(phi), y, sr * Math.sin(phi)));
+        }
+
+        const tube = makeTube(pts, color, em, strandTubeRadius);
+        if (tube) zone5Group.add(tube);
+
+        // Four arrows per strand in strand's own color
+        const arrowTs = [0.15, 0.40, 0.65, 0.88];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nZ5Pts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nZ5Pts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, color, 0.13);
+        });
+      }
+
+      // Ambient blue at outer radius with Zone 5's pitch (not Zone 4's)
+      const AMBIENT_COLOR = 0x8ab4e0;
+      const AMBIENT_EM = 0x4a6ea0;
+      const nAmbient = 6;
+      const ambientR = columnRadius * 0.78;
+      for (let i = 0; i < nAmbient; i++) {
+        const phaseOffset = (i / nAmbient) * Math.PI * 2;
+        const pts = [];
+        const nPts = 60;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = zone5Base + t * zone5Height;
+          // Zone 5's turn count, so pitch is visibly different from Zone 4
+          const phi = phaseOffset + zone5Turns * Math.PI * 2 * t;
+          pts.push(new THREE.Vector3(
+            ambientR * Math.cos(phi),
+            y,
+            ambientR * Math.sin(phi)
+          ));
+        }
+        if (pts.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, Math.max(16, pts.length * 2), 0.014, 8, false);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color: AMBIENT_COLOR,
+            emissive: AMBIENT_EM,
+            emissiveIntensity: 0.3,
+            roughness: 0.6,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.55,
+          });
+          zone5Group.add(new THREE.Mesh(tubeGeom, tubeMat));
+        }
+
+        const arrowTs = [0.25, 0.55, 0.85];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, AMBIENT_COLOR, 0.09);
+        });
+      }
+    }
+
+    // ======================================================================
+    // THRESHOLD 5 - Turbulent Negotiation
+    // ======================================================================
+    // Unlike Threshold 4 (which was degrading helical structure), Threshold 5
+    // IS fully turbulent. The secondary helix dissolves into multi-scale
+    // chaotic motion — Kolmogorov cascade. No ordered direction, no helical
+    // continuation. Zone 2-style fragmented geometry in a muted palette:
+    // darkened reds from Zone 5 bleeding into grays and muddy browns as the
+    // last organized structure dissolves.
+    const threshold5Group = new THREE.Group();
+    window.threshold5Ref = threshold5Group;
+    scene.add(threshold5Group);
+
+    {
+      // Palette: muted, chaotic, carries the red memory from Zone 5 fading
+      // into brownish-gray as turbulent mixing destroys the spectral organization.
+      const t5Palette = [
+        0x6a2420,  // deep muted red
+        0x7a3a2a,  // rusty red-brown
+        0x5a4838,  // muddy brown
+        0x4a4438,  // dark brownish-gray
+        0x3a3a3a,  // dark gray
+      ];
+      const t5Pick = () => t5Palette[Math.floor(Math.random() * t5Palette.length)];
+
+      const clampR = (pt, maxR) => {
+        const r = Math.sqrt(pt.x * pt.x + pt.z * pt.z);
+        if (r > maxR) {
+          const s = maxR / r;
+          pt.x *= s;
+          pt.z *= s;
+        }
+        return pt;
+      };
+
+      const maxR = columnRadius * 0.90;
+
+      // Medium kinks — organized structure fragments with direction changes
+      for (let i = 0; i < 20; i++) {
+        const startR = Math.random() * maxR * 0.85;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const len1 = 0.10 + Math.random() * 0.14;
+        const len2 = 0.10 + Math.random() * 0.14;
+        const a1 = Math.random() * Math.PI * 2;
+        const a2 = a1 + (Math.random() - 0.5) * Math.PI * 1.3;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a1) * len1,
+          p0.y + (Math.random() - 0.5) * 0.08,
+          p0.z + Math.sin(a1) * len1
+        );
+        const p2 = new THREE.Vector3(
+          p1.x + Math.cos(a2) * len2,
+          p1.y + (Math.random() - 0.5) * 0.08,
+          p1.z + Math.sin(a2) * len2
+        );
+        [p0, p1, p2].forEach((p) => clampR(p, maxR));
+        const color = t5Pick();
+        const tube = makeTube([p0, p1, p2], color, color, 0.010);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // Short darts — pure chaotic motion, multi-scale
+      for (let i = 0; i < 32; i++) {
+        const startR = Math.random() * maxR * 0.9;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.06 + Math.random() * 0.10;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y + (Math.random() - 0.5) * 0.06,
+          p0.z + Math.sin(a) * len
+        );
+        clampR(p0, maxR);
+        clampR(p1, maxR);
+        const color = t5Pick();
+        const tube = makeTube([p0, p1], color, color, 0.009);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // Tiny dashes — smallest scale of Kolmogorov cascade
+      for (let i = 0; i < 45; i++) {
+        const startR = Math.random() * maxR * 0.9;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.03 + Math.random() * 0.04;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y,
+          p0.z + Math.sin(a) * len
+        );
+        clampR(p0, maxR);
+        clampR(p1, maxR);
+        const color = t5Pick();
+        const tube = makeTube([p0, p1], color, color, 0.007);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // A handful of collision bursts — intense localized chaotic events
+      for (let i = 0; i < 6; i++) {
+        const r = Math.random() * maxR * 0.80;
+        const ph = Math.random() * Math.PI * 2;
+        const y = t5Base + Math.random() * t5Height;
+        const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
+        const nBurst = 7;
+        const burstPts = [];
+        for (let k = 0; k < nBurst; k++) {
+          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.3;
+          const L = 0.07 + Math.random() * 0.05;
+          burstPts.push(center.x, center.y, center.z);
+          burstPts.push(
+            center.x + Math.cos(a) * L,
+            center.y + (Math.random() - 0.5) * 0.06,
+            center.z + Math.sin(a) * L
+          );
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(burstPts, 3));
+        const m = new THREE.LineBasicMaterial({
+          color: t5Pick(),
+          transparent: true,
+          opacity: 0.7,
+        });
+        threshold5Group.add(new THREE.LineSegments(g, m));
+      }
+    }
+
+    // ======================================================================
+    // ZONE 6 - Relaminarization (indigo ray, Position 2 zone)
+    // ======================================================================
+    // Geometric compression suppresses the turbulence from Threshold 5. A new
+    // simplified coherence emerges — not helical, not axisymmetric bubble, but
+    // concentrated forward-moving flow. Ra's Position 2 zone. Indigo ray.
+    // "Preheat zone" — energy approaching ignition but not yet radiating.
+    // Column narrows visibly from full radius at base to ~40% at top.
+    const zone6Group = new THREE.Group();
+    window.zone6Ref = zone6Group;
+    scene.add(zone6Group);
+
+    {
+      const INDIGO = 0x3a2a7c;          // opaque indigo blue for flow and ambient
+      const INDIGO_EM = 0x1a1048;       // darker indigo for emissive
+      const INDIGO_LINE = 0x5040a0;     // slightly brighter for line rings
+
+      // Column cross-section taper: linear from base radius to top radius
+      const baseR = columnRadius * 0.78;    // matches Zone 5 ambient radius — smooth connection from below
+      const topR = columnRadius * 0.32;     // significantly narrower at top, approaching apex
+      const radiusAt = (y) => {
+        const t = (y - zone6Base) / zone6Height;
+        return baseR + (topR - baseR) * t;
+      };
+
+      // Cone mesh wireframe: visible taper of the column through Zone 6.
+      // Uses a few horizontal rings plus vertical meridians so the
+      // narrowing is unmistakable even with the streamlines turned off.
+      {
+        const nRings = 5;
+        for (let j = 0; j < nRings; j++) {
+          const t = j / (nRings - 1);
+          const y = zone6Base + t * zone6Height;
+          const r = radiusAt(y);
+          const ringPts = [];
+          for (let k = 0; k <= 48; k++) {
+            const ph = (k / 48) * Math.PI * 2;
+            ringPts.push(new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph)));
+          }
+          const g = new THREE.BufferGeometry().setFromPoints(ringPts);
+          const m = new THREE.LineBasicMaterial({
+            color: INDIGO_LINE,
+            transparent: true,
+            opacity: 0.35 + 0.25 * t,  // top ring brightest — concentration
+          });
+          zone6Group.add(new THREE.Line(g, m));
+        }
+
+        // Vertical meridians — 8 evenly spaced around the circumference
+        const nMeridians = 8;
+        for (let i = 0; i < nMeridians; i++) {
+          const phi = (i / nMeridians) * Math.PI * 2;
+          const mpts = [];
+          const nMpts = 20;
+          for (let k = 0; k < nMpts; k++) {
+            const t = k / (nMpts - 1);
+            const y = zone6Base + t * zone6Height;
+            const r = radiusAt(y);
+            mpts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          const g = new THREE.BufferGeometry().setFromPoints(mpts);
+          const m = new THREE.LineBasicMaterial({
+            color: INDIGO_LINE,
+            transparent: true,
+            opacity: 0.30,
+          });
+          zone6Group.add(new THREE.Line(g, m));
+        }
+      }
+
+      // Interior streamlines: simplified coherence, primarily axial, with
+      // a faint residual rotation (~0.2 turns across Zone 6) that reflects
+      // the not-quite-zero residual swirl after turbulence suppression.
+      const residualTurns = 0.2;
+      const nInterior = 9;
+      for (let i = 0; i < nInterior; i++) {
+        const phi0 = (i / nInterior) * Math.PI * 2;
+        // Interior streamlines sit at different starting radii within the
+        // narrowing column; they converge as the column tapers.
+        const startRadiusFactor = 0.25 + 0.50 * (i / (nInterior - 1));
+
+        const pts = [];
+        const nPts = 30;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = zone6Base + t * zone6Height;
+          // Streamline radius = startFactor × column-radius-at-this-height
+          const colR = radiusAt(y);
+          const r = colR * startRadiusFactor;
+          const phi = phi0 + residualTurns * Math.PI * 2 * t;
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+        }
+
+        const tube = makeTube(pts, INDIGO, INDIGO_EM, 0.017);
+        if (tube) zone6Group.add(tube);
+
+        // Three arrows per streamline, all in indigo — flow is primarily axial
+        const arrowTs = [0.2, 0.55, 0.85];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, INDIGO, 0.10);
+        });
+      }
+
+      // Ambient frame: OPAQUE indigo blue outer streamlines following the
+      // column taper. These replace the translucent light-blue ambient from
+      // earlier zones — Zone 6 is the indigo-ray zone, and the ambient frame
+      // takes on that quality.
+      const nAmbient = 6;
+      for (let i = 0; i < nAmbient; i++) {
+        const phaseOffset = (i / nAmbient) * Math.PI * 2;
+        const pts = [];
+        const nPts = 30;
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const y = zone6Base + t * zone6Height;
+          const r = radiusAt(y);  // follow the taper exactly
+          const phi = phaseOffset + residualTurns * Math.PI * 2 * t;
+          pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+        }
+        // Solid, opaque indigo — no transparent material
+        const tube = makeTube(pts, INDIGO, INDIGO_EM, 0.014);
+        if (tube) zone6Group.add(tube);
+
+        const arrowTs = [0.3, 0.7];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, INDIGO, 0.09);
+        });
+      }
+
+      // Top of Zone 6: a subtle "almost-ready" signal rather than a climactic
+      // flourish. The real ignition happens above the dark gap, not here.
+      // A faint, narrow indigo ring sits at zone6Top — the compressed flow
+      // has reached its terminus but has not yet transitioned. Small, dim,
+      // suggestive rather than declarative.
+      {
+        const terminalR = topR * 0.7;
+        const ringPts = [];
+        for (let k = 0; k <= 32; k++) {
+          const ph = (k / 32) * Math.PI * 2;
+          ringPts.push(new THREE.Vector3(terminalR * Math.cos(ph), zone6Top, terminalR * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(ringPts);
+        const m = new THREE.LineBasicMaterial({
+          color: INDIGO_LINE,
+          transparent: true,
+          opacity: 0.45,
+        });
+        zone6Group.add(new THREE.Line(g, m));
+      }
+    }
+
+    // ======================================================================
+    // THRESHOLD 6 - Apex Ignition (the dark gap)
+    // ======================================================================
+    // The candle-flame analog. A spatial discontinuity between the last
+    // visible extent of the compressed interior flow and the first visible
+    // extent of the divergent outflow. Energy is present here but has not
+    // yet crossed the activation threshold. Rendered as a visibly dark region
+    // with a faint translucent core — no active flow, just potential.
+    const threshold6Group = new THREE.Group();
+    window.threshold6Ref = threshold6Group;
+    scene.add(threshold6Group);
+
+    {
+      // Faint dark core cylinder at the axis — energy present but not radiating.
+      // Lower opacity than Threshold 3's velocity deficit, because here the
+      // flow has literally ended rather than merely slowed.
+      const darkR = columnRadius * 0.10;
+      const darkGeom = new THREE.CylinderGeometry(darkR * 0.5, darkR, t6Height, 24, 1, true);
+      const darkMat = new THREE.MeshStandardMaterial({
+        color: 0x0a0614,  // near-black with indigo tint
+        transparent: true,
+        opacity: 0.28,
+        side: THREE.DoubleSide,
+        depthWrite: false,
+      });
+      const darkCore = new THREE.Mesh(darkGeom, darkMat);
+      darkCore.position.set(0, (t6Base + t6Top) / 2, 0);
+      threshold6Group.add(darkCore);
+
+      // Apex point marker: a small, slightly-glowing sphere at the geometric
+      // tip of the column (top of Threshold 6). Marks the terminus of the
+      // interior flow and the emergence point of Zone 7's radiation.
+      {
+        const apexGeom = new THREE.SphereGeometry(0.05, 24, 16);
+        const apexMat = new THREE.MeshStandardMaterial({
+          color: 0x6a4a9c,      // muted violet — first hint of Zone 7's color
+          emissive: 0x3a2858,
+          emissiveIntensity: 0.5,
+          roughness: 0.4,
+        });
+        const apexMarker = new THREE.Mesh(apexGeom, apexMat);
+        apexMarker.position.set(0, apexY, 0);
+        threshold6Group.add(apexMarker);
+      }
+
+      // Boundary rings: one at t6Base (entry — top of Zone 6's last flow),
+      // one at t6Top (exit — where Zone 7's radiation begins). The entry
+      // ring is dim indigo; the exit ring is dim violet — signaling the
+      // color transition that happens inside the gap.
+      {
+        const baseRingR = columnRadius * 0.24;
+        const ringPtsBase = [];
+        for (let k = 0; k <= 48; k++) {
+          const ph = (k / 48) * Math.PI * 2;
+          ringPtsBase.push(new THREE.Vector3(baseRingR * Math.cos(ph), t6Base, baseRingR * Math.sin(ph)));
+        }
+        const gBase = new THREE.BufferGeometry().setFromPoints(ringPtsBase);
+        const mBase = new THREE.LineBasicMaterial({
+          color: 0x3a2a7c,  // indigo (Zone 6 color)
+          transparent: true,
+          opacity: 0.4,
+        });
+        threshold6Group.add(new THREE.Line(gBase, mBase));
+
+        const topRingR = columnRadius * 0.14;
+        const ringPtsTop = [];
+        for (let k = 0; k <= 48; k++) {
+          const ph = (k / 48) * Math.PI * 2;
+          ringPtsTop.push(new THREE.Vector3(topRingR * Math.cos(ph), t6Top, topRingR * Math.sin(ph)));
+        }
+        const gTop = new THREE.BufferGeometry().setFromPoints(ringPtsTop);
+        const mTop = new THREE.LineBasicMaterial({
+          color: 0x6a4a9c,  // muted violet (Zone 7 color emerging)
+          transparent: true,
+          opacity: 0.4,
+        });
+        threshold6Group.add(new THREE.Line(gTop, mTop));
+      }
+    }
+
+    // ======================================================================
+    // ZONE 7 - Radial Divergence (violet ray, rendered as collimated jet)
+    // ======================================================================
+    // Ra (59.10) describes the third spiral radiating from the top of the
+    // pyramid. Rendered here as a collimated relativistic jet (in the
+    // style of an accretion-disk jet around a black hole): a tight, nearly
+    // cylindrical beam rising from the apex with a slight flare at the
+    // base, a bright luminous core, a cooler wispy halo, and internal
+    // filamentary striations. The jet extends well above the apex to the
+    // top of the visible scene, reading as a long sustained emission
+    // rather than a contained flame.
+    //
+    // Palette shift: the original candle-flame used pure violet. This jet
+    // uses a violet-blue / cyan-white gradient — cooler and brighter,
+    // matching the black-hole jet aesthetic — while keeping the zone's
+    // "violet ray" identity at the cooler outer halo.
+    const zone7Group = new THREE.Group();
+    window.zone7Ref = zone7Group;
+    scene.add(zone7Group);
+
+    {
+      // Thick helical jet — modeled on the structure visible in the
+      // reference image: a substantial-diameter beam with prominent
+      // spiral ribbons wrapping around its exterior. The ribbons are
+      // NOT internal filaments — they're thick luminous bands clearly
+      // visible as the jet's defining texture. The beam widens gently
+      // with height (real astrophysical jets broaden as they propagate).
+      //
+      // Jet length: apex (y ≈ 8.0) up to y = 20, about 12 scene units —
+      // roughly 4× the pyramid height in scene units.
+      const jetBaseY = apexY;
+      const jetTopY = 20.0;
+      const jetHeight = jetTopY - jetBaseY;
+
+      // Jet radius profile — narrow at origin, gently widening with height.
+      // The reference image shows a near-point origin at the collimation
+      // site that smoothly expands as the jet propagates. Three phases:
+      //   Origin  (0 -> 0.04):      r = 0.08 → 0.18 (quick emergence)
+      //   Expand  (0.04 -> 0.95):   r = 0.18 → 0.78 (long smooth widening)
+      //   Tip     (0.95 -> 1.0):    r → 0 (fade-out at the top)
+      // Uses square-root easing in the expand phase so the widening is
+      // most rapid near the base and tapers toward the top — matches the
+      // reference image's cone-like silhouette.
+      const jetProfile = (t) => {
+        if (t < 0.04) {
+          const s = t / 0.04;
+          return 0.08 + (0.18 - 0.08) * Math.sqrt(s);
+        }
+        if (t < 0.95) {
+          const s = (t - 0.04) / (0.95 - 0.04);
+          return 0.18 + (0.78 - 0.18) * Math.sqrt(s);
+        }
+        const s = (t - 0.95) / 0.05;
+        return 0.78 * (1 - s);
+      };
+
+      // --- Outer halo: soft cool-violet envelope around the whole jet.
+      // Big, diffuse, low opacity — sits outside the main body and the
+      // helical ribbons so it reads as a glow.
+      {
+        const nRings = 60;
+        const nPhi = 32;
+        const vertices = [];
+        const indices = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const y = jetBaseY + jetHeight * t;
+          const r = jetProfile(t) * 1.6;
+          for (let i = 0; i <= nPhi; i++) {
+            const ph = (i / nPhi) * Math.PI * 2;
+            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+          }
+        }
+        for (let j = 0; j < nRings; j++) {
+          for (let i = 0; i < nPhi; i++) {
+            const a = j * (nPhi + 1) + i;
+            const b = a + 1;
+            const c = a + (nPhi + 1);
+            const d = c + 1;
+            indices.push(a, b, d);
+            indices.push(a, d, c);
+          }
+        }
+        const haloGeom = new THREE.BufferGeometry();
+        haloGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        haloGeom.setIndex(indices);
+        haloGeom.computeVertexNormals();
+        const haloMat = new THREE.MeshStandardMaterial({
+          color: 0x7a6ac8,
+          emissive: 0x4a3a9a,
+          emissiveIntensity: 0.55,
+          transparent: true,
+          opacity: 0.16,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        zone7Group.add(new THREE.Mesh(haloGeom, haloMat));
+      }
+
+      // --- Main jet body: solid translucent beam, cool blue-white.
+      // This is the substrate the helical ribbons wrap around.
+      {
+        const nRings = 60;
+        const nPhi = 36;
+        const vertices = [];
+        const indices = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const y = jetBaseY + jetHeight * t;
+          const r = jetProfile(t);
+          for (let i = 0; i <= nPhi; i++) {
+            const ph = (i / nPhi) * Math.PI * 2;
+            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+          }
+        }
+        for (let j = 0; j < nRings; j++) {
+          for (let i = 0; i < nPhi; i++) {
+            const a = j * (nPhi + 1) + i;
+            const b = a + 1;
+            const c = a + (nPhi + 1);
+            const d = c + 1;
+            indices.push(a, b, d);
+            indices.push(a, d, c);
+          }
+        }
+        const bodyGeom = new THREE.BufferGeometry();
+        bodyGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        bodyGeom.setIndex(indices);
+        bodyGeom.computeVertexNormals();
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: 0x9ab4e8,
+          emissive: 0x5670b8,
+          emissiveIntensity: 0.9,
+          transparent: true,
+          opacity: 0.40,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        zone7Group.add(new THREE.Mesh(bodyGeom, bodyMat));
+      }
+
+      // --- Helical ribbons: the dominant visual feature. THREE thick
+      // luminous bands spiraling around the jet's exterior at offset
+      // phases (120° apart). Each ribbon makes ~1.5 turns from base to
+      // tip. Rendered as thick tubes that follow a helical path on the
+      // jet's surface — these are the bright wrapping bands clearly
+      // visible in the reference image.
+      {
+        const nRibbons = 3;
+        const ribbonTurns = 1.5;
+        const nPts = 120;
+        const ribbonTubeRadius = 0.095;  // thick — these are prominent bands
+
+        for (let rib = 0; rib < nRibbons; rib++) {
+          const phaseOffset = (rib / nRibbons) * Math.PI * 2;
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const y = jetBaseY + jetHeight * t;
+            // Ribbon sits on the jet's surface with slight offset outward
+            const jetR = jetProfile(t);
+            const r = jetR * 1.02;            // sit ~on the surface
+            const phi = phaseOffset + ribbonTurns * Math.PI * 2 * t;
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, ribbonTubeRadius, 10, false);
+            const ribbonMat = new THREE.MeshStandardMaterial({
+              color: 0xd8e4ff,                 // bright blue-white
+              emissive: 0x90b0f0,
+              emissiveIntensity: 1.3,
+              transparent: true,
+              opacity: 0.70,
+              side: THREE.DoubleSide,
+              depthWrite: false,
+            });
+            zone7Group.add(new THREE.Mesh(tubeGeom, ribbonMat));
+          }
+        }
+      }
+
+      // --- Secondary helical filaments: thinner, fainter threads at
+      // intermediate depth — visible texture between the main ribbons.
+      {
+        const nFilaments = 6;
+        const filTurns = 2.1;            // slightly faster twist than ribbons
+        const nPts = 80;
+
+        for (let f = 0; f < nFilaments; f++) {
+          const phaseOffset = (f / nFilaments) * Math.PI * 2 + (f * 0.23);
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const y = jetBaseY + jetHeight * t;
+            // Sit between core and surface — ~70% of jet radius, with
+            // small radial wobble for non-rigid feel
+            const jetR = jetProfile(t);
+            const wobble = 1 + 0.12 * Math.sin(t * Math.PI * 4 + f);
+            const r = jetR * 0.70 * wobble;
+            const phi = phaseOffset + filTurns * Math.PI * 2 * t;
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, 0.022, 8, false);
+            const filamentMat = new THREE.MeshStandardMaterial({
+              color: 0xe8f0ff,
+              emissive: 0x8ab0e8,
+              emissiveIntensity: 1.0,
+              transparent: true,
+              opacity: 0.45,
+              side: THREE.DoubleSide,
+              depthWrite: false,
+            });
+            zone7Group.add(new THREE.Mesh(tubeGeom, filamentMat));
+          }
+        }
+      }
+
+      // --- Bright central axis thread: a thin luminous core running
+      // straight up the centerline. Gives the jet a sense of intense
+      // energy concentrated along its axis.
+      {
+        const axisR = 0.06;
+        const nRings = 30;
+        const nPhi = 16;
+        const vertices = [];
+        const indices = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const y = jetBaseY + jetHeight * t;
+          const r = t < 0.95 ? axisR : axisR * (1 - (t - 0.95) / 0.05);
+          for (let i = 0; i <= nPhi; i++) {
+            const ph = (i / nPhi) * Math.PI * 2;
+            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+          }
+        }
+        for (let j = 0; j < nRings; j++) {
+          for (let i = 0; i < nPhi; i++) {
+            const a = j * (nPhi + 1) + i;
+            const b = a + 1;
+            const c = a + (nPhi + 1);
+            const d = c + 1;
+            indices.push(a, b, d);
+            indices.push(a, d, c);
+          }
+        }
+        const axisGeom = new THREE.BufferGeometry();
+        axisGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        axisGeom.setIndex(indices);
+        axisGeom.computeVertexNormals();
+        const axisMat = new THREE.MeshStandardMaterial({
+          color: 0xf0f4ff,
+          emissive: 0xc0d0ff,
+          emissiveIntensity: 1.6,
+          transparent: true,
+          opacity: 0.75,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        zone7Group.add(new THREE.Mesh(axisGeom, axisMat));
+      }
+
+      // --- Emission point: bright concentrated sphere at the apex
+      // where the jet emerges. The collimation point.
+      {
+        const emitGeom = new THREE.SphereGeometry(0.12, 20, 14);
+        const emitMat = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          emissive: 0xc0d8ff,
+          emissiveIntensity: 1.5,
+          roughness: 0.2,
+        });
+        const emitter = new THREE.Mesh(emitGeom, emitMat);
+        emitter.position.set(0, jetBaseY, 0);
+        zone7Group.add(emitter);
+      }
+    }
+
+    // ======================================================================
+    // AMBIENT TOROIDAL FIELD — the structural envelope of the whole form
+    // ======================================================================
+    // This is the outer half of the poloidal circuit. Raw unprocessed prana
+    // circulates along these loops: down the outer flank from the north pole
+    // region, curving under the base, and back up through the intake ring
+    // to feed Zone 1. The violet ray (Zone 7) is a localized emission at the
+    // apex; this ambient field is what surrounds the whole form and carries
+    // the flow on its return path. Color: gold (matches Zone 1 — raw prana).
+    //
+    // Proportions: slightly wider than tall (~1.2:1 horizontal:vertical).
+    // The SOUTH POLE extends BELOW the separatrix base by ~1 unit — close
+    // enough that the ambient field reads as surrounding the separatrix,
+    // with the separatrix sitting clearly inside the envelope as an event
+    // horizon. The NORTH POLE is flush with the apex — the flame emerges
+    // directly from the top of the envelope.
+    //   South pole close:  y_south =  -4.5             (1 unit below separatrix)
+    //   North pole close:  y_north =  apexY            (12.25) — flush with flame base
+    //   Equator midpoint:  y_eq    =   3.875
+    //   Equator radius:    r_eq    =  10.05 × columnRadius  (1.2:1 W:H ratio)
+    //   Pole neck radius:  r_pole  =   0.3 × columnRadius  (narrow at both ends)
+    //
+    // Vertical half-span: 8.375.  Horizontal half-span: 10.05.  Ratio: 1.2.
+    const ambientFieldGroup = new THREE.Group();
+    window.ambientFieldRef = ambientFieldGroup;
+    scene.add(ambientFieldGroup);
+
+    {
+      const AMBIENT_GOLD = 0x8a6a1e;
+      const AMBIENT_GOLD_EM = 0x4a3810;
+
+      const y_south = -4.5;               // 1 unit below separatrix base
+      const y_north = apexY;              // 12.25 — flush with apex / flame base
+      const y_eq = (y_south + y_north) / 2;         // 3.875
+      const v_halfspan = (y_north - y_south) / 2;    // 8.375
+      const r_eq = columnRadius * 10.05;
+      const r_pole = columnRadius * 0.3;
+
+      // Number of envelope loops around the torus (azimuthal divisions)
+      const nLoops = 24;
+
+      for (let i = 0; i < nLoops; i++) {
+        const phi = (i / nLoops) * Math.PI * 2;
+
+        const pts = [];
+        const nPts = 60;
+
+        // alpha sweeps from 0 (north pole) to PI (south pole)
+        // This traces the half-loop along the OUTSIDE of the torus.
+        for (let k = 0; k < nPts; k++) {
+          const tSweep = k / (nPts - 1);
+          const alpha = tSweep * Math.PI;
+
+          // Vertical position: cosine sweep from y_north at alpha=0 through
+          // y_eq at alpha=pi/2 to y_south at alpha=pi
+          const y = y_eq + v_halfspan * Math.cos(alpha);
+
+          // Radius: sine-based bulge to r_eq at the equator
+          const r = r_pole + (r_eq - r_pole) * Math.sin(alpha);
+
+          pts.push(new THREE.Vector3(
+            r * Math.cos(phi),
+            y,
+            r * Math.sin(phi)
+          ));
+        }
+
+        // Render as a thin semi-transparent tube
+        if (pts.length >= 2) {
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, Math.max(32, pts.length * 2), 0.015, 8, false);
+          const tubeMat = new THREE.MeshStandardMaterial({
+            color: AMBIENT_GOLD,
+            emissive: AMBIENT_GOLD_EM,
+            emissiveIntensity: 0.25,
+            roughness: 0.7,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.50,
+            depthWrite: false,
+          });
+          ambientFieldGroup.add(new THREE.Mesh(tubeGeom, tubeMat));
+        }
+
+        // Arrows showing flow direction: DOWNWARD along the outer flank.
+        // Three arrows per loop — upper-flank descending, equator, lower-flank.
+        const arrowTs = [0.25, 0.50, 0.75];
+        arrowTs.forEach((tA) => {
+          const idx = Math.floor(tA * (nPts - 1));
+          const pos = pts[idx];
+          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const d = next.clone().sub(pos);
+          if (d.length() > 1e-5) {
+            addArrow(ambientFieldGroup, pos, d, AMBIENT_GOLD, 0.12);
+          }
+        });
+      }
+
+      // Equatorial ring — emphasizes the maximum-radius bulge at the equator
+      {
+        const ringPts = [];
+        for (let k = 0; k <= 64; k++) {
+          const ph = (k / 64) * Math.PI * 2;
+          ringPts.push(new THREE.Vector3(r_eq * Math.cos(ph), y_eq, r_eq * Math.sin(ph)));
+        }
+        const g = new THREE.BufferGeometry().setFromPoints(ringPts);
+        const m = new THREE.LineBasicMaterial({
+          color: AMBIENT_GOLD,
+          transparent: true,
+          opacity: 0.40,
+        });
+        ambientFieldGroup.add(new THREE.Line(g, m));
+      }
+    }
+
+    // ======================================================================
+    // SPIRALS OVERLAY — Don/Ra schematic of the four spirals
+    // ======================================================================
+    // Don and Ra describe the column as carrying four distinct spirals:
+    //
+    //   1. SEMI-SPIRAL (incomplete first spiral)
+    //      Bottom: top of the Separatrix (y = -2.8)
+    //      Top:    Threshold 2 / Zone 3 boundary (y = 0.154)
+    //      Encompasses: Zone 2 + Threshold 2
+    //
+    //   2. FIRST FULL SPIRAL (through the King's Chamber)
+    //      Bottom: Threshold 2 / Zone 3 boundary (y = 0.154)
+    //      Top:    Zone 4 / Zone 5 boundary (y = 4.154)
+    //      Encompasses: Zone 3 (bubble) + Threshold 3 + Zone 4 + Threshold 4
+    //
+    //   3. SECOND FULL SPIRAL (ascending to the apex)
+    //      Bottom: Zone 4 / Zone 5 boundary (y = 4.154)
+    //      Top:    Apex (y = 8.0)
+    //      Encompasses: Zone 5 + Threshold 5 + Zone 6 + Threshold 6
+    //
+    //   4. THIRD SPIRAL (the jet — ejecting outward)
+    //      Bottom: Apex (y = 8.0)
+    //      Top:    Jet tip (y = 20.0)
+    //      IS the jet itself
+    //
+    // Below the semi-spiral's bottom pinch: an X-cross extends downward
+    // where the spiral's side-curves pass through each other, then flares
+    // out into a nearly-horizontal skirt matching the pyramid's base flow.
+    // All drawn in dark gray, thick lines, toggleable (default OFF).
+    const spiralsGroup = new THREE.Group();
+    window.spiralsRef = spiralsGroup;
+    scene.add(spiralsGroup);
+    {
+      const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
+      const SPIRAL_OPACITY = 0.92;
+      const tubeR = 0.055;             // thicker than the first version
+
+      // Each vesica is drawn from bottom pinch to top pinch; half-width
+      // is the maximum bulge at its vertical midpoint. Widths tuned to
+      // match your schematic: first full spiral widest (it encompasses
+      // the bubble), jet narrowest (long pointed lens), semi-spiral and
+      // second full slightly slimmer than the first full.
+      const vesicas = [
+        { yBot: -2.8,   yTop:  0.154, halfW: 0.78 },   // semi-spiral
+        { yBot:  0.154, yTop:  4.154, halfW: 0.95 },   // 1st full spiral
+        { yBot:  4.154, yTop:  8.0,   halfW: 0.78 },   // 2nd full spiral
+        { yBot:  8.0,   yTop: 20.0,   halfW: 0.55 },   // 3rd spiral (jet)
+      ];
+
+      // Shared material factory (keeps all lines consistent)
+      const makeLineMat = () => new THREE.MeshStandardMaterial({
+        color: SPIRAL_COLOR,
+        emissive: 0x1a1a1a,
+        emissiveIntensity: 0.20,
+        roughness: 0.65,
+        transparent: true,
+        opacity: SPIRAL_OPACITY,
+      });
+
+      // Build each vesica as 4 meridian curves (at azimuthal angles 0,
+      // 90, 180, 270). Each curve follows r(t) = halfW * sin(π·t) from
+      // bottom pinch up to top pinch, so radius is 0 at the endpoints
+      // and maximum at the middle — producing the lens/vesica silhouette
+      // from any orbital angle.
+      const nPts = 48;
+      vesicas.forEach((v) => {
+        const { yBot, yTop, halfW } = v;
+        const height = yTop - yBot;
+
+        for (let meridian = 0; meridian < 4; meridian++) {
+          const phi = (meridian / 4) * Math.PI * 2;
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const r = halfW * Math.sin(Math.PI * t);
+            const y = yBot + height * t;
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, tubeR, 8, false);
+            spiralsGroup.add(new THREE.Mesh(tubeGeom, makeLineMat()));
+          }
+        }
+      });
+
+      // X-cross below the semi-spiral's bottom pinch (y = -2.8). The
+      // two side-curves of the semi-spiral continue past the pinch and
+      // cross symmetrically — this models the "inflow" just before it
+      // organizes into the first spiral. Drawn as 4 meridian lines that
+      // go from just below the pinch (crossing the axis at an offset
+      // point) and continue outward-downward.
+      //
+      // Each "cross-leg" goes from the semi-spiral pinch (0, -2.8, 0),
+      // passing to the opposite side, creating the X. In 3D with 4
+      // meridians this reads as a crossing pattern from multiple angles.
+      {
+        const xPinchY = -2.8;
+        const xCrossY = -3.2;              // vertical extent of the cross
+        const xCrossR = 0.35;              // how far outward the leg ends
+        const nXPts = 16;
+
+        for (let meridian = 0; meridian < 4; meridian++) {
+          const phi = (meridian / 4) * Math.PI * 2;
+          // Leg 1: from (0, xPinchY) passing through axis to (+r, xCrossY)
+          const leg1Pts = [];
+          for (let k = 0; k < nXPts; k++) {
+            const t = k / (nXPts - 1);
+            const r = -xCrossR * 0.4 + (xCrossR + xCrossR * 0.4) * t;   // starts inside axis, ends outside
+            const y = xPinchY + (xCrossY - xPinchY) * t;
+            leg1Pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (leg1Pts.length >= 2) {
+            const c = new THREE.CatmullRomCurve3(leg1Pts);
+            const g = new THREE.TubeGeometry(c, nXPts * 2, tubeR, 8, false);
+            spiralsGroup.add(new THREE.Mesh(g, makeLineMat()));
+          }
+        }
+      }
+
+      // Flaring skirt at the base — nearly horizontal flare opening out
+      // from the bottom of the X-cross. Matches the wide flat-disk base
+      // visible in the schematic drawing. Four meridian rays so the
+      // skirt reads from any angle.
+      {
+        const skirtStartY = -3.2;          // bottom of X-cross
+        const skirtEndY = -3.5;            // skirt bends slightly downward
+        const skirtStartR = 0.35;          // matches X-cross outer end
+        const skirtEndR = 1.75;            // wide flat skirt
+        const nSkirtPts = 24;
+
+        for (let meridian = 0; meridian < 4; meridian++) {
+          const phi = (meridian / 4) * Math.PI * 2;
+          const pts = [];
+          for (let k = 0; k < nSkirtPts; k++) {
+            const t = k / (nSkirtPts - 1);
+            const r = skirtStartR + (skirtEndR - skirtStartR) * t;
+            // Slight downward curve: use quadratic easing so it starts
+            // flat and bends slightly down at the outer end
+            const y = skirtStartY + (skirtEndY - skirtStartY) * (t * t);
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const c = new THREE.CatmullRomCurve3(pts);
+            const g = new THREE.TubeGeometry(c, nSkirtPts * 2, tubeR, 8, false);
+            spiralsGroup.add(new THREE.Mesh(g, makeLineMat()));
+          }
+        }
+      }
+    }
+
+    // ======================================================================
+    // LABELS
+    // ======================================================================
+    const labelsGroup = new THREE.Group();
+    window.labelsRef = labelsGroup;
+    scene.add(labelsGroup);
+    {
+      const labelX = 3.2;
+      const LABEL_COLOR = 0x6b4a1a;  // amber-brown, matches label text color
+
+      // Helper: draw a thin line with a small arrowhead FROM the label's
+      // left-edge position TO the target zone at the given (x, y). The
+      // arrow appears next to the label (on the side closer to the zone)
+      // and the line spans the gap.
+      const makeLabelPointer = (labelLeftX, labelY, targetX, targetY) => {
+        // Line from just inside the label's left edge, to the target
+        const lineStart = new THREE.Vector3(labelLeftX - 0.1, labelY, 0);
+        const lineEnd = new THREE.Vector3(targetX, targetY, 0);
+        const lineGeom = new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: LABEL_COLOR,
+          transparent: true,
+          opacity: 0.55,
+        });
+        labelsGroup.add(new THREE.Line(lineGeom, lineMat));
+
+        // Small arrowhead at the target end, pointing toward the zone
+        const dir = lineEnd.clone().sub(lineStart);
+        if (dir.length() > 1e-5) {
+          addArrow(labelsGroup, lineEnd.clone(), dir, LABEL_COLOR, 0.08);
+        }
+      };
+
+      // Helper: place a label AND its pointer together.
+      // Label is positioned by its left edge at (labelLeftX, y).
+      // Pointer goes from just inside that left edge to (targetX, targetY).
+      const placeLabeled = (text, labelLeftX, y, targetX, targetY) => {
+        labelsGroup.add(makeLabel(text, new THREE.Vector3(labelLeftX, y, 0)));
+        makeLabelPointer(labelLeftX, y, targetX, targetY ?? y);
+      };
+
+      // Interior-column labels: pointer targets the right edge of the zone
+      // at the label's y-level. For most interior zones the right edge is
+      // at columnRadius (~1.0); the separatrix flares wider; the bubble is
+      // slightly narrower; Zone 6 narrows toward its top; the flame is
+      // small and narrow.
+      // Zone 1 — Convergence: placed directly BELOW the south pole of the
+      // ambient toroidal field (y_south = -4.5), with a vertical arrow
+      // pointing UP into the entrance. This reads as "prana enters here,
+      // converging upward." The label is centered on the vertical axis
+      // (x = 0) by offsetting its left edge by half the label's width.
+      {
+        const zone1Text = "Zone 1 — Convergence";
+        const zone1FontSize = 64;
+
+        // Measure label width the same way makeLabel does, so we can center it
+        const measureCanvas = document.createElement("canvas");
+        const measureCtx = measureCanvas.getContext("2d");
+        measureCtx.font = `italic ${zone1FontSize}px Georgia, serif`;
+        const zone1TextWidth = Math.ceil(measureCtx.measureText(zone1Text).width);
+        const zone1Padding = 20;
+        const zone1CanvasWidth = zone1TextWidth + zone1Padding * 2;
+        const zone1CanvasHeight = Math.ceil(zone1FontSize * 1.4);
+        const zone1SpriteHeight = 0.5;
+        const zone1SpriteWidth = zone1SpriteHeight * (zone1CanvasWidth / zone1CanvasHeight);
+
+        // Label sits further below the south pole (y_south = -4.5) so
+        // there's a clear visible gap between the arrow tip and the
+        // entrance. Label at y = -6.8, arrow tip at y = -5.5 — a full
+        // unit of breathing room between the tip and the south pole.
+        const zone1LabelY = -6.8;
+        const zone1LabelLeftX = -zone1SpriteWidth / 2;  // centers label on x = 0
+
+        // Add the label itself (sprite positioned by left edge)
+        labelsGroup.add(makeLabel(
+          zone1Text,
+          new THREE.Vector3(zone1LabelLeftX, zone1LabelY, 0)
+        ));
+
+        // Vertical arrow: from just above the label up to a point south
+        // of the entrance (y = -5.5, a clear unit below the south pole).
+        const zone1ArrowStart = new THREE.Vector3(0, zone1LabelY + 0.28, 0);
+        const zone1ArrowEnd = new THREE.Vector3(0, -5.5, 0);
+        const zone1LineGeom = new THREE.BufferGeometry().setFromPoints([
+          zone1ArrowStart, zone1ArrowEnd,
+        ]);
+        const zone1LineMat = new THREE.LineBasicMaterial({
+          color: LABEL_COLOR,
+          transparent: true,
+          opacity: 0.55,
+        });
+        labelsGroup.add(new THREE.Line(zone1LineGeom, zone1LineMat));
+        addArrow(
+          labelsGroup,
+          zone1ArrowEnd.clone(),
+          new THREE.Vector3(0, 1, 0),  // pointing straight up
+          LABEL_COLOR,
+          0.10
+        );
+      }
+      placeLabeled("Threshold 1 — Separatrix",
+        labelX, separatrixBaseY + 0.2,
+        1.8, separatrixBaseY + 0.2);  // target the separatrix bell at mid-height
+      placeLabeled("Zone 2 — Turbulence",
+        labelX, (zone2Base + zone2Top) / 2,
+        1.05, (zone2Base + zone2Top) / 2);
+      placeLabeled("Threshold 2 — Semi-Spiral",
+        labelX, (thresh2Base + thresh2Top) / 2,
+        1.05, (thresh2Base + thresh2Top) / 2);
+      placeLabeled("Zone 3 — The Bubble",
+        labelX, bubbleCenterY,
+        bubbleHalfWidth + 0.05, bubbleCenterY);
+      placeLabeled("Threshold 3 — Wake",
+        labelX, (threshold3Base + threshold3Top) / 2,
+        0.7, (threshold3Base + threshold3Top) / 2);
+      placeLabeled("Zone 4 — Helical Flow",
+        labelX, (zone4Base + zone4Top) / 2,
+        columnRadius * 0.85, (zone4Base + zone4Top) / 2);
+      placeLabeled("Threshold 4 — Helical Breakdown",
+        labelX, (t4Base + t4Top) / 2,
+        columnRadius * 0.85, (t4Base + t4Top) / 2);
+      placeLabeled("Zone 5 — Second Helical Flow",
+        labelX, (zone5Base + zone5Top) / 2,
+        columnRadius * 0.55, (zone5Base + zone5Top) / 2);
+      placeLabeled("Threshold 5 — Turbulent Negotiation",
+        labelX, (t5Base + t5Top) / 2,
+        columnRadius * 0.85, (t5Base + t5Top) / 2);
+      placeLabeled("Zone 6 — Relaminarization",
+        labelX, (zone6Base + zone6Top) / 2,
+        columnRadius * 0.55, (zone6Base + zone6Top) / 2);
+      placeLabeled("Threshold 6 — Apex Ignition",
+        labelX, (t6Base + t6Top) / 2,
+        columnRadius * 0.15, (t6Base + t6Top) / 2);
+      // Zone 7 jet label sits beside the jet; pointer targets its side wall
+      placeLabeled("Zone 7 — Radial Divergence",
+        labelX + 1.0, 14.0,
+        0.5, 14.0);
+      // Ambient Toroidal Field label: positioned at the 10:00 clock
+      // position of the torus silhouette — upper-left quadrant. The
+      // torus outer surface is parameterized by α (0 = north pole,
+      // π = south pole): y = y_eq + v_halfspan·cos(α), r = r_pole +
+      // (r_eq − r_pole)·sin(α). 10:00 on a clock face maps to α = π/3
+      // (two-thirds of the way from 12:00 toward 9:00, going CCW).
+      //   α = π/3  →  y ≈ 8.063, r ≈ 8.744 (on the left side: x ≈ −8.744)
+      // Label sits further out-left than the surface point, arrow
+      // extends rightward-and-slightly-down to touch the surface.
+      {
+        const toroidalText = "Ambient Toroidal Field";
+        const toroidalFontSize = 64;
+
+        // Measure label width for right-edge anchoring
+        const measureCanvas = document.createElement("canvas");
+        const measureCtx = measureCanvas.getContext("2d");
+        measureCtx.font = `italic ${toroidalFontSize}px Georgia, serif`;
+        const toroidalTextWidth = Math.ceil(measureCtx.measureText(toroidalText).width);
+        const toroidalPadding = 20;
+        const toroidalCanvasWidth = toroidalTextWidth + toroidalPadding * 2;
+        const toroidalCanvasHeight = Math.ceil(toroidalFontSize * 1.4);
+        const toroidalSpriteHeight = 0.5;
+        const toroidalSpriteWidth = toroidalSpriteHeight * (toroidalCanvasWidth / toroidalCanvasHeight);
+
+        // Label anchor: sprite's RIGHT edge sits at `labelRightX`, so
+        // its left edge is at labelRightX − spriteWidth. The arrow here
+        // does NOT try to reach the 3D surface point at (−8.744, 8.063)
+        // — that location is in empty space from most orbital angles.
+        // Instead the arrow travels a short distance right of the label
+        // (1 scene unit) into the visible region where the torus loops
+        // actually render from the default view. Label sits slightly
+        // below the visual torus-line region so the arrow's short path
+        // doesn't cross the text.
+        const labelRightX = -6.8;          // just left of the visual torus edge
+        const labelLeftX = labelRightX - toroidalSpriteWidth;
+        const labelY = 7.2;                // height where the upper-left torus loops are most visible
+
+        // Arrow end: close to label's right edge, pointing slightly
+        // right-and-down into the visible torus line region.
+        const arrowEndX = labelRightX + 1.0;
+        const arrowEndY = labelY - 0.4;
+
+        // Add the label (sprite positioned by its left edge)
+        labelsGroup.add(makeLabel(
+          toroidalText,
+          new THREE.Vector3(labelLeftX, labelY, 0)
+        ));
+
+        // Pointer: short line from just right of label's right edge to arrow tip
+        const lineStart = new THREE.Vector3(labelRightX + 0.1, labelY, 0);
+        const lineEnd = new THREE.Vector3(arrowEndX, arrowEndY, 0);
+        const lineGeom = new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: LABEL_COLOR,
+          transparent: true,
+          opacity: 0.55,
+        });
+        labelsGroup.add(new THREE.Line(lineGeom, lineMat));
+
+        // Arrowhead at the tip, pointing toward the visible torus region
+        const dir = lineEnd.clone().sub(lineStart);
+        if (dir.length() > 1e-5) {
+          addArrow(labelsGroup, lineEnd.clone(), dir, LABEL_COLOR, 0.10);
+        }
+      }
+    }
+
+    // ======================================================================
+    // CHAMBER LABELS (toggleable, black)
+    // ======================================================================
+    // Four labels pointing to the pyramid chambers: Resonance Chamber,
+    // Queen's Chamber, King's Chamber, and the Interdimensional Chamber
+    // (Position 2 sphere). Rendered in black on the LEFT side of the scene
+    // so they don't compete with the zone labels on the right. Pointers and
+    // arrowheads are also black. Grouped under their own toggle so they can
+    // be shown independently of the zone-label set.
+    const chamberLabelsGroup = new THREE.Group();
+    window.chamberLabelsRef = chamberLabelsGroup;
+    scene.add(chamberLabelsGroup);
+    {
+      const chamberLabelColor = "#000000";
+      const POINTER_COLOR = 0x000000;
+      // Left-side label placement: labels extend to the LEFT of their anchor,
+      // so the anchor (the sprite's RIGHT edge) sits at this X and the text
+      // runs leftward.  We'll still use makeLabel which positions by LEFT
+      // edge, so we compute a leftEdgeX that leaves room for the label.
+      const labelRightX = -3.0;  // anchor x — where the label's right edge sits
+
+      // Helper: measure approximate label width to position its left edge
+      const approxLabelWidth = (text, fontSize = 64) => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        ctx.font = `italic ${fontSize}px Georgia, serif`;
+        const textWidth = ctx.measureText(text).width;
+        const padding = 20;
+        const canvasWidth = textWidth + padding * 2;
+        const canvasHeight = Math.ceil(fontSize * 1.4);
+        const spriteHeight = 0.5;
+        const aspectRatio = canvasWidth / canvasHeight;
+        return spriteHeight * aspectRatio;
+      };
+
+      const placeChamberLabel = (text, labelY, targetX, targetY) => {
+        const w = approxLabelWidth(text);
+        const leftX = labelRightX - w;
+        // The label itself
+        chamberLabelsGroup.add(
+          makeLabel(text, new THREE.Vector3(leftX, labelY, 0), 64, chamberLabelColor)
+        );
+        // Pointer: from just right of the label's right edge to the target
+        const lineStart = new THREE.Vector3(labelRightX + 0.1, labelY, 0);
+        const lineEnd = new THREE.Vector3(targetX, targetY, 0);
+        const lineGeom = new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]);
+        const lineMat = new THREE.LineBasicMaterial({
+          color: POINTER_COLOR,
+          transparent: true,
+          opacity: 0.85,
+        });
+        chamberLabelsGroup.add(new THREE.Line(lineGeom, lineMat));
+        // Black arrowhead at the target end
+        const dir = lineEnd.clone().sub(lineStart);
+        if (dir.length() > 1e-5) {
+          addArrow(chamberLabelsGroup, lineEnd.clone(), dir, POINTER_COLOR, 0.08);
+        }
+      };
+
+      // Target coordinates in poloidal units (RC and KC are off-axis; we
+      // target their projected x at z=0 viewing plane for pointer geometry):
+      //   RC: pyramid (14, -56.25, 0) cubits  -> poloidal (0.44, -2.68, 0)
+      //   QC: pyramid (0, 44, 0)              -> poloidal (0, 0.504, 0)
+      //   KC: pyramid (0, 85.5, -25)          -> poloidal (0, 1.822, -0.794)
+      //       (pointer targets KC's projected x=0 at y=1.822)
+      //   P2: pyramid (0, 210, 0)             -> poloidal (0, 5.776, 0)
+      placeChamberLabel("Resonance Chamber",
+        -2.68,
+        0.44, -2.68);
+      placeChamberLabel("Queen's Chamber",
+        0.504,
+        -0.05, 0.504);
+      placeChamberLabel("King's Chamber",
+        1.822,
+        -0.05, 1.822);
+      placeChamberLabel("Interdimensional Chamber",
+        5.776,
+        -0.05, 5.776);
+    }
+
+    // ======================================================================
+    // PYRAMID OVERLAY (toggleable) — The Great Pyramid rendered around the
+    // poloidal core under Option A scaling
+    // ======================================================================
+    //
+    // The pyramid is built in its native cubit units (BASE = 440, HEIGHT = 280,
+    // Red Chamber at –60, Queen's Chamber at +44, King's Chamber at +85.5,
+    // Position 2 at +210, apex at +280), then the entire group is scaled
+    // down by 1/POLOIDAL_TO_PYRAMID_SCALE so the Queen's Chamber (pyramid
+    // y = 40 / after-box-centering y = 44) lands near the poloidal bubble
+    // (poloidal y = 2.2). Working in cubits inside the group keeps the
+    // pyramid code directly comparable to the manuscript's geometry.
+    //
+    // Ported from great_pyramid_3d.html. The ground plane, ground hatching,
+    // and 2D HTML labels are not carried over — the ambient toroidal field
+    // carries its own visual envelope and the poloidal core has its own
+    // labeling system.
+    //
+    // Materials: the pyramid uses MeshBasicMaterial throughout. This matches
+    // the source file and keeps the pyramid visually distinct from the
+    // poloidal core's lit MeshStandardMaterial geometry. The pyramid recedes
+    // as structural context while the poloidal core remains primary content.
+    // Pyramid overlay frame (exploratory reframe v4 — April 2026):
+    // Matches the revised column geometry (column now 11.5 units tall, T6 top
+    // at y = 8.0). Anchors preserved: RC bottom -> separatrix top (y = -2.8),
+    // pyramid apex -> T6 top (y = 8.0). Span: 340 cubits over 10.8 poloidal
+    // units. Scale: 340 / 10.8 = 31.481. Offset: -0.894.
+    // (POLOIDAL_TO_PYRAMID_SCALE and PYRAMID_Y_OFFSET are declared at the
+    // top of the useEffect so the Zone 7 flame can reference them too.)
+    const pyramidGroup = new THREE.Group();
+    window.pyramidRef = pyramidGroup;
+    scene.add(pyramidGroup);
+    pyramidGroup.scale.set(
+      1 / POLOIDAL_TO_PYRAMID_SCALE,
+      1 / POLOIDAL_TO_PYRAMID_SCALE,
+      1 / POLOIDAL_TO_PYRAMID_SCALE
+    );
+    pyramidGroup.position.y = PYRAMID_Y_OFFSET;
+    {
+      const BASE_C = 440;
+      const HALF_C = BASE_C / 2;
+      const HEIGHT_C = 280;
+      // Dark gold — deeper, richer tone. The previous light-honey
+      // (0xd4b06a) read as faded; this darker amber-gold gives the
+      // pyramid more presence as a structural frame around the poloidal
+      // core without overwhelming the interior content.
+      const goldColor = 0x8a6818;       // dark gold for the face fill
+      const edgeColor = 0x5e4610;       // even deeper for the edge lines
+
+      // --- Outer shell: four translucent triangular faces + edge wireframe
+      {
+        const faceGeo = new THREE.BufferGeometry();
+        faceGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array([
+          -HALF_C, 0, -HALF_C,   HALF_C, 0, -HALF_C,   0, HEIGHT_C, 0,
+           HALF_C, 0, -HALF_C,   HALF_C, 0,  HALF_C,   0, HEIGHT_C, 0,
+           HALF_C, 0,  HALF_C,  -HALF_C, 0,  HALF_C,   0, HEIGHT_C, 0,
+          -HALF_C, 0,  HALF_C,  -HALF_C, 0, -HALF_C,   0, HEIGHT_C, 0,
+        ]), 3));
+        const facesMesh = new THREE.Mesh(faceGeo, new THREE.MeshBasicMaterial({
+          color: goldColor,
+          transparent: true,
+          opacity: 0.18,                // bumped from 0.08 so the darker color reads
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        }));
+        pyramidGroup.add(facesMesh);
+
+        const edgeGeo = new THREE.BufferGeometry();
+        edgeGeo.setAttribute("position", new THREE.BufferAttribute(new Float32Array([
+          -HALF_C, 0, -HALF_C,   HALF_C, 0, -HALF_C,
+           HALF_C, 0, -HALF_C,   HALF_C, 0,  HALF_C,
+           HALF_C, 0,  HALF_C,  -HALF_C, 0,  HALF_C,
+          -HALF_C, 0,  HALF_C,  -HALF_C, 0, -HALF_C,
+          -HALF_C, 0, -HALF_C,   0, HEIGHT_C, 0,
+           HALF_C, 0, -HALF_C,   0, HEIGHT_C, 0,
+           HALF_C, 0,  HALF_C,   0, HEIGHT_C, 0,
+          -HALF_C, 0,  HALF_C,   0, HEIGHT_C, 0,
+        ]), 3));
+        pyramidGroup.add(new THREE.LineSegments(edgeGeo, new THREE.LineBasicMaterial({
+          color: edgeColor,
+          transparent: true,
+          opacity: 0.55,                // bumped from 0.35 to match the darker fill
+        })));
+      }
+
+      // --- Chambers group: Red, Queen's, King's (+ QC gable)
+      const chambersGroup = new THREE.Group();
+      window.pyramidChambersRef = chambersGroup;
+      pyramidGroup.add(chambersGroup);
+
+      // Red Chamber: 14 east, bottom at –60, inner dims 27 × 7.5 × 16
+      // v8.2: darkened from (0x333333 @ 18% opacity) to near-black at 85%
+      // opacity so the subterranean RC reads clearly.
+      {
+        const rcW = 27, rcH = 7.5, rcD = 16;
+        const rcCx = 14, rcCz = 0;
+        const rcBottom = -60;
+        const rcGeo = new THREE.BoxGeometry(rcW, rcH, rcD);
+        const rc = new THREE.Mesh(rcGeo, new THREE.MeshBasicMaterial({
+          color: 0x101010,
+          transparent: true,
+          opacity: 0.85,
+          depthWrite: false,
+        }));
+        rc.position.set(rcCx, rcBottom + rcH / 2, rcCz);
+        chambersGroup.add(rc);
+        const rcWire = new THREE.LineSegments(
+          new THREE.EdgesGeometry(rcGeo),
+          new THREE.LineBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.85 })
+        );
+        rcWire.position.copy(rc.position);
+        chambersGroup.add(rcWire);
+      }
+
+      // Queen's Chamber: centered on axis, box center at y = 44 (inner
+      // chamber runs y = 40 to y = 48), dims 10 × 8 × 10. Small triangular
+      // gable sits above the box at y = 48.
+      // v8.2: darkened further from (0x505050 @ 90%) to near-black
+      // fully opaque. QC embedded inside the bubble must read strongly
+      // against the transparent gold and green tubes surrounding it.
+      {
+        const qcMat = new THREE.MeshBasicMaterial({
+          color: 0x0a0a0a, transparent: true, opacity: 0.98,
+        });
+        const qcWireMat = new THREE.LineBasicMaterial({
+          color: 0x000000, transparent: true, opacity: 0.95,
+        });
+        const qcGeo = new THREE.BoxGeometry(10, 8, 10);
+        const qcBox = new THREE.Mesh(qcGeo, qcMat);
+        qcBox.position.set(0, 44, 0);
+        chambersGroup.add(qcBox);
+        const qcWire = new THREE.LineSegments(new THREE.EdgesGeometry(qcGeo), qcWireMat);
+        qcWire.position.copy(qcBox.position);
+        chambersGroup.add(qcWire);
+
+        const gs = new THREE.Shape();
+        gs.moveTo(-5, 0); gs.lineTo(5, 0); gs.lineTo(0, 3); gs.closePath();
+        const qcGableGeo = new THREE.ExtrudeGeometry(gs, { depth: 10, bevelEnabled: false });
+        const qcGable = new THREE.Mesh(qcGableGeo, qcMat);
+        qcGable.position.set(0, 48, -5);
+        chambersGroup.add(qcGable);
+        const qcGableWire = new THREE.LineSegments(new THREE.EdgesGeometry(qcGableGeo), qcWireMat);
+        qcGableWire.position.copy(qcGable.position);
+        chambersGroup.add(qcGableWire);
+      }
+
+      // King's Chamber: 25 south of center, box center at y = 85.5 (inner
+      // chamber y = 80 to y = 91), dims 20 × 11 × 10.
+      // v8.3: darkened to near-black, fully opaque — matching QC/RC for
+      // consistent visual weight across all three main chambers.
+      {
+        const kcMat = new THREE.MeshBasicMaterial({
+          color: 0x0a0a0a, transparent: true, opacity: 0.98,
+        });
+        const kcWireMat = new THREE.LineBasicMaterial({
+          color: 0x000000, transparent: true, opacity: 0.95,
+        });
+        const kcGeo = new THREE.BoxGeometry(20, 11, 10);
+        const kc = new THREE.Mesh(kcGeo, kcMat);
+        kc.position.set(0, 85.5, -25);
+        chambersGroup.add(kc);
+        const kcWire = new THREE.LineSegments(new THREE.EdgesGeometry(kcGeo), kcWireMat);
+        kcWire.position.copy(kc.position);
+        chambersGroup.add(kcWire);
+      }
+
+      // --- Relieving chambers group: five stacked tapering boxes above the
+      // King's Chamber, plus the top triangular gable
+      // v8.3: darkened to near-black at moderate opacity (0.70) so the
+      // five ascending layers are clearly visible but slightly less
+      // commanding than the main KC below them (hierarchy: KC > relieving).
+      const relievingGroup = new THREE.Group();
+      window.pyramidRelievingRef = relievingGroup;
+      pyramidGroup.add(relievingGroup);
+      {
+        const rMat = new THREE.MeshBasicMaterial({
+          color: 0x0a0a0a, transparent: true, opacity: 0.70,
+        });
+        const rWireMat = new THREE.LineBasicMaterial({
+          color: 0x000000, transparent: true, opacity: 0.80,
+        });
+        const rData = [
+          { w: 19, h: 3.5, d: 9.5, y: 92.75 },
+          { w: 18, h: 3.0, d: 9.0, y: 96.0 },
+          { w: 17, h: 2.5, d: 8.5, y: 98.75 },
+          { w: 16, h: 2.0, d: 8.0, y: 101.0 },
+          { w: 15, h: 2.0, d: 7.5, y: 103.0 },
+        ];
+        rData.forEach((r) => {
+          const g = new THREE.BoxGeometry(r.w, r.h, r.d);
+          const m = new THREE.Mesh(g, rMat);
+          m.position.set(0, r.y, -25);
+          relievingGroup.add(m);
+          const w = new THREE.LineSegments(new THREE.EdgesGeometry(g), rWireMat);
+          w.position.copy(m.position);
+          relievingGroup.add(w);
+        });
+        // Top gable above the highest relieving chamber
+        const tgs = new THREE.Shape();
+        tgs.moveTo(-7.5, 0); tgs.lineTo(7.5, 0); tgs.lineTo(0, 3); tgs.closePath();
+        const tgGeo = new THREE.ExtrudeGeometry(tgs, { depth: 7.5, bevelEnabled: false });
+        const tg = new THREE.Mesh(tgGeo, new THREE.MeshBasicMaterial({
+          color: 0x0a0a0a, transparent: true, opacity: 0.65,
+        }));
+        tg.position.set(0, 104, -25 - 3.75);
+        relievingGroup.add(tg);
+        const tgWire = new THREE.LineSegments(new THREE.EdgesGeometry(tgGeo), rWireMat);
+        tgWire.position.copy(tg.position);
+        relievingGroup.add(tgWire);
+      }
+
+      // --- Position 2: the Interdimensional Chamber.
+      // v8.4: darkened and recolored with the gold-indigo-violet palette
+      // appropriate to Position 2's metaphysical role and its fluid-dynamic
+      // location at Threshold 5 (between second helical flow and
+      // relaminarization, where the flow is most plastic).
+      //   Outer sphere: deep INDIGO — the base envelope
+      //   Wireframe: GOLD — ring structure scribing the surface
+      //   Inner core: VIOLET — concentrated radiant center
+      const p2Group = new THREE.Group();
+      window.pyramidP2Ref = p2Group;
+      pyramidGroup.add(p2Group);
+      {
+        const p2Y = 210;
+        const p2R = 12;
+
+        // Outer envelope: deep indigo
+        const p2Solid = new THREE.Mesh(
+          new THREE.SphereGeometry(p2R, 24, 16),
+          new THREE.MeshBasicMaterial({
+            color: 0x2a1e70, transparent: true, opacity: 0.30, depthWrite: false,
+          })
+        );
+        p2Solid.position.set(0, p2Y, 0);
+        p2Group.add(p2Solid);
+
+        // Wireframe: gold striations on the sphere's surface
+        const p2Wire = new THREE.LineSegments(
+          new THREE.EdgesGeometry(new THREE.SphereGeometry(p2R, 12, 8)),
+          new THREE.LineBasicMaterial({
+            color: 0xc8a050, transparent: true, opacity: 0.75,
+          })
+        );
+        p2Wire.position.set(0, p2Y, 0);
+        p2Group.add(p2Wire);
+
+        // Inner core: concentrated violet
+        const p2Inner = new THREE.Mesh(
+          new THREE.SphereGeometry(p2R * 0.4, 16, 12),
+          new THREE.MeshBasicMaterial({
+            color: 0x6a20a8, transparent: true, opacity: 0.55, depthWrite: false,
+          })
+        );
+        p2Inner.position.set(0, p2Y, 0);
+        p2Group.add(p2Inner);
+      }
+    }
+
+    // --- Correspondence lines group: pedagogical overlay. Under the earlier
+    // Option A mapping (QC = bubble), each line connected a pyramid chamber
+    // to its interpretive poloidal counterpart (RC->Zone 1, QC->bubble, etc.).
+    // Under the current vessel-first reframe (pyramid base = separatrix base,
+    // apex = T6 top), chambers land in different zones — QC sits below column
+    // base, KC in Zone 2 turbulence, P2 in Zone 4. The original correspondence
+    // claims no longer hold; the new correspondences are being re-read.
+    //
+    // While the interpretive map is being re-worked, these lines render as
+    // neutral chamber-to-axis markers: a short line from each chamber center
+    // horizontally to the central axis at the same height. This shows WHERE
+    // each chamber sits in the column without asserting a specific poloidal
+    // correspondence. Toggled separately; default OFF.
+    const correspondenceGroup = new THREE.Group();
+    window.pyramidCorrespondenceRef = correspondenceGroup;
+    scene.add(correspondenceGroup);
+    {
+      const S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
+      const Y = PYRAMID_Y_OFFSET;
+      const corrMat = new THREE.LineBasicMaterial({
+        color: 0x8a6a1e,
+        transparent: true,
+        opacity: 0.55,
+      });
+      // Chamber-to-axis lines: each starts at the chamber's (x, z) position
+      // at its native y, and terminates on the central axis at the same y.
+      // This is a "you are here" marker rather than a correspondence claim.
+      const pairs = [
+        // Red Chamber center -> axis at RC height
+        [new THREE.Vector3(14 * S, -56.25 * S + Y, 0),
+         new THREE.Vector3(0, -56.25 * S + Y, 0)],
+        // Queen's Chamber center -> axis at QC height (already on axis, zero-length — skip)
+        // King's Chamber center -> axis at KC height
+        [new THREE.Vector3(0, 85.5 * S + Y, -25 * S),
+         new THREE.Vector3(0, 85.5 * S + Y, 0)],
+        // Position 2 -> axis at P2 height (already on axis, zero-length — skip)
+        // Pyramid apex -> no lateral offset needed
+      ];
+      pairs.forEach(([a, b]) => {
+        const geom = new THREE.BufferGeometry().setFromPoints([a, b]);
+        const line = new THREE.Line(geom, corrMat);
+        correspondenceGroup.add(line);
+      });
+    }
+
+    // ======================================================================
+    // CAMERA + ORBIT CONTROLS
+    // ======================================================================
+    const orbit = {
+      azimuth: Math.PI / 4,
+      elevation: 0.15,
+      distance: 40,
+      // Target adjusted April 2026 for revised column geometry.
+      // New column spans y = -3.5 to y = 8.0; midpoint ≈ 2.25.
+      target: new THREE.Vector3(0, 2.25, 0),
+    };
+
+    const updateCamera = () => {
+      const cx = orbit.target.x + orbit.distance * Math.cos(orbit.elevation) * Math.sin(orbit.azimuth);
+      const cy = orbit.target.y + orbit.distance * Math.sin(orbit.elevation);
+      const cz = orbit.target.z + orbit.distance * Math.cos(orbit.elevation) * Math.cos(orbit.azimuth);
+      camera.position.set(cx, cy, cz);
+      camera.lookAt(orbit.target);
+    };
+    updateCamera();
+
+    let isDragging = false;
+    let lastX = 0, lastY = 0;
+
+    const onPointerDown = (e) => {
+      isDragging = true;
+      lastX = e.clientX || (e.touches && e.touches[0].clientX);
+      lastY = e.clientY || (e.touches && e.touches[0].clientY);
+    };
+    const onPointerMove = (e) => {
+      if (!isDragging) return;
+      const cx = e.clientX || (e.touches && e.touches[0].clientX);
+      const cy = e.clientY || (e.touches && e.touches[0].clientY);
+      if (cx === undefined || cy === undefined) return;
+      const dx = cx - lastX;
+      const dy = cy - lastY;
+      orbit.azimuth -= dx * 0.005;
+      orbit.elevation += dy * 0.005;
+      orbit.elevation = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, orbit.elevation));
+      lastX = cx;
+      lastY = cy;
+      updateCamera();
+    };
+    const onPointerUp = () => { isDragging = false; };
+    const onWheel = (e) => {
+      e.preventDefault();
+      const delta = e.deltaY > 0 ? 1.08 : 0.93;
+      orbit.distance = Math.max(4, Math.min(65, orbit.distance * delta));
+      updateCamera();
+    };
+
+    renderer.domElement.addEventListener("mousedown", onPointerDown);
+    window.addEventListener("mousemove", onPointerMove);
+    window.addEventListener("mouseup", onPointerUp);
+    renderer.domElement.addEventListener("touchstart", onPointerDown, { passive: true });
+    window.addEventListener("touchmove", onPointerMove, { passive: true });
+    window.addEventListener("touchend", onPointerUp);
+    renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
+
+    // ======================================================================
+    // RENDER LOOP
+    // ======================================================================
+    let animId = 0;
+    const animate = () => {
+      animId = requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    };
+    animate();
+
+    const handleResize = () => {
+      const w = mount.clientWidth;
+      const h = mount.clientHeight;
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+      renderer.setSize(w, h);
+    };
+    window.addEventListener("resize", handleResize);
+
+
+
+// Apply initial visibility state (must run AFTER scene construction so refs exist)
+updateVisibility();
+</script>
+</body>
+</html>
