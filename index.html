@@ -1,100 +1,178 @@
-import React, { useEffect, useRef, useState } from "react";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Poloidal Core Visualization — Raian Process Metaphysics</title>
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #f5efdd; overflow: hidden; }
+  body { font-family: Georgia, serif; }
+  #mount { position: fixed; inset: 0; width: 100%; height: 100%; }
+  #panel {
+    position: fixed; bottom: 16px; left: 16px;
+    background: rgba(245, 239, 221, 0.92);
+    border: 1px solid #a8822c; border-radius: 6px;
+    padding: 6px 10px; max-width: 300px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    color: #4a3818; z-index: 10;
+  }
+  #panel.open {
+    padding: 10px 14px; max-height: 80vh; overflow-y: auto;
+  }
+  #panel .header {
+    display: flex; justify-content: space-between; align-items: center;
+    cursor: pointer; font-weight: bold; font-size: 14px;
+  }
+  #panel .header span.chev { margin-left: 12px; }
+  #panel .body { display: none; margin-top: 10px; }
+  #panel.open .body { display: block; }
+  .row {
+    display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 12px;
+  }
+  .row.sub { padding-left: 20px; }
+  .row input[type=checkbox] { margin: 0; }
+  .italic { font-style: italic; }
+  .bold { font-weight: bold; }
+  .divider { height: 8px; }
+  .legend {
+    margin-top: 10px; padding-top: 10px; border-top: 1px solid #c8a85c;
+    font-size: 11px; color: #6b4a1a; line-height: 1.45;
+  }
+  .legend-row { margin-bottom: 3px; }
+  .swatch {
+    display: inline-block; width: 12px; height: 12px;
+    vertical-align: middle; margin-right: 6px;
+  }
+  .help {
+    margin-top: 10px; font-size: 11px; color: #6b4a1a; font-style: italic;
+  }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+</head>
+<body>
+
+<div id="mount"></div>
+
+<div id="panel" onclick="if (event.target.closest('.header')) togglePanel()">
+  <div class="header">
+    <span>Poloidal Core — Zones &amp; Thresholds</span>
+    <span class="chev" id="chev">▸</span>
+  </div>
+  <div class="body" onclick="event.stopPropagation()">
+    <div class="row"><input type="checkbox" id="cb_zone1" checked onchange="onToggle('zone1', this.checked)"><span>Zone 1 — Radial Convergence</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold1" checked onchange="onToggle('threshold1', this.checked)"><span class="italic">Threshold 1 — The Separatrix</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone2" checked onchange="onToggle('zone2', this.checked)"><span>Zone 2 — Collision &amp; Turbulence</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold2" checked onchange="onToggle('threshold2', this.checked)"><span>Zone 3 / Threshold 2 — The Foundation Semi-Spiral</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone4" checked onchange="onToggle('zone4', this.checked)"><span>Zone 4 — The Bubble</span></div>
+      <div class="row" class="sub"><input type="checkbox" id="cb_bubbleEnvelope" checked onchange="onToggle('bubbleEnvelope', this.checked)"><span>bubble envelope</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold3" checked onchange="onToggle('threshold3', this.checked)"><span class="italic">Threshold 3 — Post-Bubble Wake</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone5" checked onchange="onToggle('zone5', this.checked)"><span>Zone 5 — First Helical Flow</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold4" checked onchange="onToggle('threshold4', this.checked)"><span class="italic">Threshold 4 — Helical Breakdown</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone6" checked onchange="onToggle('zone6', this.checked)"><span>Zone 6 — Second Helical Flow</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold5" checked onchange="onToggle('threshold5', this.checked)"><span class="italic">Threshold 5 — Turbulent Negotiation</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone7" checked onchange="onToggle('zone7', this.checked)"><span>Zone 7 — Relaminarization</span></div>
+      <div class="row"><input type="checkbox" id="cb_threshold6" checked onchange="onToggle('threshold6', this.checked)"><span class="italic">Threshold 6 — Apex Ignition</span></div>
+      <div class="row"><input type="checkbox" id="cb_zone8" checked onchange="onToggle('zone8', this.checked)"><span>Zone 8 — Radial Divergence</span></div>
+      <div class="row"><input type="checkbox" id="cb_ambientField" checked onchange="onToggle('ambientField', this.checked)"><span>Ambient Toroidal Field</span></div>
+      <div class="row"><input type="checkbox" id="cb_lowerSheath" checked onchange="onToggle('lowerSheath', this.checked)"><span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span></div>
+      <div class="row"><input type="checkbox" id="cb_merkaba"  onchange="onToggle('merkaba', this.checked)"><span>Merkaba overlay</span></div>
+      <div class="row"><input type="checkbox" id="cb_spirals"  onchange="onToggle('spirals', this.checked)"><span>Spirals overlay (Don/Ra schematic)</span></div>
+      <div class="row"><input type="checkbox" id="cb_labels" checked onchange="onToggle('labels', this.checked)"><span>Labels</span></div>
+      <div class="row"><input type="checkbox" id="cb_chamberLabels" checked onchange="onToggle('chamberLabels', this.checked)"><span>Chamber labels</span></div>
+      <div class="row"><input type="checkbox" id="cb_pyramid"  onchange="onToggle('pyramid', this.checked)"><span class="bold">Pyramid overlay</span></div>
+      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidChambers" checked onchange="onToggle('pyramidChambers', this.checked)"><span>chambers (RC · QC · KC)</span></div>
+      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidRelieving" checked onchange="onToggle('pyramidRelieving', this.checked)"><span>relieving chambers</span></div>
+      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidP2" checked onchange="onToggle('pyramidP2', this.checked)"><span>Position 2 marker</span></div>
+      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidCorrespondence"  onchange="onToggle('pyramidCorrespondence', this.checked)"><span>correspondence lines</span></div>
+    <div class="legend">
+  <div class="legend-row"><span class="swatch" style="background:#785c18"></span>gold = organized flow</div>
+  <div class="legend-row"><span class="swatch" style="background:linear-gradient(180deg,#e0a028,#d4682c,#4a1420);width:30px"></span>turbulence gradient (Zone 2)</div>
+  <div class="legend-row"><span class="swatch" style="background:#b8a018"></span>dark yellow = semi-spiral</div>
+  <div class="legend-row"><span class="swatch" style="background:#3a8a4a"></span>green = micro-torus</div>
+  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#d4342e,#e0c030,#4ca848,#3a6ac8,#8844a8);width:30px"></span>spectrum = Zone 5 vortex core</div>
+  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#b8261e,#d4342e,#e07030,#e09c30);width:30px"></span>red-to-amber = Zone 6 (second spiral)</div>
+  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#6a2420,#5a4838,#3a3a3a);width:30px"></span>muted = Threshold 5 turbulence</div>
+  <div class="legend-row"><span class="swatch" style="background:#3a2a7c"></span>indigo = Zone 7 (relaminarization)</div>
+  <div class="legend-row"><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (preheat)</div>
+  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#7a6ac8,#a8c0f0,#f0f4ff);width:30px"></span>Zone 8 jet (violet-blue → blue-white)</div>
+  <div class="legend-row"><span class="swatch" style="background:#8a6a1e"></span>gold = ambient toroidal field (raw prana)</div>
+</div>
+<div class="help">Drag to orbit · scroll to zoom</div>
+  </div>
+</div>
+
+<script type="module">
 import * as THREE from "three";
 
-export default function PoloidalCoreVisualization() {
-  const mountRef = useRef(null);
-  const sceneRef = useRef(null);
-  const rendererRef = useRef(null);
-  const cameraRef = useRef(null);
+// ---------- visibility state ----------
+const visibility = {
+  zone1: true,
+  threshold1: true,
+  zone2: true,
+  threshold2: true,
+  zone4: true,
+  bubbleEnvelope: true,
+  threshold3: true,
+  zone5: true,
+  threshold4: true,
+  zone6: true,
+  threshold5: true,
+  zone7: true,
+  threshold6: true,
+  zone8: true,
+  ambientField: true,
+  lowerSheath: true,
+  merkaba: false,
+  spirals: false,
+  labels: true,
+  chamberLabels: true,
+  pyramid: false,
+  pyramidChambers: true,
+  pyramidRelieving: true,
+  pyramidP2: true,
+  pyramidCorrespondence: false,
+};
 
-  // Zone / Threshold refs
-  const zone1Ref = useRef(null);
-  const threshold1Ref = useRef(null);
-  const zone2Ref = useRef(null);
-  const threshold2Ref = useRef(null);
-  const zone4Ref = useRef(null);
-  const bubbleEnvelopeRef = useRef(null);
-  const threshold3Ref = useRef(null);
-  const zone5Ref = useRef(null);
-  const threshold4Ref = useRef(null);
-  const zone6Ref = useRef(null);
-  const threshold5Ref = useRef(null);
-  const zone7Ref = useRef(null);
-  const threshold6Ref = useRef(null);
-  const zone8Ref = useRef(null);
-  const ambientFieldRef = useRef(null);
-  const lowerSheathRef = useRef(null);
-  const merkabaRef = useRef(null);
-  const labelsRef = useRef(null);
-  const chamberLabelsRef = useRef(null);
-  // Spirals overlay — Don/Ra schematic of the zones as stacked vesica
-  // (lens-shaped) spirals along the central column. Toggleable.
-  const spiralsRef = useRef(null);
 
-  // Pyramid overlay refs — the Great Pyramid rendered in poloidal scene,
-  // scaled by 1/POLOIDAL_TO_PYRAMID_SCALE so chamber positions fall where
-  // Option A scaling places them (QC anchored exactly, other chambers near).
-  const pyramidRef = useRef(null);
-  const pyramidChambersRef = useRef(null);
-  const pyramidRelievingRef = useRef(null);
-  const pyramidP2Ref = useRef(null);
-  const pyramidCorrespondenceRef = useRef(null);
+// ---------- scene refs ----------
+const refs = {
+  scene: null, renderer: null, camera: null, mount: null,
+  zone1: null, threshold1: null, zone2: null, threshold2: null,
+  zone4: null, bubbleEnvelope: null, threshold3: null, zone5: null,
+  threshold4: null, zone6: null, threshold5: null, zone7: null,
+  threshold6: null, zone8: null, ambientField: null, lowerSheath: null,
+  merkaba: null, labels: null, chamberLabels: null, spirals: null,
+  pyramid: null, pyramidChambers: null, pyramidRelieving: null,
+  pyramidP2: null, pyramidCorrespondence: null,
+};
 
-  // Visibility state
-  const [visibility, setVisibility] = useState({
-    zone1: true,
-    threshold1: true,
-    zone2: true,
-    threshold2: true,
-    zone4: true,
-    bubbleEnvelope: true,
-    threshold3: true,
-    zone5: true,
-    threshold4: true,
-    zone6: true,
-    threshold5: true,
-    zone7: true,
-    threshold6: true,
-    zone8: true,
-    ambientField: true,
-    lowerSheath: true,
-    merkaba: false,
-    labels: true,
-    chamberLabels: true,
-    // Pyramid overlay — master toggle default OFF (overlay appears on demand,
-    // just like the merkaba). Sub-toggles default ON except correspondence
-    // lines, which are pedagogical extras that default OFF.
-    pyramid: false,
-    pyramidChambers: true,
-    pyramidRelieving: true,
-    pyramidP2: true,
-    pyramidCorrespondence: false,
-    // Spirals overlay — Don/Ra schematic. Default OFF.
-    spirals: false,
-  });
+// ---------- scene construction (verbatim from jsx useEffect body) ----------
+(() => {
+    const mount = document.getElementById('mount');
 
-  const [panelOpen, setPanelOpen] = useState(false);
-
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return;
 
     // --- Scene setup -------------------------------------------------------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#f5efdd");
-    sceneRef.current = scene;
+    refs.scene = scene;
 
     const width = mount.clientWidth;
     const height = mount.clientHeight;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    cameraRef.current = camera;
+    refs.camera = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
-    rendererRef.current = renderer;
+    refs.renderer = renderer;
 
     // Lighting
     const ambient = new THREE.AmbientLight(0xffffff, 0.7);
@@ -398,7 +476,7 @@ export default function PoloidalCoreVisualization() {
     // ZONE 1 - Radial Convergence
     // ======================================================================
     const zone1Group = new THREE.Group();
-    zone1Ref.current = zone1Group;
+    refs.zone1 = zone1Group;
     scene.add(zone1Group);
     {
       const GOLD = 0x785c18;
@@ -473,7 +551,7 @@ export default function PoloidalCoreVisualization() {
     // THRESHOLD 1 - Separatrix Bell
     // ======================================================================
     const threshold1Group = new THREE.Group();
-    threshold1Ref.current = threshold1Group;
+    refs.threshold1 = threshold1Group;
     scene.add(threshold1Group);
     {
       const nRings = 18;
@@ -566,7 +644,7 @@ export default function PoloidalCoreVisualization() {
     // ZONE 2 - Collision & Turbulence (lower) / Proto-organization (upper)
     // ======================================================================
     const zone2Group = new THREE.Group();
-    zone2Ref.current = zone2Group;
+    refs.zone2 = zone2Group;
     scene.add(zone2Group);
     {
       const z2Height = zone2Top - zone2Base;
@@ -829,7 +907,7 @@ export default function PoloidalCoreVisualization() {
     // foundation upon which everything above it rests.
     // ======================================================================
     const threshold2Group = new THREE.Group();
-    threshold2Ref.current = threshold2Group;
+    refs.threshold2 = threshold2Group;
     scene.add(threshold2Group);
     {
       // --------------------------------------------------------------
@@ -1026,7 +1104,7 @@ export default function PoloidalCoreVisualization() {
     //   Top:    y = lowerStagY       (0.5) — bottom of Zone 4 bubble
     //   Radius: r = separatrixThroatR (0.9) — cylindrical
     const lowerSheathGroup = new THREE.Group();
-    lowerSheathRef.current = lowerSheathGroup;
+    refs.lowerSheath = lowerSheathGroup;
     scene.add(lowerSheathGroup);
 
     {
@@ -1110,7 +1188,7 @@ export default function PoloidalCoreVisualization() {
     // ZONE 4 - The Bubble (Counter-Rotating Vortex Ring)
     // ======================================================================
     const zone4Group = new THREE.Group();
-    zone4Ref.current = zone4Group;
+    refs.zone4 = zone4Group;
     scene.add(zone4Group);
     {
       // Bubble ambient colors — original rich hues restored.
@@ -1239,7 +1317,7 @@ export default function PoloidalCoreVisualization() {
 
       // Bubble envelope
       const envGroup = new THREE.Group();
-      bubbleEnvelopeRef.current = envGroup;
+      refs.bubbleEnvelope = envGroup;
       {
         const nRings = 24;
         const nPhi = 36;
@@ -1289,7 +1367,7 @@ export default function PoloidalCoreVisualization() {
     //   Bubble horizontal extent:  r = 0.82 × columnRadius
     // Aspect 1:1.49. Merkaba fits snugly as a proper stellated octahedron.
     const merkabaGroup = new THREE.Group();
-    merkabaRef.current = merkabaGroup;
+    refs.merkaba = merkabaGroup;
     scene.add(merkabaGroup);
     {
       const tetHeight = 1.05;         // apex-to-apex ≈ bubble height
@@ -1353,7 +1431,7 @@ export default function PoloidalCoreVisualization() {
     // THRESHOLD 3 - Post-Bubble Wake
     // ======================================================================
     const threshold3Group = new THREE.Group();
-    threshold3Ref.current = threshold3Group;
+    refs.threshold3 = threshold3Group;
     scene.add(threshold3Group);
     {
       // Velocity deficit core
@@ -1437,7 +1515,7 @@ export default function PoloidalCoreVisualization() {
     // We track Zone 5's final state per strand (end phi, end radius, end color)
     // so Threshold 4 can continue each strand smoothly.
     const zone5Group = new THREE.Group();
-    zone5Ref.current = zone5Group;
+    refs.zone5 = zone5Group;
     scene.add(zone5Group);
 
     // v8.1: DENSE RAINBOW — 24 strands forming a continuous spectrum band
@@ -1608,7 +1686,7 @@ export default function PoloidalCoreVisualization() {
     //       ("some turns barely distinguishable")
     // Ambient blue streamlines also degrade in the same pattern.
     const threshold4Group = new THREE.Group();
-    threshold4Ref.current = threshold4Group;
+    refs.threshold4 = threshold4Group;
     scene.add(threshold4Group);
 
     // Boundary rings at T4 entry (y = t4Base) and exit (y = t4Top) —
@@ -1804,7 +1882,7 @@ export default function PoloidalCoreVisualization() {
     // Starting azimuthal phases are randomized so the strands read as newly
     // born from the breakdown, not as continuations of the fading Zone 5.
     const zone6Group = new THREE.Group();
-    zone6Ref.current = zone6Group;
+    refs.zone6 = zone6Group;
     scene.add(zone6Group);
 
     {
@@ -1912,7 +1990,7 @@ export default function PoloidalCoreVisualization() {
     // darkened reds from Zone 6 bleeding into grays and muddy browns as the
     // last organized structure dissolves.
     const threshold5Group = new THREE.Group();
-    threshold5Ref.current = threshold5Group;
+    refs.threshold5 = threshold5Group;
     scene.add(threshold5Group);
 
     {
@@ -2055,7 +2133,7 @@ export default function PoloidalCoreVisualization() {
     // "Preheat zone" — energy approaching ignition but not yet radiating.
     // Column narrows visibly from full radius at base to ~40% at top.
     const zone7Group = new THREE.Group();
-    zone7Ref.current = zone7Group;
+    refs.zone7 = zone7Group;
     scene.add(zone7Group);
 
     {
@@ -2214,7 +2292,7 @@ export default function PoloidalCoreVisualization() {
     // yet crossed the activation threshold. Rendered as a visibly dark region
     // with a faint translucent core — no active flow, just potential.
     const threshold6Group = new THREE.Group();
-    threshold6Ref.current = threshold6Group;
+    refs.threshold6 = threshold6Group;
     scene.add(threshold6Group);
 
     {
@@ -2302,7 +2380,7 @@ export default function PoloidalCoreVisualization() {
     // matching the black-hole jet aesthetic — while keeping the zone's
     // "violet ray" identity at the cooler outer halo.
     const zone8Group = new THREE.Group();
-    zone8Ref.current = zone8Group;
+    refs.zone8 = zone8Group;
     scene.add(zone8Group);
 
     {
@@ -2589,7 +2667,7 @@ export default function PoloidalCoreVisualization() {
     //
     // Vertical half-span: 8.375.  Horizontal half-span: 10.05.  Ratio: 1.2.
     const ambientFieldGroup = new THREE.Group();
-    ambientFieldRef.current = ambientFieldGroup;
+    refs.ambientField = ambientFieldGroup;
     scene.add(ambientFieldGroup);
 
     {
@@ -2710,7 +2788,7 @@ export default function PoloidalCoreVisualization() {
     // out into a nearly-horizontal skirt matching the pyramid's base flow.
     // All drawn in dark gray, thick lines, toggleable (default OFF).
     const spiralsGroup = new THREE.Group();
-    spiralsRef.current = spiralsGroup;
+    refs.spirals = spiralsGroup;
     scene.add(spiralsGroup);
     {
       const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
@@ -2835,7 +2913,7 @@ export default function PoloidalCoreVisualization() {
     // LABELS
     // ======================================================================
     const labelsGroup = new THREE.Group();
-    labelsRef.current = labelsGroup;
+    refs.labels = labelsGroup;
     scene.add(labelsGroup);
     {
       const labelX = 3.2;
@@ -3045,7 +3123,7 @@ export default function PoloidalCoreVisualization() {
     // arrowheads are also black. Grouped under their own toggle so they can
     // be shown independently of the zone-label set.
     const chamberLabelsGroup = new THREE.Group();
-    chamberLabelsRef.current = chamberLabelsGroup;
+    refs.chamberLabels = chamberLabelsGroup;
     scene.add(chamberLabelsGroup);
     {
       const chamberLabelColor = "#000000";
@@ -3145,7 +3223,7 @@ export default function PoloidalCoreVisualization() {
     // (POLOIDAL_TO_PYRAMID_SCALE and PYRAMID_Y_OFFSET are declared at the
     // top of the useEffect so the Zone 8 flame can reference them too.)
     const pyramidGroup = new THREE.Group();
-    pyramidRef.current = pyramidGroup;
+    refs.pyramid = pyramidGroup;
     scene.add(pyramidGroup);
     pyramidGroup.scale.set(
       1 / POLOIDAL_TO_PYRAMID_SCALE,
@@ -3202,7 +3280,7 @@ export default function PoloidalCoreVisualization() {
 
       // --- Chambers group: Red, Queen's, King's (+ QC gable)
       const chambersGroup = new THREE.Group();
-      pyramidChambersRef.current = chambersGroup;
+      refs.pyramidChambers = chambersGroup;
       pyramidGroup.add(chambersGroup);
 
       // Red Chamber: 14 east, bottom at –60, inner dims 27 × 7.5 × 16
@@ -3287,7 +3365,7 @@ export default function PoloidalCoreVisualization() {
       // five ascending layers are clearly visible but slightly less
       // commanding than the main KC below them (hierarchy: KC > relieving).
       const relievingGroup = new THREE.Group();
-      pyramidRelievingRef.current = relievingGroup;
+      refs.pyramidRelieving = relievingGroup;
       pyramidGroup.add(relievingGroup);
       {
         const rMat = new THREE.MeshBasicMaterial({
@@ -3344,7 +3422,7 @@ export default function PoloidalCoreVisualization() {
       //   Wireframe: GOLD — ring structure scribing the surface
       //   Inner core: VIOLET — concentrated radiant center
       const p2Group = new THREE.Group();
-      pyramidP2Ref.current = p2Group;
+      refs.pyramidP2 = p2Group;
       pyramidGroup.add(p2Group);
       {
         const p2Y = 210;
@@ -3397,7 +3475,7 @@ export default function PoloidalCoreVisualization() {
     // each chamber sits in the column without asserting a specific poloidal
     // correspondence. Toggled separately; default OFF.
     const correspondenceGroup = new THREE.Group();
-    pyramidCorrespondenceRef.current = correspondenceGroup;
+    refs.pyramidCorrespondence = correspondenceGroup;
     scene.add(correspondenceGroup);
     {
       const S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
@@ -3504,309 +3582,57 @@ export default function PoloidalCoreVisualization() {
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    window.addEventListener("resize", handleResize);
+    window.addEventListener("resize", handleResize);  
+})();
 
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", handleResize);
-      renderer.domElement.removeEventListener("mousedown", onPointerDown);
-      window.removeEventListener("mousemove", onPointerMove);
-      window.removeEventListener("mouseup", onPointerUp);
-      renderer.domElement.removeEventListener("touchstart", onPointerDown);
-      window.removeEventListener("touchmove", onPointerMove);
-      window.removeEventListener("touchend", onPointerUp);
-      renderer.domElement.removeEventListener("wheel", onWheel);
-      if (mount.contains(renderer.domElement)) {
-        mount.removeChild(renderer.domElement);
-      }
-      renderer.dispose();
-    };
-  }, []);
-
-  // Toggle visibility when state changes
-  useEffect(() => {
-    if (zone1Ref.current) zone1Ref.current.visible = visibility.zone1;
-    if (threshold1Ref.current) threshold1Ref.current.visible = visibility.threshold1;
-    if (zone2Ref.current) zone2Ref.current.visible = visibility.zone2;
-    if (threshold2Ref.current) threshold2Ref.current.visible = visibility.threshold2;
-    if (zone4Ref.current) zone4Ref.current.visible = visibility.zone4;
-    if (bubbleEnvelopeRef.current) bubbleEnvelopeRef.current.visible = visibility.bubbleEnvelope;
-    if (threshold3Ref.current) threshold3Ref.current.visible = visibility.threshold3;
-    if (zone5Ref.current) zone5Ref.current.visible = visibility.zone5;
-    if (threshold4Ref.current) threshold4Ref.current.visible = visibility.threshold4;
-    if (zone6Ref.current) zone6Ref.current.visible = visibility.zone6;
-    if (threshold5Ref.current) threshold5Ref.current.visible = visibility.threshold5;
-    if (zone7Ref.current) zone7Ref.current.visible = visibility.zone7;
-    if (threshold6Ref.current) threshold6Ref.current.visible = visibility.threshold6;
-    if (zone8Ref.current) zone8Ref.current.visible = visibility.zone8;
-    if (ambientFieldRef.current) ambientFieldRef.current.visible = visibility.ambientField;
-    if (lowerSheathRef.current) lowerSheathRef.current.visible = visibility.lowerSheath;
-    if (merkabaRef.current) merkabaRef.current.visible = visibility.merkaba;
-    if (labelsRef.current) labelsRef.current.visible = visibility.labels;
-    if (chamberLabelsRef.current) chamberLabelsRef.current.visible = visibility.chamberLabels;
-    if (spiralsRef.current) spiralsRef.current.visible = visibility.spirals;
+// ---------- visibility sync (verbatim from toggle useEffect body) ----------
+function syncVisibility() {
+    if (refs.zone1) refs.zone1.visible = visibility.zone1;
+    if (refs.threshold1) refs.threshold1.visible = visibility.threshold1;
+    if (refs.zone2) refs.zone2.visible = visibility.zone2;
+    if (refs.threshold2) refs.threshold2.visible = visibility.threshold2;
+    if (refs.zone4) refs.zone4.visible = visibility.zone4;
+    if (refs.bubbleEnvelope) refs.bubbleEnvelope.visible = visibility.bubbleEnvelope;
+    if (refs.threshold3) refs.threshold3.visible = visibility.threshold3;
+    if (refs.zone5) refs.zone5.visible = visibility.zone5;
+    if (refs.threshold4) refs.threshold4.visible = visibility.threshold4;
+    if (refs.zone6) refs.zone6.visible = visibility.zone6;
+    if (refs.threshold5) refs.threshold5.visible = visibility.threshold5;
+    if (refs.zone7) refs.zone7.visible = visibility.zone7;
+    if (refs.threshold6) refs.threshold6.visible = visibility.threshold6;
+    if (refs.zone8) refs.zone8.visible = visibility.zone8;
+    if (refs.ambientField) refs.ambientField.visible = visibility.ambientField;
+    if (refs.lowerSheath) refs.lowerSheath.visible = visibility.lowerSheath;
+    if (refs.merkaba) refs.merkaba.visible = visibility.merkaba;
+    if (refs.labels) refs.labels.visible = visibility.labels;
+    if (refs.chamberLabels) refs.chamberLabels.visible = visibility.chamberLabels;
+    if (refs.spirals) refs.spirals.visible = visibility.spirals;
     // Pyramid overlay: master visibility, then sub-groups only take effect
     // when the master is on. Correspondence lines live in the outer scene
     // (not inside pyramidGroup), so they're gated on both master and sub.
-    if (pyramidRef.current) pyramidRef.current.visible = visibility.pyramid;
-    if (pyramidChambersRef.current) pyramidChambersRef.current.visible = visibility.pyramidChambers;
-    if (pyramidRelievingRef.current) pyramidRelievingRef.current.visible = visibility.pyramidRelieving;
-    if (pyramidP2Ref.current) pyramidP2Ref.current.visible = visibility.pyramidP2;
-    if (pyramidCorrespondenceRef.current) {
-      pyramidCorrespondenceRef.current.visible = visibility.pyramid && visibility.pyramidCorrespondence;
+    if (refs.pyramid) refs.pyramid.visible = visibility.pyramid;
+    if (refs.pyramidChambers) refs.pyramidChambers.visible = visibility.pyramidChambers;
+    if (refs.pyramidRelieving) refs.pyramidRelieving.visible = visibility.pyramidRelieving;
+    if (refs.pyramidP2) refs.pyramidP2.visible = visibility.pyramidP2;
+    if (refs.pyramidCorrespondence) {
+      refs.pyramidCorrespondence.visible = visibility.pyramid && visibility.pyramidCorrespondence;
     }
-  }, [visibility]);
-
-  const toggle = (key) => {
-    setVisibility((v) => ({ ...v, [key]: !v[key] }));
-  };
-
-  const rowStyle = {
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-    padding: "2px 0",
-    fontSize: 12,
-    fontFamily: "Georgia, serif",
-    color: "#4a3818",
-  };
-
-  return (
-    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#f5efdd" }}>
-      <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
-
-      {/* Control panel — collapsed by default to keep scene unobstructed */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 16,
-          left: 16,
-          background: panelOpen ? "rgba(245, 239, 221, 0.82)" : "rgba(245, 239, 221, 0.92)",
-          border: "1px solid #a8822c",
-          borderRadius: 6,
-          padding: panelOpen ? "10px 14px" : "6px 10px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          maxWidth: 300,
-          maxHeight: panelOpen ? "80vh" : "auto",
-          overflowY: panelOpen ? "auto" : "visible",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            cursor: "pointer",
-            fontFamily: "Georgia, serif",
-            fontWeight: "bold",
-            color: "#4a3818",
-            fontSize: 14,
-          }}
-          onClick={() => setPanelOpen(!panelOpen)}
-        >
-          <span>Poloidal Core — Zones &amp; Thresholds</span>
-          <span style={{ marginLeft: 12 }}>{panelOpen ? "▾" : "▸"}</span>
-        </div>
-
-        {panelOpen && (
-          <div style={{ marginTop: 10 }}>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone1} onChange={() => toggle("zone1")} />
-              <span>Zone 1 — Radial Convergence</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold1} onChange={() => toggle("threshold1")} />
-              <span style={{ fontStyle: "italic" }}>Threshold 1 — The Separatrix</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone2} onChange={() => toggle("zone2")} />
-              <span>Zone 2 — Collision &amp; Turbulence</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold2} onChange={() => toggle("threshold2")} />
-              <span>Zone 3 / Threshold 2 — The Foundation Semi-Spiral</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone4} onChange={() => toggle("zone4")} />
-              <span>Zone 4 — The Bubble</span>
-            </div>
-            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
-              <input type="checkbox" checked={visibility.bubbleEnvelope} onChange={() => toggle("bubbleEnvelope")} />
-              <span>bubble envelope</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold3} onChange={() => toggle("threshold3")} />
-              <span style={{ fontStyle: "italic" }}>Threshold 3 — Post-Bubble Wake</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone5} onChange={() => toggle("zone5")} />
-              <span>Zone 5 — First Helical Flow</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold4} onChange={() => toggle("threshold4")} />
-              <span style={{ fontStyle: "italic" }}>Threshold 4 — Helical Breakdown</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone6} onChange={() => toggle("zone6")} />
-              <span>Zone 6 — Second Helical Flow</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold5} onChange={() => toggle("threshold5")} />
-              <span style={{ fontStyle: "italic" }}>Threshold 5 — Turbulent Negotiation</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone7} onChange={() => toggle("zone7")} />
-              <span>Zone 7 — Relaminarization</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.threshold6} onChange={() => toggle("threshold6")} />
-              <span style={{ fontStyle: "italic" }}>Threshold 6 — Apex Ignition</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.zone8} onChange={() => toggle("zone8")} />
-              <span>Zone 8 — Radial Divergence</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.ambientField} onChange={() => toggle("ambientField")} />
-              <span>Ambient Toroidal Field</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.lowerSheath} onChange={() => toggle("lowerSheath")} />
-              <span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span>
-            </div>
-            <div style={{ height: 8 }} />
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.merkaba} onChange={() => toggle("merkaba")} />
-              <span>Merkaba overlay</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.spirals} onChange={() => toggle("spirals")} />
-              <span>Spirals overlay (Don/Ra schematic)</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.labels} onChange={() => toggle("labels")} />
-              <span>Labels</span>
-            </div>
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.chamberLabels} onChange={() => toggle("chamberLabels")} />
-              <span>Chamber labels</span>
-            </div>
-
-            {/* Pyramid overlay — master toggle followed by indented sub-toggles.
-                When master is off, sub-toggle state is preserved but hidden. */}
-            <div style={{ height: 8 }} />
-            <div style={rowStyle}>
-              <input type="checkbox" checked={visibility.pyramid} onChange={() => toggle("pyramid")} />
-              <span style={{ fontWeight: "bold" }}>Pyramid overlay</span>
-            </div>
-            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
-              <input
-                type="checkbox"
-                checked={visibility.pyramidChambers}
-                onChange={() => toggle("pyramidChambers")}
-                disabled={!visibility.pyramid}
-              />
-              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>chambers (RC · QC · KC)</span>
-            </div>
-            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
-              <input
-                type="checkbox"
-                checked={visibility.pyramidRelieving}
-                onChange={() => toggle("pyramidRelieving")}
-                disabled={!visibility.pyramid}
-              />
-              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>relieving chambers</span>
-            </div>
-            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
-              <input
-                type="checkbox"
-                checked={visibility.pyramidP2}
-                onChange={() => toggle("pyramidP2")}
-                disabled={!visibility.pyramid}
-              />
-              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>Position 2 marker</span>
-            </div>
-            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
-              <input
-                type="checkbox"
-                checked={visibility.pyramidCorrespondence}
-                onChange={() => toggle("pyramidCorrespondence")}
-                disabled={!visibility.pyramid}
-              />
-              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>correspondence lines</span>
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                paddingTop: 10,
-                borderTop: "1px solid #c8a85c",
-                fontSize: 11,
-                color: "#6b4a1a",
-                fontFamily: "Georgia, serif",
-                lineHeight: 1.45,
-              }}
-            >
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#785c18", verticalAlign: "middle", marginRight: 6 }} />
-                gold = organized flow
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(180deg, #e0a028, #d4682c, #4a1420)", verticalAlign: "middle", marginRight: 6 }} />
-                turbulence gradient (Zone 2)
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#b8a018", verticalAlign: "middle", marginRight: 6 }} />
-                dark yellow = semi-spiral
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#3a8a4a", verticalAlign: "middle", marginRight: 6 }} />
-                green = micro-torus
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8)", verticalAlign: "middle", marginRight: 6 }} />
-                spectrum = Zone 5 vortex core
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30)", verticalAlign: "middle", marginRight: 6 }} />
-                red-to-amber = Zone 6 (second spiral)
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a)", verticalAlign: "middle", marginRight: 6 }} />
-                muted = Threshold 5 turbulence
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#3a2a7c", verticalAlign: "middle", marginRight: 6 }} />
-                indigo = Zone 7 (relaminarization)
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#0a0614", verticalAlign: "middle", marginRight: 6 }} />
-                dark gap = Threshold 6 (preheat)
-              </div>
-              <div style={{ marginBottom: 3 }}>
-                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff)", verticalAlign: "middle", marginRight: 6 }} />
-                Zone 8 jet (violet-blue → blue-white)
-              </div>
-              <div>
-                <span style={{ display: "inline-block", width: 12, height: 12, background: "#8a6a1e", verticalAlign: "middle", marginRight: 6 }} />
-                gold = ambient toroidal field (raw prana)
-              </div>
-            </div>
-
-            <div
-              style={{
-                marginTop: 10,
-                fontSize: 11,
-                color: "#6b4a1a",
-                fontFamily: "Georgia, serif",
-                fontStyle: "italic",
-              }}
-            >
-              Drag to orbit · scroll to zoom
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  
 }
+// initial sync
+syncVisibility();
+
+// ---------- panel wiring ----------
+window.onToggle = (key, checked) => {
+  visibility[key] = checked;
+  syncVisibility();
+};
+
+window.togglePanel = () => {
+  const p = document.getElementById('panel');
+  p.classList.toggle('open');
+  document.getElementById('chev').textContent = p.classList.contains('open') ? '▾' : '▸';
+};
+</script>
+</body>
+</html>
