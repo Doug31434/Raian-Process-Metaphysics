@@ -1,214 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Poloidal Core Visualization — Raian Process Metaphysics</title>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html, body { width: 100%; height: 100%; background: #f5efdd; overflow: hidden; font-family: Georgia, serif; }
-#scene-container { position: relative; width: 100%; height: 100%; }
-#canvas-mount { width: 100%; height: 100%; }
-canvas { display: block; }
+import React, { useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 
-/* Control panel */
-#control-panel {
-  position: absolute; bottom: 16px; left: 16px;
-  background: rgba(245, 239, 221, 0.92);
-  border: 1px solid #a8822c;
-  border-radius: 6px;
-  padding: 6px 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-width: 300px;
-  max-height: calc(100% - 40px);
-  overflow-y: auto;
-  font-family: Georgia, serif;
-  color: #4a3818;
-  font-size: 12px;
-}
-#control-panel.open { padding: 10px 14px; background: rgba(245, 239, 221, 0.82); }
-#panel-header {
-  display: flex; justify-content: space-between; align-items: center;
-  cursor: pointer; font-weight: bold; font-size: 14px; user-select: none;
-}
-#panel-body { margin-top: 10px; display: none; }
-#control-panel.open #panel-body { display: block; }
-.row { display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 12px; }
-.row input[type="checkbox"] { cursor: pointer; }
-.row.indent { padding-left: 20px; }
-.row.indent span { font-size: 12px; }
-.row.bold span { font-weight: bold; }
-.row-disabled span { opacity: 0.5; }
-.gap { height: 8px; }
+export default function PoloidalCoreVisualization() {
+  const mountRef = useRef(null);
+  const sceneRef = useRef(null);
+  const rendererRef = useRef(null);
+  const cameraRef = useRef(null);
 
-/* Legend */
-#legend { margin-top: 10px; padding-top: 10px; border-top: 1px solid #c8a85c; font-size: 11px; color: #6b4a1a; line-height: 1.45; }
-#legend .swatch { display: inline-block; width: 12px; height: 12px; vertical-align: middle; margin-right: 6px; }
-#legend .swatch-wide { display: inline-block; width: 30px; height: 12px; vertical-align: middle; margin-right: 6px; }
-#hint { margin-top: 10px; font-size: 11px; color: #6b4a1a; font-family: Georgia, serif; font-style: italic; }
-</style>
-</head>
-<body>
-<div id="scene-container">
-  <div id="canvas-mount"></div>
+  // Zone / Threshold refs
+  const zone1Ref = useRef(null);
+  const threshold1Ref = useRef(null);
+  const zone2Ref = useRef(null);
+  const threshold2Ref = useRef(null);
+  const zone4Ref = useRef(null);
+  const bubbleEnvelopeRef = useRef(null);
+  const threshold3Ref = useRef(null);
+  const zone5Ref = useRef(null);
+  const threshold4Ref = useRef(null);
+  const zone6Ref = useRef(null);
+  const threshold5Ref = useRef(null);
+  const zone7Ref = useRef(null);
+  const threshold6Ref = useRef(null);
+  const zone8Ref = useRef(null);
+  const ambientFieldRef = useRef(null);
+  const lowerSheathRef = useRef(null);
+  const merkabaRef = useRef(null);
+  const labelsRef = useRef(null);
+  const chamberLabelsRef = useRef(null);
+  // Spirals overlay — Don/Ra schematic of the zones as stacked vesica
+  // (lens-shaped) spirals along the central column. Toggleable.
+  const spiralsRef = useRef(null);
 
-  <div id="control-panel">
-    <div id="panel-header" onclick="togglePanel()">
-      <span>Poloidal Core &mdash; Zones &amp; Thresholds</span>
-      <span id="panel-arrow">&#9656;</span>
-    </div>
-    <div id="panel-body">
-      <div class="row"><input type="checkbox" data-key="zone1" checked/><span>Zone 1 &mdash; Radial Convergence</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold1" checked/><span style="font-style: italic;">Threshold 1 &mdash; The Separatrix</span></div>
-      <div class="row"><input type="checkbox" data-key="zone2" checked/><span>Zone 2 &mdash; Collision &amp; Turbulence</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold2" checked/><span style="font-style: italic;">Threshold 2 &mdash; The Semi-Spiral</span></div>
-      <div class="row"><input type="checkbox" data-key="zone3" checked/><span>Zone 3 &mdash; The Bubble</span></div>
-      <div class="row indent"><input type="checkbox" data-key="bubbleEnvelope" checked/><span>bubble envelope</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold3" checked/><span style="font-style: italic;">Threshold 3 &mdash; Post-Bubble Wake</span></div>
-      <div class="row"><input type="checkbox" data-key="zone4" checked/><span>Zone 4 &mdash; First Helical Flow</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold4" checked/><span style="font-style: italic;">Threshold 4 &mdash; Helical Breakdown</span></div>
-      <div class="row"><input type="checkbox" data-key="zone5" checked/><span>Zone 5 &mdash; Second Helical Flow</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold5" checked/><span style="font-style: italic;">Threshold 5 &mdash; Turbulent Negotiation</span></div>
-      <div class="row"><input type="checkbox" data-key="zone6" checked/><span>Zone 6 &mdash; Relaminarization</span></div>
-      <div class="row"><input type="checkbox" data-key="threshold6" checked/><span style="font-style: italic;">Threshold 6 &mdash; Apex Ignition</span></div>
-      <div class="row"><input type="checkbox" data-key="zone7" checked/><span>Zone 7 &mdash; Radial Divergence</span></div>
-      <div class="row"><input type="checkbox" data-key="ambientField" checked/><span>Ambient Toroidal Field</span></div>
-      <div class="row"><input type="checkbox" data-key="lowerSheath" checked/><span>Lower Sheath (Zone 1&ndash;Threshold 2)</span></div>
+  // Pyramid overlay refs — the Great Pyramid rendered in poloidal scene,
+  // scaled by 1/POLOIDAL_TO_PYRAMID_SCALE so chamber positions fall where
+  // Option A scaling places them (QC anchored exactly, other chambers near).
+  const pyramidRef = useRef(null);
+  const pyramidChambersRef = useRef(null);
+  const pyramidRelievingRef = useRef(null);
+  const pyramidP2Ref = useRef(null);
+  const pyramidCorrespondenceRef = useRef(null);
 
-      <div class="gap"></div>
-      <div class="row"><input type="checkbox" data-key="merkaba"/><span>Merkaba overlay</span></div>
-      <div class="row"><input type="checkbox" data-key="spirals"/><span>Spirals overlay (Don/Ra schematic)</span></div>
-      <div class="row"><input type="checkbox" data-key="labels" checked/><span>Labels</span></div>
-      <div class="row"><input type="checkbox" data-key="chamberLabels" checked/><span>Chamber labels</span></div>
-
-      <div class="gap"></div>
-      <div class="row bold"><input type="checkbox" data-key="pyramid"/><span>Pyramid overlay</span></div>
-      <div class="row indent"><input type="checkbox" data-key="pyramidChambers" checked/><span>chambers (RC &middot; QC &middot; KC)</span></div>
-      <div class="row indent"><input type="checkbox" data-key="pyramidRelieving" checked/><span>relieving chambers</span></div>
-      <div class="row indent"><input type="checkbox" data-key="pyramidP2" checked/><span>Position 2 marker</span></div>
-      <div class="row indent"><input type="checkbox" data-key="pyramidCorrespondence"/><span>correspondence lines</span></div>
-
-      <div id="legend">
-        <div><span class="swatch" style="background: #785c18;"></span>gold = organized flow</div>
-        <div><span class="swatch-wide" style="background: linear-gradient(180deg, #e0a028, #d4682c, #4a1420);"></span>turbulence gradient (Zone 2)</div>
-        <div><span class="swatch" style="background: #b8a018;"></span>dark yellow = semi-spiral</div>
-        <div><span class="swatch" style="background: #3a8a4a;"></span>green = micro-torus</div>
-        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8);"></span>spectrum = Zone 4</div>
-        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30);"></span>red-to-amber = Zone 5</div>
-        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a);"></span>muted = Threshold 5</div>
-        <div><span class="swatch" style="background: #3a2a7c;"></span>indigo = Zone 6</div>
-        <div><span class="swatch" style="background: #0a0614;"></span>dark gap = Threshold 6</div>
-        <div><span class="swatch-wide" style="background: linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff);"></span>Zone 7 jet</div>
-        <div><span class="swatch" style="background: #8a6a1e;"></span>gold = ambient toroidal field</div>
-      </div>
-      <div id="hint">Drag to orbit &middot; scroll to zoom</div>
-    </div>
-  </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script>
-// Visibility state — single source of truth for all toggles
-const visibility = {
-  zone1: true, threshold1: true, zone2: true, threshold2: true, zone3: true,
-  bubbleEnvelope: true, threshold3: true, zone4: true, threshold4: true,
-  zone5: true, threshold5: true, zone6: true, threshold6: true, zone7: true,
-  ambientField: true, lowerSheath: true,
-  merkaba: false, labels: true, chamberLabels: true,
-  pyramid: false, pyramidChambers: true, pyramidRelieving: true,
-  pyramidP2: true, pyramidCorrespondence: false,
-  spirals: false,
-};
-
-// Panel open/close
-let panelOpen = false;
-function togglePanel() {
-  panelOpen = !panelOpen;
-  const panel = document.getElementById("control-panel");
-  const arrow = document.getElementById("panel-arrow");
-  if (panelOpen) {
-    panel.classList.add("open");
-    arrow.innerHTML = "&#9662;";
-  } else {
-    panel.classList.remove("open");
-    arrow.innerHTML = "&#9656;";
-  }
-}
-
-// Apply visibility to the scene — called after scene is built and whenever a toggle changes
-function updateVisibility() {
-  if (window.zone1Ref) window.zone1Ref.visible = visibility.zone1;
-  if (window.threshold1Ref) window.threshold1Ref.visible = visibility.threshold1;
-  if (window.zone2Ref) window.zone2Ref.visible = visibility.zone2;
-  if (window.threshold2Ref) window.threshold2Ref.visible = visibility.threshold2;
-  if (window.zone3Ref) window.zone3Ref.visible = visibility.zone3;
-  if (window.bubbleEnvelopeRef) window.bubbleEnvelopeRef.visible = visibility.bubbleEnvelope;
-  if (window.threshold3Ref) window.threshold3Ref.visible = visibility.threshold3;
-  if (window.zone4Ref) window.zone4Ref.visible = visibility.zone4;
-  if (window.threshold4Ref) window.threshold4Ref.visible = visibility.threshold4;
-  if (window.zone5Ref) window.zone5Ref.visible = visibility.zone5;
-  if (window.threshold5Ref) window.threshold5Ref.visible = visibility.threshold5;
-  if (window.zone6Ref) window.zone6Ref.visible = visibility.zone6;
-  if (window.threshold6Ref) window.threshold6Ref.visible = visibility.threshold6;
-  if (window.zone7Ref) window.zone7Ref.visible = visibility.zone7;
-  if (window.ambientFieldRef) window.ambientFieldRef.visible = visibility.ambientField;
-  if (window.lowerSheathRef) window.lowerSheathRef.visible = visibility.lowerSheath;
-  if (window.merkabaRef) window.merkabaRef.visible = visibility.merkaba;
-  if (window.labelsRef) window.labelsRef.visible = visibility.labels;
-  if (window.chamberLabelsRef) window.chamberLabelsRef.visible = visibility.chamberLabels;
-  if (window.spiralsRef) window.spiralsRef.visible = visibility.spirals;
-  if (window.pyramidRef) window.pyramidRef.visible = visibility.pyramid;
-  if (window.pyramidChambersRef) window.pyramidChambersRef.visible = visibility.pyramidChambers;
-  if (window.pyramidRelievingRef) window.pyramidRelievingRef.visible = visibility.pyramidRelieving;
-  if (window.pyramidP2Ref) window.pyramidP2Ref.visible = visibility.pyramidP2;
-  if (window.pyramidCorrespondenceRef) {
-    window.pyramidCorrespondenceRef.visible = visibility.pyramid && visibility.pyramidCorrespondence;
-  }
-  // Disabled state for pyramid sub-toggles
-  document.querySelectorAll('.row.indent input').forEach((el) => {
-    const key = el.dataset.key;
-    if (['pyramidChambers','pyramidRelieving','pyramidP2','pyramidCorrespondence'].includes(key)) {
-      el.disabled = !visibility.pyramid;
-      el.parentElement.classList.toggle('row-disabled', !visibility.pyramid);
-    }
+  // Visibility state
+  const [visibility, setVisibility] = useState({
+    zone1: true,
+    threshold1: true,
+    zone2: true,
+    threshold2: true,
+    zone4: true,
+    bubbleEnvelope: true,
+    threshold3: true,
+    zone5: true,
+    threshold4: true,
+    zone6: true,
+    threshold5: true,
+    zone7: true,
+    threshold6: true,
+    zone8: true,
+    ambientField: true,
+    lowerSheath: true,
+    merkaba: false,
+    labels: true,
+    chamberLabels: true,
+    // Pyramid overlay — master toggle default OFF (overlay appears on demand,
+    // just like the merkaba). Sub-toggles default ON except correspondence
+    // lines, which are pedagogical extras that default OFF.
+    pyramid: false,
+    pyramidChambers: true,
+    pyramidRelieving: true,
+    pyramidP2: true,
+    pyramidCorrespondence: false,
+    // Spirals overlay — Don/Ra schematic. Default OFF.
+    spirals: false,
   });
-}
 
-// Wire checkboxes
-document.querySelectorAll('#panel-body input[type="checkbox"]').forEach((el) => {
-  const key = el.dataset.key;
-  if (key in visibility) el.checked = visibility[key];
-  el.addEventListener('change', () => {
-    visibility[key] = el.checked;
-    updateVisibility();
-  });
-});
+  const [panelOpen, setPanelOpen] = useState(false);
 
-// ----- Build the scene ----------------------------------------------------
-// Mount reference: the div where the renderer canvas will attach
-const mount = document.getElementById('canvas-mount');
-
-// Everything below is the scene-construction code, lightly adapted from
-// the React artifact's useEffect body. The `mount` variable above takes
-// the place of `mountRef.current`. Scene-group "ref" assignments write
-// directly to `window` globals, which updateVisibility() reads.
+  useEffect(() => {
+    const mount = mountRef.current;
+    if (!mount) return;
 
     // --- Scene setup -------------------------------------------------------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#f5efdd");
-    window.sceneRef = scene;
+    sceneRef.current = scene;
 
     const width = mount.clientWidth;
     const height = mount.clientHeight;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    window.cameraRef = camera;
+    cameraRef.current = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
-    window.rendererRef = renderer;
+    rendererRef.current = renderer;
 
     // Lighting
     const ambient = new THREE.AmbientLight(0xffffff, 0.7);
@@ -223,7 +109,7 @@ const mount = document.getElementById('canvas-mount');
 
     // Pyramid-to-poloidal scaling: the pyramid is modeled in native cubit
     // units (280 cubits tall) and scaled down into the scene by this
-    // factor. Declared here so the Zone 7 flame (which references pyramid
+    // factor. Declared here so the Zone 8 flame (which references pyramid
     // height) and the pyramid overlay both read from the same source.
     // Anchors: RC bottom -> separatrix top (y = -2.8); pyramid apex -> T6
     // top (y = 8.0). Span: 340 cubits over 10.8 poloidal units.
@@ -242,13 +128,14 @@ const mount = document.getElementById('canvas-mount');
     const zone2Top = zone2Base + 1.50;       // −1.25
     const zone2Radius = columnRadius;
 
-    // Threshold 2 - semi-spiral
-    // Revised April 2026 (v7): shortened to 1.35 units from v6's 1.45.
-    // Top edge at y = 0.154, just below the (lowered) bubble bottom.
+    // Zone 3 / Threshold 2 - foundation semi-spiral (dual identity)
+    // Variable name retains `thresh2*` prefix because the semi-spiral
+    // still functions as Threshold 2 (carrying flow from chaos into
+    // stillness) in addition to its new Zone 3 identity.
     const thresh2Base = zone2Top + 0.05;
     const thresh2Top = thresh2Base + 1.354;  // 0.154
 
-    // Zone 3 - bubble
+    // Zone 4 - bubble / Queen's Chamber (was Zone 3 under old numbering)
     // Revised April 2026 (v7): halfHeight 0.50 → 0.55 (taller). Bubble
     // top held at y = 1.304 (unchanged); bubble bottom lowered from 0.304
     // to 0.204 so the bubble extends down further. Bubble center shifts
@@ -269,7 +156,7 @@ const mount = document.getElementById('canvas-mount');
     const threshold3Base = upperStagY + 0.05;        // 1.354
     const threshold3Top = threshold3Base + 0.30;     // 1.654
 
-    // Zone 4 - first helical flow with WIDENED BULGE AND KC CONVERGENCE
+    // Zone 5 - first helical flow with WIDENED BULGE AND KC CONVERGENCE
     // Revised April 2026 (v8): bulge becomes a trapezoidal plateau across
     // the King's Chamber vertical band. Across KC's vertical extent (y =
     // 1.647 to y = 1.997), all strand radii converge toward a common radial
@@ -282,14 +169,14 @@ const mount = document.getElementById('canvas-mount');
     //
     // Profile: strands spread naturally from base to KC-bottom, converge
     // into KC across its vertical band (y = 1.647 → 1.997), then re-disperse
-    // toward Zone 4 top.
-    const zone4Base = threshold3Top;          // 1.654
-    const zone4Top = zone4Base + 1.50;        // 3.154
-    const zone4Height = zone4Top - zone4Base;
-    const zone4BulgePeakY = 1.822;            // KC center
-    const zone4BulgePeakR = 1.45;             // widened plateau radius
-    const zone4BaseR = 1.00;
-    const zone4TopR = 0.85;
+    // toward Zone 5 top.
+    const zone5Base = threshold3Top;          // 1.654
+    const zone5Top = zone5Base + 1.50;        // 3.154
+    const zone5Height = zone5Top - zone5Base;
+    const zone5BulgePeakY = 1.822;            // KC center
+    const zone5BulgePeakR = 1.45;             // widened plateau radius
+    const zone5BaseR = 1.00;
+    const zone5TopR = 0.85;
 
     // King's Chamber radial band (for strand convergence)
     const kcYBottom = 1.647;      // KC y bottom (80 cubits / scale)
@@ -300,17 +187,17 @@ const mount = document.getElementById('canvas-mount');
     // into KC band.  `naturalR` is what the strand would have under the
     // base/peak/top profile (no convergence); across KC's vertical band,
     // strands are blended toward the common convergence radius.
-    const zone4StrandRadiusAt = (sr, y) => {
+    const zone5StrandRadiusAt = (sr, y) => {
       // Natural radius: strand at sr, scaled by bulge envelope
       let envelope;
-      if (y <= zone4Base) envelope = zone4BaseR;
-      else if (y >= zone4Top) envelope = zone4TopR;
-      else if (y <= zone4BulgePeakY) {
-        const t = (y - zone4Base) / (zone4BulgePeakY - zone4Base);
-        envelope = zone4BaseR + (zone4BulgePeakR - zone4BaseR) * t;
+      if (y <= zone5Base) envelope = zone5BaseR;
+      else if (y >= zone5Top) envelope = zone5TopR;
+      else if (y <= zone5BulgePeakY) {
+        const t = (y - zone5Base) / (zone5BulgePeakY - zone5Base);
+        envelope = zone5BaseR + (zone5BulgePeakR - zone5BaseR) * t;
       } else {
-        const t = (y - zone4BulgePeakY) / (zone4Top - zone4BulgePeakY);
-        envelope = zone4BulgePeakR + (zone4TopR - zone4BulgePeakR) * t;
+        const t = (y - zone5BulgePeakY) / (zone5Top - zone5BulgePeakY);
+        envelope = zone5BulgePeakR + (zone5TopR - zone5BulgePeakR) * t;
       }
       const naturalR = sr * envelope;
 
@@ -332,55 +219,55 @@ const mount = document.getElementById('canvas-mount');
 
     // Retained for backward compatibility / ambient streamlines / labels:
     // simple envelope function without convergence.
-    const zone4RadiusAt = (y) => {
-      if (y <= zone4Base) return zone4BaseR * columnRadius;
-      if (y >= zone4Top) return zone4TopR * columnRadius;
-      if (y <= zone4BulgePeakY) {
-        const t = (y - zone4Base) / (zone4BulgePeakY - zone4Base);
-        return (zone4BaseR + (zone4BulgePeakR - zone4BaseR) * t) * columnRadius;
+    const zone5RadiusAt = (y) => {
+      if (y <= zone5Base) return zone5BaseR * columnRadius;
+      if (y >= zone5Top) return zone5TopR * columnRadius;
+      if (y <= zone5BulgePeakY) {
+        const t = (y - zone5Base) / (zone5BulgePeakY - zone5Base);
+        return (zone5BaseR + (zone5BulgePeakR - zone5BaseR) * t) * columnRadius;
       } else {
-        const t = (y - zone4BulgePeakY) / (zone4Top - zone4BulgePeakY);
-        return (zone4BulgePeakR + (zone4TopR - zone4BulgePeakR) * t) * columnRadius;
+        const t = (y - zone5BulgePeakY) / (zone5Top - zone5BulgePeakY);
+        return (zone5BulgePeakR + (zone5TopR - zone5BulgePeakR) * t) * columnRadius;
       }
     };
 
     // Threshold 4 - helical breakdown (unchanged)
-    const t4Base = zone4Top;                  // 3.154
+    const t4Base = zone5Top;                  // 3.154
     const t4Top = t4Base + 1.0;               // 4.154
     const t4Height = t4Top - t4Base;
 
-    // Zone 5 - second helical flow (unchanged)
-    const zone5Base = t4Top;                  // 4.154
-    const zone5Top = zone5Base + 1.0;         // 5.154
-    const zone5Height = zone5Top - zone5Base;
+    // Zone 6 - second helical flow (unchanged)
+    const zone6Base = t4Top;                  // 4.154
+    const zone6Top = zone6Base + 1.0;         // 5.154
+    const zone6Height = zone6Top - zone6Base;
 
     // Threshold 5 - turbulent negotiation
     // Revised April 2026 (v7): extended from 0.75 → 1.30 — significantly
     // taller, giving the fully-turbulent Kolmogorov cascade real vertical
     // room as the secondary helix dissolves.
-    const t5Base = zone5Top;             // 5.154
+    const t5Base = zone6Top;             // 5.154
     const t5Top = t5Base + 1.30;         // 6.454
     const t5Height = t5Top - t5Base;
 
-    // Zone 6 - relaminarization (indigo ray, Position 2 zone)
-    // Revised April 2026 (v7): shortened from 1.85 → 1.30. Zone 6 sits
+    // Zone 7 - relaminarization (indigo ray) — Position 2 now at Threshold 5
+    // Revised April 2026 (v7): shortened from 1.85 → 1.30. Zone 7 sits
     // between extended T5 below and the apex gap above. Geometric
     // compression suppresses turbulence across this shorter span.
-    const zone6Base = t5Top;             // 6.454
-    const zone6Top = t5Top + 1.296;      // 7.750
-    const zone6Height = zone6Top - zone6Base;
+    const zone7Base = t5Top;             // 6.454
+    const zone7Top = t5Top + 1.296;      // 7.750
+    const zone7Height = zone7Top - zone7Base;
 
     // Threshold 6 - apex ignition (the dark gap) — unchanged
-    const t6Base = zone6Top;             // 7.750
-    const t6Top = zone6Top + 0.25;       // 8.000
+    const t6Base = zone7Top;             // 7.750
+    const t6Top = zone7Top + 0.25;       // 8.000
     const t6Height = t6Top - t6Base;
     // Geometric apex point sits at the top of the gap
     const apexY = t6Top;                 // 8.000
 
-    // Zone 7 - radial divergence (violet ray, third spiral) — unchanged
-    const zone7Base = t6Top;             // 8.000
-    const zone7Top = t6Top + 3.0;        // 11.000
-    const zone7Height = zone7Top - zone7Base;
+    // Zone 8 - radial divergence (violet ray, third spiral) — unchanged
+    const zone8Base = t6Top;             // 8.000
+    const zone8Top = t6Top + 3.0;        // 11.000
+    const zone8Height = zone8Top - zone8Base;
 
     // ======================================================================
     // HELPERS
@@ -496,7 +383,7 @@ const mount = document.getElementById('canvas-mount');
     {
       const axisGeom = new THREE.BufferGeometry().setFromPoints([
         new THREE.Vector3(0, separatrixBaseY - 0.5, 0),
-        new THREE.Vector3(0, zone6Top, 0),
+        new THREE.Vector3(0, zone7Top, 0),
       ]);
       const axisMat = new THREE.LineBasicMaterial({
         color: 0x8a6a1e,
@@ -511,7 +398,7 @@ const mount = document.getElementById('canvas-mount');
     // ZONE 1 - Radial Convergence
     // ======================================================================
     const zone1Group = new THREE.Group();
-    window.zone1Ref = zone1Group;
+    zone1Ref.current = zone1Group;
     scene.add(zone1Group);
     {
       const GOLD = 0x785c18;
@@ -586,7 +473,7 @@ const mount = document.getElementById('canvas-mount');
     // THRESHOLD 1 - Separatrix Bell
     // ======================================================================
     const threshold1Group = new THREE.Group();
-    window.threshold1Ref = threshold1Group;
+    threshold1Ref.current = threshold1Group;
     scene.add(threshold1Group);
     {
       const nRings = 18;
@@ -679,7 +566,7 @@ const mount = document.getElementById('canvas-mount');
     // ZONE 2 - Collision & Turbulence (lower) / Proto-organization (upper)
     // ======================================================================
     const zone2Group = new THREE.Group();
-    window.zone2Ref = zone2Group;
+    zone2Ref.current = zone2Group;
     scene.add(zone2Group);
     {
       const z2Height = zone2Top - zone2Base;
@@ -935,42 +822,190 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // THRESHOLD 2 - Semi-Spiral (3 dark-yellow helical threads)
+    // ZONE 3 / THRESHOLD 2 - Foundation Semi-Spiral (dual identity)
+    // The tightening corkscrew that opens into a cradle at its top.
+    // See inner block below for geometry notes. Promoted from a mere
+    // threshold (three slim threads) to a zone-weight rendering — the
+    // foundation upon which everything above it rests.
     // ======================================================================
     const threshold2Group = new THREE.Group();
-    window.threshold2Ref = threshold2Group;
+    threshold2Ref.current = threshold2Group;
     scene.add(threshold2Group);
     {
-      const DY_COLOR = 0xb8a018;
-      const DY_EM = 0x6e5808;
-      const nThreads = 3;
-      const base = thresh2Base;
-      const top = thresh2Top;
-      const h = top - base;
+      // --------------------------------------------------------------
+      // ZONE 3 / THRESHOLD 2 — THE FOUNDATION SEMI-SPIRAL
+      // --------------------------------------------------------------
+      // Dual identity: a zone (coherent rotational regime) AND a
+      // threshold (carrying flow from chaos into stillness). Ra 59.10
+      // calls it "the foundation semi-spiral which supplies the prana
+      // for all that may be affected by the three following upward
+      // spirals of light" — foundation, not corridor.
+      //
+      // The geometry renders Doug's metaphor: a tightening corkscrew
+      // that becomes a cradle. Loose at the base (chaos of Zone 2 just
+      // barely organizing), winding tighter and faster as it rises
+      // (pitch shortening, rotation intensifying), reaching a pinch
+      // near the top, then FLARING OUTWARD as the spiral's work
+      // delivers the flow into stagnation. The upward flare is the
+      // cradle — the held vessel presenting the bubble (Zone 4) up
+      // from below. The corkscrew that becomes a cradle. Motion that
+      // becomes stillness. Polarity chosen and offered upward.
+      //
+      // Variable weight: promoted from three slim threads (prior
+      // threshold treatment) to five thicker threads, to carry the
+      // presence of a zone rather than a mere transitional phenomenon.
+      const DY_COLOR = 0xb8a018;     // dark yellow-gold (primary palette)
+      const DY_EM    = 0x6e5808;     // emissive
+      const DY_CORE  = 0xd8c048;     // brighter gold for the axial core
+      const DY_CORE_EM = 0x8a6810;
 
+      const nThreads = 5;
+      const base = thresh2Base;                    // -1.20
+      const top  = thresh2Top;                     // 0.154
+      const h    = top - base;                     // 1.354
+
+      // --- Zone-wise profile:
+      //   Section A (loose corkscrew):   t in [0.00, 0.65] — wide radius,
+      //                                  long pitch, gentle winding.
+      //   Section B (tightening pinch):  t in [0.65, 0.85] — radius
+      //                                  contracts fast, pitch shortens,
+      //                                  rotation intensifies.
+      //   Section C (flare/cradle):      t in [0.85, 1.00] — threads
+      //                                  arc outward and up into a
+      //                                  cradle rim matching the bubble's
+      //                                  lower curvature.
+      //
+      // The cradle rim terminates at the bubble's lower stagnation point
+      // contour — approximately (r ≈ bubbleHalfWidth * 0.55, y ≈ lowerStagY)
+      // so the bubble appears seated in it.
+      const loosePitchTurns     = 0.5;   // turns over [0, 0.65]
+      const tighteningTurns     = 2.2;   // turns over [0.65, 0.85]
+      // (after cradle flare opens, winding stops — no more turns added)
+
+      const rBase      = columnRadius * 0.92;      // loose outer radius
+      const rPinch     = columnRadius * 0.18;      // narrowest point (y = cradle base)
+      const rCradleRim = bubbleHalfWidth * 0.62;   // flare outward to cradle the bubble
+      const yPinch     = base + h * 0.85;          // top of winding, base of cradle
+      const yCradleRim = lowerStagY - 0.01;        // meets bubble's lower stagnation
+
+      // Phi progression: accumulate turns non-linearly.
+      const phiAt = (t) => {
+        if (t <= 0.65) {
+          // Loose: linear accumulation
+          return (t / 0.65) * loosePitchTurns * Math.PI * 2;
+        } else if (t <= 0.85) {
+          const phiAtLooseEnd = loosePitchTurns * Math.PI * 2;
+          // Tighten: quadratic ramp — more turns per unit t as t grows
+          const u = (t - 0.65) / 0.20;
+          return phiAtLooseEnd + tighteningTurns * Math.PI * 2 * Math.pow(u, 1.6);
+        } else {
+          // Cradle flare: winding stops, phi stays constant from the
+          // end of the tightening section. The threads arc outward
+          // radially but no further rotation is accumulated.
+          const phiAtPinch = loosePitchTurns * Math.PI * 2
+                           + tighteningTurns * Math.PI * 2;
+          return phiAtPinch;
+        }
+      };
+
+      // Radius progression: wide to pinch to flare.
+      const rAt = (t) => {
+        if (t <= 0.65) {
+          // Loose: gentle taper inward with easing
+          const u = t / 0.65;
+          return rBase - (rBase - rPinch * 2.2) * Math.pow(u, 1.4);
+        } else if (t <= 0.85) {
+          // Tightening: accelerate contraction to rPinch
+          const u = (t - 0.65) / 0.20;
+          const rEnterTighten = rBase - (rBase - rPinch * 2.2) * Math.pow(1, 1.4);
+          return rEnterTighten + (rPinch - rEnterTighten) * Math.pow(u, 1.3);
+        } else {
+          // Cradle flare: arc outward from rPinch at yPinch to rCradleRim
+          // at yCradleRim, following a cosine curve that reads as a bowl
+          // rim rather than a straight cone.
+          const u = (t - 0.85) / 0.15;          // 0 at pinch, 1 at rim
+          const arc = 0.5 * (1 - Math.cos(u * Math.PI));  // ease-in-out
+          return rPinch + (rCradleRim - rPinch) * arc;
+        }
+      };
+
+      // Y progression: linear through sections A & B; then decelerating
+      // through C so the cradle opens gradually and meets the bubble.
+      const yAt = (t) => {
+        if (t <= 0.85) {
+          // Linear rise from base to yPinch
+          const u = t / 0.85;
+          return base + (yPinch - base) * u;
+        } else {
+          // Cradle: rise from yPinch to yCradleRim with easing
+          const u = (t - 0.85) / 0.15;
+          const ease = Math.pow(u, 0.7);
+          return yPinch + (yCradleRim - yPinch) * ease;
+        }
+      };
+
+      // --- The five winding threads ---
       for (let i = 0; i < nThreads; i++) {
         const phi0 = (i / nThreads) * Math.PI * 2;
         const pts = [];
-        const nPts = 80;
+        const nPts = 120;                         // denser for smoother curves
         for (let k = 0; k < nPts; k++) {
           const t = k / (nPts - 1);
-          const turnRate = 0.5 + 4.0 * Math.pow(t, 2.2);
-          const phi = phi0 + turnRate * Math.PI;
-          const r = columnRadius * (0.85 - 0.7 * Math.pow(t, 1.1));
-          const y = base + h * t;
+          const phi = phi0 + phiAt(t);
+          const r = rAt(t);
+          const y = yAt(t);
           pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
         }
-        const tube = makeTube(pts, DY_COLOR, DY_EM, 0.032);
+        const tube = makeTube(pts, DY_COLOR, DY_EM, 0.040);
         if (tube) threshold2Group.add(tube);
 
-        const arrowTs = [0.12, 0.28, 0.44, 0.58, 0.72, 0.88];
+        // Arrows: sparse on the loose section, denser through the
+        // tightening section, curving outward at the cradle rim.
+        const arrowTs = [0.10, 0.30, 0.50, 0.70, 0.82, 0.93];
         arrowTs.forEach((tA) => {
           const idx = Math.floor(tA * (nPts - 1));
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(threshold2Group, pos, d, DY_COLOR, 0.14);
+          if (d.length() > 1e-5) addArrow(threshold2Group, pos, d, DY_COLOR, 0.13);
         });
+      }
+
+      // --- Central axial core thread: a slender brighter-gold line on
+      // the axis running from just above the loose section through the
+      // pinch and into the cradle's lower interior. Reads as the
+      // "foundation line" of the spiral — the organizing axis around
+      // which the five winding threads rotate. Anchors the "regularized
+      // rotational core" language of Ra 59.10.
+      {
+        const corePts = [];
+        const nCore = 40;
+        const coreBaseT = 0.35;  // begins midway through the loose section
+        const coreTopT  = 0.92;  // ends partway into the cradle
+        for (let k = 0; k < nCore; k++) {
+          const t = coreBaseT + (coreTopT - coreBaseT) * (k / (nCore - 1));
+          corePts.push(new THREE.Vector3(0, yAt(t), 0));
+        }
+        const coreTube = makeTube(corePts, DY_CORE, DY_CORE_EM, 0.018);
+        if (coreTube) threshold2Group.add(coreTube);
+      }
+
+      // --- Cradle rim ring: a thin gold ring at the cradle's rim
+      // height, matching the bubble's lower curvature. Visually closes
+      // the cradle and makes the "held vessel" reading unambiguous.
+      {
+        const ringGeom = new THREE.TorusGeometry(rCradleRim, 0.018, 8, 48);
+        const ringMat = new THREE.MeshStandardMaterial({
+          color: DY_CORE,
+          emissive: DY_CORE_EM,
+          emissiveIntensity: 0.35,
+          metalness: 0.2,
+          roughness: 0.55,
+        });
+        const ring = new THREE.Mesh(ringGeom, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.set(0, yCradleRim, 0);
+        threshold2Group.add(ring);
       }
     }
 
@@ -978,20 +1013,20 @@ const mount = document.getElementById('canvas-mount');
     // LOWER SHEATH - tight cylindrical envelope around Zone 1, separatrix, Zone 2
     // ======================================================================
     // A light gold frame that visually contains the lower interior of the
-    // column. Modeled on Zone 4's blue ambient helical pattern — gives the
+    // column. Modeled on Zone 5's blue ambient helical pattern — gives the
     // viewer a clear flow vector: prana ascending. Width matches the
     // separatrix throat (r = 0.9), extends from the separatrix base up to
-    // the bottom of Zone 3's bubble.
+    // the bottom of Zone 4's bubble.
     //
     // Construction: 6 ascending helical streamlines + a few horizontal rings.
     // The streamlines carry arrows showing upward flow direction.
     //
     // Dimensions:
     //   Bottom: y = separatrixBaseY (-3.5)
-    //   Top:    y = lowerStagY       (0.5) — bottom of Zone 3 bubble
+    //   Top:    y = lowerStagY       (0.5) — bottom of Zone 4 bubble
     //   Radius: r = separatrixThroatR (0.9) — cylindrical
     const lowerSheathGroup = new THREE.Group();
-    window.lowerSheathRef = lowerSheathGroup;
+    lowerSheathRef.current = lowerSheathGroup;
     scene.add(lowerSheathGroup);
 
     {
@@ -1072,11 +1107,11 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // ZONE 3 - The Bubble (Counter-Rotating Vortex Ring)
+    // ZONE 4 - The Bubble (Counter-Rotating Vortex Ring)
     // ======================================================================
-    const zone3Group = new THREE.Group();
-    window.zone3Ref = zone3Group;
-    scene.add(zone3Group);
+    const zone4Group = new THREE.Group();
+    zone4Ref.current = zone4Group;
+    scene.add(zone4Group);
     {
       // Bubble ambient colors — original rich hues restored.
       // v8.1: transparency (not lighter color) used to reveal the dark
@@ -1130,14 +1165,14 @@ const mount = document.getElementById('canvas-mount');
           pts.push(new THREE.Vector3(r * Math.cos(twistPhi), y, r * Math.sin(twistPhi)));
         }
         const tube = makeTubeTransparent(pts, GOLD, GOLD_EM, 0.02, 0.55);
-        if (tube) zone3Group.add(tube);
+        if (tube) zone4Group.add(tube);
         const arrowTs = [0.2, 0.45, 0.68, 0.88];
         arrowTs.forEach((tA) => {
           const idx = Math.floor(tA * (nPts - 1));
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone3Group, pos, d, GOLD, 0.12);
+          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, GOLD, 0.12);
         });
       }
 
@@ -1162,14 +1197,14 @@ const mount = document.getElementById('canvas-mount');
           pts.push(new THREE.Vector3(rr * Math.cos(phi), yy, rr * Math.sin(phi)));
         }
         const tube = makeTubeTransparent(pts, GREEN, GREEN_EM, 0.016, 0.55);
-        if (tube) zone3Group.add(tube);
+        if (tube) zone4Group.add(tube);
         const arrowTs = [0.1, 0.35, 0.6, 0.85];
         arrowTs.forEach((tA) => {
           const idx = Math.floor(tA * (nPts - 1));
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone3Group, pos, d, GREEN_ARROW, 0.09);
+          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, GREEN_ARROW, 0.09);
         });
       }
 
@@ -1183,10 +1218,10 @@ const mount = document.getElementById('canvas-mount');
       });
       const lowerStag = new THREE.Mesh(stagGeom, stagMat);
       lowerStag.position.set(0, lowerStagY, 0);
-      zone3Group.add(lowerStag);
+      zone4Group.add(lowerStag);
       const upperStag = new THREE.Mesh(stagGeom, stagMat);
       upperStag.position.set(0, upperStagY, 0);
-      zone3Group.add(upperStag);
+      zone4Group.add(upperStag);
 
       [lowerStagY, upperStagY].forEach((y) => {
         const ringGeom = new THREE.RingGeometry(0.08, 0.16, 32);
@@ -1199,12 +1234,12 @@ const mount = document.getElementById('canvas-mount');
         const ring = new THREE.Mesh(ringGeom, ringMat);
         ring.rotation.x = Math.PI / 2;
         ring.position.set(0, y, 0);
-        zone3Group.add(ring);
+        zone4Group.add(ring);
       });
 
       // Bubble envelope
       const envGroup = new THREE.Group();
-      window.bubbleEnvelopeRef = envGroup;
+      bubbleEnvelopeRef.current = envGroup;
       {
         const nRings = 24;
         const nPhi = 36;
@@ -1254,7 +1289,7 @@ const mount = document.getElementById('canvas-mount');
     //   Bubble horizontal extent:  r = 0.82 × columnRadius
     // Aspect 1:1.49. Merkaba fits snugly as a proper stellated octahedron.
     const merkabaGroup = new THREE.Group();
-    window.merkabaRef = merkabaGroup;
+    merkabaRef.current = merkabaGroup;
     scene.add(merkabaGroup);
     {
       const tetHeight = 1.05;         // apex-to-apex ≈ bubble height
@@ -1318,7 +1353,7 @@ const mount = document.getElementById('canvas-mount');
     // THRESHOLD 3 - Post-Bubble Wake
     // ======================================================================
     const threshold3Group = new THREE.Group();
-    window.threshold3Ref = threshold3Group;
+    threshold3Ref.current = threshold3Group;
     scene.add(threshold3Group);
     {
       // Velocity deficit core
@@ -1397,13 +1432,13 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // ZONE 4 - First Helical Flow
+    // ZONE 5 - First Helical Flow
     // ======================================================================
-    // We track Zone 4's final state per strand (end phi, end radius, end color)
+    // We track Zone 5's final state per strand (end phi, end radius, end color)
     // so Threshold 4 can continue each strand smoothly.
-    const zone4Group = new THREE.Group();
-    window.zone4Ref = zone4Group;
-    scene.add(zone4Group);
+    const zone5Group = new THREE.Group();
+    zone5Ref.current = zone5Group;
+    scene.add(zone5Group);
 
     // v8.1: DENSE RAINBOW — 24 strands forming a continuous spectrum band
     // rather than 7 discrete color bands. Each strand is a thin tube; their
@@ -1447,7 +1482,7 @@ const mount = document.getElementById('canvas-mount');
 
     const innerR = columnRadius * 0.25;
     const outerR = columnRadius * 0.65;
-    // Zone 4: a single sharply-delineated spiral (Ra 59.8). One full turn
+    // Zone 5: a single sharply-delineated spiral (Ra 59.8). One full turn
     // across the zone's vertical extent — a sweeping, regular helix, not a
     // tight coil. Fits Ra's language of "the first spiral" (singular) and the
     // wide aspect ratio of the pyramid geometry.
@@ -1472,16 +1507,16 @@ const mount = document.getElementById('canvas-mount');
         const pts = [];
         for (let k = 0; k < nStrandPts; k++) {
           const t = k / (nStrandPts - 1);
-          const y = zone4Base + t * zone4Height;
+          const y = zone5Base + t * zone5Height;
           const phi = phi0 + strandTurns * Math.PI * 2 * t;
           // v8: use per-strand radius that converges toward KC interior
           // across KC's vertical band — all colors gather into the chamber.
-          const r = zone4StrandRadiusAt(sr, y);
+          const r = zone5StrandRadiusAt(sr, y);
           pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
         }
 
         const tube = makeTube(pts, color, em, strandTubeRadius);
-        if (tube) zone4Group.add(tube);
+        if (tube) zone5Group.add(tube);
 
         // v8.1: with 24 strands, arrows render sparsely — one per strand at
         // mid-height, smaller size — to show flow direction without cluttering.
@@ -1490,15 +1525,15 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nStrandPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, color, 0.08);
+          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, color, 0.08);
         }
 
         // Record final phi and radius for Threshold 4 continuation.
-        // After bulge, strand ends at scaled radius = sr × (zone4TopR / 1.0).
+        // After bulge, strand ends at scaled radius = sr × (zone5TopR / 1.0).
         const endPhi = phi0 + strandTurns * Math.PI * 2;
         strandEndState.push({
           endPhi,
-          radius: sr * zone4TopR,
+          radius: sr * zone5TopR,
           color,
           em,
         });
@@ -1516,10 +1551,10 @@ const mount = document.getElementById('canvas-mount');
         const nPts = 50;
         for (let k = 0; k < nPts; k++) {
           const t = k / (nPts - 1);
-          const y = zone4Base + t * zone4Height;
+          const y = zone5Base + t * zone5Height;
           const phi = phaseOffset + strandTurns * Math.PI * 2 * t;
           // v8: ambient streamlines also converge into KC band
-          const r = zone4StrandRadiusAt(ambientR, y);
+          const r = zone5StrandRadiusAt(ambientR, y);
           pts.push(new THREE.Vector3(
             r * Math.cos(phi),
             y,
@@ -1538,7 +1573,7 @@ const mount = document.getElementById('canvas-mount');
             transparent: true,
             opacity: 0.55,
           });
-          zone4Group.add(new THREE.Mesh(tubeGeom, tubeMat));
+          zone5Group.add(new THREE.Mesh(tubeGeom, tubeMat));
         }
 
         const arrowTs = [0.25, 0.55, 0.85];
@@ -1547,12 +1582,12 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone4Group, pos, d, AMBIENT_COLOR, 0.09);
+          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, AMBIENT_COLOR, 0.09);
         });
 
         ambientEndStates.push({
           endPhi: phaseOffset + strandTurns * Math.PI * 2,
-          radius: ambientR * zone4TopR,
+          radius: ambientR * zone5TopR,
         });
       }
 
@@ -1565,7 +1600,7 @@ const mount = document.getElementById('canvas-mount');
     // ======================================================================
     // THRESHOLD 4 - Helical Breakdown
     // ======================================================================
-    // Continue the seven spectral strands from Zone 4 with:
+    // Continue the seven spectral strands from Zone 5 with:
     //   (a) pitch lengthening (turn rate slows with height)
     //   (b) amplitude wobble (radius fluctuates irregularly)
     //   (c) color desaturating toward mid-gray (#7a7a7a)
@@ -1573,13 +1608,13 @@ const mount = document.getElementById('canvas-mount');
     //       ("some turns barely distinguishable")
     // Ambient blue streamlines also degrade in the same pattern.
     const threshold4Group = new THREE.Group();
-    window.threshold4Ref = threshold4Group;
+    threshold4Ref.current = threshold4Group;
     scene.add(threshold4Group);
 
     // Boundary rings at T4 entry (y = t4Base) and exit (y = t4Top) —
     // thin, muted gray-amber rings bracketing the breakdown region so the
-    // threshold is visually distinct from the clean Zone 4 helix below and
-    // the compact Zone 5 helix above.
+    // threshold is visually distinct from the clean Zone 5 helix below and
+    // the compact Zone 6 helix above.
     {
       const ringR = columnRadius * 0.82;
       [t4Base, t4Top].forEach((y) => {
@@ -1598,16 +1633,16 @@ const mount = document.getElementById('canvas-mount');
       });
     }
 
-    // Track final (phi, radius) for each strand at top of Threshold 4 — Zone 5
+    // Track final (phi, radius) for each strand at top of Threshold 4 — Zone 6
     // does NOT continue these, but we need them to know where the strands end
-    // visually so Zone 5's fresh phases clearly read as "new."
+    // visually so Zone 6's fresh phases clearly read as "new."
     const t4StrandEnd = [];
     const t4AmbientEnd = [];
 
     {
       const MID_GRAY = 0x7a7a7a;
       const nT4Pts = 60;
-      // v8.1: thinner tubes to match Zone 4's dense rainbow
+      // v8.1: thinner tubes to match Zone 5's dense rainbow
       const baseTubeRadius = 0.011;
       // Pick ~1 in 3 strands to fade to thinner tubes in upper portion
       // ("some turns barely distinguishable"). With 24 strands, picks 8.
@@ -1619,7 +1654,7 @@ const mount = document.getElementById('canvas-mount');
 
         // Build points along Threshold 4
         const pts = [];
-        const nominalPitchRate = strandTurns * Math.PI * 2 / zone4Height; // rad per unit height (Zone 4 rate)
+        const nominalPitchRate = strandTurns * Math.PI * 2 / zone5Height; // rad per unit height (Zone 5 rate)
         let phi = endPhi;
         let prevY = t4Base;
         for (let k = 0; k < nT4Pts; k++) {
@@ -1676,7 +1711,7 @@ const mount = document.getElementById('canvas-mount');
           threshold4Group.add(upperTube);
         }
 
-        // Arrows: three per strand (fewer than Zone 4's four — degrading)
+        // Arrows: three per strand (fewer than Zone 5's four — degrading)
         // Position arrows at tLocal = 0.2, 0.5, 0.8
         // For fading strands, skip the top arrow (0.8) to emphasize dying
         const arrowTs = fadingStrandIndices.has(s) ? [0.2, 0.5] : [0.2, 0.5, 0.8];
@@ -1705,7 +1740,7 @@ const mount = document.getElementById('canvas-mount');
         const { endPhi, radius } = ambientEndStates[i];
         const pts = [];
         const nPts = 40;
-        const nominalPitchRate = strandTurns * Math.PI * 2 / zone4Height;
+        const nominalPitchRate = strandTurns * Math.PI * 2 / zone5Height;
         let phi = endPhi;
         let prevY = t4Base;
         for (let k = 0; k < nPts; k++) {
@@ -1742,7 +1777,7 @@ const mount = document.getElementById('canvas-mount');
           threshold4Group.add(new THREE.Mesh(tubeGeom, tubeMat));
         }
 
-        // Two arrows per ambient streamline (degrading from Zone 4's three)
+        // Two arrows per ambient streamline (degrading from Zone 5's three)
         const arrowTs = [0.35, 0.75];
         arrowTs.forEach((tA) => {
           const idx = Math.floor(tA * (nPts - 1));
@@ -1760,21 +1795,21 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // ZONE 5 - Second Helical Flow (Ra's "second spiral" — red-biased)
+    // ZONE 6 - Second Helical Flow (Ra's "second spiral" — red-biased)
     // ======================================================================
     // Independent helical mode with its own oscillation frequency (3.5 turns
-    // across Zone 5, visibly tighter than Zone 4's 2.5), its own pitch, its
+    // across Zone 6, visibly tighter than Zone 5's 2.5), its own pitch, its
     // own amplitude. Three strands at three distinct radii in the red/orange
-    // band. Same CCW handedness as Zone 4 but different frequency.
+    // band. Same CCW handedness as Zone 5 but different frequency.
     // Starting azimuthal phases are randomized so the strands read as newly
-    // born from the breakdown, not as continuations of the fading Zone 4.
-    const zone5Group = new THREE.Group();
-    window.zone5Ref = zone5Group;
-    scene.add(zone5Group);
+    // born from the breakdown, not as continuations of the fading Zone 5.
+    const zone6Group = new THREE.Group();
+    zone6Ref.current = zone6Group;
+    scene.add(zone6Group);
 
     {
-      // Zone 5 is compact (0.8 units tall) but carries 1.5 turns — giving a
-      // pitch of ~0.53 units per turn compared to Zone 4's 3.5 units per turn.
+      // Zone 6 is compact (0.8 units tall) but carries 1.5 turns — giving a
+      // pitch of ~0.53 units per turn compared to Zone 5's 3.5 units per turn.
       // That ~6.6x pitch ratio makes the "different oscillation frequency"
       // immediately visible. The structure reads as tight and intensified,
       // matching Ra 59.9's "spiraled once again, causing an enormous
@@ -1787,7 +1822,7 @@ const mount = document.getElementById('canvas-mount');
       ];
       const zone5Radii = [0.35, 0.42, 0.50]; // × columnRadius
 
-      // Seed phases that are clearly unrelated to Zone 4 end phases
+      // Seed phases that are clearly unrelated to Zone 5 end phases
       // (use irrational-ish multipliers to avoid alignment)
       const zone5PhaseSeeds = [0.0, 2.094, 4.189]; // 0, 2π/3, 4π/3 rad
 
@@ -1802,13 +1837,13 @@ const mount = document.getElementById('canvas-mount');
         const pts = [];
         for (let k = 0; k < nZ5Pts; k++) {
           const t = k / (nZ5Pts - 1);
-          const y = zone5Base + t * zone5Height;
+          const y = zone6Base + t * zone6Height;
           const phi = phi0 + zone5Turns * Math.PI * 2 * t; // CCW, tighter pitch
           pts.push(new THREE.Vector3(sr * Math.cos(phi), y, sr * Math.sin(phi)));
         }
 
         const tube = makeTube(pts, color, em, strandTubeRadius);
-        if (tube) zone5Group.add(tube);
+        if (tube) zone6Group.add(tube);
 
         // Four arrows per strand in strand's own color
         const arrowTs = [0.15, 0.40, 0.65, 0.88];
@@ -1817,11 +1852,11 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nZ5Pts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, color, 0.13);
+          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, color, 0.13);
         });
       }
 
-      // Ambient blue at outer radius with Zone 5's pitch (not Zone 4's)
+      // Ambient blue at outer radius with Zone 6's pitch (not Zone 5's)
       const AMBIENT_COLOR = 0x8ab4e0;
       const AMBIENT_EM = 0x4a6ea0;
       const nAmbient = 6;
@@ -1832,8 +1867,8 @@ const mount = document.getElementById('canvas-mount');
         const nPts = 60;
         for (let k = 0; k < nPts; k++) {
           const t = k / (nPts - 1);
-          const y = zone5Base + t * zone5Height;
-          // Zone 5's turn count, so pitch is visibly different from Zone 4
+          const y = zone6Base + t * zone6Height;
+          // Zone 6's turn count, so pitch is visibly different from Zone 5
           const phi = phaseOffset + zone5Turns * Math.PI * 2 * t;
           pts.push(new THREE.Vector3(
             ambientR * Math.cos(phi),
@@ -1853,7 +1888,7 @@ const mount = document.getElementById('canvas-mount');
             transparent: true,
             opacity: 0.55,
           });
-          zone5Group.add(new THREE.Mesh(tubeGeom, tubeMat));
+          zone6Group.add(new THREE.Mesh(tubeGeom, tubeMat));
         }
 
         const arrowTs = [0.25, 0.55, 0.85];
@@ -1862,7 +1897,7 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone5Group, pos, d, AMBIENT_COLOR, 0.09);
+          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, AMBIENT_COLOR, 0.09);
         });
       }
     }
@@ -1874,14 +1909,14 @@ const mount = document.getElementById('canvas-mount');
     // IS fully turbulent. The secondary helix dissolves into multi-scale
     // chaotic motion — Kolmogorov cascade. No ordered direction, no helical
     // continuation. Zone 2-style fragmented geometry in a muted palette:
-    // darkened reds from Zone 5 bleeding into grays and muddy browns as the
+    // darkened reds from Zone 6 bleeding into grays and muddy browns as the
     // last organized structure dissolves.
     const threshold5Group = new THREE.Group();
-    window.threshold5Ref = threshold5Group;
+    threshold5Ref.current = threshold5Group;
     scene.add(threshold5Group);
 
     {
-      // Palette: muted, chaotic, carries the red memory from Zone 5 fading
+      // Palette: muted, chaotic, carries the red memory from Zone 6 fading
       // into brownish-gray as turbulent mixing destroys the spectral organization.
       const t5Palette = [
         0x6a2420,  // deep muted red
@@ -2012,16 +2047,16 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // ZONE 6 - Relaminarization (indigo ray, Position 2 zone)
+    // ZONE 7 - Relaminarization (indigo ray) — Position 2 has moved to Threshold 5
     // ======================================================================
     // Geometric compression suppresses the turbulence from Threshold 5. A new
     // simplified coherence emerges — not helical, not axisymmetric bubble, but
     // concentrated forward-moving flow. Ra's Position 2 zone. Indigo ray.
     // "Preheat zone" — energy approaching ignition but not yet radiating.
     // Column narrows visibly from full radius at base to ~40% at top.
-    const zone6Group = new THREE.Group();
-    window.zone6Ref = zone6Group;
-    scene.add(zone6Group);
+    const zone7Group = new THREE.Group();
+    zone7Ref.current = zone7Group;
+    scene.add(zone7Group);
 
     {
       const INDIGO = 0x3a2a7c;          // opaque indigo blue for flow and ambient
@@ -2029,21 +2064,21 @@ const mount = document.getElementById('canvas-mount');
       const INDIGO_LINE = 0x5040a0;     // slightly brighter for line rings
 
       // Column cross-section taper: linear from base radius to top radius
-      const baseR = columnRadius * 0.78;    // matches Zone 5 ambient radius — smooth connection from below
+      const baseR = columnRadius * 0.78;    // matches Zone 6 ambient radius — smooth connection from below
       const topR = columnRadius * 0.32;     // significantly narrower at top, approaching apex
       const radiusAt = (y) => {
-        const t = (y - zone6Base) / zone6Height;
+        const t = (y - zone7Base) / zone7Height;
         return baseR + (topR - baseR) * t;
       };
 
-      // Cone mesh wireframe: visible taper of the column through Zone 6.
+      // Cone mesh wireframe: visible taper of the column through Zone 7.
       // Uses a few horizontal rings plus vertical meridians so the
       // narrowing is unmistakable even with the streamlines turned off.
       {
         const nRings = 5;
         for (let j = 0; j < nRings; j++) {
           const t = j / (nRings - 1);
-          const y = zone6Base + t * zone6Height;
+          const y = zone7Base + t * zone7Height;
           const r = radiusAt(y);
           const ringPts = [];
           for (let k = 0; k <= 48; k++) {
@@ -2056,7 +2091,7 @@ const mount = document.getElementById('canvas-mount');
             transparent: true,
             opacity: 0.35 + 0.25 * t,  // top ring brightest — concentration
           });
-          zone6Group.add(new THREE.Line(g, m));
+          zone7Group.add(new THREE.Line(g, m));
         }
 
         // Vertical meridians — 8 evenly spaced around the circumference
@@ -2067,7 +2102,7 @@ const mount = document.getElementById('canvas-mount');
           const nMpts = 20;
           for (let k = 0; k < nMpts; k++) {
             const t = k / (nMpts - 1);
-            const y = zone6Base + t * zone6Height;
+            const y = zone7Base + t * zone7Height;
             const r = radiusAt(y);
             mpts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
           }
@@ -2077,12 +2112,12 @@ const mount = document.getElementById('canvas-mount');
             transparent: true,
             opacity: 0.30,
           });
-          zone6Group.add(new THREE.Line(g, m));
+          zone7Group.add(new THREE.Line(g, m));
         }
       }
 
       // Interior streamlines: simplified coherence, primarily axial, with
-      // a faint residual rotation (~0.2 turns across Zone 6) that reflects
+      // a faint residual rotation (~0.2 turns across Zone 7) that reflects
       // the not-quite-zero residual swirl after turbulence suppression.
       const residualTurns = 0.2;
       const nInterior = 9;
@@ -2096,7 +2131,7 @@ const mount = document.getElementById('canvas-mount');
         const nPts = 30;
         for (let k = 0; k < nPts; k++) {
           const t = k / (nPts - 1);
-          const y = zone6Base + t * zone6Height;
+          const y = zone7Base + t * zone7Height;
           // Streamline radius = startFactor × column-radius-at-this-height
           const colR = radiusAt(y);
           const r = colR * startRadiusFactor;
@@ -2105,7 +2140,7 @@ const mount = document.getElementById('canvas-mount');
         }
 
         const tube = makeTube(pts, INDIGO, INDIGO_EM, 0.017);
-        if (tube) zone6Group.add(tube);
+        if (tube) zone7Group.add(tube);
 
         // Three arrows per streamline, all in indigo — flow is primarily axial
         const arrowTs = [0.2, 0.55, 0.85];
@@ -2114,13 +2149,13 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, INDIGO, 0.10);
+          if (d.length() > 1e-5) addArrow(zone7Group, pos, d, INDIGO, 0.10);
         });
       }
 
       // Ambient frame: OPAQUE indigo blue outer streamlines following the
       // column taper. These replace the translucent light-blue ambient from
-      // earlier zones — Zone 6 is the indigo-ray zone, and the ambient frame
+      // earlier zones — Zone 7 is the indigo-ray zone, and the ambient frame
       // takes on that quality.
       const nAmbient = 6;
       for (let i = 0; i < nAmbient; i++) {
@@ -2129,14 +2164,14 @@ const mount = document.getElementById('canvas-mount');
         const nPts = 30;
         for (let k = 0; k < nPts; k++) {
           const t = k / (nPts - 1);
-          const y = zone6Base + t * zone6Height;
+          const y = zone7Base + t * zone7Height;
           const r = radiusAt(y);  // follow the taper exactly
           const phi = phaseOffset + residualTurns * Math.PI * 2 * t;
           pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
         }
         // Solid, opaque indigo — no transparent material
         const tube = makeTube(pts, INDIGO, INDIGO_EM, 0.014);
-        if (tube) zone6Group.add(tube);
+        if (tube) zone7Group.add(tube);
 
         const arrowTs = [0.3, 0.7];
         arrowTs.forEach((tA) => {
@@ -2144,13 +2179,13 @@ const mount = document.getElementById('canvas-mount');
           const pos = pts[idx];
           const next = pts[Math.min(idx + 1, nPts - 1)];
           const d = next.clone().sub(pos);
-          if (d.length() > 1e-5) addArrow(zone6Group, pos, d, INDIGO, 0.09);
+          if (d.length() > 1e-5) addArrow(zone7Group, pos, d, INDIGO, 0.09);
         });
       }
 
-      // Top of Zone 6: a subtle "almost-ready" signal rather than a climactic
+      // Top of Zone 7: a subtle "almost-ready" signal rather than a climactic
       // flourish. The real ignition happens above the dark gap, not here.
-      // A faint, narrow indigo ring sits at zone6Top — the compressed flow
+      // A faint, narrow indigo ring sits at zone7Top — the compressed flow
       // has reached its terminus but has not yet transitioned. Small, dim,
       // suggestive rather than declarative.
       {
@@ -2158,7 +2193,7 @@ const mount = document.getElementById('canvas-mount');
         const ringPts = [];
         for (let k = 0; k <= 32; k++) {
           const ph = (k / 32) * Math.PI * 2;
-          ringPts.push(new THREE.Vector3(terminalR * Math.cos(ph), zone6Top, terminalR * Math.sin(ph)));
+          ringPts.push(new THREE.Vector3(terminalR * Math.cos(ph), zone7Top, terminalR * Math.sin(ph)));
         }
         const g = new THREE.BufferGeometry().setFromPoints(ringPts);
         const m = new THREE.LineBasicMaterial({
@@ -2166,7 +2201,7 @@ const mount = document.getElementById('canvas-mount');
           transparent: true,
           opacity: 0.45,
         });
-        zone6Group.add(new THREE.Line(g, m));
+        zone7Group.add(new THREE.Line(g, m));
       }
     }
 
@@ -2179,7 +2214,7 @@ const mount = document.getElementById('canvas-mount');
     // yet crossed the activation threshold. Rendered as a visibly dark region
     // with a faint translucent core — no active flow, just potential.
     const threshold6Group = new THREE.Group();
-    window.threshold6Ref = threshold6Group;
+    threshold6Ref.current = threshold6Group;
     scene.add(threshold6Group);
 
     {
@@ -2201,11 +2236,11 @@ const mount = document.getElementById('canvas-mount');
 
       // Apex point marker: a small, slightly-glowing sphere at the geometric
       // tip of the column (top of Threshold 6). Marks the terminus of the
-      // interior flow and the emergence point of Zone 7's radiation.
+      // interior flow and the emergence point of Zone 8's radiation.
       {
         const apexGeom = new THREE.SphereGeometry(0.05, 24, 16);
         const apexMat = new THREE.MeshStandardMaterial({
-          color: 0x6a4a9c,      // muted violet — first hint of Zone 7's color
+          color: 0x6a4a9c,      // muted violet — first hint of Zone 8's color
           emissive: 0x3a2858,
           emissiveIntensity: 0.5,
           roughness: 0.4,
@@ -2215,8 +2250,8 @@ const mount = document.getElementById('canvas-mount');
         threshold6Group.add(apexMarker);
       }
 
-      // Boundary rings: one at t6Base (entry — top of Zone 6's last flow),
-      // one at t6Top (exit — where Zone 7's radiation begins). The entry
+      // Boundary rings: one at t6Base (entry — top of Zone 7's last flow),
+      // one at t6Top (exit — where Zone 8's radiation begins). The entry
       // ring is dim indigo; the exit ring is dim violet — signaling the
       // color transition that happens inside the gap.
       {
@@ -2228,7 +2263,7 @@ const mount = document.getElementById('canvas-mount');
         }
         const gBase = new THREE.BufferGeometry().setFromPoints(ringPtsBase);
         const mBase = new THREE.LineBasicMaterial({
-          color: 0x3a2a7c,  // indigo (Zone 6 color)
+          color: 0x3a2a7c,  // indigo (Zone 7 color)
           transparent: true,
           opacity: 0.4,
         });
@@ -2242,7 +2277,7 @@ const mount = document.getElementById('canvas-mount');
         }
         const gTop = new THREE.BufferGeometry().setFromPoints(ringPtsTop);
         const mTop = new THREE.LineBasicMaterial({
-          color: 0x6a4a9c,  // muted violet (Zone 7 color emerging)
+          color: 0x6a4a9c,  // muted violet (Zone 8 color emerging)
           transparent: true,
           opacity: 0.4,
         });
@@ -2251,7 +2286,7 @@ const mount = document.getElementById('canvas-mount');
     }
 
     // ======================================================================
-    // ZONE 7 - Radial Divergence (violet ray, rendered as collimated jet)
+    // ZONE 8 - Radial Divergence (violet ray, rendered as collimated jet)
     // ======================================================================
     // Ra (59.10) describes the third spiral radiating from the top of the
     // pyramid. Rendered here as a collimated relativistic jet (in the
@@ -2266,9 +2301,9 @@ const mount = document.getElementById('canvas-mount');
     // uses a violet-blue / cyan-white gradient — cooler and brighter,
     // matching the black-hole jet aesthetic — while keeping the zone's
     // "violet ray" identity at the cooler outer halo.
-    const zone7Group = new THREE.Group();
-    window.zone7Ref = zone7Group;
-    scene.add(zone7Group);
+    const zone8Group = new THREE.Group();
+    zone8Ref.current = zone8Group;
+    scene.add(zone8Group);
 
     {
       // Thick helical jet — modeled on the structure visible in the
@@ -2346,7 +2381,7 @@ const mount = document.getElementById('canvas-mount');
           side: THREE.DoubleSide,
           depthWrite: false,
         });
-        zone7Group.add(new THREE.Mesh(haloGeom, haloMat));
+        zone8Group.add(new THREE.Mesh(haloGeom, haloMat));
       }
 
       // --- Main jet body: solid translucent beam, cool blue-white.
@@ -2388,7 +2423,7 @@ const mount = document.getElementById('canvas-mount');
           side: THREE.DoubleSide,
           depthWrite: false,
         });
-        zone7Group.add(new THREE.Mesh(bodyGeom, bodyMat));
+        zone8Group.add(new THREE.Mesh(bodyGeom, bodyMat));
       }
 
       // --- Helical ribbons: the dominant visual feature. THREE thick
@@ -2427,7 +2462,7 @@ const mount = document.getElementById('canvas-mount');
               side: THREE.DoubleSide,
               depthWrite: false,
             });
-            zone7Group.add(new THREE.Mesh(tubeGeom, ribbonMat));
+            zone8Group.add(new THREE.Mesh(tubeGeom, ribbonMat));
           }
         }
       }
@@ -2465,7 +2500,7 @@ const mount = document.getElementById('canvas-mount');
               side: THREE.DoubleSide,
               depthWrite: false,
             });
-            zone7Group.add(new THREE.Mesh(tubeGeom, filamentMat));
+            zone8Group.add(new THREE.Mesh(tubeGeom, filamentMat));
           }
         }
       }
@@ -2511,7 +2546,7 @@ const mount = document.getElementById('canvas-mount');
           side: THREE.DoubleSide,
           depthWrite: false,
         });
-        zone7Group.add(new THREE.Mesh(axisGeom, axisMat));
+        zone8Group.add(new THREE.Mesh(axisGeom, axisMat));
       }
 
       // --- Emission point: bright concentrated sphere at the apex
@@ -2526,7 +2561,7 @@ const mount = document.getElementById('canvas-mount');
         });
         const emitter = new THREE.Mesh(emitGeom, emitMat);
         emitter.position.set(0, jetBaseY, 0);
-        zone7Group.add(emitter);
+        zone8Group.add(emitter);
       }
     }
 
@@ -2536,7 +2571,7 @@ const mount = document.getElementById('canvas-mount');
     // This is the outer half of the poloidal circuit. Raw unprocessed prana
     // circulates along these loops: down the outer flank from the north pole
     // region, curving under the base, and back up through the intake ring
-    // to feed Zone 1. The violet ray (Zone 7) is a localized emission at the
+    // to feed Zone 1. The violet ray (Zone 8) is a localized emission at the
     // apex; this ambient field is what surrounds the whole form and carries
     // the flow on its return path. Color: gold (matches Zone 1 — raw prana).
     //
@@ -2554,7 +2589,7 @@ const mount = document.getElementById('canvas-mount');
     //
     // Vertical half-span: 8.375.  Horizontal half-span: 10.05.  Ratio: 1.2.
     const ambientFieldGroup = new THREE.Group();
-    window.ambientFieldRef = ambientFieldGroup;
+    ambientFieldRef.current = ambientFieldGroup;
     scene.add(ambientFieldGroup);
 
     {
@@ -2650,20 +2685,20 @@ const mount = document.getElementById('canvas-mount');
     // ======================================================================
     // Don and Ra describe the column as carrying four distinct spirals:
     //
-    //   1. SEMI-SPIRAL (incomplete first spiral)
+    //   1. FOUNDATION SEMI-SPIRAL (Zone 3 / Threshold 2, dual identity)
     //      Bottom: top of the Separatrix (y = -2.8)
-    //      Top:    Threshold 2 / Zone 3 boundary (y = 0.154)
-    //      Encompasses: Zone 2 + Threshold 2
+    //      Top:    Zone 3 / Zone 4 boundary (y = 0.154)
+    //      Encompasses: Zone 2 + Zone 3 / Threshold 2
     //
     //   2. FIRST FULL SPIRAL (through the King's Chamber)
-    //      Bottom: Threshold 2 / Zone 3 boundary (y = 0.154)
-    //      Top:    Zone 4 / Zone 5 boundary (y = 4.154)
-    //      Encompasses: Zone 3 (bubble) + Threshold 3 + Zone 4 + Threshold 4
+    //      Bottom: Zone 3 / Zone 4 boundary (y = 0.154)
+    //      Top:    Zone 5 / Zone 6 boundary (y = 4.154)
+    //      Encompasses: Zone 4 (bubble) + Threshold 3 + Zone 5 + Threshold 4
     //
     //   3. SECOND FULL SPIRAL (ascending to the apex)
-    //      Bottom: Zone 4 / Zone 5 boundary (y = 4.154)
+    //      Bottom: Zone 5 / Zone 6 boundary (y = 4.154)
     //      Top:    Apex (y = 8.0)
-    //      Encompasses: Zone 5 + Threshold 5 + Zone 6 + Threshold 6
+    //      Encompasses: Zone 6 + Threshold 5 (Position 2) + Zone 7 + Threshold 6
     //
     //   4. THIRD SPIRAL (the jet — ejecting outward)
     //      Bottom: Apex (y = 8.0)
@@ -2675,7 +2710,7 @@ const mount = document.getElementById('canvas-mount');
     // out into a nearly-horizontal skirt matching the pyramid's base flow.
     // All drawn in dark gray, thick lines, toggleable (default OFF).
     const spiralsGroup = new THREE.Group();
-    window.spiralsRef = spiralsGroup;
+    spiralsRef.current = spiralsGroup;
     scene.add(spiralsGroup);
     {
       const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
@@ -2800,7 +2835,7 @@ const mount = document.getElementById('canvas-mount');
     // LABELS
     // ======================================================================
     const labelsGroup = new THREE.Group();
-    window.labelsRef = labelsGroup;
+    labelsRef.current = labelsGroup;
     scene.add(labelsGroup);
     {
       const labelX = 3.2;
@@ -2840,7 +2875,7 @@ const mount = document.getElementById('canvas-mount');
       // Interior-column labels: pointer targets the right edge of the zone
       // at the label's y-level. For most interior zones the right edge is
       // at columnRadius (~1.0); the separatrix flares wider; the bubble is
-      // slightly narrower; Zone 6 narrows toward its top; the flame is
+      // slightly narrower; Zone 7 narrows toward its top; the flame is
       // small and narrow.
       // Zone 1 — Convergence: placed directly BELOW the south pole of the
       // ambient toroidal field (y_south = -4.5), with a vertical arrow
@@ -2902,35 +2937,35 @@ const mount = document.getElementById('canvas-mount');
       placeLabeled("Zone 2 — Turbulence",
         labelX, (zone2Base + zone2Top) / 2,
         1.05, (zone2Base + zone2Top) / 2);
-      placeLabeled("Threshold 2 — Semi-Spiral",
+      placeLabeled("Zone 3 / Threshold 2 — Foundation Semi-Spiral",
         labelX, (thresh2Base + thresh2Top) / 2,
         1.05, (thresh2Base + thresh2Top) / 2);
-      placeLabeled("Zone 3 — The Bubble",
+      placeLabeled("Zone 4 — The Bubble / Queen's Chamber",
         labelX, bubbleCenterY,
         bubbleHalfWidth + 0.05, bubbleCenterY);
       placeLabeled("Threshold 3 — Wake",
         labelX, (threshold3Base + threshold3Top) / 2,
         0.7, (threshold3Base + threshold3Top) / 2);
-      placeLabeled("Zone 4 — Helical Flow",
-        labelX, (zone4Base + zone4Top) / 2,
-        columnRadius * 0.85, (zone4Base + zone4Top) / 2);
+      placeLabeled("Zone 5 — First Helical Flow",
+        labelX, (zone5Base + zone5Top) / 2,
+        columnRadius * 0.85, (zone5Base + zone5Top) / 2);
       placeLabeled("Threshold 4 — Helical Breakdown",
         labelX, (t4Base + t4Top) / 2,
         columnRadius * 0.85, (t4Base + t4Top) / 2);
-      placeLabeled("Zone 5 — Second Helical Flow",
-        labelX, (zone5Base + zone5Top) / 2,
-        columnRadius * 0.55, (zone5Base + zone5Top) / 2);
+      placeLabeled("Zone 6 — Second Helical Flow",
+        labelX, (zone6Base + zone6Top) / 2,
+        columnRadius * 0.55, (zone6Base + zone6Top) / 2);
       placeLabeled("Threshold 5 — Turbulent Negotiation",
         labelX, (t5Base + t5Top) / 2,
         columnRadius * 0.85, (t5Base + t5Top) / 2);
-      placeLabeled("Zone 6 — Relaminarization",
-        labelX, (zone6Base + zone6Top) / 2,
-        columnRadius * 0.55, (zone6Base + zone6Top) / 2);
+      placeLabeled("Zone 7 — Relaminarization",
+        labelX, (zone7Base + zone7Top) / 2,
+        columnRadius * 0.55, (zone7Base + zone7Top) / 2);
       placeLabeled("Threshold 6 — Apex Ignition",
         labelX, (t6Base + t6Top) / 2,
         columnRadius * 0.15, (t6Base + t6Top) / 2);
-      // Zone 7 jet label sits beside the jet; pointer targets its side wall
-      placeLabeled("Zone 7 — Radial Divergence",
+      // Zone 8 jet label sits beside the jet; pointer targets its side wall
+      placeLabeled("Zone 8 — Radial Divergence",
         labelX + 1.0, 14.0,
         0.5, 14.0);
       // Ambient Toroidal Field label: positioned at the 10:00 clock
@@ -3010,7 +3045,7 @@ const mount = document.getElementById('canvas-mount');
     // arrowheads are also black. Grouped under their own toggle so they can
     // be shown independently of the zone-label set.
     const chamberLabelsGroup = new THREE.Group();
-    window.chamberLabelsRef = chamberLabelsGroup;
+    chamberLabelsRef.current = chamberLabelsGroup;
     scene.add(chamberLabelsGroup);
     {
       const chamberLabelColor = "#000000";
@@ -3108,9 +3143,9 @@ const mount = document.getElementById('canvas-mount');
     // pyramid apex -> T6 top (y = 8.0). Span: 340 cubits over 10.8 poloidal
     // units. Scale: 340 / 10.8 = 31.481. Offset: -0.894.
     // (POLOIDAL_TO_PYRAMID_SCALE and PYRAMID_Y_OFFSET are declared at the
-    // top of the useEffect so the Zone 7 flame can reference them too.)
+    // top of the useEffect so the Zone 8 flame can reference them too.)
     const pyramidGroup = new THREE.Group();
-    window.pyramidRef = pyramidGroup;
+    pyramidRef.current = pyramidGroup;
     scene.add(pyramidGroup);
     pyramidGroup.scale.set(
       1 / POLOIDAL_TO_PYRAMID_SCALE,
@@ -3167,7 +3202,7 @@ const mount = document.getElementById('canvas-mount');
 
       // --- Chambers group: Red, Queen's, King's (+ QC gable)
       const chambersGroup = new THREE.Group();
-      window.pyramidChambersRef = chambersGroup;
+      pyramidChambersRef.current = chambersGroup;
       pyramidGroup.add(chambersGroup);
 
       // Red Chamber: 14 east, bottom at –60, inner dims 27 × 7.5 × 16
@@ -3252,7 +3287,7 @@ const mount = document.getElementById('canvas-mount');
       // five ascending layers are clearly visible but slightly less
       // commanding than the main KC below them (hierarchy: KC > relieving).
       const relievingGroup = new THREE.Group();
-      window.pyramidRelievingRef = relievingGroup;
+      pyramidRelievingRef.current = relievingGroup;
       pyramidGroup.add(relievingGroup);
       {
         const rMat = new THREE.MeshBasicMaterial({
@@ -3294,13 +3329,22 @@ const mount = document.getElementById('canvas-mount');
       // --- Position 2: the Interdimensional Chamber.
       // v8.4: darkened and recolored with the gold-indigo-violet palette
       // appropriate to Position 2's metaphysical role and its fluid-dynamic
-      // location at Threshold 5 (between second helical flow and
-      // relaminarization, where the flow is most plastic).
+      // location at Threshold 5 — the turbulent negotiation zone where
+      // the second spiral (Zone 6) dissolves before the relaminarization
+      // of Zone 7 takes hold. This is the threshold itself, not the calm
+      // indigo column above it. Ra 59.14: "apparent diffusion and weakness
+      // of the spiraling energy... in position two, as you have called it,
+      // much work may be done inter-dimensionally." The diffusion-and-
+      // weakness language is the language of turbulent dissolution, not
+      // relaminarization — P2 is the interdimensional doorway, not the
+      // calm zone past it. Ra 59.15: no chamber was built here; only
+      // entities capable of serving as conductors of the focused spiral
+      // can navigate this threshold.
       //   Outer sphere: deep INDIGO — the base envelope
       //   Wireframe: GOLD — ring structure scribing the surface
       //   Inner core: VIOLET — concentrated radiant center
       const p2Group = new THREE.Group();
-      window.pyramidP2Ref = p2Group;
+      pyramidP2Ref.current = p2Group;
       pyramidGroup.add(p2Group);
       {
         const p2Y = 210;
@@ -3343,8 +3387,9 @@ const mount = document.getElementById('canvas-mount');
     // to its interpretive poloidal counterpart (RC->Zone 1, QC->bubble, etc.).
     // Under the current vessel-first reframe (pyramid base = separatrix base,
     // apex = T6 top), chambers land in different zones — QC sits below column
-    // base, KC in Zone 2 turbulence, P2 in Zone 4. The original correspondence
-    // claims no longer hold; the new correspondences are being re-read.
+    // base, KC in Zone 2 turbulence, P2 at Threshold 5 (turbulent negotiation,
+    // the interdimensional doorway). The original correspondence claims no
+    // longer hold; the new correspondences are being re-read.
     //
     // While the interpretive map is being re-worked, these lines render as
     // neutral chamber-to-axis markers: a short line from each chamber center
@@ -3352,7 +3397,7 @@ const mount = document.getElementById('canvas-mount');
     // each chamber sits in the column without asserting a specific poloidal
     // correspondence. Toggled separately; default OFF.
     const correspondenceGroup = new THREE.Group();
-    window.pyramidCorrespondenceRef = correspondenceGroup;
+    pyramidCorrespondenceRef.current = correspondenceGroup;
     scene.add(correspondenceGroup);
     {
       const S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
@@ -3461,10 +3506,307 @@ const mount = document.getElementById('canvas-mount');
     };
     window.addEventListener("resize", handleResize);
 
+    return () => {
+      cancelAnimationFrame(animId);
+      window.removeEventListener("resize", handleResize);
+      renderer.domElement.removeEventListener("mousedown", onPointerDown);
+      window.removeEventListener("mousemove", onPointerMove);
+      window.removeEventListener("mouseup", onPointerUp);
+      renderer.domElement.removeEventListener("touchstart", onPointerDown);
+      window.removeEventListener("touchmove", onPointerMove);
+      window.removeEventListener("touchend", onPointerUp);
+      renderer.domElement.removeEventListener("wheel", onWheel);
+      if (mount.contains(renderer.domElement)) {
+        mount.removeChild(renderer.domElement);
+      }
+      renderer.dispose();
+    };
+  }, []);
 
+  // Toggle visibility when state changes
+  useEffect(() => {
+    if (zone1Ref.current) zone1Ref.current.visible = visibility.zone1;
+    if (threshold1Ref.current) threshold1Ref.current.visible = visibility.threshold1;
+    if (zone2Ref.current) zone2Ref.current.visible = visibility.zone2;
+    if (threshold2Ref.current) threshold2Ref.current.visible = visibility.threshold2;
+    if (zone4Ref.current) zone4Ref.current.visible = visibility.zone4;
+    if (bubbleEnvelopeRef.current) bubbleEnvelopeRef.current.visible = visibility.bubbleEnvelope;
+    if (threshold3Ref.current) threshold3Ref.current.visible = visibility.threshold3;
+    if (zone5Ref.current) zone5Ref.current.visible = visibility.zone5;
+    if (threshold4Ref.current) threshold4Ref.current.visible = visibility.threshold4;
+    if (zone6Ref.current) zone6Ref.current.visible = visibility.zone6;
+    if (threshold5Ref.current) threshold5Ref.current.visible = visibility.threshold5;
+    if (zone7Ref.current) zone7Ref.current.visible = visibility.zone7;
+    if (threshold6Ref.current) threshold6Ref.current.visible = visibility.threshold6;
+    if (zone8Ref.current) zone8Ref.current.visible = visibility.zone8;
+    if (ambientFieldRef.current) ambientFieldRef.current.visible = visibility.ambientField;
+    if (lowerSheathRef.current) lowerSheathRef.current.visible = visibility.lowerSheath;
+    if (merkabaRef.current) merkabaRef.current.visible = visibility.merkaba;
+    if (labelsRef.current) labelsRef.current.visible = visibility.labels;
+    if (chamberLabelsRef.current) chamberLabelsRef.current.visible = visibility.chamberLabels;
+    if (spiralsRef.current) spiralsRef.current.visible = visibility.spirals;
+    // Pyramid overlay: master visibility, then sub-groups only take effect
+    // when the master is on. Correspondence lines live in the outer scene
+    // (not inside pyramidGroup), so they're gated on both master and sub.
+    if (pyramidRef.current) pyramidRef.current.visible = visibility.pyramid;
+    if (pyramidChambersRef.current) pyramidChambersRef.current.visible = visibility.pyramidChambers;
+    if (pyramidRelievingRef.current) pyramidRelievingRef.current.visible = visibility.pyramidRelieving;
+    if (pyramidP2Ref.current) pyramidP2Ref.current.visible = visibility.pyramidP2;
+    if (pyramidCorrespondenceRef.current) {
+      pyramidCorrespondenceRef.current.visible = visibility.pyramid && visibility.pyramidCorrespondence;
+    }
+  }, [visibility]);
 
-// Apply initial visibility state (must run AFTER scene construction so refs exist)
-updateVisibility();
-</script>
-</body>
-</html>
+  const toggle = (key) => {
+    setVisibility((v) => ({ ...v, [key]: !v[key] }));
+  };
+
+  const rowStyle = {
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    padding: "2px 0",
+    fontSize: 12,
+    fontFamily: "Georgia, serif",
+    color: "#4a3818",
+  };
+
+  return (
+    <div style={{ position: "relative", width: "100%", height: "100vh", background: "#f5efdd" }}>
+      <div ref={mountRef} style={{ width: "100%", height: "100%" }} />
+
+      {/* Control panel — collapsed by default to keep scene unobstructed */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 16,
+          left: 16,
+          background: panelOpen ? "rgba(245, 239, 221, 0.82)" : "rgba(245, 239, 221, 0.92)",
+          border: "1px solid #a8822c",
+          borderRadius: 6,
+          padding: panelOpen ? "10px 14px" : "6px 10px",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+          maxWidth: 300,
+          maxHeight: panelOpen ? "80vh" : "auto",
+          overflowY: panelOpen ? "auto" : "visible",
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            cursor: "pointer",
+            fontFamily: "Georgia, serif",
+            fontWeight: "bold",
+            color: "#4a3818",
+            fontSize: 14,
+          }}
+          onClick={() => setPanelOpen(!panelOpen)}
+        >
+          <span>Poloidal Core — Zones &amp; Thresholds</span>
+          <span style={{ marginLeft: 12 }}>{panelOpen ? "▾" : "▸"}</span>
+        </div>
+
+        {panelOpen && (
+          <div style={{ marginTop: 10 }}>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone1} onChange={() => toggle("zone1")} />
+              <span>Zone 1 — Radial Convergence</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold1} onChange={() => toggle("threshold1")} />
+              <span style={{ fontStyle: "italic" }}>Threshold 1 — The Separatrix</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone2} onChange={() => toggle("zone2")} />
+              <span>Zone 2 — Collision &amp; Turbulence</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold2} onChange={() => toggle("threshold2")} />
+              <span>Zone 3 / Threshold 2 — The Foundation Semi-Spiral</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone4} onChange={() => toggle("zone4")} />
+              <span>Zone 4 — The Bubble</span>
+            </div>
+            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
+              <input type="checkbox" checked={visibility.bubbleEnvelope} onChange={() => toggle("bubbleEnvelope")} />
+              <span>bubble envelope</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold3} onChange={() => toggle("threshold3")} />
+              <span style={{ fontStyle: "italic" }}>Threshold 3 — Post-Bubble Wake</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone5} onChange={() => toggle("zone5")} />
+              <span>Zone 5 — First Helical Flow</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold4} onChange={() => toggle("threshold4")} />
+              <span style={{ fontStyle: "italic" }}>Threshold 4 — Helical Breakdown</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone6} onChange={() => toggle("zone6")} />
+              <span>Zone 6 — Second Helical Flow</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold5} onChange={() => toggle("threshold5")} />
+              <span style={{ fontStyle: "italic" }}>Threshold 5 — Turbulent Negotiation</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone7} onChange={() => toggle("zone7")} />
+              <span>Zone 7 — Relaminarization</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.threshold6} onChange={() => toggle("threshold6")} />
+              <span style={{ fontStyle: "italic" }}>Threshold 6 — Apex Ignition</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.zone8} onChange={() => toggle("zone8")} />
+              <span>Zone 8 — Radial Divergence</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.ambientField} onChange={() => toggle("ambientField")} />
+              <span>Ambient Toroidal Field</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.lowerSheath} onChange={() => toggle("lowerSheath")} />
+              <span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span>
+            </div>
+            <div style={{ height: 8 }} />
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.merkaba} onChange={() => toggle("merkaba")} />
+              <span>Merkaba overlay</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.spirals} onChange={() => toggle("spirals")} />
+              <span>Spirals overlay (Don/Ra schematic)</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.labels} onChange={() => toggle("labels")} />
+              <span>Labels</span>
+            </div>
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.chamberLabels} onChange={() => toggle("chamberLabels")} />
+              <span>Chamber labels</span>
+            </div>
+
+            {/* Pyramid overlay — master toggle followed by indented sub-toggles.
+                When master is off, sub-toggle state is preserved but hidden. */}
+            <div style={{ height: 8 }} />
+            <div style={rowStyle}>
+              <input type="checkbox" checked={visibility.pyramid} onChange={() => toggle("pyramid")} />
+              <span style={{ fontWeight: "bold" }}>Pyramid overlay</span>
+            </div>
+            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
+              <input
+                type="checkbox"
+                checked={visibility.pyramidChambers}
+                onChange={() => toggle("pyramidChambers")}
+                disabled={!visibility.pyramid}
+              />
+              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>chambers (RC · QC · KC)</span>
+            </div>
+            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
+              <input
+                type="checkbox"
+                checked={visibility.pyramidRelieving}
+                onChange={() => toggle("pyramidRelieving")}
+                disabled={!visibility.pyramid}
+              />
+              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>relieving chambers</span>
+            </div>
+            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
+              <input
+                type="checkbox"
+                checked={visibility.pyramidP2}
+                onChange={() => toggle("pyramidP2")}
+                disabled={!visibility.pyramid}
+              />
+              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>Position 2 marker</span>
+            </div>
+            <div style={{ ...rowStyle, paddingLeft: 20, fontSize: 12 }}>
+              <input
+                type="checkbox"
+                checked={visibility.pyramidCorrespondence}
+                onChange={() => toggle("pyramidCorrespondence")}
+                disabled={!visibility.pyramid}
+              />
+              <span style={{ opacity: visibility.pyramid ? 1 : 0.5 }}>correspondence lines</span>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                paddingTop: 10,
+                borderTop: "1px solid #c8a85c",
+                fontSize: 11,
+                color: "#6b4a1a",
+                fontFamily: "Georgia, serif",
+                lineHeight: 1.45,
+              }}
+            >
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#785c18", verticalAlign: "middle", marginRight: 6 }} />
+                gold = organized flow
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(180deg, #e0a028, #d4682c, #4a1420)", verticalAlign: "middle", marginRight: 6 }} />
+                turbulence gradient (Zone 2)
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#b8a018", verticalAlign: "middle", marginRight: 6 }} />
+                dark yellow = semi-spiral
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#3a8a4a", verticalAlign: "middle", marginRight: 6 }} />
+                green = micro-torus
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8)", verticalAlign: "middle", marginRight: 6 }} />
+                spectrum = Zone 5 vortex core
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30)", verticalAlign: "middle", marginRight: 6 }} />
+                red-to-amber = Zone 6 (second spiral)
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a)", verticalAlign: "middle", marginRight: 6 }} />
+                muted = Threshold 5 turbulence
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#3a2a7c", verticalAlign: "middle", marginRight: 6 }} />
+                indigo = Zone 7 (relaminarization)
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#0a0614", verticalAlign: "middle", marginRight: 6 }} />
+                dark gap = Threshold 6 (preheat)
+              </div>
+              <div style={{ marginBottom: 3 }}>
+                <span style={{ display: "inline-block", width: 30, height: 12, background: "linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff)", verticalAlign: "middle", marginRight: 6 }} />
+                Zone 8 jet (violet-blue → blue-white)
+              </div>
+              <div>
+                <span style={{ display: "inline-block", width: 12, height: 12, background: "#8a6a1e", verticalAlign: "middle", marginRight: 6 }} />
+                gold = ambient toroidal field (raw prana)
+              </div>
+            </div>
+
+            <div
+              style={{
+                marginTop: 10,
+                fontSize: 11,
+                color: "#6b4a1a",
+                fontFamily: "Georgia, serif",
+                fontStyle: "italic",
+              }}
+            >
+              Drag to orbit · scroll to zoom
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
