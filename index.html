@@ -2,177 +2,180 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Poloidal Core Visualization — Raian Process Metaphysics</title>
+<title>Poloidal Core Visualization</title>
 <style>
-  html, body { margin: 0; padding: 0; height: 100%; background: #f5efdd; overflow: hidden; }
-  body { font-family: Georgia, serif; }
-  #mount { position: fixed; inset: 0; width: 100%; height: 100%; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #f5efdd;
+    font-family: Georgia, serif;
+  }
+  #mount {
+    position: absolute;
+    inset: 0;
+  }
   #panel {
-    position: fixed; bottom: 16px; left: 16px;
+    position: absolute;
+    bottom: 16px;
+    left: 16px;
     background: rgba(245, 239, 221, 0.92);
-    border: 1px solid #a8822c; border-radius: 6px;
-    padding: 6px 10px; max-width: 300px;
+    border: 1px solid #a8822c;
+    border-radius: 6px;
+    padding: 6px 10px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    color: #4a3818; z-index: 10;
+    max-width: 300px;
+    font-family: Georgia, serif;
+    color: #4a3818;
+    z-index: 10;
   }
   #panel.open {
-    padding: 10px 14px; max-height: 80vh; overflow-y: auto;
+    background: rgba(245, 239, 221, 0.82);
+    padding: 10px 14px;
+    max-height: 80vh;
+    overflow-y: auto;
   }
-  #panel .header {
-    display: flex; justify-content: space-between; align-items: center;
-    cursor: pointer; font-weight: bold; font-size: 14px;
+  #panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 14px;
   }
-  #panel .header span.chev { margin-left: 12px; }
-  #panel .body { display: none; margin-top: 10px; }
-  #panel.open .body { display: block; }
+  #panel-body {
+    display: none;
+    margin-top: 10px;
+  }
+  #panel.open #panel-body {
+    display: block;
+  }
   .row {
-    display: flex; align-items: center; gap: 8px; padding: 2px 0; font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 2px 0;
+    font-size: 12px;
   }
-  .row.sub { padding-left: 20px; }
-  .row input[type=checkbox] { margin: 0; }
+  .row.sub {
+    padding-left: 20px;
+  }
   .italic { font-style: italic; }
   .bold { font-weight: bold; }
-  .divider { height: 8px; }
+  .spacer { height: 8px; }
   .legend {
-    margin-top: 10px; padding-top: 10px; border-top: 1px solid #c8a85c;
-    font-size: 11px; color: #6b4a1a; line-height: 1.45;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #c8a85c;
+    font-size: 11px;
+    color: #6b4a1a;
+    line-height: 1.45;
   }
-  .legend-row { margin-bottom: 3px; }
-  .swatch {
-    display: inline-block; width: 12px; height: 12px;
-    vertical-align: middle; margin-right: 6px;
+  .legend .swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    vertical-align: middle;
+    margin-right: 6px;
   }
-  .help {
-    margin-top: 10px; font-size: 11px; color: #6b4a1a; font-style: italic;
+  .legend .swatch.wide { width: 30px; }
+  .legend > div { margin-bottom: 3px; }
+  .hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #6b4a1a;
+    font-style: italic;
   }
 </style>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
-  }
-}
-</script>
 </head>
 <body>
-
 <div id="mount"></div>
 
-<div id="panel" onclick="if (event.target.closest('.header')) togglePanel()">
-  <div class="header">
-    <span>Poloidal Core — Zones &amp; Thresholds</span>
-    <span class="chev" id="chev">▸</span>
+<div id="panel">
+  <div id="panel-header">
+    <span>Poloidal Core &mdash; Zones &amp; Thresholds</span>
+    <span id="panel-arrow">&#9656;</span>
   </div>
-  <div class="body" onclick="event.stopPropagation()">
-    <div class="row"><input type="checkbox" id="cb_zone1" checked onchange="onToggle('zone1', this.checked)"><span>Zone 1 — Radial Convergence</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold1" checked onchange="onToggle('threshold1', this.checked)"><span class="italic">Threshold 1 — The Separatrix</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone2" checked onchange="onToggle('zone2', this.checked)"><span>Zone 2 — Collision &amp; Turbulence</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold2" checked onchange="onToggle('threshold2', this.checked)"><span>Zone 3 / Threshold 2 — The Foundation Semi-Spiral</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone4" checked onchange="onToggle('zone4', this.checked)"><span>Zone 4 — The Bubble</span></div>
-      <div class="row" class="sub"><input type="checkbox" id="cb_bubbleEnvelope" checked onchange="onToggle('bubbleEnvelope', this.checked)"><span>bubble envelope</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold3" checked onchange="onToggle('threshold3', this.checked)"><span class="italic">Threshold 3 — Post-Bubble Wake</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone5" checked onchange="onToggle('zone5', this.checked)"><span>Zone 5 — First Helical Flow</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold4" checked onchange="onToggle('threshold4', this.checked)"><span class="italic">Threshold 4 — Helical Breakdown</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone6" checked onchange="onToggle('zone6', this.checked)"><span>Zone 6 — Second Helical Flow</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold5" checked onchange="onToggle('threshold5', this.checked)"><span class="italic">Threshold 5 — Turbulent Negotiation</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone7" checked onchange="onToggle('zone7', this.checked)"><span>Zone 7 — Relaminarization</span></div>
-      <div class="row"><input type="checkbox" id="cb_threshold6" checked onchange="onToggle('threshold6', this.checked)"><span class="italic">Threshold 6 — Apex Ignition</span></div>
-      <div class="row"><input type="checkbox" id="cb_zone8" checked onchange="onToggle('zone8', this.checked)"><span>Zone 8 — Radial Divergence</span></div>
-      <div class="row"><input type="checkbox" id="cb_ambientField" checked onchange="onToggle('ambientField', this.checked)"><span>Ambient Toroidal Field</span></div>
-      <div class="row"><input type="checkbox" id="cb_lowerSheath" checked onchange="onToggle('lowerSheath', this.checked)"><span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span></div>
-      <div class="row"><input type="checkbox" id="cb_merkaba"  onchange="onToggle('merkaba', this.checked)"><span>Merkaba overlay</span></div>
-      <div class="row"><input type="checkbox" id="cb_spirals"  onchange="onToggle('spirals', this.checked)"><span>Spirals overlay (Don/Ra schematic)</span></div>
-      <div class="row"><input type="checkbox" id="cb_labels" checked onchange="onToggle('labels', this.checked)"><span>Labels</span></div>
-      <div class="row"><input type="checkbox" id="cb_chamberLabels" checked onchange="onToggle('chamberLabels', this.checked)"><span>Chamber labels</span></div>
-      <div class="row"><input type="checkbox" id="cb_pyramid"  onchange="onToggle('pyramid', this.checked)"><span class="bold">Pyramid overlay</span></div>
-      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidChambers" checked onchange="onToggle('pyramidChambers', this.checked)"><span>chambers (RC · QC · KC)</span></div>
-      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidRelieving" checked onchange="onToggle('pyramidRelieving', this.checked)"><span>relieving chambers</span></div>
-      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidP2" checked onchange="onToggle('pyramidP2', this.checked)"><span>Position 2 marker</span></div>
-      <div class="row" class="sub"><input type="checkbox" id="cb_pyramidCorrespondence"  onchange="onToggle('pyramidCorrespondence', this.checked)"><span>correspondence lines</span></div>
+  <div id="panel-body">
+    <div class="row"><input type="checkbox" data-key="zone1" checked><span>Zone 1 &mdash; Radial Convergence</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold1" checked><span class="italic">Threshold 1 &mdash; The Separatrix</span></div>
+    <div class="row"><input type="checkbox" data-key="zone2" checked><span>Zone 2 &mdash; Collision &amp; Turbulence</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold2" checked><span>Zone 3 / Threshold 2 &mdash; The Foundation Semi-Spiral</span></div>
+    <div class="row"><input type="checkbox" data-key="zone4" checked><span>Zone 4 &mdash; The Bubble</span></div>
+    <div class="row sub"><input type="checkbox" data-key="bubbleEnvelope" checked><span>bubble envelope</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold3" checked><span class="italic">Threshold 3 &mdash; Post-Bubble Wake</span></div>
+    <div class="row"><input type="checkbox" data-key="zone5" checked><span>Zone 5 &mdash; First Helical Flow</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold4" checked><span class="italic">Threshold 4 &mdash; Helical Breakdown</span></div>
+    <div class="row"><input type="checkbox" data-key="zone6" checked><span>Zone 6 &mdash; Second Helical Flow</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold5" checked><span class="italic">Threshold 5 &mdash; Turbulent Negotiation</span></div>
+    <div class="row"><input type="checkbox" data-key="zone7" checked><span>Zone 7 &mdash; Relaminarization</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold6" checked><span class="italic">Threshold 6 &mdash; Apex Ignition</span></div>
+    <div class="row"><input type="checkbox" data-key="zone8" checked><span>Zone 8 &mdash; Radial Divergence</span></div>
+    <div class="row"><input type="checkbox" data-key="ambientField" checked><span>Ambient Toroidal Field</span></div>
+    <div class="row"><input type="checkbox" data-key="lowerSheath" checked><span>Lower Sheath (Zone 1 &ndash; base of Zone 3 / Threshold 2)</span></div>
+    <div class="spacer"></div>
+    <div class="row"><input type="checkbox" data-key="merkaba"><span>Merkaba overlay</span></div>
+    <div class="row"><input type="checkbox" data-key="spirals"><span>Spirals overlay (Don/Ra schematic)</span></div>
+    <div class="row"><input type="checkbox" data-key="labels" checked><span>Labels</span></div>
+    <div class="row"><input type="checkbox" data-key="chamberLabels" checked><span>Chamber labels</span></div>
+
+    <div class="spacer"></div>
+    <div class="row"><input type="checkbox" data-key="pyramid"><span class="bold">Pyramid overlay</span></div>
+    <div class="row sub"><input type="checkbox" data-key="pyramidChambers" checked data-gated-by="pyramid"><span>chambers (RC &middot; QC &middot; KC)</span></div>
+    <div class="row sub"><input type="checkbox" data-key="pyramidRelieving" checked data-gated-by="pyramid"><span>relieving chambers</span></div>
+    <div class="row sub"><input type="checkbox" data-key="pyramidP2" checked data-gated-by="pyramid"><span>Position 2 marker</span></div>
+    <div class="row sub"><input type="checkbox" data-key="pyramidCorrespondence" data-gated-by="pyramid"><span>correspondence lines</span></div>
+
     <div class="legend">
-  <div class="legend-row"><span class="swatch" style="background:#785c18"></span>gold = organized flow</div>
-  <div class="legend-row"><span class="swatch" style="background:linear-gradient(180deg,#e0a028,#d4682c,#4a1420);width:30px"></span>turbulence gradient (Zone 2)</div>
-  <div class="legend-row"><span class="swatch" style="background:#b8a018"></span>dark yellow = semi-spiral</div>
-  <div class="legend-row"><span class="swatch" style="background:#3a8a4a"></span>green = micro-torus</div>
-  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#d4342e,#e0c030,#4ca848,#3a6ac8,#8844a8);width:30px"></span>spectrum = Zone 5 vortex core</div>
-  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#b8261e,#d4342e,#e07030,#e09c30);width:30px"></span>red-to-amber = Zone 6 (second spiral)</div>
-  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#6a2420,#5a4838,#3a3a3a);width:30px"></span>muted = Threshold 5 turbulence</div>
-  <div class="legend-row"><span class="swatch" style="background:#3a2a7c"></span>indigo = Zone 7 (relaminarization)</div>
-  <div class="legend-row"><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (preheat)</div>
-  <div class="legend-row"><span class="swatch" style="background:linear-gradient(90deg,#7a6ac8,#a8c0f0,#f0f4ff);width:30px"></span>Zone 8 jet (violet-blue → blue-white)</div>
-  <div class="legend-row"><span class="swatch" style="background:#8a6a1e"></span>gold = ambient toroidal field (raw prana)</div>
-</div>
-<div class="help">Drag to orbit · scroll to zoom</div>
+      <div><span class="swatch" style="background:#785c18"></span>gold = organized flow</div>
+      <div><span class="swatch wide" style="background:linear-gradient(180deg, #e0a028, #d4682c, #4a1420)"></span>turbulence gradient (Zone 2)</div>
+      <div><span class="swatch" style="background:#b8a018"></span>dark yellow = semi-spiral</div>
+      <div><span class="swatch" style="background:#3a8a4a"></span>green = micro-torus</div>
+      <div><span class="swatch wide" style="background:linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8)"></span>spectrum = Zone 5 vortex core</div>
+      <div><span class="swatch wide" style="background:linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30)"></span>red-to-amber = Zone 6 (second spiral)</div>
+      <div><span class="swatch wide" style="background:linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a)"></span>muted = Threshold 5 turbulence</div>
+      <div><span class="swatch" style="background:#3a2a7c"></span>indigo = Zone 7 (relaminarization)</div>
+      <div><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (preheat)</div>
+      <div><span class="swatch wide" style="background:linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff)"></span>Zone 8 jet (violet-blue &rarr; blue-white)</div>
+      <div><span class="swatch" style="background:#8a6a1e"></span>gold = ambient toroidal field (raw prana)</div>
+    </div>
+    <div class="hint">Drag to orbit &middot; scroll to zoom</div>
   </div>
 </div>
 
-<script type="module">
-import * as THREE from "three";
+<!-- Three.js r128 from cdnjs (allowed in container network config) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+// Global registry of toggle-able groups, populated during scene construction.
+window.__groups = {};
 
-// ---------- visibility state ----------
-const visibility = {
-  zone1: true,
-  threshold1: true,
-  zone2: true,
-  threshold2: true,
-  zone4: true,
-  bubbleEnvelope: true,
-  threshold3: true,
-  zone5: true,
-  threshold4: true,
-  zone6: true,
-  threshold5: true,
-  zone7: true,
-  threshold6: true,
-  zone8: true,
-  ambientField: true,
-  lowerSheath: true,
-  merkaba: false,
-  spirals: false,
-  labels: true,
-  chamberLabels: true,
-  pyramid: false,
-  pyramidChambers: true,
-  pyramidRelieving: true,
-  pyramidP2: true,
-  pyramidCorrespondence: false,
-};
-
-
-// ---------- scene refs ----------
-const refs = {
-  scene: null, renderer: null, camera: null, mount: null,
-  zone1: null, threshold1: null, zone2: null, threshold2: null,
-  zone4: null, bubbleEnvelope: null, threshold3: null, zone5: null,
-  threshold4: null, zone6: null, threshold5: null, zone7: null,
-  threshold6: null, zone8: null, ambientField: null, lowerSheath: null,
-  merkaba: null, labels: null, chamberLabels: null, spirals: null,
-  pyramid: null, pyramidChambers: null, pyramidRelieving: null,
-  pyramidP2: null, pyramidCorrespondence: null,
-};
-
-// ---------- scene construction (verbatim from jsx useEffect body) ----------
-(() => {
-    const mount = document.getElementById('mount');
-
+// ---------------------------------------------------------------------------
+// SCENE CONSTRUCTION
+// Code extracted verbatim from the React component's useEffect body, with
+// React-specific ref assignments rewritten to touch window.__groups instead.
+// Cleanup (unmount) block omitted — no unmounting happens in plain HTML.
+// ---------------------------------------------------------------------------
+(function runScene() {
+    const mount = document.getElementById("mount");
+    if (!mount) return;
 
     // --- Scene setup -------------------------------------------------------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#f5efdd");
-    refs.scene = scene;
+    window.__groups.scene = scene;
 
     const width = mount.clientWidth;
     const height = mount.clientHeight;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    refs.camera = camera;
+    window.__groups.camera = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
-    refs.renderer = renderer;
+    window.__groups.renderer = renderer;
 
     // Lighting
     const ambient = new THREE.AmbientLight(0xffffff, 0.7);
@@ -476,7 +479,7 @@ const refs = {
     // ZONE 1 - Radial Convergence
     // ======================================================================
     const zone1Group = new THREE.Group();
-    refs.zone1 = zone1Group;
+    window.__groups.zone1 = zone1Group;
     scene.add(zone1Group);
     {
       const GOLD = 0x785c18;
@@ -551,7 +554,7 @@ const refs = {
     // THRESHOLD 1 - Separatrix Bell
     // ======================================================================
     const threshold1Group = new THREE.Group();
-    refs.threshold1 = threshold1Group;
+    window.__groups.threshold1 = threshold1Group;
     scene.add(threshold1Group);
     {
       const nRings = 18;
@@ -644,7 +647,7 @@ const refs = {
     // ZONE 2 - Collision & Turbulence (lower) / Proto-organization (upper)
     // ======================================================================
     const zone2Group = new THREE.Group();
-    refs.zone2 = zone2Group;
+    window.__groups.zone2 = zone2Group;
     scene.add(zone2Group);
     {
       const z2Height = zone2Top - zone2Base;
@@ -907,7 +910,7 @@ const refs = {
     // foundation upon which everything above it rests.
     // ======================================================================
     const threshold2Group = new THREE.Group();
-    refs.threshold2 = threshold2Group;
+    window.__groups.threshold2 = threshold2Group;
     scene.add(threshold2Group);
     {
       // --------------------------------------------------------------
@@ -1104,7 +1107,7 @@ const refs = {
     //   Top:    y = lowerStagY       (0.5) — bottom of Zone 4 bubble
     //   Radius: r = separatrixThroatR (0.9) — cylindrical
     const lowerSheathGroup = new THREE.Group();
-    refs.lowerSheath = lowerSheathGroup;
+    window.__groups.lowerSheath = lowerSheathGroup;
     scene.add(lowerSheathGroup);
 
     {
@@ -1188,7 +1191,7 @@ const refs = {
     // ZONE 4 - The Bubble (Counter-Rotating Vortex Ring)
     // ======================================================================
     const zone4Group = new THREE.Group();
-    refs.zone4 = zone4Group;
+    window.__groups.zone4 = zone4Group;
     scene.add(zone4Group);
     {
       // Bubble ambient colors — original rich hues restored.
@@ -1317,7 +1320,7 @@ const refs = {
 
       // Bubble envelope
       const envGroup = new THREE.Group();
-      refs.bubbleEnvelope = envGroup;
+      window.__groups.bubbleEnvelope = envGroup;
       {
         const nRings = 24;
         const nPhi = 36;
@@ -1367,7 +1370,7 @@ const refs = {
     //   Bubble horizontal extent:  r = 0.82 × columnRadius
     // Aspect 1:1.49. Merkaba fits snugly as a proper stellated octahedron.
     const merkabaGroup = new THREE.Group();
-    refs.merkaba = merkabaGroup;
+    window.__groups.merkaba = merkabaGroup;
     scene.add(merkabaGroup);
     {
       const tetHeight = 1.05;         // apex-to-apex ≈ bubble height
@@ -1431,7 +1434,7 @@ const refs = {
     // THRESHOLD 3 - Post-Bubble Wake
     // ======================================================================
     const threshold3Group = new THREE.Group();
-    refs.threshold3 = threshold3Group;
+    window.__groups.threshold3 = threshold3Group;
     scene.add(threshold3Group);
     {
       // Velocity deficit core
@@ -1515,7 +1518,7 @@ const refs = {
     // We track Zone 5's final state per strand (end phi, end radius, end color)
     // so Threshold 4 can continue each strand smoothly.
     const zone5Group = new THREE.Group();
-    refs.zone5 = zone5Group;
+    window.__groups.zone5 = zone5Group;
     scene.add(zone5Group);
 
     // v8.1: DENSE RAINBOW — 24 strands forming a continuous spectrum band
@@ -1686,7 +1689,7 @@ const refs = {
     //       ("some turns barely distinguishable")
     // Ambient blue streamlines also degrade in the same pattern.
     const threshold4Group = new THREE.Group();
-    refs.threshold4 = threshold4Group;
+    window.__groups.threshold4 = threshold4Group;
     scene.add(threshold4Group);
 
     // Boundary rings at T4 entry (y = t4Base) and exit (y = t4Top) —
@@ -1882,7 +1885,7 @@ const refs = {
     // Starting azimuthal phases are randomized so the strands read as newly
     // born from the breakdown, not as continuations of the fading Zone 5.
     const zone6Group = new THREE.Group();
-    refs.zone6 = zone6Group;
+    window.__groups.zone6 = zone6Group;
     scene.add(zone6Group);
 
     {
@@ -1981,7 +1984,7 @@ const refs = {
     }
 
     // ======================================================================
-    // THRESHOLD 5 - Turbulent Negotiation
+    // THRESHOLD 5 - Turbulent Negotiation (DENSIFIED — April 2026 v9)
     // ======================================================================
     // Unlike Threshold 4 (which was degrading helical structure), Threshold 5
     // IS fully turbulent. The secondary helix dissolves into multi-scale
@@ -1989,8 +1992,15 @@ const refs = {
     // continuation. Zone 2-style fragmented geometry in a muted palette:
     // darkened reds from Zone 6 bleeding into grays and muddy browns as the
     // last organized structure dissolves.
+    //
+    // v9 densification: all per-scale counts increased ~3-4x and an entirely
+    // new LARGE-EDDY population added at the top of the cascade. The zone
+    // now renders as five scales of turbulent motion stacked on top of each
+    // other (large swirling eddies → medium arcs → medium kinks → short
+    // darts → tiny dashes → sub-Kolmogorov specks), plus many more localized
+    // collision bursts. Reads as densely filled, chaotically active space.
     const threshold5Group = new THREE.Group();
-    refs.threshold5 = threshold5Group;
+    window.__groups.threshold5 = threshold5Group;
     scene.add(threshold5Group);
 
     {
@@ -1999,9 +2009,11 @@ const refs = {
       const t5Palette = [
         0x6a2420,  // deep muted red
         0x7a3a2a,  // rusty red-brown
+        0x8a4028,  // burnt orange-red
         0x5a4838,  // muddy brown
         0x4a4438,  // dark brownish-gray
         0x3a3a3a,  // dark gray
+        0x2a2828,  // near-black gray
       ];
       const t5Pick = () => t5Palette[Math.floor(Math.random() * t5Palette.length)];
 
@@ -2017,9 +2029,109 @@ const refs = {
 
       const maxR = columnRadius * 0.90;
 
-      // Medium kinks — organized structure fragments with direction changes
-      for (let i = 0; i < 20; i++) {
-        const startR = Math.random() * maxR * 0.85;
+      // v10 (April 2026): translucent turbulence. All T5 tube populations
+      // use this helper rather than makeTube directly, so the Interdimensional
+      // Chamber (P2 sphere, embedded at y ≈ 5.776 inside the turbulent band)
+      // reads clearly through the turbulent field. Opacity 0.45 for larger
+      // structures (large eddies, medium arcs, kinks) preserves their
+      // structural presence; 0.35 for small-scale populations (darts, tiny
+      // dashes, sub-Kolmogorov specks) lets the chamber glow through.
+      const makeT5Tube = (points, color, tubeRadius, opacity) => {
+        if (points.length < 2) return null;
+        const curve = new THREE.CatmullRomCurve3(points);
+        const geom = new THREE.TubeGeometry(curve, Math.max(16, points.length * 2), tubeRadius, 8, false);
+        const mat = new THREE.MeshStandardMaterial({
+          color,
+          emissive: color,
+          emissiveIntensity: 0.35,
+          roughness: 0.6,
+          metalness: 0.1,
+          transparent: true,
+          opacity,
+          depthWrite: false,
+        });
+        return new THREE.Mesh(geom, mat);
+      };
+
+      // -----------------------------------------------------------------
+      // LARGE EDDIES (NEW) — the top of the Kolmogorov cascade. The last
+      // organized structure from Zone 6 fragments into big rotating
+      // eddies that occupy a substantial arc of the column before
+      // dissipating into smaller motions. Rendered as curved multi-point
+      // streamlines, 6-8 points each, following a partial circular arc
+      // with significant radial excursion and vertical drift. Count: 14.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 14; i++) {
+        const centerR = Math.random() * maxR * 0.55;
+        const centerPhi = Math.random() * Math.PI * 2;
+        const centerY = t5Base + (0.1 + Math.random() * 0.8) * t5Height;
+        const eddyRadius = 0.22 + Math.random() * 0.20;  // size of the eddy
+        const arcSpan = (0.6 + Math.random() * 0.9) * Math.PI;  // how much of a full turn
+        const arcStart = Math.random() * Math.PI * 2;
+        const arcDir = Math.random() < 0.5 ? 1 : -1;     // CW or CCW
+        const nPts = 7 + Math.floor(Math.random() * 3);
+        const pts = [];
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const arcPhi = arcStart + arcDir * arcSpan * t;
+          // Eddy center in Cartesian
+          const cx = centerR * Math.cos(centerPhi);
+          const cz = centerR * Math.sin(centerPhi);
+          // Radial pulsation gives eddies an irregular shape
+          const radialPulse = 1 + 0.25 * Math.sin(t * Math.PI * 2 + i);
+          const px = cx + eddyRadius * radialPulse * Math.cos(arcPhi);
+          const pz = cz + eddyRadius * radialPulse * Math.sin(arcPhi);
+          // Vertical drift — eddies wobble up and down as they rotate
+          const py = centerY + 0.10 * Math.sin(t * Math.PI * 1.8 + i * 0.7)
+                             + (t - 0.5) * 0.15 * (Math.random() - 0.5);
+          const p = new THREE.Vector3(px, py, pz);
+          clampR(p, maxR);
+          pts.push(p);
+        }
+        const color = t5Pick();
+        const tube = makeT5Tube(pts, color, 0.013, 0.55);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // -----------------------------------------------------------------
+      // MEDIUM ARCS (NEW) — smaller curved fragments, 4-5 points,
+      // moderate radial sweep. Fills the gap between large eddies and
+      // medium kinks in the cascade. Count: 28.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 28; i++) {
+        const startR = Math.random() * maxR * 0.90;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const arcAngle = (0.3 + Math.random() * 0.6) * Math.PI;
+        const arcDir = Math.random() < 0.5 ? 1 : -1;
+        const arcRadius = 0.10 + Math.random() * 0.14;
+        const nPts = 5;
+        const pts = [];
+        // Arc pivots around a point near the start
+        const pivotPhi = Math.random() * Math.PI * 2;
+        const pivotX = startR * Math.cos(startPhi) + arcRadius * 0.6 * Math.cos(pivotPhi);
+        const pivotZ = startR * Math.sin(startPhi) + arcRadius * 0.6 * Math.sin(pivotPhi);
+        for (let k = 0; k < nPts; k++) {
+          const t = k / (nPts - 1);
+          const ang = pivotPhi + Math.PI + arcDir * arcAngle * t;
+          const px = pivotX + arcRadius * Math.cos(ang);
+          const pz = pivotZ + arcRadius * Math.sin(ang);
+          const py = startY + (Math.random() - 0.5) * 0.09 + t * (Math.random() - 0.5) * 0.10;
+          const p = new THREE.Vector3(px, py, pz);
+          clampR(p, maxR);
+          pts.push(p);
+        }
+        const color = t5Pick();
+        const tube = makeT5Tube(pts, color, 0.011, 0.50);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // -----------------------------------------------------------------
+      // MEDIUM KINKS — organized structure fragments with direction
+      // changes. Count tripled: 20 → 60.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 60; i++) {
+        const startR = Math.random() * maxR * 0.88;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const len1 = 0.10 + Math.random() * 0.14;
@@ -2043,13 +2155,50 @@ const refs = {
         );
         [p0, p1, p2].forEach((p) => clampR(p, maxR));
         const color = t5Pick();
-        const tube = makeTube([p0, p1, p2], color, color, 0.010);
+        const tube = makeT5Tube([p0, p1, p2], color, 0.010, 0.45);
         if (tube) threshold5Group.add(tube);
       }
 
-      // Short darts — pure chaotic motion, multi-scale
-      for (let i = 0; i < 32; i++) {
-        const startR = Math.random() * maxR * 0.9;
+      // -----------------------------------------------------------------
+      // THREE-KINK FRAGMENTS (NEW) — four-point polylines with two
+      // direction changes, slightly longer than medium kinks. Adds a
+      // cascade layer between medium kinks and medium arcs. Count: 35.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 35; i++) {
+        const startR = Math.random() * maxR * 0.85;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const pts = [];
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        pts.push(p0);
+        let curAng = Math.random() * Math.PI * 2;
+        let cur = p0;
+        for (let k = 0; k < 3; k++) {
+          const segLen = 0.08 + Math.random() * 0.12;
+          curAng += (Math.random() - 0.5) * Math.PI * 1.2;
+          const next = new THREE.Vector3(
+            cur.x + Math.cos(curAng) * segLen,
+            cur.y + (Math.random() - 0.5) * 0.08,
+            cur.z + Math.sin(curAng) * segLen
+          );
+          clampR(next, maxR);
+          pts.push(next);
+          cur = next;
+        }
+        const color = t5Pick();
+        const tube = makeT5Tube(pts, color, 0.009, 0.42);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // -----------------------------------------------------------------
+      // SHORT DARTS — pure chaotic motion. Count nearly tripled: 32 → 90.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 90; i++) {
+        const startR = Math.random() * maxR * 0.92;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const a = Math.random() * Math.PI * 2;
@@ -2067,13 +2216,15 @@ const refs = {
         clampR(p0, maxR);
         clampR(p1, maxR);
         const color = t5Pick();
-        const tube = makeTube([p0, p1], color, color, 0.009);
+        const tube = makeT5Tube([p0, p1], color, 0.009, 0.38);
         if (tube) threshold5Group.add(tube);
       }
 
-      // Tiny dashes — smallest scale of Kolmogorov cascade
-      for (let i = 0; i < 45; i++) {
-        const startR = Math.random() * maxR * 0.9;
+      // -----------------------------------------------------------------
+      // TINY DASHES — Kolmogorov inertial range. Count tripled: 45 → 140.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 140; i++) {
+        const startR = Math.random() * maxR * 0.92;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const a = Math.random() * Math.PI * 2;
@@ -2091,25 +2242,59 @@ const refs = {
         clampR(p0, maxR);
         clampR(p1, maxR);
         const color = t5Pick();
-        const tube = makeTube([p0, p1], color, color, 0.007);
+        const tube = makeT5Tube([p0, p1], color, 0.007, 0.32);
         if (tube) threshold5Group.add(tube);
       }
 
-      // A handful of collision bursts — intense localized chaotic events
-      for (let i = 0; i < 6; i++) {
-        const r = Math.random() * maxR * 0.80;
+      // -----------------------------------------------------------------
+      // SUB-KOLMOGOROV SPECKS (NEW) — the smallest scale, where viscous
+      // dissipation converts motion to heat. Many tiny two-point segments
+      // of vanishing length, rendered as very thin tubes. Fills the
+      // visual field with "pepper" — the turbulence's last sigh before
+      // structure disappears entirely. Count: 180.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 180; i++) {
+        const startR = Math.random() * maxR * 0.92;
+        const startPhi = Math.random() * Math.PI * 2;
+        const startY = t5Base + Math.random() * t5Height;
+        const a = Math.random() * Math.PI * 2;
+        const len = 0.012 + Math.random() * 0.020;
+        const p0 = new THREE.Vector3(
+          startR * Math.cos(startPhi),
+          startY,
+          startR * Math.sin(startPhi)
+        );
+        const p1 = new THREE.Vector3(
+          p0.x + Math.cos(a) * len,
+          p0.y,
+          p0.z + Math.sin(a) * len
+        );
+        clampR(p0, maxR);
+        clampR(p1, maxR);
+        const color = t5Pick();
+        const tube = makeT5Tube([p0, p1], color, 0.005, 0.25);
+        if (tube) threshold5Group.add(tube);
+      }
+
+      // -----------------------------------------------------------------
+      // COLLISION BURSTS — intense localized chaotic events where
+      // eddies collide and shed energy outward in all directions.
+      // Count increased: 6 → 22. Each burst has 7-11 rays.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 22; i++) {
+        const r = Math.random() * maxR * 0.82;
         const ph = Math.random() * Math.PI * 2;
         const y = t5Base + Math.random() * t5Height;
         const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
-        const nBurst = 7;
+        const nBurst = 7 + Math.floor(Math.random() * 5);
         const burstPts = [];
         for (let k = 0; k < nBurst; k++) {
-          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.3;
-          const L = 0.07 + Math.random() * 0.05;
+          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.35;
+          const L = 0.05 + Math.random() * 0.07;
           burstPts.push(center.x, center.y, center.z);
           burstPts.push(
             center.x + Math.cos(a) * L,
-            center.y + (Math.random() - 0.5) * 0.06,
+            center.y + (Math.random() - 0.5) * 0.07,
             center.z + Math.sin(a) * L
           );
         }
@@ -2118,7 +2303,38 @@ const refs = {
         const m = new THREE.LineBasicMaterial({
           color: t5Pick(),
           transparent: true,
-          opacity: 0.7,
+          opacity: 0.55,
+        });
+        threshold5Group.add(new THREE.LineSegments(g, m));
+      }
+
+      // -----------------------------------------------------------------
+      // MICRO-BURSTS (NEW) — smaller, denser collision events. Short
+      // rays (4-5 each) marking sub-eddy breakup events. Count: 40.
+      // -----------------------------------------------------------------
+      for (let i = 0; i < 40; i++) {
+        const r = Math.random() * maxR * 0.88;
+        const ph = Math.random() * Math.PI * 2;
+        const y = t5Base + Math.random() * t5Height;
+        const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
+        const nBurst = 4 + Math.floor(Math.random() * 2);
+        const burstPts = [];
+        for (let k = 0; k < nBurst; k++) {
+          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.4;
+          const L = 0.025 + Math.random() * 0.04;
+          burstPts.push(center.x, center.y, center.z);
+          burstPts.push(
+            center.x + Math.cos(a) * L,
+            center.y + (Math.random() - 0.5) * 0.04,
+            center.z + Math.sin(a) * L
+          );
+        }
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(burstPts, 3));
+        const m = new THREE.LineBasicMaterial({
+          color: t5Pick(),
+          transparent: true,
+          opacity: 0.6,
         });
         threshold5Group.add(new THREE.LineSegments(g, m));
       }
@@ -2133,7 +2349,7 @@ const refs = {
     // "Preheat zone" — energy approaching ignition but not yet radiating.
     // Column narrows visibly from full radius at base to ~40% at top.
     const zone7Group = new THREE.Group();
-    refs.zone7 = zone7Group;
+    window.__groups.zone7 = zone7Group;
     scene.add(zone7Group);
 
     {
@@ -2292,7 +2508,7 @@ const refs = {
     // yet crossed the activation threshold. Rendered as a visibly dark region
     // with a faint translucent core — no active flow, just potential.
     const threshold6Group = new THREE.Group();
-    refs.threshold6 = threshold6Group;
+    window.__groups.threshold6 = threshold6Group;
     scene.add(threshold6Group);
 
     {
@@ -2380,7 +2596,7 @@ const refs = {
     // matching the black-hole jet aesthetic — while keeping the zone's
     // "violet ray" identity at the cooler outer halo.
     const zone8Group = new THREE.Group();
-    refs.zone8 = zone8Group;
+    window.__groups.zone8 = zone8Group;
     scene.add(zone8Group);
 
     {
@@ -2667,7 +2883,7 @@ const refs = {
     //
     // Vertical half-span: 8.375.  Horizontal half-span: 10.05.  Ratio: 1.2.
     const ambientFieldGroup = new THREE.Group();
-    refs.ambientField = ambientFieldGroup;
+    window.__groups.ambientField = ambientFieldGroup;
     scene.add(ambientFieldGroup);
 
     {
@@ -2788,7 +3004,7 @@ const refs = {
     // out into a nearly-horizontal skirt matching the pyramid's base flow.
     // All drawn in dark gray, thick lines, toggleable (default OFF).
     const spiralsGroup = new THREE.Group();
-    refs.spirals = spiralsGroup;
+    window.__groups.spirals = spiralsGroup;
     scene.add(spiralsGroup);
     {
       const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
@@ -2913,7 +3129,7 @@ const refs = {
     // LABELS
     // ======================================================================
     const labelsGroup = new THREE.Group();
-    refs.labels = labelsGroup;
+    window.__groups.labels = labelsGroup;
     scene.add(labelsGroup);
     {
       const labelX = 3.2;
@@ -3123,7 +3339,7 @@ const refs = {
     // arrowheads are also black. Grouped under their own toggle so they can
     // be shown independently of the zone-label set.
     const chamberLabelsGroup = new THREE.Group();
-    refs.chamberLabels = chamberLabelsGroup;
+    window.__groups.chamberLabels = chamberLabelsGroup;
     scene.add(chamberLabelsGroup);
     {
       const chamberLabelColor = "#000000";
@@ -3223,7 +3439,7 @@ const refs = {
     // (POLOIDAL_TO_PYRAMID_SCALE and PYRAMID_Y_OFFSET are declared at the
     // top of the useEffect so the Zone 8 flame can reference them too.)
     const pyramidGroup = new THREE.Group();
-    refs.pyramid = pyramidGroup;
+    window.__groups.pyramid = pyramidGroup;
     scene.add(pyramidGroup);
     pyramidGroup.scale.set(
       1 / POLOIDAL_TO_PYRAMID_SCALE,
@@ -3280,7 +3496,7 @@ const refs = {
 
       // --- Chambers group: Red, Queen's, King's (+ QC gable)
       const chambersGroup = new THREE.Group();
-      refs.pyramidChambers = chambersGroup;
+      window.__groups.pyramidChambers = chambersGroup;
       pyramidGroup.add(chambersGroup);
 
       // Red Chamber: 14 east, bottom at –60, inner dims 27 × 7.5 × 16
@@ -3365,7 +3581,7 @@ const refs = {
       // five ascending layers are clearly visible but slightly less
       // commanding than the main KC below them (hierarchy: KC > relieving).
       const relievingGroup = new THREE.Group();
-      refs.pyramidRelieving = relievingGroup;
+      window.__groups.pyramidRelieving = relievingGroup;
       pyramidGroup.add(relievingGroup);
       {
         const rMat = new THREE.MeshBasicMaterial({
@@ -3422,7 +3638,7 @@ const refs = {
       //   Wireframe: GOLD — ring structure scribing the surface
       //   Inner core: VIOLET — concentrated radiant center
       const p2Group = new THREE.Group();
-      refs.pyramidP2 = p2Group;
+      window.__groups.pyramidP2 = p2Group;
       pyramidGroup.add(p2Group);
       {
         const p2Y = 210;
@@ -3475,7 +3691,7 @@ const refs = {
     // each chamber sits in the column without asserting a specific poloidal
     // correspondence. Toggled separately; default OFF.
     const correspondenceGroup = new THREE.Group();
-    refs.pyramidCorrespondence = correspondenceGroup;
+    window.__groups.pyramidCorrespondence = correspondenceGroup;
     scene.add(correspondenceGroup);
     {
       const S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
@@ -3582,57 +3798,58 @@ const refs = {
       camera.updateProjectionMatrix();
       renderer.setSize(w, h);
     };
-    window.addEventListener("resize", handleResize);  
+    window.addEventListener("resize", handleResize);
 })();
 
-// ---------- visibility sync (verbatim from toggle useEffect body) ----------
-function syncVisibility() {
-    if (refs.zone1) refs.zone1.visible = visibility.zone1;
-    if (refs.threshold1) refs.threshold1.visible = visibility.threshold1;
-    if (refs.zone2) refs.zone2.visible = visibility.zone2;
-    if (refs.threshold2) refs.threshold2.visible = visibility.threshold2;
-    if (refs.zone4) refs.zone4.visible = visibility.zone4;
-    if (refs.bubbleEnvelope) refs.bubbleEnvelope.visible = visibility.bubbleEnvelope;
-    if (refs.threshold3) refs.threshold3.visible = visibility.threshold3;
-    if (refs.zone5) refs.zone5.visible = visibility.zone5;
-    if (refs.threshold4) refs.threshold4.visible = visibility.threshold4;
-    if (refs.zone6) refs.zone6.visible = visibility.zone6;
-    if (refs.threshold5) refs.threshold5.visible = visibility.threshold5;
-    if (refs.zone7) refs.zone7.visible = visibility.zone7;
-    if (refs.threshold6) refs.threshold6.visible = visibility.threshold6;
-    if (refs.zone8) refs.zone8.visible = visibility.zone8;
-    if (refs.ambientField) refs.ambientField.visible = visibility.ambientField;
-    if (refs.lowerSheath) refs.lowerSheath.visible = visibility.lowerSheath;
-    if (refs.merkaba) refs.merkaba.visible = visibility.merkaba;
-    if (refs.labels) refs.labels.visible = visibility.labels;
-    if (refs.chamberLabels) refs.chamberLabels.visible = visibility.chamberLabels;
-    if (refs.spirals) refs.spirals.visible = visibility.spirals;
-    // Pyramid overlay: master visibility, then sub-groups only take effect
-    // when the master is on. Correspondence lines live in the outer scene
-    // (not inside pyramidGroup), so they're gated on both master and sub.
-    if (refs.pyramid) refs.pyramid.visible = visibility.pyramid;
-    if (refs.pyramidChambers) refs.pyramidChambers.visible = visibility.pyramidChambers;
-    if (refs.pyramidRelieving) refs.pyramidRelieving.visible = visibility.pyramidRelieving;
-    if (refs.pyramidP2) refs.pyramidP2.visible = visibility.pyramidP2;
-    if (refs.pyramidCorrespondence) {
-      refs.pyramidCorrespondence.visible = visibility.pyramid && visibility.pyramidCorrespondence;
-    }
-  
-}
-// initial sync
-syncVisibility();
+// ---------------------------------------------------------------------------
+// Wire the checkboxes to group visibility.
+// ---------------------------------------------------------------------------
+(function wirePanel() {
+  const panel = document.getElementById("panel");
+  const header = document.getElementById("panel-header");
+  const arrow = document.getElementById("panel-arrow");
+  header.addEventListener("click", () => {
+    panel.classList.toggle("open");
+    arrow.innerHTML = panel.classList.contains("open") ? "&#9662;" : "&#9656;";
+  });
 
-// ---------- panel wiring ----------
-window.onToggle = (key, checked) => {
-  visibility[key] = checked;
-  syncVisibility();
-};
+  const checkboxes = document.querySelectorAll("#panel input[type=checkbox]");
 
-window.togglePanel = () => {
-  const p = document.getElementById('panel');
-  p.classList.toggle('open');
-  document.getElementById('chev').textContent = p.classList.contains('open') ? '▾' : '▸';
-};
+  function applyVisibility() {
+    checkboxes.forEach((cb) => {
+      const key = cb.dataset.key;
+      const grp = window.__groups[key];
+      if (!grp) return;
+      // Gated sub-toggles: only take effect when their gate is also on
+      const gate = cb.dataset.gatedBy;
+      let visible = cb.checked;
+      if (gate) {
+        const gateCb = document.querySelector(
+          '#panel input[data-key="' + gate + '"]'
+        );
+        if (gateCb) visible = visible && gateCb.checked;
+      }
+      grp.visible = visible;
+    });
+
+    // Also update disabled state on gated sub-toggles
+    checkboxes.forEach((cb) => {
+      const gate = cb.dataset.gatedBy;
+      if (!gate) return;
+      const gateCb = document.querySelector(
+        '#panel input[data-key="' + gate + '"]'
+      );
+      cb.disabled = gateCb && !gateCb.checked;
+      const label = cb.parentElement.querySelector("span");
+      if (label) label.style.opacity = cb.disabled ? 0.5 : 1;
+    });
+  }
+
+  checkboxes.forEach((cb) => {
+    cb.addEventListener("change", applyVisibility);
+  });
+  applyVisibility();
+})();
 </script>
 </body>
 </html>
