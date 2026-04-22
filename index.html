@@ -1,70 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<title>Poloidal Core Visualization</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Poloidal Core Visualization — Raian Process Metaphysics</title>
 <style>
   html, body {
     margin: 0;
     padding: 0;
+    width: 100%;
     height: 100%;
     overflow: hidden;
     background: #f5efdd;
     font-family: Georgia, serif;
   }
+  #stage {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #f5efdd;
+  }
   #mount {
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+  }
+
+  /* Control panel — collapsible, top-right */
+  #panel-toggle {
     position: absolute;
-    inset: 0;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    background: rgba(245, 239, 221, 0.95);
+    border: 1px solid #c8a85c;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    color: #4a3818;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  #panel-toggle:hover {
+    background: rgba(245, 239, 221, 1);
   }
   #panel {
     position: absolute;
-    bottom: 16px;
-    left: 16px;
-    background: rgba(245, 239, 221, 0.92);
-    border: 1px solid #a8822c;
-    border-radius: 6px;
-    padding: 6px 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 300px;
-    font-family: Georgia, serif;
-    color: #4a3818;
-    z-index: 10;
-  }
-  #panel.open {
-    background: rgba(245, 239, 221, 0.82);
-    padding: 10px 14px;
-    max-height: 80vh;
+    top: 50px;
+    right: 12px;
+    width: 280px;
+    max-height: calc(100vh - 80px);
     overflow-y: auto;
-  }
-  #panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 14px;
-  }
-  #panel-body {
+    background: rgba(245, 239, 221, 0.96);
+    border: 1px solid #c8a85c;
+    border-radius: 4px;
+    padding: 12px 14px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    color: #4a3818;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    z-index: 19;
     display: none;
-    margin-top: 10px;
   }
-  #panel.open #panel-body {
-    display: block;
-  }
-  .row {
+  #panel.open { display: block; }
+  #panel .row {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 2px 0;
     font-size: 12px;
+    color: #4a3818;
   }
-  .row.sub {
+  #panel .row.indented {
     padding-left: 20px;
+    font-size: 11px;
   }
-  .italic { font-style: italic; }
-  .bold { font-weight: bold; }
-  .spacer { height: 8px; }
-  .legend {
+  #panel .row .italic { font-style: italic; }
+  #panel .row .bold { font-weight: bold; }
+  #panel .row.disabled span { opacity: 0.5; }
+  #panel .gap { height: 8px; }
+  #panel input[type="checkbox"] { cursor: pointer; }
+  #panel .legend {
     margin-top: 10px;
     padding-top: 10px;
     border-top: 1px solid #c8a85c;
@@ -72,16 +89,22 @@
     color: #6b4a1a;
     line-height: 1.45;
   }
-  .legend .swatch {
+  #panel .legend > div { margin-bottom: 3px; }
+  #panel .swatch {
     display: inline-block;
     width: 12px;
     height: 12px;
     vertical-align: middle;
     margin-right: 6px;
   }
-  .legend .swatch.wide { width: 30px; }
-  .legend > div { margin-bottom: 3px; }
-  .hint {
+  #panel .swatch-wide {
+    display: inline-block;
+    width: 30px;
+    height: 12px;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  #panel .footer {
     margin-top: 10px;
     font-size: 11px;
     color: #6b4a1a;
@@ -90,92 +113,101 @@
 </style>
 </head>
 <body>
-<div id="mount"></div>
-
-<div id="panel">
-  <div id="panel-header">
-    <span>Poloidal Core &mdash; Zones &amp; Thresholds</span>
-    <span id="panel-arrow">&#9656;</span>
-  </div>
-  <div id="panel-body">
-    <div class="row"><input type="checkbox" data-key="zone1" checked><span>Zone 1 &mdash; Radial Convergence</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold1" checked><span class="italic">Threshold 1 &mdash; The Separatrix</span></div>
-    <div class="row"><input type="checkbox" data-key="zone2" checked><span>Zone 2 &mdash; Collision &amp; Turbulence</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold2" checked><span>Zone 3 / Threshold 2 &mdash; The Foundation Semi-Spiral</span></div>
-    <div class="row"><input type="checkbox" data-key="zone4" checked><span>Zone 4 &mdash; The Bubble</span></div>
-    <div class="row sub"><input type="checkbox" data-key="bubbleEnvelope" checked><span>bubble envelope</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold3" checked><span class="italic">Threshold 3 &mdash; Post-Bubble Wake</span></div>
-    <div class="row"><input type="checkbox" data-key="zone5" checked><span>Zone 5 &mdash; First Helical Flow</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold4" checked><span class="italic">Threshold 4 &mdash; Helical Breakdown</span></div>
-    <div class="row"><input type="checkbox" data-key="zone6" checked><span>Zone 6 &mdash; Second Helical Flow</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold5" checked><span class="italic">Threshold 5 &mdash; Turbulent Negotiation</span></div>
-    <div class="row"><input type="checkbox" data-key="zone7" checked><span>Zone 7 &mdash; Relaminarization</span></div>
-    <div class="row"><input type="checkbox" data-key="threshold6" checked><span class="italic">Threshold 6 &mdash; Apex Ignition</span></div>
-    <div class="row"><input type="checkbox" data-key="zone8" checked><span>Zone 8 &mdash; Radial Divergence</span></div>
-    <div class="row"><input type="checkbox" data-key="ambientField" checked><span>Ambient Toroidal Field</span></div>
-    <div class="row"><input type="checkbox" data-key="lowerSheath" checked><span>Lower Sheath (Zone 1 &ndash; base of Zone 3 / Threshold 2)</span></div>
-    <div class="spacer"></div>
-    <div class="row"><input type="checkbox" data-key="merkaba"><span>Merkaba overlay</span></div>
-    <div class="row"><input type="checkbox" data-key="spirals"><span>Spirals overlay (Don/Ra schematic)</span></div>
-    <div class="row"><input type="checkbox" data-key="labels" checked><span>Labels</span></div>
-    <div class="row"><input type="checkbox" data-key="chamberLabels" checked><span>Chamber labels</span></div>
-
-    <div class="spacer"></div>
-    <div class="row"><input type="checkbox" data-key="pyramid"><span class="bold">Pyramid overlay</span></div>
-    <div class="row sub"><input type="checkbox" data-key="pyramidChambers" checked data-gated-by="pyramid"><span>chambers (RC &middot; QC &middot; KC)</span></div>
-    <div class="row sub"><input type="checkbox" data-key="pyramidRelieving" checked data-gated-by="pyramid"><span>relieving chambers</span></div>
-    <div class="row sub"><input type="checkbox" data-key="pyramidP2" checked data-gated-by="pyramid"><span>Position 2 marker</span></div>
-    <div class="row sub"><input type="checkbox" data-key="pyramidCorrespondence" data-gated-by="pyramid"><span>correspondence lines</span></div>
-
+<div id="stage">
+  <div id="mount"></div>
+  <button id="panel-toggle">Controls ▾</button>
+  <div id="panel">
+    <div class="row"><input type="checkbox" data-key="zone1" checked /><span>Zone 1 — Convergence</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold1" checked /><span class="italic">Threshold 1 — Separatrix</span></div>
+    <div class="row"><input type="checkbox" data-key="zone2" checked /><span>Zone 2 — Turbulence</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold2" checked /><span class="italic">Zone 3 / Threshold 2 — Foundation Semi-Spiral</span></div>
+    <div class="row"><input type="checkbox" data-key="zone4" checked /><span>Zone 4 — Queen's Chamber — Green Ray</span></div>
+    <div class="row"><input type="checkbox" data-key="bubbleEnvelope" checked /><span>Bubble envelope</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold3" checked /><span class="italic">Threshold 3 — Wake</span></div>
+    <div class="row"><input type="checkbox" data-key="zone5" checked /><span>Zone 5 — King's Chamber — Blue Ray</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold4" checked /><span class="italic">Threshold 4 — Helical Breakdown</span></div>
+    <div class="row"><input type="checkbox" data-key="zone6" checked /><span>Zone 6 — Building Spiral — Indigo Ray</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold5" checked /><span class="italic">Threshold 5 — Turbulence Negotiation</span></div>
+    <div class="row"><input type="checkbox" data-key="mbsct" checked /><span>MBSCT doorway (Position 2 vesica)</span></div>
+    <div class="row"><input type="checkbox" data-key="zone7" checked /><span>Zone 7 — Relaminarization — Violet (7th Density)</span></div>
+    <div class="row"><input type="checkbox" data-key="threshold6" checked /><span class="italic">Threshold 6 — Silence Between Octaves</span></div>
+    <div class="row"><input type="checkbox" data-key="zone8" checked /><span>Zone 8 — Next Octave's First Density (Gold + Red)</span></div>
+    <div class="row"><input type="checkbox" data-key="ambientField" checked /><span>Ambient Toroidal Field</span></div>
+    <div class="row"><input type="checkbox" data-key="lowerSheath" checked /><span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span></div>
+    <div class="gap"></div>
+    <div class="row"><input type="checkbox" data-key="merkaba" /><span>Merkaba overlay</span></div>
+    <div class="row"><input type="checkbox" data-key="spirals" /><span>Spirals overlay (Don/Ra schematic)</span></div>
+    <div class="row"><input type="checkbox" data-key="labels" checked /><span>Labels</span></div>
+    <div class="row"><input type="checkbox" data-key="chamberLabels" checked /><span>Chamber labels</span></div>
+    <div class="gap"></div>
+    <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
+    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
+    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
+    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidP2" checked /><span>Position 2 marker</span></div>
+    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidCorrespondence" /><span>correspondence lines</span></div>
     <div class="legend">
       <div><span class="swatch" style="background:#785c18"></span>gold = organized flow</div>
-      <div><span class="swatch wide" style="background:linear-gradient(180deg, #e0a028, #d4682c, #4a1420)"></span>turbulence gradient (Zone 2)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(180deg,#e0a028,#d4682c,#4a1420)"></span>turbulence gradient (Zone 2)</div>
       <div><span class="swatch" style="background:#b8a018"></span>dark yellow = semi-spiral</div>
-      <div><span class="swatch" style="background:#3a8a4a"></span>green = micro-torus</div>
-      <div><span class="swatch wide" style="background:linear-gradient(90deg, #d4342e, #e0c030, #4ca848, #3a6ac8, #8844a8)"></span>spectrum = Zone 5 vortex core</div>
-      <div><span class="swatch wide" style="background:linear-gradient(90deg, #b8261e, #d4342e, #e07030, #e09c30)"></span>red-to-amber = Zone 6 (second spiral)</div>
-      <div><span class="swatch wide" style="background:linear-gradient(90deg, #6a2420, #5a4838, #3a3a3a)"></span>muted = Threshold 5 turbulence</div>
-      <div><span class="swatch" style="background:#3a2a7c"></span>indigo = Zone 7 (relaminarization)</div>
-      <div><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (preheat)</div>
-      <div><span class="swatch wide" style="background:linear-gradient(90deg, #7a6ac8, #a8c0f0, #f0f4ff)"></span>Zone 8 jet (violet-blue &rarr; blue-white)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#ffffff,#3a8a4a)"></span>white-in-green = Zone 4 (Queen's Chamber, green ray)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#d4342e,#e0c030,#4ca848,#2848a8,#8844a8)"></span>blue-dominant spectrum = Zone 5 (King's Chamber, blue ray)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#2a1c70,#3a2a7c,#4a3a98)"></span>indigo = Zone 6 (building spiral, indigo ray)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#6a2420,#5a4838,#3a3a3a)"></span>muted turbulence = Threshold 5 (turbulence negotiation)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#b89030,#c0a0e8,#9c6ad4)"></span>gold + violet vesica = MBSCT doorway (Position 2)</div>
+      <div><span class="swatch" style="background:#8844a8"></span>violet = Zone 7 (relaminarization, 7th density)</div>
+      <div><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (silence between octaves)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#c8a050,#d87838,#b8261e)"></span>gold + red intertwined = Zone 8 (next octave's 1st density)</div>
       <div><span class="swatch" style="background:#8a6a1e"></span>gold = ambient toroidal field (raw prana)</div>
     </div>
-    <div class="hint">Drag to orbit &middot; scroll to zoom</div>
+    <div class="footer">Drag to orbit · scroll to zoom</div>
   </div>
 </div>
 
-<!-- Three.js r128 from cdnjs (allowed in container network config) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
-// Global registry of toggle-able groups, populated during scene construction.
-window.__groups = {};
+(function () {
+  "use strict";
 
-// ---------------------------------------------------------------------------
-// SCENE CONSTRUCTION
-// Code extracted verbatim from the React component's useEffect body, with
-// React-specific ref assignments rewritten to touch window.__groups instead.
-// Cleanup (unmount) block omitted — no unmounting happens in plain HTML.
-// ---------------------------------------------------------------------------
-(function runScene() {
-    const mount = document.getElementById("mount");
-    if (!mount) return;
+  // ----- Visibility state ------------------------------------------------
+  const visibility = {
+    zone1: true, threshold1: true, zone2: true, threshold2: true,
+    zone4: true, bubbleEnvelope: true, threshold3: true, zone5: true,
+    threshold4: true, zone6: true, threshold5: true, zone7: true,
+    threshold6: true, zone8: true, ambientField: true, lowerSheath: true,
+    merkaba: false, labels: true, chamberLabels: true,
+    mbsct: true,
+    pyramid: false, pyramidChambers: true, pyramidRelieving: true,
+    pyramidP2: true, pyramidCorrespondence: false,
+    spirals: false,
+  };
+
+  // ----- Scene refs (vanilla object replacing React useRefs) -------------
+  const refs = {};
+
+  // ----- Mount + scene setup --------------------------------------------
+  const mount = document.getElementById("mount");
+  if (!mount) return;
+
+  // ====================================================================
+  // BEGIN SCENE BODY (extracted from React useEffect, refs.xxx pattern)
+  // ====================================================================
 
     // --- Scene setup -------------------------------------------------------
     const scene = new THREE.Scene();
     scene.background = new THREE.Color("#f5efdd");
-    window.__groups.scene = scene;
+    refs.scene = scene;
 
     const width = mount.clientWidth;
     const height = mount.clientHeight;
 
     const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
-    window.__groups.camera = camera;
+    refs.camera = camera;
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.setSize(width, height);
     mount.appendChild(renderer.domElement);
-    window.__groups.renderer = renderer;
+    refs.renderer = renderer;
 
     // Lighting
     const ambient = new THREE.AmbientLight(0xffffff, 0.7);
@@ -479,7 +511,7 @@ window.__groups = {};
     // ZONE 1 - Radial Convergence
     // ======================================================================
     const zone1Group = new THREE.Group();
-    window.__groups.zone1 = zone1Group;
+    refs.zone1 = zone1Group;
     scene.add(zone1Group);
     {
       const GOLD = 0x785c18;
@@ -554,7 +586,7 @@ window.__groups = {};
     // THRESHOLD 1 - Separatrix Bell
     // ======================================================================
     const threshold1Group = new THREE.Group();
-    window.__groups.threshold1 = threshold1Group;
+    refs.threshold1 = threshold1Group;
     scene.add(threshold1Group);
     {
       const nRings = 18;
@@ -647,7 +679,7 @@ window.__groups = {};
     // ZONE 2 - Collision & Turbulence (lower) / Proto-organization (upper)
     // ======================================================================
     const zone2Group = new THREE.Group();
-    window.__groups.zone2 = zone2Group;
+    refs.zone2 = zone2Group;
     scene.add(zone2Group);
     {
       const z2Height = zone2Top - zone2Base;
@@ -910,7 +942,7 @@ window.__groups = {};
     // foundation upon which everything above it rests.
     // ======================================================================
     const threshold2Group = new THREE.Group();
-    window.__groups.threshold2 = threshold2Group;
+    refs.threshold2 = threshold2Group;
     scene.add(threshold2Group);
     {
       // --------------------------------------------------------------
@@ -1107,7 +1139,7 @@ window.__groups = {};
     //   Top:    y = lowerStagY       (0.5) — bottom of Zone 4 bubble
     //   Radius: r = separatrixThroatR (0.9) — cylindrical
     const lowerSheathGroup = new THREE.Group();
-    window.__groups.lowerSheath = lowerSheathGroup;
+    refs.lowerSheath = lowerSheathGroup;
     scene.add(lowerSheathGroup);
 
     {
@@ -1191,7 +1223,7 @@ window.__groups = {};
     // ZONE 4 - The Bubble (Counter-Rotating Vortex Ring)
     // ======================================================================
     const zone4Group = new THREE.Group();
-    window.__groups.zone4 = zone4Group;
+    refs.zone4 = zone4Group;
     scene.add(zone4Group);
     {
       // Bubble ambient colors — original rich hues restored.
@@ -1304,6 +1336,38 @@ window.__groups = {};
       upperStag.position.set(0, upperStagY, 0);
       zone4Group.add(upperStag);
 
+      // White-light core (April 2026 ray reassignment): the unified light
+      // being received by the green-ray vessel. A small bright sphere at
+      // the bubble's geometric center, surrounded by a soft white halo.
+      // Reads as "white light held inside green-ray chakra" — the green
+      // micro-torus is the receiver; this is what is being received.
+      {
+        const coreGeom = new THREE.SphereGeometry(0.075, 24, 18);
+        const coreMat = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          emissive: 0xffffff,
+          emissiveIntensity: 1.4,
+          roughness: 0.2,
+        });
+        const core = new THREE.Mesh(coreGeom, coreMat);
+        core.position.set(0, bubbleCenterY, 0);
+        zone4Group.add(core);
+
+        // Soft halo around the core
+        const haloGeom = new THREE.SphereGeometry(0.18, 24, 18);
+        const haloMat = new THREE.MeshStandardMaterial({
+          color: 0xffffff,
+          emissive: 0xfff8e0,
+          emissiveIntensity: 0.7,
+          transparent: true,
+          opacity: 0.30,
+          depthWrite: false,
+        });
+        const halo = new THREE.Mesh(haloGeom, haloMat);
+        halo.position.set(0, bubbleCenterY, 0);
+        zone4Group.add(halo);
+      }
+
       [lowerStagY, upperStagY].forEach((y) => {
         const ringGeom = new THREE.RingGeometry(0.08, 0.16, 32);
         const ringMat = new THREE.MeshBasicMaterial({
@@ -1320,7 +1384,7 @@ window.__groups = {};
 
       // Bubble envelope
       const envGroup = new THREE.Group();
-      window.__groups.bubbleEnvelope = envGroup;
+      refs.bubbleEnvelope = envGroup;
       {
         const nRings = 24;
         const nPhi = 36;
@@ -1370,7 +1434,7 @@ window.__groups = {};
     //   Bubble horizontal extent:  r = 0.82 × columnRadius
     // Aspect 1:1.49. Merkaba fits snugly as a proper stellated octahedron.
     const merkabaGroup = new THREE.Group();
-    window.__groups.merkaba = merkabaGroup;
+    refs.merkaba = merkabaGroup;
     scene.add(merkabaGroup);
     {
       const tetHeight = 1.05;         // apex-to-apex ≈ bubble height
@@ -1434,7 +1498,7 @@ window.__groups = {};
     // THRESHOLD 3 - Post-Bubble Wake
     // ======================================================================
     const threshold3Group = new THREE.Group();
-    window.__groups.threshold3 = threshold3Group;
+    refs.threshold3 = threshold3Group;
     scene.add(threshold3Group);
     {
       // Velocity deficit core
@@ -1518,7 +1582,7 @@ window.__groups = {};
     // We track Zone 5's final state per strand (end phi, end radius, end color)
     // so Threshold 4 can continue each strand smoothly.
     const zone5Group = new THREE.Group();
-    window.__groups.zone5 = zone5Group;
+    refs.zone5 = zone5Group;
     scene.add(zone5Group);
 
     // v8.1: DENSE RAINBOW — 24 strands forming a continuous spectrum band
@@ -1552,12 +1616,30 @@ window.__groups = {};
       const b = Math.round((b1 + m) * 255);
       return (r << 16) | (g << 8) | b;
     };
+    // April 2026 ray reassignment: King's Chamber is now identified as the
+    // BLUE-RAY chamber (Ra 39.10, 66.5 — crystallized healer's energy
+    // through green and out through blue). The full ROYGBIV spectrum is
+    // still rendered (Ra 56.6 — light spectrum is differentiated here),
+    // but the hue distribution is biased so that blue (h ≈ 0.55–0.67)
+    // claims the most strands — making blue the visually dominant tone.
+    // We use a piecewise linear hue ramp: 4 strands across red→yellow,
+    // 3 strands across yellow→green, 12 strands packed across the blue
+    // band, 5 strands across blue→violet.
+    const hueAt = (i) => {
+      // Maps strand index 0..23 to hue across red→violet, weighted to blue
+      if (i < 4)        return (i / 4) * 0.17;                   // red→yellow
+      if (i < 7)        return 0.17 + ((i - 4) / 3) * 0.16;      // yellow→green
+      if (i < 19)       return 0.50 + ((i - 7) / 12) * 0.20;     // GREEN→VIOLET-EDGE OF BLUE — densest packing
+      return 0.70 + ((i - 19) / 5) * 0.13;                       // blue→violet (h up to 0.83)
+    };
     for (let s = 0; s < N_STRANDS; s++) {
-      const t = s / (N_STRANDS - 1);
-      // Red (h=0) -> Violet (h=0.83 = 300°). 0.83 avoids magenta wrap.
-      const hue = t * 0.83;
-      const col = hslToHex(hue, 0.85, 0.50);       // saturated, mid-lightness
-      const em  = hslToHex(hue, 0.85, 0.22);       // dimmer emissive
+      const hue = hueAt(s);
+      // Saturate blue strands a bit more so they read as the dominant tone
+      const isBlueBand = hue >= 0.50 && hue <= 0.72;
+      const sat = isBlueBand ? 0.95 : 0.82;
+      const lightness = isBlueBand ? 0.55 : 0.48;
+      const col = hslToHex(hue, sat, lightness);
+      const em  = hslToHex(hue, sat, 0.24);
       spectrum.push({ color: col, em });
     }
 
@@ -1620,11 +1702,15 @@ window.__groups = {};
         });
       }
 
-      // Ambient light-blue streamlines (record their end state too)
+      // Ambient blue streamlines (record their end state too)
+      // April 2026 ray reassignment: KC is the blue-ray chamber, so the
+      // ambient frame here uses a deeper, more present royal blue rather
+      // than the pale sky-blue of earlier renderings — reinforcing blue
+      // as the dominant tone of this zone.
       const nAmbient = 6;
       const ambientR = columnRadius * 0.78;
-      const AMBIENT_COLOR = 0x8ab4e0;
-      const AMBIENT_EM = 0x4a6ea0;
+      const AMBIENT_COLOR = 0x4a6ae0;   // deeper royal blue
+      const AMBIENT_EM = 0x2848a8;      // saturated indigo-blue emissive
       const ambientEndStates = [];
       for (let i = 0; i < nAmbient; i++) {
         const phaseOffset = (i / nAmbient) * Math.PI * 2;
@@ -1689,7 +1775,7 @@ window.__groups = {};
     //       ("some turns barely distinguishable")
     // Ambient blue streamlines also degrade in the same pattern.
     const threshold4Group = new THREE.Group();
-    window.__groups.threshold4 = threshold4Group;
+    refs.threshold4 = threshold4Group;
     scene.add(threshold4Group);
 
     // Boundary rings at T4 entry (y = t4Base) and exit (y = t4Top) —
@@ -1876,16 +1962,20 @@ window.__groups = {};
     }
 
     // ======================================================================
-    // ZONE 6 - Second Helical Flow (Ra's "second spiral" — red-biased)
+    // ZONE 6 - Second Helical Flow (Ra's "second spiral" — INDIGO RAY)
     // ======================================================================
-    // Independent helical mode with its own oscillation frequency (3.5 turns
-    // across Zone 6, visibly tighter than Zone 5's 2.5), its own pitch, its
-    // own amplitude. Three strands at three distinct radii in the red/orange
-    // band. Same CCW handedness as Zone 5 but different frequency.
+    // April 2026 ray reassignment: the building spiral is properly the
+    // adept's work (Ra 39.10 — indigo as gateway to intelligent infinity,
+    // the ray worked upon in inner/hidden/occult teachings). Replaces
+    // earlier red-biased palette with deep saturated indigo.
+    //
+    // Independent helical mode with its own oscillation frequency, its own
+    // pitch, its own amplitude. Three strands at three distinct radii, all
+    // in indigo. Same CCW handedness as Zone 5 but different frequency.
     // Starting azimuthal phases are randomized so the strands read as newly
     // born from the breakdown, not as continuations of the fading Zone 5.
     const zone6Group = new THREE.Group();
-    window.__groups.zone6 = zone6Group;
+    refs.zone6 = zone6Group;
     scene.add(zone6Group);
 
     {
@@ -1896,10 +1986,13 @@ window.__groups = {};
       // matching Ra 59.9's "spiraled once again, causing an enormous
       // strengthening and focusing of energy."
       const zone5Turns = 1.5;
+      // Deep saturated indigo palette — three subtly distinct shades so the
+      // three strands remain visually distinguishable while reading as a
+      // single ray-color zone.
       const zone5Palette = [
-        { color: 0xb8261e, em: 0x5a1210 },  // deep red
-        { color: 0xd4342e, em: 0x6a1a14 },  // bright red
-        { color: 0xe07030, em: 0x6e3612 },  // orange
+        { color: 0x2a1c70, em: 0x140a3a },  // deepest indigo
+        { color: 0x3a2a7c, em: 0x1a1048 },  // canonical indigo (matches earlier INDIGO constant)
+        { color: 0x4a3a98, em: 0x251c5e },  // slightly brighter indigo-violet
       ];
       const zone5Radii = [0.35, 0.42, 0.50]; // × columnRadius
 
@@ -1937,9 +2030,11 @@ window.__groups = {};
         });
       }
 
-      // Ambient blue at outer radius with Zone 6's pitch (not Zone 5's)
-      const AMBIENT_COLOR = 0x8ab4e0;
-      const AMBIENT_EM = 0x4a6ea0;
+      // Ambient indigo at outer radius with Zone 6's pitch (not Zone 5's).
+      // April 2026: shifted from sky-blue to indigo so the ambient frame
+      // agrees with Zone 6's new indigo-ray identity.
+      const AMBIENT_COLOR = 0x4a3a98;     // brighter indigo-violet
+      const AMBIENT_EM = 0x251c5e;
       const nAmbient = 6;
       const ambientR = columnRadius * 0.78;
       for (let i = 0; i < nAmbient; i++) {
@@ -1984,7 +2079,7 @@ window.__groups = {};
     }
 
     // ======================================================================
-    // THRESHOLD 5 - Turbulent Negotiation (DENSIFIED — April 2026 v9)
+    // THRESHOLD 5 - Turbulent Negotiation
     // ======================================================================
     // Unlike Threshold 4 (which was degrading helical structure), Threshold 5
     // IS fully turbulent. The secondary helix dissolves into multi-scale
@@ -1992,15 +2087,8 @@ window.__groups = {};
     // continuation. Zone 2-style fragmented geometry in a muted palette:
     // darkened reds from Zone 6 bleeding into grays and muddy browns as the
     // last organized structure dissolves.
-    //
-    // v9 densification: all per-scale counts increased ~3-4x and an entirely
-    // new LARGE-EDDY population added at the top of the cascade. The zone
-    // now renders as five scales of turbulent motion stacked on top of each
-    // other (large swirling eddies → medium arcs → medium kinks → short
-    // darts → tiny dashes → sub-Kolmogorov specks), plus many more localized
-    // collision bursts. Reads as densely filled, chaotically active space.
     const threshold5Group = new THREE.Group();
-    window.__groups.threshold5 = threshold5Group;
+    refs.threshold5 = threshold5Group;
     scene.add(threshold5Group);
 
     {
@@ -2009,11 +2097,9 @@ window.__groups = {};
       const t5Palette = [
         0x6a2420,  // deep muted red
         0x7a3a2a,  // rusty red-brown
-        0x8a4028,  // burnt orange-red
         0x5a4838,  // muddy brown
         0x4a4438,  // dark brownish-gray
         0x3a3a3a,  // dark gray
-        0x2a2828,  // near-black gray
       ];
       const t5Pick = () => t5Palette[Math.floor(Math.random() * t5Palette.length)];
 
@@ -2029,109 +2115,9 @@ window.__groups = {};
 
       const maxR = columnRadius * 0.90;
 
-      // v10 (April 2026): translucent turbulence. All T5 tube populations
-      // use this helper rather than makeTube directly, so the Interdimensional
-      // Chamber (P2 sphere, embedded at y ≈ 5.776 inside the turbulent band)
-      // reads clearly through the turbulent field. Opacity 0.45 for larger
-      // structures (large eddies, medium arcs, kinks) preserves their
-      // structural presence; 0.35 for small-scale populations (darts, tiny
-      // dashes, sub-Kolmogorov specks) lets the chamber glow through.
-      const makeT5Tube = (points, color, tubeRadius, opacity) => {
-        if (points.length < 2) return null;
-        const curve = new THREE.CatmullRomCurve3(points);
-        const geom = new THREE.TubeGeometry(curve, Math.max(16, points.length * 2), tubeRadius, 8, false);
-        const mat = new THREE.MeshStandardMaterial({
-          color,
-          emissive: color,
-          emissiveIntensity: 0.35,
-          roughness: 0.6,
-          metalness: 0.1,
-          transparent: true,
-          opacity,
-          depthWrite: false,
-        });
-        return new THREE.Mesh(geom, mat);
-      };
-
-      // -----------------------------------------------------------------
-      // LARGE EDDIES (NEW) — the top of the Kolmogorov cascade. The last
-      // organized structure from Zone 6 fragments into big rotating
-      // eddies that occupy a substantial arc of the column before
-      // dissipating into smaller motions. Rendered as curved multi-point
-      // streamlines, 6-8 points each, following a partial circular arc
-      // with significant radial excursion and vertical drift. Count: 14.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 14; i++) {
-        const centerR = Math.random() * maxR * 0.55;
-        const centerPhi = Math.random() * Math.PI * 2;
-        const centerY = t5Base + (0.1 + Math.random() * 0.8) * t5Height;
-        const eddyRadius = 0.22 + Math.random() * 0.20;  // size of the eddy
-        const arcSpan = (0.6 + Math.random() * 0.9) * Math.PI;  // how much of a full turn
-        const arcStart = Math.random() * Math.PI * 2;
-        const arcDir = Math.random() < 0.5 ? 1 : -1;     // CW or CCW
-        const nPts = 7 + Math.floor(Math.random() * 3);
-        const pts = [];
-        for (let k = 0; k < nPts; k++) {
-          const t = k / (nPts - 1);
-          const arcPhi = arcStart + arcDir * arcSpan * t;
-          // Eddy center in Cartesian
-          const cx = centerR * Math.cos(centerPhi);
-          const cz = centerR * Math.sin(centerPhi);
-          // Radial pulsation gives eddies an irregular shape
-          const radialPulse = 1 + 0.25 * Math.sin(t * Math.PI * 2 + i);
-          const px = cx + eddyRadius * radialPulse * Math.cos(arcPhi);
-          const pz = cz + eddyRadius * radialPulse * Math.sin(arcPhi);
-          // Vertical drift — eddies wobble up and down as they rotate
-          const py = centerY + 0.10 * Math.sin(t * Math.PI * 1.8 + i * 0.7)
-                             + (t - 0.5) * 0.15 * (Math.random() - 0.5);
-          const p = new THREE.Vector3(px, py, pz);
-          clampR(p, maxR);
-          pts.push(p);
-        }
-        const color = t5Pick();
-        const tube = makeT5Tube(pts, color, 0.013, 0.55);
-        if (tube) threshold5Group.add(tube);
-      }
-
-      // -----------------------------------------------------------------
-      // MEDIUM ARCS (NEW) — smaller curved fragments, 4-5 points,
-      // moderate radial sweep. Fills the gap between large eddies and
-      // medium kinks in the cascade. Count: 28.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 28; i++) {
-        const startR = Math.random() * maxR * 0.90;
-        const startPhi = Math.random() * Math.PI * 2;
-        const startY = t5Base + Math.random() * t5Height;
-        const arcAngle = (0.3 + Math.random() * 0.6) * Math.PI;
-        const arcDir = Math.random() < 0.5 ? 1 : -1;
-        const arcRadius = 0.10 + Math.random() * 0.14;
-        const nPts = 5;
-        const pts = [];
-        // Arc pivots around a point near the start
-        const pivotPhi = Math.random() * Math.PI * 2;
-        const pivotX = startR * Math.cos(startPhi) + arcRadius * 0.6 * Math.cos(pivotPhi);
-        const pivotZ = startR * Math.sin(startPhi) + arcRadius * 0.6 * Math.sin(pivotPhi);
-        for (let k = 0; k < nPts; k++) {
-          const t = k / (nPts - 1);
-          const ang = pivotPhi + Math.PI + arcDir * arcAngle * t;
-          const px = pivotX + arcRadius * Math.cos(ang);
-          const pz = pivotZ + arcRadius * Math.sin(ang);
-          const py = startY + (Math.random() - 0.5) * 0.09 + t * (Math.random() - 0.5) * 0.10;
-          const p = new THREE.Vector3(px, py, pz);
-          clampR(p, maxR);
-          pts.push(p);
-        }
-        const color = t5Pick();
-        const tube = makeT5Tube(pts, color, 0.011, 0.50);
-        if (tube) threshold5Group.add(tube);
-      }
-
-      // -----------------------------------------------------------------
-      // MEDIUM KINKS — organized structure fragments with direction
-      // changes. Count tripled: 20 → 60.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 60; i++) {
-        const startR = Math.random() * maxR * 0.88;
+      // Medium kinks — organized structure fragments with direction changes
+      for (let i = 0; i < 20; i++) {
+        const startR = Math.random() * maxR * 0.85;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const len1 = 0.10 + Math.random() * 0.14;
@@ -2155,50 +2141,13 @@ window.__groups = {};
         );
         [p0, p1, p2].forEach((p) => clampR(p, maxR));
         const color = t5Pick();
-        const tube = makeT5Tube([p0, p1, p2], color, 0.010, 0.45);
+        const tube = makeTube([p0, p1, p2], color, color, 0.010);
         if (tube) threshold5Group.add(tube);
       }
 
-      // -----------------------------------------------------------------
-      // THREE-KINK FRAGMENTS (NEW) — four-point polylines with two
-      // direction changes, slightly longer than medium kinks. Adds a
-      // cascade layer between medium kinks and medium arcs. Count: 35.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 35; i++) {
-        const startR = Math.random() * maxR * 0.85;
-        const startPhi = Math.random() * Math.PI * 2;
-        const startY = t5Base + Math.random() * t5Height;
-        const pts = [];
-        const p0 = new THREE.Vector3(
-          startR * Math.cos(startPhi),
-          startY,
-          startR * Math.sin(startPhi)
-        );
-        pts.push(p0);
-        let curAng = Math.random() * Math.PI * 2;
-        let cur = p0;
-        for (let k = 0; k < 3; k++) {
-          const segLen = 0.08 + Math.random() * 0.12;
-          curAng += (Math.random() - 0.5) * Math.PI * 1.2;
-          const next = new THREE.Vector3(
-            cur.x + Math.cos(curAng) * segLen,
-            cur.y + (Math.random() - 0.5) * 0.08,
-            cur.z + Math.sin(curAng) * segLen
-          );
-          clampR(next, maxR);
-          pts.push(next);
-          cur = next;
-        }
-        const color = t5Pick();
-        const tube = makeT5Tube(pts, color, 0.009, 0.42);
-        if (tube) threshold5Group.add(tube);
-      }
-
-      // -----------------------------------------------------------------
-      // SHORT DARTS — pure chaotic motion. Count nearly tripled: 32 → 90.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 90; i++) {
-        const startR = Math.random() * maxR * 0.92;
+      // Short darts — pure chaotic motion, multi-scale
+      for (let i = 0; i < 32; i++) {
+        const startR = Math.random() * maxR * 0.9;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const a = Math.random() * Math.PI * 2;
@@ -2216,15 +2165,13 @@ window.__groups = {};
         clampR(p0, maxR);
         clampR(p1, maxR);
         const color = t5Pick();
-        const tube = makeT5Tube([p0, p1], color, 0.009, 0.38);
+        const tube = makeTube([p0, p1], color, color, 0.009);
         if (tube) threshold5Group.add(tube);
       }
 
-      // -----------------------------------------------------------------
-      // TINY DASHES — Kolmogorov inertial range. Count tripled: 45 → 140.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 140; i++) {
-        const startR = Math.random() * maxR * 0.92;
+      // Tiny dashes — smallest scale of Kolmogorov cascade
+      for (let i = 0; i < 45; i++) {
+        const startR = Math.random() * maxR * 0.9;
         const startPhi = Math.random() * Math.PI * 2;
         const startY = t5Base + Math.random() * t5Height;
         const a = Math.random() * Math.PI * 2;
@@ -2242,59 +2189,25 @@ window.__groups = {};
         clampR(p0, maxR);
         clampR(p1, maxR);
         const color = t5Pick();
-        const tube = makeT5Tube([p0, p1], color, 0.007, 0.32);
+        const tube = makeTube([p0, p1], color, color, 0.007);
         if (tube) threshold5Group.add(tube);
       }
 
-      // -----------------------------------------------------------------
-      // SUB-KOLMOGOROV SPECKS (NEW) — the smallest scale, where viscous
-      // dissipation converts motion to heat. Many tiny two-point segments
-      // of vanishing length, rendered as very thin tubes. Fills the
-      // visual field with "pepper" — the turbulence's last sigh before
-      // structure disappears entirely. Count: 180.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 180; i++) {
-        const startR = Math.random() * maxR * 0.92;
-        const startPhi = Math.random() * Math.PI * 2;
-        const startY = t5Base + Math.random() * t5Height;
-        const a = Math.random() * Math.PI * 2;
-        const len = 0.012 + Math.random() * 0.020;
-        const p0 = new THREE.Vector3(
-          startR * Math.cos(startPhi),
-          startY,
-          startR * Math.sin(startPhi)
-        );
-        const p1 = new THREE.Vector3(
-          p0.x + Math.cos(a) * len,
-          p0.y,
-          p0.z + Math.sin(a) * len
-        );
-        clampR(p0, maxR);
-        clampR(p1, maxR);
-        const color = t5Pick();
-        const tube = makeT5Tube([p0, p1], color, 0.005, 0.25);
-        if (tube) threshold5Group.add(tube);
-      }
-
-      // -----------------------------------------------------------------
-      // COLLISION BURSTS — intense localized chaotic events where
-      // eddies collide and shed energy outward in all directions.
-      // Count increased: 6 → 22. Each burst has 7-11 rays.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 22; i++) {
-        const r = Math.random() * maxR * 0.82;
+      // A handful of collision bursts — intense localized chaotic events
+      for (let i = 0; i < 6; i++) {
+        const r = Math.random() * maxR * 0.80;
         const ph = Math.random() * Math.PI * 2;
         const y = t5Base + Math.random() * t5Height;
         const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
-        const nBurst = 7 + Math.floor(Math.random() * 5);
+        const nBurst = 7;
         const burstPts = [];
         for (let k = 0; k < nBurst; k++) {
-          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.35;
-          const L = 0.05 + Math.random() * 0.07;
+          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.3;
+          const L = 0.07 + Math.random() * 0.05;
           burstPts.push(center.x, center.y, center.z);
           burstPts.push(
             center.x + Math.cos(a) * L,
-            center.y + (Math.random() - 0.5) * 0.07,
+            center.y + (Math.random() - 0.5) * 0.06,
             center.z + Math.sin(a) * L
           );
         }
@@ -2303,59 +2216,174 @@ window.__groups = {};
         const m = new THREE.LineBasicMaterial({
           color: t5Pick(),
           transparent: true,
-          opacity: 0.55,
+          opacity: 0.7,
         });
         threshold5Group.add(new THREE.LineSegments(g, m));
       }
 
-      // -----------------------------------------------------------------
-      // MICRO-BURSTS (NEW) — smaller, denser collision events. Short
-      // rays (4-5 each) marking sub-eddy breakup events. Count: 40.
-      // -----------------------------------------------------------------
-      for (let i = 0; i < 40; i++) {
-        const r = Math.random() * maxR * 0.88;
-        const ph = Math.random() * Math.PI * 2;
-        const y = t5Base + Math.random() * t5Height;
-        const center = new THREE.Vector3(r * Math.cos(ph), y, r * Math.sin(ph));
-        const nBurst = 4 + Math.floor(Math.random() * 2);
-        const burstPts = [];
-        for (let k = 0; k < nBurst; k++) {
-          const a = (k / nBurst) * Math.PI * 2 + Math.random() * 0.4;
-          const L = 0.025 + Math.random() * 0.04;
-          burstPts.push(center.x, center.y, center.z);
-          burstPts.push(
-            center.x + Math.cos(a) * L,
-            center.y + (Math.random() - 0.5) * 0.04,
-            center.z + Math.sin(a) * L
-          );
-        }
-        const g = new THREE.BufferGeometry();
-        g.setAttribute("position", new THREE.Float32BufferAttribute(burstPts, 3));
-        const m = new THREE.LineBasicMaterial({
-          color: t5Pick(),
-          transparent: true,
-          opacity: 0.6,
+      // ----------------------------------------------------------------
+      // MBSCT DOORWAY — Position 2 / interdimensional passage
+      // ----------------------------------------------------------------
+      // April 2026: at Threshold 5 sits the location of the Mind/Body/
+      // Spirit Complex Totality (Ra 36.1 — "comes into being in the
+      // seventh density"; Ra 37.6 — "infinitely complex thought-form").
+      // Its proper location in the column is at the threshold where
+      // dimensional transformation actually occurs (Ra 59.14). The MBSCT
+      // lives at the doorway between dimensions because the MBSCT IS
+      // that doorway.
+      //
+      // Rendered as a vesica-piscis-shaped portal (two interpenetrating
+      // arches forming a lens / pointed-oval frame) at the vertical
+      // center of T5. The vesica reads as a passage rather than a
+      // chamber, which is the point: a doorway has no interior, only
+      // a threshold one passes through.
+      //
+      // Wrapped in its OWN group (mbsctGroup) so the vesica can be
+      // toggled independently of the surrounding T5 turbulence.
+      const mbsctGroup = new THREE.Group();
+      refs.mbsct = mbsctGroup;
+      scene.add(mbsctGroup);
+      {
+        const t5Mid = (t5Base + t5Top) / 2;             // ~5.804
+        const portalHalfHeight = 0.50;                   // vesica reaches ~halfway up/down T5
+        const portalHalfWidth = 0.34;                    // narrow lens (passage, not chamber)
+        const PORTAL_GOLD = 0xb89030;
+        const PORTAL_INDIGO = 0x6a4a9c;
+        const PORTAL_VIOLET = 0x9c6ad4;
+
+        // Build a vesica-piscis ring as 2 facing arches, drawn around the
+        // central axis. Each arch is a half-ellipse in the y-axis vertical
+        // plane (one in the +x/y plane, one in the -x/y plane), connected
+        // at top and bottom pinches on the axis.
+        const buildArchPts = (sideSign) => {
+          const pts = [];
+          const nPts = 36;
+          for (let k = 0; k <= nPts; k++) {
+            const tt = k / nPts;
+            // Parameterize from bottom pinch (tt=0) up through the bulge
+            // at tt=0.5 and back to top pinch (tt=1)
+            const angle = -Math.PI / 2 + tt * Math.PI;   // -PI/2 → PI/2
+            const y = t5Mid + portalHalfHeight * Math.sin(angle);
+            const r = portalHalfWidth * Math.cos(angle); // 0 at pinches, max at midpoint
+            pts.push(new THREE.Vector3(sideSign * r, y, 0));
+          }
+          return pts;
+        };
+
+        // Two arches forming the vesica in the x-y plane
+        [+1, -1].forEach((sign) => {
+          const pts = buildArchPts(sign);
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const g = new THREE.TubeGeometry(curve, 72, 0.022, 10, false);
+          const m = new THREE.MeshStandardMaterial({
+            color: PORTAL_GOLD,
+            emissive: PORTAL_INDIGO,
+            emissiveIntensity: 0.55,
+            roughness: 0.4,
+            metalness: 0.25,
+          });
+          mbsctGroup.add(new THREE.Mesh(g, m));
         });
-        threshold5Group.add(new THREE.LineSegments(g, m));
+
+        // A second vesica rotated 90° around the vertical axis (in the
+        // z-y plane) so the doorway reads as a 3D portal from any orbital
+        // angle — not just a flat ring viewed edge-on.
+        [+1, -1].forEach((sign) => {
+          const pts = [];
+          const nPts = 36;
+          for (let k = 0; k <= nPts; k++) {
+            const tt = k / nPts;
+            const angle = -Math.PI / 2 + tt * Math.PI;
+            const y = t5Mid + portalHalfHeight * Math.sin(angle);
+            const r = portalHalfWidth * Math.cos(angle);
+            pts.push(new THREE.Vector3(0, y, sign * r));
+          }
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const g = new THREE.TubeGeometry(curve, 72, 0.022, 10, false);
+          const m = new THREE.MeshStandardMaterial({
+            color: PORTAL_GOLD,
+            emissive: PORTAL_VIOLET,
+            emissiveIntensity: 0.45,
+            roughness: 0.4,
+            metalness: 0.25,
+          });
+          mbsctGroup.add(new THREE.Mesh(g, m));
+        });
+
+        // Pinch markers — two small bright spheres at the top and bottom
+        // of the vesica, where all four arches meet on the axis. These
+        // are the "hinges" of the doorway.
+        const pinchGeom = new THREE.SphereGeometry(0.05, 20, 14);
+        const pinchMat = new THREE.MeshStandardMaterial({
+          color: 0xfff0c0,
+          emissive: 0xc8a050,
+          emissiveIntensity: 1.1,
+          roughness: 0.3,
+        });
+        [t5Mid - portalHalfHeight, t5Mid + portalHalfHeight].forEach((py) => {
+          const m = new THREE.Mesh(pinchGeom, pinchMat);
+          m.position.set(0, py, 0);
+          mbsctGroup.add(m);
+        });
+
+        // Faint translucent vesica "membrane" — a soft glowing surface
+        // filling the inside of the portal frame. Suggests the threshold
+        // itself: not a wall, not empty space, but a surface one passes
+        // through. Two crossed elliptical disks (one in x-y plane, one in
+        // z-y plane) at very low opacity.
+        [0, Math.PI / 2].forEach((rotY) => {
+          // Disk geometry: ellipse approximated as a many-sided polygon
+          const ellipseShape = new THREE.Shape();
+          const segs = 64;
+          for (let k = 0; k <= segs; k++) {
+            const a = (k / segs) * Math.PI * 2;
+            const x = portalHalfWidth * Math.cos(a);
+            const y = portalHalfHeight * Math.sin(a);
+            if (k === 0) ellipseShape.moveTo(x, y);
+            else ellipseShape.lineTo(x, y);
+          }
+          const dGeom = new THREE.ShapeGeometry(ellipseShape);
+          const dMat = new THREE.MeshStandardMaterial({
+            color: 0xc0a0e8,
+            emissive: 0x6a4a9c,
+            emissiveIntensity: 0.35,
+            transparent: true,
+            opacity: 0.18,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const disk = new THREE.Mesh(dGeom, dMat);
+          disk.position.set(0, t5Mid, 0);
+          disk.rotation.y = rotY;
+          mbsctGroup.add(disk);
+        });
       }
     }
 
     // ======================================================================
-    // ZONE 7 - Relaminarization (indigo ray) — Position 2 has moved to Threshold 5
+    // ZONE 7 - Relaminarization (VIOLET RAY — seventh density)
     // ======================================================================
-    // Geometric compression suppresses the turbulence from Threshold 5. A new
-    // simplified coherence emerges — not helical, not axisymmetric bubble, but
-    // concentrated forward-moving flow. Ra's Position 2 zone. Indigo ray.
-    // "Preheat zone" — energy approaching ignition but not yet radiating.
-    // Column narrows visibly from full radius at base to ~40% at top.
+    // April 2026 ray reassignment: Zone 7 carries the VIOLET signature
+    // (Ra 39.10 — "the mark, the register, the identity, the true
+    // vibration of an entity") and is identified as SEVENTH DENSITY
+    // (Ra 36.1 — where the MBSCT comes into consciousness). The
+    // relaminarized straight flow approaching the apex is the violet
+    // signature being gathered and registered as the totality vibration
+    // before release across the boundary between octaves.
+    //
+    // Geometric compression suppresses the turbulence from Threshold 5. A
+    // simplified coherence emerges — not helical, not axisymmetric bubble,
+    // but concentrated forward-moving flow approaching the boundary
+    // between octaves. Column narrows visibly from full radius at base to
+    // ~40% at top.
     const zone7Group = new THREE.Group();
-    window.__groups.zone7 = zone7Group;
+    refs.zone7 = zone7Group;
     scene.add(zone7Group);
 
     {
-      const INDIGO = 0x3a2a7c;          // opaque indigo blue for flow and ambient
-      const INDIGO_EM = 0x1a1048;       // darker indigo for emissive
-      const INDIGO_LINE = 0x5040a0;     // slightly brighter for line rings
+      const INDIGO = 0x8844a8;          // VIOLET (renamed; constant kept as INDIGO for minimal diff)
+      const INDIGO_EM = 0x4a1e6a;       // darker violet for emissive
+      const INDIGO_LINE = 0xa868c8;     // brighter violet for line rings
 
       // Column cross-section taper: linear from base radius to top radius
       const baseR = columnRadius * 0.78;    // matches Zone 6 ambient radius — smooth connection from below
@@ -2508,7 +2536,7 @@ window.__groups = {};
     // yet crossed the activation threshold. Rendered as a visibly dark region
     // with a faint translucent core — no active flow, just potential.
     const threshold6Group = new THREE.Group();
-    window.__groups.threshold6 = threshold6Group;
+    refs.threshold6 = threshold6Group;
     scene.add(threshold6Group);
 
     {
@@ -2530,13 +2558,15 @@ window.__groups = {};
 
       // Apex point marker: a small, slightly-glowing sphere at the geometric
       // tip of the column (top of Threshold 6). Marks the terminus of the
-      // interior flow and the emergence point of Zone 8's radiation.
+      // interior flow and the emergence point of the next octave's first
+      // density. April 2026: shifted from violet hint to warm-gold tone
+      // since Zone 8 is now gold-and-red, not violet.
       {
         const apexGeom = new THREE.SphereGeometry(0.05, 24, 16);
         const apexMat = new THREE.MeshStandardMaterial({
-          color: 0x6a4a9c,      // muted violet — first hint of Zone 8's color
-          emissive: 0x3a2858,
-          emissiveIntensity: 0.5,
+          color: 0xd8a850,      // warm gold — first hint of Zone 8's color
+          emissive: 0x8a5a18,
+          emissiveIntensity: 0.55,
           roughness: 0.4,
         });
         const apexMarker = new THREE.Mesh(apexGeom, apexMat);
@@ -2544,10 +2574,11 @@ window.__groups = {};
         threshold6Group.add(apexMarker);
       }
 
-      // Boundary rings: one at t6Base (entry — top of Zone 7's last flow),
-      // one at t6Top (exit — where Zone 8's radiation begins). The entry
-      // ring is dim indigo; the exit ring is dim violet — signaling the
-      // color transition that happens inside the gap.
+      // Boundary rings: one at t6Base (entry — top of Zone 7's last flow,
+      // VIOLET signature gathered), one at t6Top (exit — where Zone 8's
+      // next-octave radiation begins, GOLD-RED emerging). The dark gap
+      // between them is genuine discontinuity — the silence between
+      // octaves (Ra 16.51 — eighth note begins a new octave).
       {
         const baseRingR = columnRadius * 0.24;
         const ringPtsBase = [];
@@ -2557,7 +2588,7 @@ window.__groups = {};
         }
         const gBase = new THREE.BufferGeometry().setFromPoints(ringPtsBase);
         const mBase = new THREE.LineBasicMaterial({
-          color: 0x3a2a7c,  // indigo (Zone 7 color)
+          color: 0x8844a8,  // violet (Zone 7 color — completion of seventh density)
           transparent: true,
           opacity: 0.4,
         });
@@ -2571,7 +2602,7 @@ window.__groups = {};
         }
         const gTop = new THREE.BufferGeometry().setFromPoints(ringPtsTop);
         const mTop = new THREE.LineBasicMaterial({
-          color: 0x6a4a9c,  // muted violet (Zone 8 color emerging)
+          color: 0xc8862c,  // warm amber-gold (Zone 8 color emerging — next octave's first density)
           transparent: true,
           opacity: 0.4,
         });
@@ -2580,73 +2611,124 @@ window.__groups = {};
     }
 
     // ======================================================================
-    // ZONE 8 - Radial Divergence (violet ray, rendered as collimated jet)
+    // ZONE 8 - First Density of the Next Octave (GOLD + RED intertwined)
     // ======================================================================
-    // Ra (59.10) describes the third spiral radiating from the top of the
-    // pyramid. Rendered here as a collimated relativistic jet (in the
-    // style of an accretion-disk jet around a black hole): a tight, nearly
-    // cylindrical beam rising from the apex with a slight flare at the
-    // base, a bright luminous core, a cooler wispy halo, and internal
-    // filamentary striations. The jet extends well above the apex to the
-    // top of the visible scene, reading as a long sustained emission
-    // rather than a contained flame.
+    // April 2026 reframing: Zone 8 is no longer the violet signature of the
+    // just-completed octave (that registered inside Zone 7 and released
+    // into the dark gap). Zone 8 is the FIRST DENSITY OF THE NEXT OCTAVE
+    // manifest as light — the gold inflow and red aperture of the next
+    // torus woven together as twin strands of one phenomenon, before they
+    // have separated into their distinct functions. The pyramid's apex is
+    // the next pyramid's base. Ra 16.51 frames the eighth note as the
+    // beginning of a new octave; the dark gap (Threshold 6) is the genuine
+    // discontinuity between completion and new beginning.
     //
-    // Palette shift: the original candle-flame used pure violet. This jet
-    // uses a violet-blue / cyan-white gradient — cooler and brighter,
-    // matching the black-hole jet aesthetic — while keeping the zone's
-    // "violet ray" identity at the cooler outer halo.
+    // Rendered as twin braided helical strands rising from the apex, one
+    // gold and one red, intertwining as they ascend. Reads as a single
+    // flame composed of two strands, not two separate flames. Soft warm
+    // halo and a bright concentrated emission point at the apex.
     const zone8Group = new THREE.Group();
-    window.__groups.zone8 = zone8Group;
+    refs.zone8 = zone8Group;
     scene.add(zone8Group);
 
     {
-      // Thick helical jet — modeled on the structure visible in the
-      // reference image: a substantial-diameter beam with prominent
-      // spiral ribbons wrapping around its exterior. The ribbons are
-      // NOT internal filaments — they're thick luminous bands clearly
-      // visible as the jet's defining texture. The beam widens gently
-      // with height (real astrophysical jets broaden as they propagate).
-      //
-      // Jet length: apex (y ≈ 8.0) up to y = 20, about 12 scene units —
-      // roughly 4× the pyramid height in scene units.
-      const jetBaseY = apexY;
-      const jetTopY = 20.0;
-      const jetHeight = jetTopY - jetBaseY;
+      // Flame extends well above the apex but is shorter and narrower than
+      // the prior jet — this is a flame, not a sustained astrophysical
+      // emission. It tapers out as it rises.
+      const flameBaseY = apexY;            // 8.0
+      const flameTopY = 14.5;              // ~6.5 units of flame above the apex
+      const flameHeight = flameTopY - flameBaseY;
 
-      // Jet radius profile — narrow at origin, gently widening with height.
-      // The reference image shows a near-point origin at the collimation
-      // site that smoothly expands as the jet propagates. Three phases:
-      //   Origin  (0 -> 0.04):      r = 0.08 → 0.18 (quick emergence)
-      //   Expand  (0.04 -> 0.95):   r = 0.18 → 0.78 (long smooth widening)
-      //   Tip     (0.95 -> 1.0):    r → 0 (fade-out at the top)
-      // Uses square-root easing in the expand phase so the widening is
-      // most rapid near the base and tapers toward the top — matches the
-      // reference image's cone-like silhouette.
-      const jetProfile = (t) => {
-        if (t < 0.04) {
-          const s = t / 0.04;
-          return 0.08 + (0.18 - 0.08) * Math.sqrt(s);
+      // Flame radius profile — narrow at origin, widens slightly mid-flame,
+      // tapers to a point at the tip. Classic candle-flame silhouette but
+      // interpreted through twin braided strands rather than a continuous
+      // body.
+      const flameProfile = (t) => {
+        if (t < 0.05) {
+          // Quick emergence from the apex
+          const s = t / 0.05;
+          return 0.06 + (0.18 - 0.06) * Math.sqrt(s);
+        }
+        if (t < 0.55) {
+          // Gentle widening to the flame's belly
+          const s = (t - 0.05) / 0.50;
+          return 0.18 + (0.32 - 0.18) * Math.sin(s * Math.PI / 2);
         }
         if (t < 0.95) {
-          const s = (t - 0.04) / (0.95 - 0.04);
-          return 0.18 + (0.78 - 0.18) * Math.sqrt(s);
+          // Smooth taper from belly to near-tip
+          const s = (t - 0.55) / 0.40;
+          return 0.32 + (0.06 - 0.32) * (s * s);
         }
+        // Pinch to a point at the tip
         const s = (t - 0.95) / 0.05;
-        return 0.78 * (1 - s);
+        return 0.06 * (1 - s);
       };
 
-      // --- Outer halo: soft cool-violet envelope around the whole jet.
-      // Big, diffuse, low opacity — sits outside the main body and the
-      // helical ribbons so it reads as a glow.
+      // Color constants — warm gold and saturated red, the two strands of
+      // the next octave's first density.
+      const GOLD_COLOR = 0xc8a050;
+      const GOLD_EM   = 0x6e4a18;
+      const RED_COLOR = 0xb8261e;
+      const RED_EM   = 0x5a1210;
+
+      // ---- TWIN BRAIDED STRANDS — the dominant visual of the flame.
+      // Two helices rising from the apex, offset by 180° in azimuth so
+      // they wrap around each other. About 2.5 turns per unit of height
+      // gives a tight braid that reads clearly as intertwined strands.
       {
-        const nRings = 60;
+        const turnsPerUnit = 2.5;
+        const totalTurns = turnsPerUnit * flameHeight;
+        const nPts = 220;
+        const strandTubeR = 0.055;          // thick enough to read as "strand," not "thread"
+
+        const strands = [
+          { phaseOffset: 0,         color: GOLD_COLOR, em: GOLD_EM },
+          { phaseOffset: Math.PI,   color: RED_COLOR,  em: RED_EM  },
+        ];
+
+        strands.forEach(({ phaseOffset, color, em }) => {
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const y = flameBaseY + flameHeight * t;
+            const r = flameProfile(t);
+            const phi = phaseOffset + totalTurns * Math.PI * 2 * t;
+            pts.push(new THREE.Vector3(
+              r * Math.cos(phi),
+              y,
+              r * Math.sin(phi)
+            ));
+          }
+          const curve = new THREE.CatmullRomCurve3(pts);
+          const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, strandTubeR, 12, false);
+          const mat = new THREE.MeshStandardMaterial({
+            color,
+            emissive: em,
+            emissiveIntensity: 1.2,
+            roughness: 0.4,
+            metalness: 0.1,
+            transparent: true,
+            opacity: 0.92,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          zone8Group.add(new THREE.Mesh(tubeGeom, mat));
+        });
+      }
+
+      // ---- Soft warm halo around the flame — diffuse glow that surrounds
+      // the braid, blending gold and red into a unified warm aura. Makes
+      // the strands read as twin facets of one phenomenon rather than
+      // two unrelated helices.
+      {
+        const nRings = 50;
         const nPhi = 32;
         const vertices = [];
         const indices = [];
         for (let j = 0; j <= nRings; j++) {
           const t = j / nRings;
-          const y = jetBaseY + jetHeight * t;
-          const r = jetProfile(t) * 1.6;
+          const y = flameBaseY + flameHeight * t;
+          const r = flameProfile(t) * 1.7;     // wider than the strand envelope
           for (let i = 0; i <= nPhi; i++) {
             const ph = (i / nPhi) * Math.PI * 2;
             vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
@@ -2667,8 +2749,8 @@ window.__groups = {};
         haloGeom.setIndex(indices);
         haloGeom.computeVertexNormals();
         const haloMat = new THREE.MeshStandardMaterial({
-          color: 0x7a6ac8,
-          emissive: 0x4a3a9a,
+          color: 0xd87838,                       // warm amber — gold and red blended
+          emissive: 0x8a3818,
           emissiveIntensity: 0.55,
           transparent: true,
           opacity: 0.16,
@@ -2678,140 +2760,19 @@ window.__groups = {};
         zone8Group.add(new THREE.Mesh(haloGeom, haloMat));
       }
 
-      // --- Main jet body: solid translucent beam, cool blue-white.
-      // This is the substrate the helical ribbons wrap around.
+      // ---- Inner ember — a faint, warm centerline glow visible between
+      // the braided strands. Suggests the unified flame is one phenomenon
+      // and that the braid is the surface texture of a single flame, not
+      // two separate filaments.
       {
-        const nRings = 60;
-        const nPhi = 36;
-        const vertices = [];
-        const indices = [];
-        for (let j = 0; j <= nRings; j++) {
-          const t = j / nRings;
-          const y = jetBaseY + jetHeight * t;
-          const r = jetProfile(t);
-          for (let i = 0; i <= nPhi; i++) {
-            const ph = (i / nPhi) * Math.PI * 2;
-            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
-          }
-        }
-        for (let j = 0; j < nRings; j++) {
-          for (let i = 0; i < nPhi; i++) {
-            const a = j * (nPhi + 1) + i;
-            const b = a + 1;
-            const c = a + (nPhi + 1);
-            const d = c + 1;
-            indices.push(a, b, d);
-            indices.push(a, d, c);
-          }
-        }
-        const bodyGeom = new THREE.BufferGeometry();
-        bodyGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-        bodyGeom.setIndex(indices);
-        bodyGeom.computeVertexNormals();
-        const bodyMat = new THREE.MeshStandardMaterial({
-          color: 0x9ab4e8,
-          emissive: 0x5670b8,
-          emissiveIntensity: 0.9,
-          transparent: true,
-          opacity: 0.40,
-          side: THREE.DoubleSide,
-          depthWrite: false,
-        });
-        zone8Group.add(new THREE.Mesh(bodyGeom, bodyMat));
-      }
-
-      // --- Helical ribbons: the dominant visual feature. THREE thick
-      // luminous bands spiraling around the jet's exterior at offset
-      // phases (120° apart). Each ribbon makes ~1.5 turns from base to
-      // tip. Rendered as thick tubes that follow a helical path on the
-      // jet's surface — these are the bright wrapping bands clearly
-      // visible in the reference image.
-      {
-        const nRibbons = 3;
-        const ribbonTurns = 1.5;
-        const nPts = 120;
-        const ribbonTubeRadius = 0.095;  // thick — these are prominent bands
-
-        for (let rib = 0; rib < nRibbons; rib++) {
-          const phaseOffset = (rib / nRibbons) * Math.PI * 2;
-          const pts = [];
-          for (let k = 0; k < nPts; k++) {
-            const t = k / (nPts - 1);
-            const y = jetBaseY + jetHeight * t;
-            // Ribbon sits on the jet's surface with slight offset outward
-            const jetR = jetProfile(t);
-            const r = jetR * 1.02;            // sit ~on the surface
-            const phi = phaseOffset + ribbonTurns * Math.PI * 2 * t;
-            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
-          }
-          if (pts.length >= 2) {
-            const curve = new THREE.CatmullRomCurve3(pts);
-            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, ribbonTubeRadius, 10, false);
-            const ribbonMat = new THREE.MeshStandardMaterial({
-              color: 0xd8e4ff,                 // bright blue-white
-              emissive: 0x90b0f0,
-              emissiveIntensity: 1.3,
-              transparent: true,
-              opacity: 0.70,
-              side: THREE.DoubleSide,
-              depthWrite: false,
-            });
-            zone8Group.add(new THREE.Mesh(tubeGeom, ribbonMat));
-          }
-        }
-      }
-
-      // --- Secondary helical filaments: thinner, fainter threads at
-      // intermediate depth — visible texture between the main ribbons.
-      {
-        const nFilaments = 6;
-        const filTurns = 2.1;            // slightly faster twist than ribbons
-        const nPts = 80;
-
-        for (let f = 0; f < nFilaments; f++) {
-          const phaseOffset = (f / nFilaments) * Math.PI * 2 + (f * 0.23);
-          const pts = [];
-          for (let k = 0; k < nPts; k++) {
-            const t = k / (nPts - 1);
-            const y = jetBaseY + jetHeight * t;
-            // Sit between core and surface — ~70% of jet radius, with
-            // small radial wobble for non-rigid feel
-            const jetR = jetProfile(t);
-            const wobble = 1 + 0.12 * Math.sin(t * Math.PI * 4 + f);
-            const r = jetR * 0.70 * wobble;
-            const phi = phaseOffset + filTurns * Math.PI * 2 * t;
-            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
-          }
-          if (pts.length >= 2) {
-            const curve = new THREE.CatmullRomCurve3(pts);
-            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, 0.022, 8, false);
-            const filamentMat = new THREE.MeshStandardMaterial({
-              color: 0xe8f0ff,
-              emissive: 0x8ab0e8,
-              emissiveIntensity: 1.0,
-              transparent: true,
-              opacity: 0.45,
-              side: THREE.DoubleSide,
-              depthWrite: false,
-            });
-            zone8Group.add(new THREE.Mesh(tubeGeom, filamentMat));
-          }
-        }
-      }
-
-      // --- Bright central axis thread: a thin luminous core running
-      // straight up the centerline. Gives the jet a sense of intense
-      // energy concentrated along its axis.
-      {
-        const axisR = 0.06;
         const nRings = 30;
         const nPhi = 16;
         const vertices = [];
         const indices = [];
         for (let j = 0; j <= nRings; j++) {
           const t = j / nRings;
-          const y = jetBaseY + jetHeight * t;
-          const r = t < 0.95 ? axisR : axisR * (1 - (t - 0.95) / 0.05);
+          const y = flameBaseY + flameHeight * t;
+          const r = flameProfile(t) * 0.55;
           for (let i = 0; i <= nPhi; i++) {
             const ph = (i / nPhi) * Math.PI * 2;
             vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
@@ -2827,37 +2788,40 @@ window.__groups = {};
             indices.push(a, d, c);
           }
         }
-        const axisGeom = new THREE.BufferGeometry();
-        axisGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-        axisGeom.setIndex(indices);
-        axisGeom.computeVertexNormals();
-        const axisMat = new THREE.MeshStandardMaterial({
-          color: 0xf0f4ff,
-          emissive: 0xc0d0ff,
-          emissiveIntensity: 1.6,
+        const emberGeom = new THREE.BufferGeometry();
+        emberGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        emberGeom.setIndex(indices);
+        emberGeom.computeVertexNormals();
+        const emberMat = new THREE.MeshStandardMaterial({
+          color: 0xf0c060,
+          emissive: 0xc88030,
+          emissiveIntensity: 0.85,
           transparent: true,
-          opacity: 0.75,
+          opacity: 0.32,
           side: THREE.DoubleSide,
           depthWrite: false,
         });
-        zone8Group.add(new THREE.Mesh(axisGeom, axisMat));
+        zone8Group.add(new THREE.Mesh(emberGeom, emberMat));
       }
 
-      // --- Emission point: bright concentrated sphere at the apex
-      // where the jet emerges. The collimation point.
+      // ---- Emission point — bright concentrated sphere at the apex
+      // where the flame emerges. The point at which the next octave's
+      // first density manifests as light. Warm gold-white rather than
+      // the prior cool blue-white.
       {
-        const emitGeom = new THREE.SphereGeometry(0.12, 20, 14);
+        const emitGeom = new THREE.SphereGeometry(0.10, 20, 14);
         const emitMat = new THREE.MeshStandardMaterial({
-          color: 0xffffff,
-          emissive: 0xc0d8ff,
+          color: 0xfff4d8,
+          emissive: 0xf0a040,
           emissiveIntensity: 1.5,
-          roughness: 0.2,
+          roughness: 0.25,
         });
         const emitter = new THREE.Mesh(emitGeom, emitMat);
-        emitter.position.set(0, jetBaseY, 0);
+        emitter.position.set(0, flameBaseY, 0);
         zone8Group.add(emitter);
       }
     }
+
 
     // ======================================================================
     // AMBIENT TOROIDAL FIELD — the structural envelope of the whole form
@@ -2865,8 +2829,9 @@ window.__groups = {};
     // This is the outer half of the poloidal circuit. Raw unprocessed prana
     // circulates along these loops: down the outer flank from the north pole
     // region, curving under the base, and back up through the intake ring
-    // to feed Zone 1. The violet ray (Zone 8) is a localized emission at the
-    // apex; this ambient field is what surrounds the whole form and carries
+    // to feed Zone 1. The flame at the apex (Zone 8) is a localized emission —
+    // the next octave's first density manifesting as gold-and-red intertwined
+    // light. This ambient field is what surrounds the whole form and carries
     // the flow on its return path. Color: gold (matches Zone 1 — raw prana).
     //
     // Proportions: slightly wider than tall (~1.2:1 horizontal:vertical).
@@ -2876,14 +2841,14 @@ window.__groups = {};
     // horizon. The NORTH POLE is flush with the apex — the flame emerges
     // directly from the top of the envelope.
     //   South pole close:  y_south =  -4.5             (1 unit below separatrix)
-    //   North pole close:  y_north =  apexY            (12.25) — flush with flame base
-    //   Equator midpoint:  y_eq    =   3.875
+    //   North pole close:  y_north =  apexY            (8.0) — flush with flame base
+    //   Equator midpoint:  y_eq    =   1.75
     //   Equator radius:    r_eq    =  10.05 × columnRadius  (1.2:1 W:H ratio)
     //   Pole neck radius:  r_pole  =   0.3 × columnRadius  (narrow at both ends)
     //
     // Vertical half-span: 8.375.  Horizontal half-span: 10.05.  Ratio: 1.2.
     const ambientFieldGroup = new THREE.Group();
-    window.__groups.ambientField = ambientFieldGroup;
+    refs.ambientField = ambientFieldGroup;
     scene.add(ambientFieldGroup);
 
     {
@@ -3004,7 +2969,7 @@ window.__groups = {};
     // out into a nearly-horizontal skirt matching the pyramid's base flow.
     // All drawn in dark gray, thick lines, toggleable (default OFF).
     const spiralsGroup = new THREE.Group();
-    window.__groups.spirals = spiralsGroup;
+    refs.spirals = spiralsGroup;
     scene.add(spiralsGroup);
     {
       const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
@@ -3129,7 +3094,7 @@ window.__groups = {};
     // LABELS
     // ======================================================================
     const labelsGroup = new THREE.Group();
-    window.__groups.labels = labelsGroup;
+    refs.labels = labelsGroup;
     scene.add(labelsGroup);
     {
       const labelX = 3.2;
@@ -3234,34 +3199,34 @@ window.__groups = {};
       placeLabeled("Zone 3 / Threshold 2 — Foundation Semi-Spiral",
         labelX, (thresh2Base + thresh2Top) / 2,
         1.05, (thresh2Base + thresh2Top) / 2);
-      placeLabeled("Zone 4 — The Bubble / Queen's Chamber",
+      placeLabeled("Zone 4 — Queen's Chamber — Green Ray",
         labelX, bubbleCenterY,
         bubbleHalfWidth + 0.05, bubbleCenterY);
       placeLabeled("Threshold 3 — Wake",
         labelX, (threshold3Base + threshold3Top) / 2,
         0.7, (threshold3Base + threshold3Top) / 2);
-      placeLabeled("Zone 5 — First Helical Flow",
+      placeLabeled("Zone 5 — King's Chamber — Blue Ray",
         labelX, (zone5Base + zone5Top) / 2,
         columnRadius * 0.85, (zone5Base + zone5Top) / 2);
       placeLabeled("Threshold 4 — Helical Breakdown",
         labelX, (t4Base + t4Top) / 2,
         columnRadius * 0.85, (t4Base + t4Top) / 2);
-      placeLabeled("Zone 6 — Second Helical Flow",
+      placeLabeled("Zone 6 — Building Spiral — Indigo Ray",
         labelX, (zone6Base + zone6Top) / 2,
         columnRadius * 0.55, (zone6Base + zone6Top) / 2);
-      placeLabeled("Threshold 5 — Turbulent Negotiation",
+      placeLabeled("Threshold 5 — Turbulence Negotiation",
         labelX, (t5Base + t5Top) / 2,
         columnRadius * 0.85, (t5Base + t5Top) / 2);
-      placeLabeled("Zone 7 — Relaminarization",
+      placeLabeled("Zone 7 — Relaminarization — Seventh Density — Violet",
         labelX, (zone7Base + zone7Top) / 2,
         columnRadius * 0.55, (zone7Base + zone7Top) / 2);
-      placeLabeled("Threshold 6 — Apex Ignition",
+      placeLabeled("Threshold 6 — Apex Ignition — Silence Between Octaves",
         labelX, (t6Base + t6Top) / 2,
         columnRadius * 0.15, (t6Base + t6Top) / 2);
-      // Zone 8 jet label sits beside the jet; pointer targets its side wall
-      placeLabeled("Zone 8 — Radial Divergence",
-        labelX + 1.0, 14.0,
-        0.5, 14.0);
+      // Zone 8 flame label sits beside the flame; pointer targets its side
+      placeLabeled("Zone 8 — First Density of the Next Octave — Gold and Red Intertwined",
+        labelX + 1.0, 11.5,
+        0.4, 11.5);
       // Ambient Toroidal Field label: positioned at the 10:00 clock
       // position of the torus silhouette — upper-left quadrant. The
       // torus outer surface is parameterized by α (0 = north pole,
@@ -3339,7 +3304,7 @@ window.__groups = {};
     // arrowheads are also black. Grouped under their own toggle so they can
     // be shown independently of the zone-label set.
     const chamberLabelsGroup = new THREE.Group();
-    window.__groups.chamberLabels = chamberLabelsGroup;
+    refs.chamberLabels = chamberLabelsGroup;
     scene.add(chamberLabelsGroup);
     {
       const chamberLabelColor = "#000000";
@@ -3404,7 +3369,7 @@ window.__groups = {};
       placeChamberLabel("King's Chamber",
         1.822,
         -0.05, 1.822);
-      placeChamberLabel("Interdimensional Chamber",
+      placeChamberLabel("Position 2 — M/B/S/C Totality — Interdimensional Chamber",
         5.776,
         -0.05, 5.776);
     }
@@ -3439,7 +3404,7 @@ window.__groups = {};
     // (POLOIDAL_TO_PYRAMID_SCALE and PYRAMID_Y_OFFSET are declared at the
     // top of the useEffect so the Zone 8 flame can reference them too.)
     const pyramidGroup = new THREE.Group();
-    window.__groups.pyramid = pyramidGroup;
+    refs.pyramid = pyramidGroup;
     scene.add(pyramidGroup);
     pyramidGroup.scale.set(
       1 / POLOIDAL_TO_PYRAMID_SCALE,
@@ -3496,7 +3461,7 @@ window.__groups = {};
 
       // --- Chambers group: Red, Queen's, King's (+ QC gable)
       const chambersGroup = new THREE.Group();
-      window.__groups.pyramidChambers = chambersGroup;
+      refs.pyramidChambers = chambersGroup;
       pyramidGroup.add(chambersGroup);
 
       // Red Chamber: 14 east, bottom at –60, inner dims 27 × 7.5 × 16
@@ -3581,7 +3546,7 @@ window.__groups = {};
       // five ascending layers are clearly visible but slightly less
       // commanding than the main KC below them (hierarchy: KC > relieving).
       const relievingGroup = new THREE.Group();
-      window.__groups.pyramidRelieving = relievingGroup;
+      refs.pyramidRelieving = relievingGroup;
       pyramidGroup.add(relievingGroup);
       {
         const rMat = new THREE.MeshBasicMaterial({
@@ -3638,7 +3603,7 @@ window.__groups = {};
       //   Wireframe: GOLD — ring structure scribing the surface
       //   Inner core: VIOLET — concentrated radiant center
       const p2Group = new THREE.Group();
-      window.__groups.pyramidP2 = p2Group;
+      refs.pyramidP2 = p2Group;
       pyramidGroup.add(p2Group);
       {
         const p2Y = 210;
@@ -3691,7 +3656,7 @@ window.__groups = {};
     // each chamber sits in the column without asserting a specific poloidal
     // correspondence. Toggled separately; default OFF.
     const correspondenceGroup = new THREE.Group();
-    window.__groups.pyramidCorrespondence = correspondenceGroup;
+    refs.pyramidCorrespondence = correspondenceGroup;
     scene.add(correspondenceGroup);
     {
       const S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
@@ -3799,56 +3764,80 @@ window.__groups = {};
       renderer.setSize(w, h);
     };
     window.addEventListener("resize", handleResize);
-})();
+  // ====================================================================
+  // END SCENE BODY
+  // ====================================================================
 
-// ---------------------------------------------------------------------------
-// Wire the checkboxes to group visibility.
-// ---------------------------------------------------------------------------
-(function wirePanel() {
-  const panel = document.getElementById("panel");
-  const header = document.getElementById("panel-header");
-  const arrow = document.getElementById("panel-arrow");
-  header.addEventListener("click", () => {
-    panel.classList.toggle("open");
-    arrow.innerHTML = panel.classList.contains("open") ? "&#9662;" : "&#9656;";
+  // ----- Apply visibility state to scene refs ---------------------------
+  function applyVisibility() {
+    const map = [
+      ["zone1", "zone1"], ["threshold1", "threshold1"], ["zone2", "zone2"],
+      ["threshold2", "threshold2"], ["zone4", "zone4"],
+      ["bubbleEnvelope", "bubbleEnvelope"], ["threshold3", "threshold3"],
+      ["zone5", "zone5"], ["threshold4", "threshold4"], ["zone6", "zone6"],
+      ["threshold5", "threshold5"], ["mbsct", "mbsct"], ["zone7", "zone7"],
+      ["threshold6", "threshold6"], ["zone8", "zone8"],
+      ["ambientField", "ambientField"], ["lowerSheath", "lowerSheath"],
+      ["merkaba", "merkaba"], ["labels", "labels"],
+      ["chamberLabels", "chamberLabels"], ["spirals", "spirals"],
+      ["pyramid", "pyramid"], ["pyramidChambers", "pyramidChambers"],
+      ["pyramidRelieving", "pyramidRelieving"], ["pyramidP2", "pyramidP2"],
+    ];
+    map.forEach(function (pair) {
+      const visKey = pair[0];
+      const refKey = pair[1];
+      if (refs[refKey]) refs[refKey].visible = visibility[visKey];
+    });
+    // Correspondence lines: gated on both pyramid master and the sub-toggle
+    if (refs.pyramidCorrespondence) {
+      refs.pyramidCorrespondence.visible =
+        visibility.pyramid && visibility.pyramidCorrespondence;
+    }
+  }
+  applyVisibility();
+
+  // ----- Wire up control panel checkboxes -------------------------------
+  const checkboxes = document.querySelectorAll('#panel input[type="checkbox"]');
+  checkboxes.forEach(function (cb) {
+    const key = cb.getAttribute("data-key");
+    if (!key) return;
+    // Initialize DOM checkbox state from visibility object
+    cb.checked = !!visibility[key];
+    cb.addEventListener("change", function () {
+      visibility[key] = cb.checked;
+      applyVisibility();
+      updateChildDisabledState();
+    });
   });
 
-  const checkboxes = document.querySelectorAll("#panel input[type=checkbox]");
-
-  function applyVisibility() {
-    checkboxes.forEach((cb) => {
-      const key = cb.dataset.key;
-      const grp = window.__groups[key];
-      if (!grp) return;
-      // Gated sub-toggles: only take effect when their gate is also on
-      const gate = cb.dataset.gatedBy;
-      let visible = cb.checked;
-      if (gate) {
-        const gateCb = document.querySelector(
-          '#panel input[data-key="' + gate + '"]'
-        );
-        if (gateCb) visible = visible && gateCb.checked;
-      }
-      grp.visible = visible;
-    });
-
-    // Also update disabled state on gated sub-toggles
-    checkboxes.forEach((cb) => {
-      const gate = cb.dataset.gatedBy;
-      if (!gate) return;
-      const gateCb = document.querySelector(
-        '#panel input[data-key="' + gate + '"]'
-      );
-      cb.disabled = gateCb && !gateCb.checked;
-      const label = cb.parentElement.querySelector("span");
-      if (label) label.style.opacity = cb.disabled ? 0.5 : 1;
+  // Disable indented sub-toggles when their parent is off
+  function updateChildDisabledState() {
+    const indentedRows = document.querySelectorAll('#panel .row.indented');
+    indentedRows.forEach(function (row) {
+      const parentKey = row.getAttribute("data-parent");
+      const parentOn = !!visibility[parentKey];
+      const cb = row.querySelector('input[type="checkbox"]');
+      const span = row.querySelector("span");
+      if (cb) cb.disabled = !parentOn;
+      if (parentOn) row.classList.remove("disabled");
+      else row.classList.add("disabled");
     });
   }
+  updateChildDisabledState();
 
-  checkboxes.forEach((cb) => {
-    cb.addEventListener("change", applyVisibility);
+  // ----- Panel open/close button ----------------------------------------
+  const panel = document.getElementById("panel");
+  const panelToggleBtn = document.getElementById("panel-toggle");
+  panelToggleBtn.addEventListener("click", function () {
+    if (panel.classList.contains("open")) {
+      panel.classList.remove("open");
+      panelToggleBtn.textContent = "Controls \u25BE";
+    } else {
+      panel.classList.add("open");
+      panelToggleBtn.textContent = "Controls \u25B4";
+    }
   });
-  applyVisibility();
+
 })();
 </script>
 </body>
