@@ -120,7 +120,7 @@
     <div class="row"><input type="checkbox" data-key="zone1" checked /><span>Zone 1 — Convergence</span></div>
     <div class="row"><input type="checkbox" data-key="threshold1" checked /><span class="italic">Threshold 1 — Separatrix</span></div>
     <div class="row"><input type="checkbox" data-key="blackMembrane" checked /><span>Black membrane (south-pole event horizon)</span></div>
-    <div class="row"><input type="checkbox" data-key="zone2" checked /><span>Zone 2 — Turbulence</span></div>
+    <div class="row"><input type="checkbox" data-key="zone2" checked /><span>Zone 2 — Compression Zone</span></div>
     <div class="row"><input type="checkbox" data-key="threshold2" checked /><span class="italic">Zone 3 / Threshold 2 — Foundation Semi-Spiral</span></div>
     <div class="row"><input type="checkbox" data-key="zone4" checked /><span>Zone 4 — Queen's Chamber — Green Ray</span></div>
     <div class="row"><input type="checkbox" data-key="bubbleEnvelope" checked /><span>Bubble envelope</span></div>
@@ -132,7 +132,7 @@
     <div class="row"><input type="checkbox" data-key="mbsct" checked /><span>MBSCT doorway (Position 2 vesica)</span></div>
     <div class="row"><input type="checkbox" data-key="zone7" checked /><span>Zone 7 — Relaminarization — Violet (7th Density)</span></div>
     <div class="row"><input type="checkbox" data-key="threshold6" checked /><span class="italic">Threshold 6 — Silence Between Octaves</span></div>
-    <div class="row"><input type="checkbox" data-key="zone8" checked /><span>Zone 8 — Next Octave's First Density (Gold + Red)</span></div>
+    <div class="row"><input type="checkbox" data-key="zone8" checked /><span>Zone 8 — Next Octave (collimated jet)</span></div>
     <div class="row"><input type="checkbox" data-key="ambientField" checked /><span>Ambient Toroidal Field</span></div>
     <div class="row"><input type="checkbox" data-key="lowerSheath" checked /><span>Lower Sheath (Zone 1 – base of Zone 3 / Threshold 2)</span></div>
     <div class="gap"></div>
@@ -157,10 +157,11 @@
       <div><span class="swatch-wide" style="background:linear-gradient(90deg,#b89030,#c0a0e8,#9c6ad4)"></span>gold + violet vesica = MBSCT doorway (Position 2)</div>
       <div><span class="swatch" style="background:#8844a8"></span>violet = Zone 7 (relaminarization, 7th density)</div>
       <div><span class="swatch" style="background:#0a0614"></span>dark gap = Threshold 6 (silence between octaves)</div>
-      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#c8a050,#d87838,#b8261e)"></span>gold + red intertwined = Zone 8 (next octave's 1st density)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#a04848,#7a5a1c,#b8862c,#5a1818)"></span>dark gold body + soft red halo = Zone 8 (collimated jet)</div>
+      <div><span class="swatch-wide" style="background:linear-gradient(90deg,#b02030,#c25410,#b88a14,#1a5a2e,#2a48a8,#4030a8,#4a1a78,#7a5a14)"></span>spirals overlay: semi (red→orange→yellow) · 1st (green→blue) · 2nd (blue→indigo→violet) · jet (gold)</div>
       <div><span class="swatch" style="background:#8a6a1e"></span>gold = ambient toroidal field (raw prana)</div>
     </div>
-    <div class="footer">Drag to orbit · scroll to zoom</div>
+    <div class="footer">Drag to orbit · scroll or pinch to zoom</div>
   </div>
 </div>
 
@@ -372,15 +373,15 @@
     const zone7Height = zone7Top - zone7Base;
 
     // Threshold 6 - apex ignition (the dark gap)
-    // April 22 refinement: extended from 0.25 → 0.55. The ignition zone now
-    // has real vertical presence as the silence between octaves — more clearly
-    // legible as a discontinuity, not a seam. Everything above it (apex
-    // marker, Zone 8 flame base, toroidal north pole) tracks upward with it.
+    // April 22 v3: extended from 0.55 → 0.75 — taller still. The ignition
+    // zone now reads as a more pronounced silence between octaves. The
+    // dark core also widens (see darkR below) so the gap reads as a real
+    // chamber of darkness, not just a thin seam.
     const t6Base = zone7Top;             // 7.750
-    const t6Top = zone7Top + 0.55;       // 8.300
-    const t6Height = t6Top - t6Base;     // 0.55
+    const t6Top = zone7Top + 0.75;       // 8.500
+    const t6Height = t6Top - t6Base;     // 0.75
     // Geometric apex point sits at the top of the gap
-    const apexY = t6Top;                 // 8.300 (after April 22 gap extension)
+    const apexY = t6Top;                 // 8.500 (after April 22 v3 gap extension)
 
     // Zone 8 - radial divergence (violet ray, third spiral) — unchanged
     const zone8Base = t6Top;             // 8.000
@@ -529,62 +530,14 @@
       // ambient toroidal field and these upward-ascending streamlines now
       // carry Zone 1's full convergence narrative.
 
-      // Prana flow streamlines — Zone 1's radial convergence into the separatrix.
-      // Each streamline starts below and outside the separatrix (where the
-      // ambient field's inflow curves inward), sweeps radially inward, and
-      // rises into the base of the separatrix bell from beneath. The flow
-      // is being drawn UP and IN toward the event horizon, matching Ra's
-      // description of the "scoop" and the reverse-bathtub-vortex analogy.
-      // 18 streamlines distributed azimuthally, each with 3 arrows showing
-      // flow direction along the curve.
-      {
-        const nStreams = 18;
-        const startR = columnRadius * 3.0;      // outer start (below the intake ring)
-        const startY = -4.2;                     // well below separatrix base
-        const endR = separatrixRimR * 0.7;        // just inside the rim (r ~ 1.54)
-        const endY = separatrixBaseY + 0.05;      // entering the separatrix from below
-
-        for (let i = 0; i < nStreams; i++) {
-          const phi = (i / nStreams) * Math.PI * 2;
-
-          // Build the streamline as a curved path. The shape: starts below
-          // and outside, sweeps inward and upward in a smooth arc. Use a
-          // quadratic-like curve parameterized by t in [0, 1].
-          const pts = [];
-          const nPts = 24;
-          for (let k = 0; k < nPts; k++) {
-            const t = k / (nPts - 1);
-            // Radius: decreases from startR to endR. Use ease-out so most
-            // of the radial motion happens in the first half (flow converges
-            // quickly then rises more vertically near the end).
-            const r = startR - (startR - endR) * (1 - Math.pow(1 - t, 1.6));
-            // Vertical: rises from startY to endY. Use ease-in so the flow
-            // starts mostly horizontal and turns upward as it approaches.
-            const y = startY + (endY - startY) * Math.pow(t, 1.4);
-            // Slight tangential spiral for the inward-spiraling character
-            const spiralPhi = phi + t * 0.4;
-            pts.push(new THREE.Vector3(
-              r * Math.cos(spiralPhi),
-              y,
-              r * Math.sin(spiralPhi)
-            ));
-          }
-
-          // Render streamline as a thin gold tube
-          const tube = makeTube(pts, GOLD, GOLD_EM, 0.014);
-          if (tube) zone1Group.add(tube);
-
-          // Arrows along the curve — three per streamline at different t values
-          const arrowTs = [0.30, 0.60, 0.88];
-          arrowTs.forEach((tA) => {
-            const idx = Math.floor(tA * (nPts - 1));
-            const pos = pts[idx];
-            const next = pts[Math.min(idx + 1, nPts - 1)];
-            const d = next.clone().sub(pos);
-            if (d.length() > 1e-5) addArrow(zone1Group, pos, d, GOLD, 0.13);
-          });
-        }
-      }
+      // Prana streamlines removed (April 22 v6 final). Earlier versions
+      // added 18 dedicated gold streamlines to depict Zone 1's radial
+      // convergence, but those appeared as small stubs/"hairs" dangling
+      // below the bell because the interior segments of the curves were
+      // occluded by the bell mesh. The ambient toroidal field now carries
+      // the full inflow narrative directly — each of its 24 outer loops
+      // terminates inside the separatrix bell with an upward-pointing
+      // final arrow (see AMBIENT TOROIDAL FIELD block below).
     }
 
     // ======================================================================
@@ -2675,102 +2628,93 @@
       }
 
       // ----------------------------------------------------------------
-      // Internal RED axial rays — shooting straight up through the
-      // relaminarization column (April 22 addition). Pure vertical, no
-      // rotation. Reads as fire ascending through the violet seventh-
-      // density field — the red core of polarized intention rising
-      // toward the apex without deviation.
+      // Internal RED INTERTWINED HELICAL STRANDS — braiding upward through
+      // the relaminarization column (April 22 v2 — replaces earlier straight
+      // axial rays). Five red strands of distinct shades (saturated, bright,
+      // warm orange-red, deep crimson, scarlet) wind around each other as
+      // they ascend, so the column reads as a braid of fire rising through
+      // the violet seventh-density field. Same palette family as Zone 6's
+      // inner helices, so the two zones' reds visually agree.
       // ----------------------------------------------------------------
-      // April 22 refinement: Zone 7 red rays now use the EXACT SAME red
-      // palette as Zone 6's inner helical strands, so the two zones' reds
-      // visually match. Zone 6 uses 0xc0261e / 0xd4342e / 0xe04438; Zone 7
-      // center ray takes the warmest (0xe04438), outer rays take the
-      // canonical middle (0xd4342e), emissive deeper reds (0x5a0f0c /
-      // 0x6a1a14) matching Zone 6's emissive shades.
       const RED_RAY = 0xd4342e;            // = Zone 6 middle strand
-      const RED_RAY_EM = 0x6a1a14;         // = Zone 6 middle strand emissive
-      const RED_RAY_BRIGHT = 0xe04438;     // = Zone 6 warmest red-orange strand
+      const RED_RAY_EM = 0x6a1a14;
+      const RED_RAY_BRIGHT = 0xe04438;     // = Zone 6 warmest strand
       {
-        // Seven rays distributed across a small inner bundle — the center
-        // ray on the axis, six more in a ring around it at ~40% of the
-        // local column radius. They rise straight from zone7Base to
-        // zone7Top without rotation or taper (the rays themselves stay
-        // the same thickness even as the column narrows; the bundle as
-        // a whole tightens because the inner ring is pegged to column
-        // radius and converges as column narrows).
-        const nRays = 7;
-        const rayTubeR = 0.022;
-        const nRayPts = 20;
+        // Sixteen tightly intertwined strands forming a closed braid with
+        // no visible gaps between them. Strands of distinct red shades
+        // (cycling through the palette) wrap around each other with a
+        // tight helical pitch — 2.5 turns from base to top — so the eye
+        // reads a dense woven cable of fire ascending through the violet
+        // seventh-density field.
+        const N_STRANDS = 16;
+        const strandPalette = [
+          { color: 0xc0261e, em: 0x5a0f0c },  // saturated red
+          { color: 0xd4342e, em: 0x6a1a14 },  // bright red
+          { color: 0xe04438, em: 0x7a1e18 },  // warm red-orange
+          { color: 0x9a1a18, em: 0x4a0a08 },  // deep crimson
+          { color: 0xea5048, em: 0x8a2820 },  // scarlet
+        ];
 
-        for (let i = 0; i < nRays; i++) {
-          let rayRfactor;
-          let rayPhi;
-          if (i === 0) {
-            rayRfactor = 0;       // center ray on axis
-            rayPhi = 0;
-          } else {
-            rayRfactor = 0.40;    // outer ring at 40% of local column radius
-            rayPhi = ((i - 1) / (nRays - 1)) * Math.PI * 2;
-          }
+        // Tight pitch: 2.5 turns base→top so the strands visibly wind
+        // around each other. Smaller bundle radius (0.20 of column) so
+        // perimeter is short enough that 16 thick strands cover it
+        // shoulder-to-shoulder without gaps. Thicker tube radius so
+        // adjacent strands actually touch.
+        const totalTurns = 2.5;
+        const bundleRfactor = 0.20;
+        const strandTubeR = 0.028;
+        const nStrandPts = 80;        // more sample points for smoother tight curves
+
+        for (let s = 0; s < N_STRANDS; s++) {
+          // Cycle through the palette so all five red shades are
+          // represented across the 16 strands; adjacent strands carry
+          // different shades, giving the braid chromatic variation.
+          const { color, em } = strandPalette[s % strandPalette.length];
+          const phaseOffset = (s / N_STRANDS) * Math.PI * 2;
 
           const pts = [];
-          for (let k = 0; k < nRayPts; k++) {
-            const t = k / (nRayPts - 1);
+          for (let k = 0; k < nStrandPts; k++) {
+            const t = k / (nStrandPts - 1);
             const y = zone7Base + t * zone7Height;
-            const colR = radiusAt(y);           // taper-following radius
-            const r = colR * rayRfactor;
+            const colR = radiusAt(y);                  // column taper-following
+            const r = colR * bundleRfactor;            // strand bundle radius
+            const phi = phaseOffset + totalTurns * Math.PI * 2 * t;
             pts.push(new THREE.Vector3(
-              r * Math.cos(rayPhi),
+              r * Math.cos(phi),
               y,
-              r * Math.sin(rayPhi)
+              r * Math.sin(phi)
             ));
           }
 
-          // The center ray (i=0) is slightly brighter and thicker — it's
-          // the pure axial line of ascent. Outer rays share the same red
-          // palette as Zone 6 so the two zones' reds visually match.
-          // April 22: material properties aligned with Zone 6 strands —
-          // opaque, moderate emissive intensity, same roughness/metalness.
-          const isCenter = (i === 0);
           const curve = new THREE.CatmullRomCurve3(pts);
-          const tubeGeom = new THREE.TubeGeometry(
-            curve,
-            nRayPts * 2,
-            isCenter ? rayTubeR * 1.3 : rayTubeR,
-            10,
-            false
-          );
+          const tubeGeom = new THREE.TubeGeometry(curve, nStrandPts * 2, strandTubeR, 10, false);
           const mat = new THREE.MeshStandardMaterial({
-            color: isCenter ? RED_RAY_BRIGHT : RED_RAY,
-            emissive: isCenter ? RED_RAY : RED_RAY_EM,
-            emissiveIntensity: isCenter ? 0.55 : 0.35,   // = Zone 6 strand emissive intensity
-            roughness: 0.6,                              // = Zone 6 strand roughness
+            color,
+            emissive: em,
+            emissiveIntensity: 0.40,                   // ~Zone 6 strand intensity
+            roughness: 0.6,                            // ~Zone 6 strand material
             metalness: 0.1,
           });
           zone7Group.add(new THREE.Mesh(tubeGeom, mat));
 
-          // Upward-pointing arrows distributed along each ray to make the
-          // ascending direction unmistakable. Three arrows per ray at
-          // lower / middle / upper positions.
-          const arrowTs2 = [0.20, 0.55, 0.85];
+          // Two upward-pointing arrows per strand — fewer than before so
+          // the dense braid doesn't get cluttered with arrowheads. Lower
+          // and upper third only.
+          const arrowTs2 = [0.30, 0.75];
           arrowTs2.forEach((tA) => {
-            const idx = Math.floor(tA * (nRayPts - 1));
+            const idx = Math.floor(tA * (nStrandPts - 1));
             const pos = pts[idx];
-            // All rays ascend straight up; direction is always +Y.
-            const dirUp = new THREE.Vector3(0, 1, 0);
-            addArrow(
-              zone7Group,
-              pos.clone(),
-              dirUp,
-              isCenter ? RED_RAY_BRIGHT : RED_RAY,
-              isCenter ? 0.13 : 0.10
-            );
+            const next = pts[Math.min(idx + 1, nStrandPts - 1)];
+            const d = next.clone().sub(pos);
+            if (d.length() > 1e-5) {
+              addArrow(zone7Group, pos.clone(), d, color, 0.08);
+            }
           });
         }
 
-        // A faint red emission glow at the base of the ray bundle — reads
-        // as the ignition source from which the rays emerge (the top of
-        // Threshold 5's negotiation has resolved into coherent upward fire).
+        // A faint red emission glow at the base of the braid — reads as
+        // the ignition source from which the strands emerge (the top of
+        // Threshold 5's turbulence has resolved into coherent upward fire).
         {
           const emitGeom = new THREE.SphereGeometry(0.10, 18, 12);
           const emitMat = new THREE.MeshStandardMaterial({
@@ -2822,21 +2766,131 @@
     scene.add(threshold6Group);
 
     {
-      // Faint dark core cylinder at the axis — energy present but not radiating.
-      // Lower opacity than Threshold 3's velocity deficit, because here the
-      // flow has literally ended rather than merely slowed.
-      const darkR = columnRadius * 0.10;
-      const darkGeom = new THREE.CylinderGeometry(darkR * 0.5, darkR, t6Height, 24, 1, true);
-      const darkMat = new THREE.MeshStandardMaterial({
-        color: 0x0a0614,  // near-black with indigo tint
-        transparent: true,
-        opacity: 0.28,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      });
-      const darkCore = new THREE.Mesh(darkGeom, darkMat);
-      darkCore.position.set(0, (t6Base + t6Top) / 2, 0);
-      threshold6Group.add(darkCore);
+      // April 22 v4: rebuilt as a SOFT ATMOSPHERIC DARK REGION rather than
+      // a rigid cylinder. The earlier cylinder read as too geometric — too
+      // defined a shape for what should be the silence between octaves.
+      // The new build follows the look of the dark zone in propellant-strand
+      // combustion photographs (the band of unreacted gas between the burning
+      // surface and the luminous flame): soft fuzzy edges, internal density
+      // variation, slight taper from base to top, no hard cylinder walls.
+      //
+      // Implementation: a stack of translucent disks of varying opacity
+      // and slight radial offset, rendered as flat ring-meshes oriented
+      // horizontally and stacked vertically. Each disk has a soft radial
+      // gradient (denser at center, fading at the edge). Per-disk opacity
+      // is jittered so the chamber has internal density variation rather
+      // than uniform black. The stack overlaps so adjacent disks blend
+      // into each other rather than showing seams.
+      const baseRdark = columnRadius * 0.28;     // narrower at the base
+      const topRdark = columnRadius * 0.40;      // wider toward the top (slight expansion)
+      const nLayers = 22;                         // many thin layers — smooth atmospheric depth
+
+      // Pseudo-random but deterministic opacity jitter so the build is
+      // stable across reloads.
+      const jitter = (i) => {
+        const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453;
+        return x - Math.floor(x);
+      };
+
+      for (let layer = 0; layer < nLayers; layer++) {
+        const t = layer / (nLayers - 1);
+        const y = t6Base + t * t6Height;
+        // Radius tapers from base to top
+        const rOuter = baseRdark + (topRdark - baseRdark) * t;
+        // Per-layer opacity: base value with gentle sinusoidal variation
+        // (denser in the middle of the chamber) plus a small jitter so
+        // it doesn't look mechanically banded.
+        const middleBoost = Math.sin(t * Math.PI);   // 0 at ends, 1 at middle
+        const baseOpacity = 0.10 + 0.18 * middleBoost;
+        const opacity = baseOpacity + (jitter(layer) - 0.5) * 0.06;
+
+        // Build a soft ring-disk: many concentric rings, each fading toward
+        // the outer radius. Implemented as a single ring-mesh with vertex-
+        // colored opacity isn't available in MeshBasicMaterial without
+        // shader work, so I approximate with two stacked disks: a dense
+        // inner core disk and a soft outer halo disk with much lower
+        // opacity.
+
+        // Inner core disk — denser, smaller radius
+        {
+          const coreR = rOuter * 0.55;
+          const seg = 32;
+          const verts = [0, 0, 0];   // center vertex
+          for (let k = 0; k <= seg; k++) {
+            const ph = (k / seg) * Math.PI * 2;
+            verts.push(coreR * Math.cos(ph), 0, coreR * Math.sin(ph));
+          }
+          const idx = [];
+          for (let k = 0; k < seg; k++) {
+            idx.push(0, k + 1, k + 2);
+          }
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+          g.setIndex(idx);
+          g.computeVertexNormals();
+          const m = new THREE.MeshBasicMaterial({
+            color: 0x080510,
+            transparent: true,
+            opacity: opacity,
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const disk = new THREE.Mesh(g, m);
+          disk.position.set(0, y, 0);
+          threshold6Group.add(disk);
+        }
+
+        // Soft outer halo disk — wider, much fainter, blends the edge
+        // into the surrounding scene so there's no hard rim
+        {
+          const haloR = rOuter * 1.05;
+          const seg = 32;
+          const verts = [0, 0, 0];
+          for (let k = 0; k <= seg; k++) {
+            const ph = (k / seg) * Math.PI * 2;
+            verts.push(haloR * Math.cos(ph), 0, haloR * Math.sin(ph));
+          }
+          const idx = [];
+          for (let k = 0; k < seg; k++) {
+            idx.push(0, k + 1, k + 2);
+          }
+          const g = new THREE.BufferGeometry();
+          g.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3));
+          g.setIndex(idx);
+          g.computeVertexNormals();
+          const m = new THREE.MeshBasicMaterial({
+            color: 0x0a0614,
+            transparent: true,
+            opacity: opacity * 0.35,    // much fainter, blends to nothing at edge
+            side: THREE.DoubleSide,
+            depthWrite: false,
+          });
+          const disk = new THREE.Mesh(g, m);
+          disk.position.set(0, y, 0);
+          threshold6Group.add(disk);
+        }
+      }
+
+      // A few denser shadow blobs scattered through the chamber — small
+      // nearly-spherical concentrations of darkness that give the region
+      // local density variation, like areas of denser smoke in an
+      // atmospheric shadow.
+      for (let i = 0; i < 6; i++) {
+        const blobY = t6Base + (0.15 + jitter(i + 100) * 0.7) * t6Height;
+        const blobR = (jitter(i + 200) - 0.5) * (topRdark * 0.6);   // off-axis
+        const blobPhi = jitter(i + 300) * Math.PI * 2;
+        const blobSize = 0.06 + jitter(i + 400) * 0.06;
+        const blobGeom = new THREE.SphereGeometry(blobSize, 12, 8);
+        const blobMat = new THREE.MeshBasicMaterial({
+          color: 0x050308,
+          transparent: true,
+          opacity: 0.30 + jitter(i + 500) * 0.20,
+          depthWrite: false,
+        });
+        const blob = new THREE.Mesh(blobGeom, blobMat);
+        blob.position.set(blobR * Math.cos(blobPhi), blobY, blobR * Math.sin(blobPhi));
+        threshold6Group.add(blob);
+      }
 
       // Apex point marker: a small, slightly-glowing sphere at the geometric
       // tip of the column (top of Threshold 6). Marks the terminus of the
@@ -2856,13 +2910,13 @@
         threshold6Group.add(apexMarker);
       }
 
-      // Boundary rings: one at t6Base (entry — top of Zone 7's last flow,
-      // VIOLET signature gathered), one at t6Top (exit — where Zone 8's
-      // next-octave radiation begins, GOLD-RED emerging). The dark gap
-      // between them is genuine discontinuity — the silence between
-      // octaves (Ra 16.51 — eighth note begins a new octave).
+      // Boundary rings: subtle markers at the entry (violet, top of Zone 7)
+      // and exit (warm gold, bottom of Zone 8). Kept faint so they don't
+      // re-introduce a hard rim where the chamber should feel atmospheric.
+      // April 22 v4: opacity reduced from 0.55 to 0.30 to suit the soft
+      // dark zone; rings remain as suggestion rather than declaration.
       {
-        const baseRingR = columnRadius * 0.24;
+        const baseRingR = columnRadius * 0.36;
         const ringPtsBase = [];
         for (let k = 0; k <= 48; k++) {
           const ph = (k / 48) * Math.PI * 2;
@@ -2872,11 +2926,11 @@
         const mBase = new THREE.LineBasicMaterial({
           color: 0x8844a8,  // violet (Zone 7 color — completion of seventh density)
           transparent: true,
-          opacity: 0.4,
+          opacity: 0.30,
         });
         threshold6Group.add(new THREE.Line(gBase, mBase));
 
-        const topRingR = columnRadius * 0.14;
+        const topRingR = columnRadius * 0.20;
         const ringPtsTop = [];
         for (let k = 0; k <= 48; k++) {
           const ph = (k / 48) * Math.PI * 2;
@@ -2886,131 +2940,73 @@
         const mTop = new THREE.LineBasicMaterial({
           color: 0xc8862c,  // warm amber-gold (Zone 8 color emerging — next octave's first density)
           transparent: true,
-          opacity: 0.4,
+          opacity: 0.30,
         });
         threshold6Group.add(new THREE.Line(gTop, mTop));
       }
     }
 
     // ======================================================================
-    // ZONE 8 - First Density of the Next Octave (GOLD + RED intertwined)
+    // ZONE 8 - First Density of the Next Octave (collimated jet, recolored)
     // ======================================================================
-    // April 2026 reframing: Zone 8 is no longer the violet signature of the
-    // just-completed octave (that registered inside Zone 7 and released
-    // into the dark gap). Zone 8 is the FIRST DENSITY OF THE NEXT OCTAVE
-    // manifest as light — the gold inflow and red aperture of the next
-    // torus woven together as twin strands of one phenomenon, before they
-    // have separated into their distinct functions. The pyramid's apex is
-    // the next pyramid's base. Ra 16.51 frames the eighth note as the
-    // beginning of a new octave; the dark gap (Threshold 6) is the genuine
-    // discontinuity between completion and new beginning.
+    // April 22 v2: jet form restored from the earlier black-hole-style
+    // rendering — Doug preferred its silhouette and structure (cone-like
+    // beam with prominent helical ribbons wrapping it, central axis thread,
+    // halo glow, emission point at apex). Color story changed throughout
+    // to match the next-octave gold/red palette:
+    //   outer halo:           soft red       (#A04848)
+    //   main body / inner:    soft dark gold (#7A5A1C)
+    //   thick helical ribbons: strong dark gold (#B8862C)
+    //   secondary filaments:  dark maroon    (#5A1818)
+    //   central axis thread:  warm white-gold core
+    //   emission point:       bright warm white-gold
     //
-    // Rendered as twin braided helical strands rising from the apex, one
-    // gold and one red, intertwining as they ascend. Reads as a single
-    // flame composed of two strands, not two separate flames. Soft warm
-    // halo and a bright concentrated emission point at the apex.
+    // Reads as the next octave's first light: the inner darker gold of
+    // organized prana being woven by strong gold ribbons, with maroon
+    // secondary filaments threading through, and a soft red atmospheric
+    // halo surrounding the whole emission. The central axis stays warm
+    // white as the brightest point of concentration along the column.
     const zone8Group = new THREE.Group();
     refs.zone8 = zone8Group;
     scene.add(zone8Group);
 
     {
-      // Flame extends well above the apex but is shorter and narrower than
-      // the prior jet — this is a flame, not a sustained astrophysical
-      // emission. It tapers out as it rises.
-      const flameBaseY = apexY;            // 8.0
-      const flameTopY = 14.5;              // ~6.5 units of flame above the apex
-      const flameHeight = flameTopY - flameBaseY;
+      // Jet length: apex (y ≈ 8.30) up to y = 20, about 11.7 scene units —
+      // the long sustained emission silhouette Doug preferred.
+      const jetBaseY = apexY;
+      const jetTopY = 20.0;
+      const jetHeight = jetTopY - jetBaseY;
 
-      // Flame radius profile — narrow at origin, widens slightly mid-flame,
-      // tapers to a point at the tip. Classic candle-flame silhouette but
-      // interpreted through twin braided strands rather than a continuous
-      // body.
-      const flameProfile = (t) => {
-        if (t < 0.05) {
-          // Quick emergence from the apex
-          const s = t / 0.05;
-          return 0.06 + (0.18 - 0.06) * Math.sqrt(s);
-        }
-        if (t < 0.55) {
-          // Gentle widening to the flame's belly
-          const s = (t - 0.05) / 0.50;
-          return 0.18 + (0.32 - 0.18) * Math.sin(s * Math.PI / 2);
+      // Jet radius profile — narrow at origin, gently widening with height.
+      // Three phases:
+      //   Origin  (0 -> 0.04):      r = 0.08 → 0.18 (quick emergence)
+      //   Expand  (0.04 -> 0.95):   r = 0.18 → 0.78 (long smooth widening)
+      //   Tip     (0.95 -> 1.0):    r → 0 (fade-out at the top)
+      const jetProfile = (t) => {
+        if (t < 0.04) {
+          const s = t / 0.04;
+          return 0.08 + (0.18 - 0.08) * Math.sqrt(s);
         }
         if (t < 0.95) {
-          // Smooth taper from belly to near-tip
-          const s = (t - 0.55) / 0.40;
-          return 0.32 + (0.06 - 0.32) * (s * s);
+          const s = (t - 0.04) / (0.95 - 0.04);
+          return 0.18 + (0.78 - 0.18) * Math.sqrt(s);
         }
-        // Pinch to a point at the tip
         const s = (t - 0.95) / 0.05;
-        return 0.06 * (1 - s);
+        return 0.78 * (1 - s);
       };
 
-      // Color constants — warm gold and saturated red, the two strands of
-      // the next octave's first density.
-      const GOLD_COLOR = 0xc8a050;
-      const GOLD_EM   = 0x6e4a18;
-      const RED_COLOR = 0xb8261e;
-      const RED_EM   = 0x5a1210;
-
-      // ---- TWIN BRAIDED STRANDS — the dominant visual of the flame.
-      // Two helices rising from the apex, offset by 180° in azimuth so
-      // they wrap around each other. About 2.5 turns per unit of height
-      // gives a tight braid that reads clearly as intertwined strands.
+      // --- Outer halo: soft red atmospheric envelope around the whole jet.
+      // Big, diffuse, low opacity — sits outside the main body and ribbons
+      // so it reads as the warm aura of the emission rather than its body.
       {
-        const turnsPerUnit = 2.5;
-        const totalTurns = turnsPerUnit * flameHeight;
-        const nPts = 220;
-        const strandTubeR = 0.055;          // thick enough to read as "strand," not "thread"
-
-        const strands = [
-          { phaseOffset: 0,         color: GOLD_COLOR, em: GOLD_EM },
-          { phaseOffset: Math.PI,   color: RED_COLOR,  em: RED_EM  },
-        ];
-
-        strands.forEach(({ phaseOffset, color, em }) => {
-          const pts = [];
-          for (let k = 0; k < nPts; k++) {
-            const t = k / (nPts - 1);
-            const y = flameBaseY + flameHeight * t;
-            const r = flameProfile(t);
-            const phi = phaseOffset + totalTurns * Math.PI * 2 * t;
-            pts.push(new THREE.Vector3(
-              r * Math.cos(phi),
-              y,
-              r * Math.sin(phi)
-            ));
-          }
-          const curve = new THREE.CatmullRomCurve3(pts);
-          const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, strandTubeR, 12, false);
-          const mat = new THREE.MeshStandardMaterial({
-            color,
-            emissive: em,
-            emissiveIntensity: 1.2,
-            roughness: 0.4,
-            metalness: 0.1,
-            transparent: true,
-            opacity: 0.92,
-            side: THREE.DoubleSide,
-            depthWrite: false,
-          });
-          zone8Group.add(new THREE.Mesh(tubeGeom, mat));
-        });
-      }
-
-      // ---- Soft warm halo around the flame — diffuse glow that surrounds
-      // the braid, blending gold and red into a unified warm aura. Makes
-      // the strands read as twin facets of one phenomenon rather than
-      // two unrelated helices.
-      {
-        const nRings = 50;
+        const nRings = 60;
         const nPhi = 32;
         const vertices = [];
         const indices = [];
         for (let j = 0; j <= nRings; j++) {
           const t = j / nRings;
-          const y = flameBaseY + flameHeight * t;
-          const r = flameProfile(t) * 1.7;     // wider than the strand envelope
+          const y = jetBaseY + jetHeight * t;
+          const r = jetProfile(t) * 1.6;
           for (let i = 0; i <= nPhi; i++) {
             const ph = (i / nPhi) * Math.PI * 2;
             vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
@@ -3031,8 +3027,8 @@
         haloGeom.setIndex(indices);
         haloGeom.computeVertexNormals();
         const haloMat = new THREE.MeshStandardMaterial({
-          color: 0xd87838,                       // warm amber — gold and red blended
-          emissive: 0x8a3818,
+          color: 0xa04848,           // soft red
+          emissive: 0x6a2828,
           emissiveIntensity: 0.55,
           transparent: true,
           opacity: 0.16,
@@ -3042,19 +3038,17 @@
         zone8Group.add(new THREE.Mesh(haloGeom, haloMat));
       }
 
-      // ---- Inner ember — a faint, warm centerline glow visible between
-      // the braided strands. Suggests the unified flame is one phenomenon
-      // and that the braid is the surface texture of a single flame, not
-      // two separate filaments.
+      // --- Main jet body: solid translucent beam, soft dark gold.
+      // This is the substrate the helical ribbons wrap around.
       {
-        const nRings = 30;
-        const nPhi = 16;
+        const nRings = 60;
+        const nPhi = 36;
         const vertices = [];
         const indices = [];
         for (let j = 0; j <= nRings; j++) {
           const t = j / nRings;
-          const y = flameBaseY + flameHeight * t;
-          const r = flameProfile(t) * 0.55;
+          const y = jetBaseY + jetHeight * t;
+          const r = jetProfile(t);
           for (let i = 0; i <= nPhi; i++) {
             const ph = (i / nPhi) * Math.PI * 2;
             vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
@@ -3070,36 +3064,157 @@
             indices.push(a, d, c);
           }
         }
-        const emberGeom = new THREE.BufferGeometry();
-        emberGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
-        emberGeom.setIndex(indices);
-        emberGeom.computeVertexNormals();
-        const emberMat = new THREE.MeshStandardMaterial({
-          color: 0xf0c060,
-          emissive: 0xc88030,
+        const bodyGeom = new THREE.BufferGeometry();
+        bodyGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        bodyGeom.setIndex(indices);
+        bodyGeom.computeVertexNormals();
+        const bodyMat = new THREE.MeshStandardMaterial({
+          color: 0x7a5a1c,           // soft dark gold
+          emissive: 0x4a3812,
           emissiveIntensity: 0.85,
           transparent: true,
-          opacity: 0.32,
+          opacity: 0.42,
           side: THREE.DoubleSide,
           depthWrite: false,
         });
-        zone8Group.add(new THREE.Mesh(emberGeom, emberMat));
+        zone8Group.add(new THREE.Mesh(bodyGeom, bodyMat));
       }
 
-      // ---- Emission point — bright concentrated sphere at the apex
-      // where the flame emerges. The point at which the next octave's
-      // first density manifests as light. Warm gold-white rather than
-      // the prior cool blue-white.
+      // --- Helical ribbons: the dominant visual feature. THREE thick
+      // strong-dark-gold bands spiraling around the jet's exterior at
+      // offset phases (120° apart). Each ribbon makes ~1.5 turns from
+      // base to tip. Rendered as thick tubes that follow a helical path
+      // on the jet's surface.
       {
-        const emitGeom = new THREE.SphereGeometry(0.10, 20, 14);
-        const emitMat = new THREE.MeshStandardMaterial({
-          color: 0xfff4d8,
-          emissive: 0xf0a040,
+        const nRibbons = 3;
+        const ribbonTurns = 1.5;
+        const nPts = 120;
+        const ribbonTubeRadius = 0.095;
+
+        for (let rib = 0; rib < nRibbons; rib++) {
+          const phaseOffset = (rib / nRibbons) * Math.PI * 2;
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const y = jetBaseY + jetHeight * t;
+            const jetR = jetProfile(t);
+            const r = jetR * 1.02;            // sit ~on the surface
+            const phi = phaseOffset + ribbonTurns * Math.PI * 2 * t;
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, ribbonTubeRadius, 10, false);
+            const ribbonMat = new THREE.MeshStandardMaterial({
+              color: 0xb8862c,                 // strong dark gold
+              emissive: 0x6a4a14,
+              emissiveIntensity: 1.2,
+              transparent: true,
+              opacity: 0.78,
+              side: THREE.DoubleSide,
+              depthWrite: false,
+            });
+            zone8Group.add(new THREE.Mesh(tubeGeom, ribbonMat));
+          }
+        }
+      }
+
+      // --- Secondary helical filaments: thinner, dark maroon threads at
+      // intermediate depth — visible texture between the main ribbons.
+      // Six filaments at randomized phase offsets, slightly faster twist
+      // than the main ribbons so they wind through them rather than
+      // tracking parallel.
+      {
+        const nFilaments = 6;
+        const filTurns = 2.1;
+        const nPts = 80;
+
+        for (let f = 0; f < nFilaments; f++) {
+          const phaseOffset = (f / nFilaments) * Math.PI * 2 + (f * 0.23);
+          const pts = [];
+          for (let k = 0; k < nPts; k++) {
+            const t = k / (nPts - 1);
+            const y = jetBaseY + jetHeight * t;
+            const jetR = jetProfile(t);
+            const wobble = 1 + 0.12 * Math.sin(t * Math.PI * 4 + f);
+            const r = jetR * 0.70 * wobble;
+            const phi = phaseOffset + filTurns * Math.PI * 2 * t;
+            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+          }
+          if (pts.length >= 2) {
+            const curve = new THREE.CatmullRomCurve3(pts);
+            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, 0.022, 8, false);
+            const filamentMat = new THREE.MeshStandardMaterial({
+              color: 0x5a1818,                 // dark maroon
+              emissive: 0x2a0a0a,
+              emissiveIntensity: 0.95,
+              transparent: true,
+              opacity: 0.55,
+              side: THREE.DoubleSide,
+              depthWrite: false,
+            });
+            zone8Group.add(new THREE.Mesh(tubeGeom, filamentMat));
+          }
+        }
+      }
+
+      // --- Bright central axis thread: a thin warm white-gold core
+      // running straight up the centerline. Gives the jet a sense of
+      // intense energy concentrated along its axis — the brightest
+      // point of the whole emission.
+      {
+        const axisR = 0.06;
+        const nRings = 30;
+        const nPhi = 16;
+        const vertices = [];
+        const indices = [];
+        for (let j = 0; j <= nRings; j++) {
+          const t = j / nRings;
+          const y = jetBaseY + jetHeight * t;
+          const r = t < 0.95 ? axisR : axisR * (1 - (t - 0.95) / 0.05);
+          for (let i = 0; i <= nPhi; i++) {
+            const ph = (i / nPhi) * Math.PI * 2;
+            vertices.push(r * Math.cos(ph), y, r * Math.sin(ph));
+          }
+        }
+        for (let j = 0; j < nRings; j++) {
+          for (let i = 0; i < nPhi; i++) {
+            const a = j * (nPhi + 1) + i;
+            const b = a + 1;
+            const c = a + (nPhi + 1);
+            const d = c + 1;
+            indices.push(a, b, d);
+            indices.push(a, d, c);
+          }
+        }
+        const axisGeom = new THREE.BufferGeometry();
+        axisGeom.setAttribute("position", new THREE.Float32BufferAttribute(vertices, 3));
+        axisGeom.setIndex(indices);
+        axisGeom.computeVertexNormals();
+        const axisMat = new THREE.MeshStandardMaterial({
+          color: 0xf0e0a8,                  // warm white-gold core
+          emissive: 0xc8a050,
           emissiveIntensity: 1.5,
-          roughness: 0.25,
+          transparent: true,
+          opacity: 0.78,
+          side: THREE.DoubleSide,
+          depthWrite: false,
+        });
+        zone8Group.add(new THREE.Mesh(axisGeom, axisMat));
+      }
+
+      // --- Emission point: bright concentrated warm white-gold sphere
+      // at the apex where the jet emerges. The collimation point.
+      {
+        const emitGeom = new THREE.SphereGeometry(0.12, 20, 14);
+        const emitMat = new THREE.MeshStandardMaterial({
+          color: 0xfff4d8,                  // warm white-gold
+          emissive: 0xf0c060,
+          emissiveIntensity: 1.5,
+          roughness: 0.2,
         });
         const emitter = new THREE.Mesh(emitGeom, emitMat);
-        emitter.position.set(0, flameBaseY, 0);
+        emitter.position.set(0, jetBaseY, 0);
         zone8Group.add(emitter);
       }
     }
@@ -3111,10 +3226,11 @@
     // This is the outer half of the poloidal circuit. Raw unprocessed prana
     // circulates along these loops: down the outer flank from the north pole
     // region, curving under the base, and back up through the intake ring
-    // to feed Zone 1. The flame at the apex (Zone 8) is a localized emission —
-    // the next octave's first density manifesting as gold-and-red intertwined
-    // light. This ambient field is what surrounds the whole form and carries
-    // the flow on its return path. Color: gold (matches Zone 1 — raw prana).
+    // to feed Zone 1. The collimated jet at the apex (Zone 8) is a localized
+    // emission — the next octave's first density manifest as a sustained
+    // beam of dark gold woven by strong-gold ribbons inside a soft red halo.
+    // This ambient field is what surrounds the whole form and carries the
+    // flow on its return path. Color: gold (matches Zone 1 — raw prana).
     //
     // Proportions: slightly wider than tall (~1.2:1 horizontal:vertical).
     // The SOUTH POLE extends BELOW the separatrix base by ~1 unit — close
@@ -3147,24 +3263,58 @@
       // Number of envelope loops around the torus (azimuthal divisions)
       const nLoops = 24;
 
+      // April 22 v10 — separatrix-rim collector.  The separatrix's own
+      // rim is the collector: every one of the 24 ambient loops descends
+      // from the apex, swings out past the equator, and terminates
+      // directly on the rim circle of the separatrix bell.  The rim
+      // already draws itself (it's the widest edge of the pink bell
+      // mesh), so no additional ring geometry is needed — the loops
+      // simply meet the rim where it sits and the visual reads as
+      // "outer circulation gathers on the bell's edge."
+      //
+      // This replaces v9's dedicated collector ring beneath the bell.
+      // The terminus has moved upward and inward: from (3.3, −4.5) to
+      // the separatrix rim at (separatrixRimR, separatrixBaseY) =
+      // (2.2, −3.5).
+
+      const r_pole_north = columnRadius * 0.3;        // narrow at the apex (apex jet)
+      const terminusR = separatrixRimR;               // land on the bell's rim
+      const terminusY = separatrixBaseY;              // land at the rim's y-level
+
       for (let i = 0; i < nLoops; i++) {
         const phi = (i / nLoops) * Math.PI * 2;
 
-        const pts = [];
         const nPts = 60;
+        const pts = [];
 
-        // alpha sweeps from 0 (north pole) to PI (south pole)
-        // This traces the half-loop along the OUTSIDE of the torus.
+        // Envelope-style sweep from apex to separatrix rim over α ∈ [0, π].
+        //   At α = 0    : apex             — (r_pole_north, y_north)  = (0.3,   8.5)
+        //   At α = π/2  : equator bulge    — (r_eq,         y_eq)     = (10.05, 2.0)
+        //   At α = π    : separatrix rim   — (terminusR,    terminusY)= (2.2,  −3.5)
+        //
+        // Sine-weight blending for smooth C¹ continuity throughout.
+        //   wApex = (1 + cos α)/2    peaks at α=0
+        //   wTerm = (1 − cos α)/2    peaks at α=π
+        //   wEq   = sin α             peaks at α=π/2
+
         for (let k = 0; k < nPts; k++) {
           const tSweep = k / (nPts - 1);
           const alpha = tSweep * Math.PI;
 
-          // Vertical position: cosine sweep from y_north at alpha=0 through
-          // y_eq at alpha=pi/2 to y_south at alpha=pi
-          const y = y_eq + v_halfspan * Math.cos(alpha);
+          const wApex = (1 + Math.cos(alpha)) * 0.5;
+          const wTerm = (1 - Math.cos(alpha)) * 0.5;
+          const wEq   = Math.sin(alpha);
 
-          // Radius: sine-based bulge to r_eq at the equator
-          const r = r_pole + (r_eq - r_pole) * Math.sin(alpha);
+          // Baseline chord from apex to rim terminus
+          const rBase = r_pole_north * wApex + terminusR * wTerm;
+          const yBase = y_north * wApex + terminusY * wTerm;
+
+          // Equator bulge outward from the chord — peak at α=π/2.
+          const rBulge = wEq * (r_eq - (r_pole_north + terminusR) * 0.5);
+          const yBulge = wEq * (y_eq - (y_north + terminusY) * 0.5);
+
+          const r = rBase + rBulge;
+          const y = yBase + yBulge;
 
           pts.push(new THREE.Vector3(
             r * Math.cos(phi),
@@ -3190,13 +3340,14 @@
           ambientFieldGroup.add(new THREE.Mesh(tubeGeom, tubeMat));
         }
 
-        // Arrows showing flow direction: DOWNWARD along the outer flank.
-        // Three arrows per loop — upper-flank descending, equator, lower-flank.
-        const arrowTs = [0.25, 0.50, 0.75];
+        // Two arrows per loop.  One at the upper-outer flank (descending),
+        // one approaching the rim terminus (pointing down-and-in toward
+        // where the loop meets the bell edge).
+        const arrowTs = [0.40, 0.90];
         arrowTs.forEach((tA) => {
-          const idx = Math.floor(tA * (nPts - 1));
+          const idx = Math.floor(tA * (pts.length - 1));
           const pos = pts[idx];
-          const next = pts[Math.min(idx + 1, nPts - 1)];
+          const next = pts[Math.min(idx + 1, pts.length - 1)];
           const d = next.clone().sub(pos);
           if (d.length() > 1e-5) {
             addArrow(ambientFieldGroup, pos, d, AMBIENT_GOLD, 0.12);
@@ -3238,138 +3389,171 @@
     //
     //   3. SECOND FULL SPIRAL (ascending to the apex)
     //      Bottom: Zone 5 / Zone 6 boundary (y = 4.154)
-    //      Top:    Apex (y = 8.0)
+    //      Top:    Apex (y ≈ 8.0)
     //      Encompasses: Zone 6 + Threshold 5 (Position 2) + Zone 7 + Threshold 6
     //
     //   4. THIRD SPIRAL (the jet — ejecting outward)
-    //      Bottom: Apex (y = 8.0)
+    //      Bottom: Apex (y ≈ 8.0)
     //      Top:    Jet tip (y = 20.0)
     //      IS the jet itself
     //
-    // Below the semi-spiral's bottom pinch: an X-cross extends downward
-    // where the spiral's side-curves pass through each other, then flares
-    // out into a nearly-horizontal skirt matching the pyramid's base flow.
-    // All drawn in dark gray, thick lines, toggleable (default OFF).
+    // April 22 v6 changes:
+    //   • Semi-spiral arises from the NORTH rim of the separatrix (no
+    //     closed south side, no axis pinch). Single smooth radius curve
+    //     — no kink. Vertical gradient: red (matching the separatrix
+    //     bell) → dark orange → darker yellow.
+    //   • 1st full spiral: vertical gradient — darker green → blue.
+    //   • 2nd full spiral: vertical gradient — blue → indigo → dark violet.
+    //   • 3rd spiral (jet region): solid dark gold throughout.
+    //   • All spirals render with depthTest: false + renderOrder so the
+    //     schematic always sits on top of substrate content (Zone 3
+    //     turbulence, the bubble, etc.).
+    //   • X-cross and flaring skirt removed (predicated on the old closed
+    //     pinch which no longer exists).
+    // Toggleable (default OFF).
     const spiralsGroup = new THREE.Group();
     refs.spirals = spiralsGroup;
     scene.add(spiralsGroup);
     {
-      const SPIRAL_COLOR = 0x3a3a3a;   // dark gray — thick solid schematic lines
       const SPIRAL_OPACITY = 0.92;
-      const tubeR = 0.055;             // thicker than the first version
+      const tubeR = 0.055;             // line thickness for all spirals
 
-      // Each vesica is drawn from bottom pinch to top pinch; half-width
-      // is the maximum bulge at its vertical midpoint. Widths tuned to
-      // match your schematic: first full spiral widest (it encompasses
-      // the bubble), jet narrowest (long pointed lens), semi-spiral and
-      // second full slightly slimmer than the first full.
-      const vesicas = [
-        { yBot: -2.8,   yTop:  0.154, halfW: 0.78 },   // semi-spiral
-        { yBot:  0.154, yTop:  4.154, halfW: 0.95 },   // 1st full spiral
-        { yBot:  4.154, yTop:  apexY, halfW: 0.78 },   // 2nd full spiral
-        { yBot:  apexY, yTop:  20.0,  halfW: 0.55 },   // 3rd spiral (jet region)
+      // Per-vesica gradient color stops. Each stop is { t, c } where t
+      // ∈ [0, 1] is the height fraction (0 = bottom, 1 = top) and c is a
+      // THREE.Color. A single-element stops list renders solid color.
+      const SEMI_SPIRAL_STOPS = [
+        { t: 0.00, c: new THREE.Color(0xb02030) },   // red — matches separatrix bell
+        { t: 0.50, c: new THREE.Color(0xc25410) },   // dark orange
+        { t: 1.00, c: new THREE.Color(0xb88a14) },   // darker yellow
+      ];
+      const FIRST_FULL_STOPS = [
+        { t: 0.00, c: new THREE.Color(0x1a5a2e) },   // darker green
+        { t: 1.00, c: new THREE.Color(0x2a48a8) },   // blue
+      ];
+      const SECOND_FULL_STOPS = [
+        { t: 0.00, c: new THREE.Color(0x2848a8) },   // a shade darker blue (slightly deeper than 1st-spiral top)
+        { t: 0.50, c: new THREE.Color(0x4030a8) },   // indigo
+        { t: 1.00, c: new THREE.Color(0x4a1a78) },   // dark violet
+      ];
+      const JET_STOPS = [
+        { t: 0.50, c: new THREE.Color(0x7a5a14) },   // solid dark gold throughout
       ];
 
-      // Shared material factory (keeps all lines consistent)
-      const makeLineMat = () => new THREE.MeshStandardMaterial({
-        color: SPIRAL_COLOR,
-        emissive: 0x1a1a1a,
-        emissiveIntensity: 0.20,
-        roughness: 0.65,
+      const sampleColor = (stops, t) => {
+        if (stops.length === 1) return stops[0].c.clone();
+        for (let i = 0; i < stops.length - 1; i++) {
+          const a = stops[i];
+          const b = stops[i + 1];
+          if (t >= a.t && t <= b.t) {
+            const localT = (t - a.t) / (b.t - a.t);
+            return a.c.clone().lerp(b.c, localT);
+          }
+        }
+        return stops[stops.length - 1].c.clone();
+      };
+
+      // Each vesica is drawn from bottom pinch to top pinch (full spirals)
+      // or from open-rim to top pinch (semi-spiral). halfW is the maximum
+      // bulge at the vertical midpoint. Widths tuned to match the schematic:
+      // first full spiral widest (it encompasses the bubble), jet narrowest
+      // (long pointed lens), semi-spiral and second full slimmer than the
+      // first full.
+      const SEMI_SPIRAL_BOTTOM_R = 0.9;   // matches separatrixThroatR
+      const vesicas = [
+        { yBot: -2.8,   yTop:  0.154, halfW: 0.78, stops: SEMI_SPIRAL_STOPS, isSemi: true  },
+        { yBot:  0.154, yTop:  4.154, halfW: 0.95, stops: FIRST_FULL_STOPS,  isSemi: false },
+        { yBot:  4.154, yTop:  apexY, halfW: 0.78, stops: SECOND_FULL_STOPS, isSemi: false },
+        { yBot:  apexY, yTop:  20.0,  halfW: 0.55, stops: JET_STOPS,         isSemi: false },
+      ];
+
+      const nPts = 48;
+      const nSegments = 8;
+
+      // Common segment material factory — depthTest off + emissive glow
+      // so the schematic always sits on top and reads under any lighting.
+      const makeSegMat = (segColor) => new THREE.MeshStandardMaterial({
+        color: segColor,
+        emissive: segColor.clone().multiplyScalar(0.30),
+        emissiveIntensity: 0.40,
+        roughness: 0.55,
         transparent: true,
         opacity: SPIRAL_OPACITY,
+        depthTest: false,
+        depthWrite: false,
       });
 
-      // Build each vesica as 4 meridian curves (at azimuthal angles 0,
-      // 90, 180, 270). Each curve follows r(t) = halfW * sin(π·t) from
-      // bottom pinch up to top pinch, so radius is 0 at the endpoints
-      // and maximum at the middle — producing the lens/vesica silhouette
-      // from any orbital angle.
-      const nPts = 48;
       vesicas.forEach((v) => {
-        const { yBot, yTop, halfW } = v;
+        const { yBot, yTop, halfW, stops, isSemi } = v;
         const height = yTop - yBot;
 
+        // Radius profile selector. Semi-spiral has an open bottom that
+        // smoothly continues from the separatrix throat radius and tapers
+        // to a pinch at the top — single smooth curve, no kink. Full
+        // spirals use the classic vesica sin curve.
+        const SEMI_BULGE_MAX = halfW * 0.60;
+        const radiusAt = (t) => {
+          if (isSemi) {
+            // Wall-continuation profile: SEMI_SPIRAL_BOTTOM_R fades
+            // smoothly to 0 over the full height (smoothstep), with a
+            // small skewed-sin bulge riding on top so the silhouette has
+            // gentle vesica character without ever introducing a kink.
+            const s = t * t * (3 - 2 * t);                 // smoothstep [0,1]
+            const skew = Math.pow(t, 1.35);                // bias bulge upward
+            const env = Math.sin(Math.PI * skew);
+            return SEMI_SPIRAL_BOTTOM_R * (1 - s)
+                 + SEMI_BULGE_MAX * env * (1 - Math.pow(1 - t, 4));
+          } else {
+            return halfW * Math.sin(Math.PI * t);
+          }
+        };
+
         for (let meridian = 0; meridian < 4; meridian++) {
           const phi = (meridian / 4) * Math.PI * 2;
-          const pts = [];
+
+          // Build all points along this meridian first.
+          const allPts = [];
           for (let k = 0; k < nPts; k++) {
             const t = k / (nPts - 1);
-            const r = halfW * Math.sin(Math.PI * t);
+            const r = radiusAt(t);
             const y = yBot + height * t;
-            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+            allPts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
           }
-          if (pts.length >= 2) {
-            const curve = new THREE.CatmullRomCurve3(pts);
-            const tubeGeom = new THREE.TubeGeometry(curve, nPts * 2, tubeR, 8, false);
-            spiralsGroup.add(new THREE.Mesh(tubeGeom, makeLineMat()));
+
+          // Split into nSegments short tube segments, each carrying its
+          // own gradient-sampled material color. Adjacent segments overlap
+          // by one point so the meshes meet without visible seams.
+          const segLen = Math.ceil((allPts.length - 1) / nSegments);
+          for (let s = 0; s < nSegments; s++) {
+            const startIdx = s * segLen;
+            const endIdx = Math.min(startIdx + segLen + 1, allPts.length);
+            const segPts = allPts.slice(startIdx, endIdx);
+            if (segPts.length < 2) continue;
+
+            const midT = ((startIdx + endIdx - 1) / 2) / (nPts - 1);
+            const segColor = sampleColor(stops, midT);
+
+            const segCurve = new THREE.CatmullRomCurve3(segPts);
+            const segGeom = new THREE.TubeGeometry(
+              segCurve,
+              Math.max(8, segPts.length * 2),
+              tubeR,
+              8,
+              false
+            );
+            const segMesh = new THREE.Mesh(segGeom, makeSegMat(segColor));
+            segMesh.renderOrder = 100;
+            spiralsGroup.add(segMesh);
           }
         }
       });
 
-      // X-cross below the semi-spiral's bottom pinch (y = -2.8). The
-      // two side-curves of the semi-spiral continue past the pinch and
-      // cross symmetrically — this models the "inflow" just before it
-      // organizes into the first spiral. Drawn as 4 meridian lines that
-      // go from just below the pinch (crossing the axis at an offset
-      // point) and continue outward-downward.
-      //
-      // Each "cross-leg" goes from the semi-spiral pinch (0, -2.8, 0),
-      // passing to the opposite side, creating the X. In 3D with 4
-      // meridians this reads as a crossing pattern from multiple angles.
-      {
-        const xPinchY = -2.8;
-        const xCrossY = -3.2;              // vertical extent of the cross
-        const xCrossR = 0.35;              // how far outward the leg ends
-        const nXPts = 16;
-
-        for (let meridian = 0; meridian < 4; meridian++) {
-          const phi = (meridian / 4) * Math.PI * 2;
-          // Leg 1: from (0, xPinchY) passing through axis to (+r, xCrossY)
-          const leg1Pts = [];
-          for (let k = 0; k < nXPts; k++) {
-            const t = k / (nXPts - 1);
-            const r = -xCrossR * 0.4 + (xCrossR + xCrossR * 0.4) * t;   // starts inside axis, ends outside
-            const y = xPinchY + (xCrossY - xPinchY) * t;
-            leg1Pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
-          }
-          if (leg1Pts.length >= 2) {
-            const c = new THREE.CatmullRomCurve3(leg1Pts);
-            const g = new THREE.TubeGeometry(c, nXPts * 2, tubeR, 8, false);
-            spiralsGroup.add(new THREE.Mesh(g, makeLineMat()));
-          }
-        }
-      }
-
-      // Flaring skirt at the base — nearly horizontal flare opening out
-      // from the bottom of the X-cross. Matches the wide flat-disk base
-      // visible in the schematic drawing. Four meridian rays so the
-      // skirt reads from any angle.
-      {
-        const skirtStartY = -3.2;          // bottom of X-cross
-        const skirtEndY = -3.5;            // skirt bends slightly downward
-        const skirtStartR = 0.35;          // matches X-cross outer end
-        const skirtEndR = 1.75;            // wide flat skirt
-        const nSkirtPts = 24;
-
-        for (let meridian = 0; meridian < 4; meridian++) {
-          const phi = (meridian / 4) * Math.PI * 2;
-          const pts = [];
-          for (let k = 0; k < nSkirtPts; k++) {
-            const t = k / (nSkirtPts - 1);
-            const r = skirtStartR + (skirtEndR - skirtStartR) * t;
-            // Slight downward curve: use quadratic easing so it starts
-            // flat and bends slightly down at the outer end
-            const y = skirtStartY + (skirtEndY - skirtStartY) * (t * t);
-            pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
-          }
-          if (pts.length >= 2) {
-            const c = new THREE.CatmullRomCurve3(pts);
-            const g = new THREE.TubeGeometry(c, nSkirtPts * 2, tubeR, 8, false);
-            spiralsGroup.add(new THREE.Mesh(g, makeLineMat()));
-          }
-        }
-      }
+      // April 22 v6: removed the X-cross and the flaring skirt that
+      // formerly sat below the semi-spiral's pinch. Both were predicated
+      // on the spiral closing to a point at the axis; the spiral now
+      // arises from the separatrix's north rim, so neither element
+      // applies. The pyramid-base flow that the skirt suggested is
+      // already carried by the Zone 1 streamlines and the separatrix
+      // bell itself.
     }
 
     // ======================================================================
@@ -3418,11 +3602,12 @@
       // at columnRadius (~1.0); the separatrix flares wider; the bubble is
       // slightly narrower; Zone 7 narrows toward its top; the flame is
       // small and narrow.
-      // Zone 1 — Convergence: placed directly BELOW the south pole of the
-      // ambient toroidal field (y_south = -4.5), with a vertical arrow
-      // pointing UP into the entrance. This reads as "prana enters here,
-      // converging upward." The label is centered on the vertical axis
-      // (x = 0) by offsetting its left edge by half the label's width.
+      // Zone 1 — Convergence: placed directly below the separatrix
+      // entrance with a short vertical arrow pointing UP into the rim.
+      // The label sits just beneath the arrow.  Reads as "prana enters
+      // here, converging upward into the bell."  The label is centered
+      // on the vertical axis (x = 0) by offsetting its left edge by
+      // half the label's width.
       {
         const zone1Text = "Zone 1 — Convergence";
         const zone1FontSize = 64;
@@ -3438,11 +3623,12 @@
         const zone1SpriteHeight = 0.5;
         const zone1SpriteWidth = zone1SpriteHeight * (zone1CanvasWidth / zone1CanvasHeight);
 
-        // Label sits further below the south pole (y_south = -4.5) so
-        // there's a clear visible gap between the arrow tip and the
-        // entrance. Label at y = -6.8, arrow tip at y = -5.5 — a full
-        // unit of breathing room between the tip and the south pole.
-        const zone1LabelY = -6.8;
+        // Positions tuned to sit just under the separatrix entrance:
+        //   Arrow tip at y = -3.8 (0.3 units below the rim at y = -3.5)
+        //   Label   at y = -4.7 (label sprite centered here; top of sprite
+        //                        is near y = -4.45)
+        //   Arrow base at y = -4.42 (just above the label sprite)
+        const zone1LabelY = -4.7;
         const zone1LabelLeftX = -zone1SpriteWidth / 2;  // centers label on x = 0
 
         // Add the label itself (sprite positioned by left edge)
@@ -3451,10 +3637,10 @@
           new THREE.Vector3(zone1LabelLeftX, zone1LabelY, 0)
         ));
 
-        // Vertical arrow: from just above the label up to a point south
-        // of the entrance (y = -5.5, a clear unit below the south pole).
+        // Vertical arrow: from just above the label up to a point just
+        // below the separatrix entrance.
         const zone1ArrowStart = new THREE.Vector3(0, zone1LabelY + 0.28, 0);
-        const zone1ArrowEnd = new THREE.Vector3(0, -5.5, 0);
+        const zone1ArrowEnd = new THREE.Vector3(0, -3.8, 0);
         const zone1LineGeom = new THREE.BufferGeometry().setFromPoints([
           zone1ArrowStart, zone1ArrowEnd,
         ]);
@@ -3475,7 +3661,7 @@
       placeLabeled("Threshold 1 — Separatrix",
         labelX, separatrixBaseY + 0.2,
         1.8, separatrixBaseY + 0.2);  // target the separatrix bell at mid-height
-      placeLabeled("Zone 2 — Turbulence",
+      placeLabeled("Zone 2 — Compression Zone",
         labelX, (zone2Base + zone2Top) / 2,
         1.05, (zone2Base + zone2Top) / 2);
       placeLabeled("Zone 3 / Threshold 2 — Foundation Semi-Spiral",
@@ -3506,7 +3692,7 @@
         labelX, (t6Base + t6Top) / 2,
         columnRadius * 0.15, (t6Base + t6Top) / 2);
       // Zone 8 flame label sits beside the flame; pointer targets its side
-      placeLabeled("Zone 8 — First Density of the Next Octave — Gold and Red Intertwined",
+      placeLabeled("Zone 8 — First Density of the Next Octave — Collimated Jet",
         labelX + 1.0, 11.5,
         0.4, 11.5);
       // Ambient Toroidal Field label: positioned at the 10:00 clock
@@ -3993,12 +4179,44 @@
     let isDragging = false;
     let lastX = 0, lastY = 0;
 
+    // Pinch-zoom state (iOS / mobile).  When two fingers are on the canvas,
+    // drag is suspended and changes in inter-finger distance scale the
+    // orbit distance the same way a mouse wheel would.
+    let isPinching = false;
+    let pinchStartDist = 0;
+    let pinchStartOrbitDist = 0;
+    const pinchDistance = (touches) => {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.hypot(dx, dy);
+    };
+
     const onPointerDown = (e) => {
+      if (e.touches && e.touches.length === 2) {
+        // Two-finger touch begins → enter pinch mode, suspend drag.
+        isPinching = true;
+        isDragging = false;
+        pinchStartDist = pinchDistance(e.touches);
+        pinchStartOrbitDist = orbit.distance;
+        return;
+      }
       isDragging = true;
+      isPinching = false;
       lastX = e.clientX || (e.touches && e.touches[0].clientX);
       lastY = e.clientY || (e.touches && e.touches[0].clientY);
     };
     const onPointerMove = (e) => {
+      if (isPinching && e.touches && e.touches.length === 2) {
+        const d = pinchDistance(e.touches);
+        if (pinchStartDist > 0) {
+          // Fingers farther apart → zoom in (smaller orbit distance).
+          // Fingers closer together → zoom out.
+          const ratio = pinchStartDist / d;
+          orbit.distance = Math.max(4, Math.min(65, pinchStartOrbitDist * ratio));
+          updateCamera();
+        }
+        return;
+      }
       if (!isDragging) return;
       const cx = e.clientX || (e.touches && e.touches[0].clientX);
       const cy = e.clientY || (e.touches && e.touches[0].clientY);
@@ -4012,7 +4230,12 @@
       lastY = cy;
       updateCamera();
     };
-    const onPointerUp = () => { isDragging = false; };
+    const onPointerUp = (e) => {
+      // When one finger lifts off mid-pinch, the remaining finger shouldn't
+      // immediately start dragging the scene; require a fresh touchstart.
+      isDragging = false;
+      isPinching = false;
+    };
     const onWheel = (e) => {
       e.preventDefault();
       const delta = e.deltaY > 0 ? 1.08 : 0.93;
@@ -4023,9 +4246,18 @@
     renderer.domElement.addEventListener("mousedown", onPointerDown);
     window.addEventListener("mousemove", onPointerMove);
     window.addEventListener("mouseup", onPointerUp);
-    renderer.domElement.addEventListener("touchstart", onPointerDown, { passive: true });
-    window.addEventListener("touchmove", onPointerMove, { passive: true });
+    // Touch handlers must be passive:false so preventDefault() can stop
+    // Safari's native page-scroll + pinch from fighting the orbit control.
+    renderer.domElement.addEventListener("touchstart", (e) => {
+      if (e.touches && e.touches.length >= 1) e.preventDefault();
+      onPointerDown(e);
+    }, { passive: false });
+    window.addEventListener("touchmove", (e) => {
+      if (isDragging || isPinching) e.preventDefault();
+      onPointerMove(e);
+    }, { passive: false });
     window.addEventListener("touchend", onPointerUp);
+    window.addEventListener("touchcancel", onPointerUp);
     renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
 
     // ======================================================================
