@@ -53,7 +53,7 @@
     border-radius: 4px;
     padding: 12px 14px;
     font-family: Georgia, serif;
-    font-size: 12px;
+    font-size: 9px;
     color: #4a3818;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
     z-index: 19;
@@ -65,11 +65,11 @@
     align-items: center;
     gap: 8px;
     padding: 2px 0;
-    font-size: 12px;
+    font-size: 9px;
     color: #4a3818;
   }
-  #panel .row.indented { padding-left: 20px; font-size: 11px; }
-  #panel .row.indented2 { padding-left: 40px; font-size: 10.5px; }
+  #panel .row.indented { padding-left: 20px; font-size: 8px; }
+  #panel .row.indented2 { padding-left: 40px; font-size: 7.5px; }
   #panel .row .italic { font-style: italic; }
   #panel .row .bold { font-weight: bold; }
   #panel .row.disabled span { opacity: 0.5; }
@@ -80,18 +80,52 @@
     padding-top: 6px;
     border-top: 1px solid #c8a85c;
     font-weight: bold;
-    font-size: 12px;
+    font-size: 9px;
     color: #4a3818;
     letter-spacing: 0.02em;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #panel .section-header .caret {
+    display: inline-block;
+    width: 10px;
+    text-align: center;
+    transition: transform 0.15s;
   }
   #panel .section-header.first { margin-top: 0; padding-top: 0; border-top: none; }
+  /* Collapsible section bodies — closed by default; .open class shows. */
+  #panel .section-body { display: none; }
+  #panel .section-body.open { display: block; }
+  /* Sub-toggle rows hide entirely when their parent master is off,
+     rather than rendering grayed-out. The .row-hidden class is added
+     by JS when the parent flag is false. */
+  #panel .row.row-hidden { display: none; }
   #panel input[type="checkbox"] { cursor: pointer; }
+  #panel .density-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    padding-left: 20px;
+    margin-top: 2px;
+    margin-bottom: 4px;
+  }
+  #panel .density-grid label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 8px;
+    color: #4a3818;
+    cursor: pointer;
+  }
 
-  /* Camera Angles control: button at lower-left, drop-up panel above it */
+  /* Camera Angles control: button at top-right (left of Click Here) */
   #camera-toggle {
     position: absolute;
-    left: 12px;
-    bottom: 12px;
+    top: 12px;
+    right: 130px;
     z-index: 20;
     background: rgba(245, 239, 221, 0.95);
     border: 1px solid #c8a85c;
@@ -106,8 +140,8 @@
   #camera-toggle:hover { background: rgba(245, 239, 221, 1); }
   #camera-panel {
     position: absolute;
-    left: 12px;
-    bottom: 50px;
+    top: 50px;
+    right: 130px;
     z-index: 19;
     background: rgba(245, 239, 221, 0.96);
     border: 1px solid #c8a85c;
@@ -149,78 +183,89 @@
     <!-- ============================================================
          SECTION 1: TOROIDAL FIELD FLOW
          ============================================================ -->
-    <div class="section-header first">Toroidal Field Flow</div>
-    <div class="row"><input type="checkbox" data-key="toroidalFlow" /><span class="bold">Toroidal Field Flow (master)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="ambientField" /><span>Ambient toroidal field</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowPoloidal" /><span>poloidal sweep (the great wheel)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowToroidal" /><span>toroidal procession (around the axis)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowHelical" /><span>helical streamlines (combined)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowHelicalAscent" /><span>helical ascent (central column, dark gold)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowShearBelt" /><span>equatorial shear belt (King's Chamber level)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowQCCompression" /><span>Queen's Chamber compression ring</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowSiblingRings" /><span>counter-rotating sibling rings</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowFluxSurfaces" /><span>nested flux surfaces</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowBoundaryLayer" /><span>boundary layer at envelope</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowConvergenceEddies" /><span>convergence eddies (ovoid-forming)</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowZonal" /><span>secondary zonal flows</span></div>
-    <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowCounterCurrents" /><span>core-edge counter-currents</span></div>
+    <div class="section-header first" data-section="toroidal"><span class="caret">▸</span><span>Toroidal Field Flow</span></div>
+    <div class="section-body" data-section-body="toroidal">
+      <div class="row"><input type="checkbox" data-key="toroidalFlow" /><span class="bold">Toroidal Field Flow (master)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="ambientField" /><span>Ambient toroidal field</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowPoloidal" /><span>poloidal sweep (the great wheel)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowToroidal" /><span>toroidal procession (around the axis)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowHelical" /><span>helical streamlines (combined)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowHelicalAscent" /><span>helical ascent (central column, dark gold)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowShearBelt" /><span>equatorial shear belt (King's Chamber level)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowQCCompression" /><span>Queen's Chamber compression ring</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowSiblingRings" /><span>counter-rotating sibling rings</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowFluxSurfaces" /><span>nested flux surfaces</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowBoundaryLayer" /><span>boundary layer at envelope</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowConvergenceEddies" /><span>convergence eddies (ovoid-forming)</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowZonal" /><span>secondary zonal flows</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowCounterCurrents" /><span>core-edge counter-currents</span></div>
+    </div>
 
     <!-- ============================================================
          SECTION 2: POLOIDAL FLOW
          ============================================================ -->
-    <div class="section-header">Poloidal Flow</div>
-    <div class="row"><input type="checkbox" data-key="poloidalFlow" /><span class="bold">Poloidal Flow (master)</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone1" /><span>Zone 1 — Convergence</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold1" /><span class="italic">Threshold 1 — Separatrix</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="blackMembrane" /><span>Black membrane (south-pole event horizon)</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone2" /><span>Zone 2 — Compression Zone</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold2" /><span class="italic">Zone 3 / Threshold 2 — Foundation Semi-Spiral</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="lowerSheath" /><span>Lower sheath (Zone 1 – base of Zone 3)</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone4" /><span>Zone 4 — Queen's Chamber — Green Ray</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="bubbleEnvelope" /><span>Bubble envelope</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold3" /><span class="italic">Threshold 3 — Wake</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone5" /><span>Zone 5 — King's Chamber — Blue Ray</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold4" /><span class="italic">Threshold 4 — Helical Breakdown</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone6" /><span>Zone 6 — Building Spiral</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold5" /><span class="italic">Threshold 5 — Turbulence Negotiation</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone7" /><span>Zone 7 — Relaminarization — Violet (7th Density)</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold6" /><span class="italic">Threshold 6 — Silence Between Octaves</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone8" /><span>Zone 8 — Next Octave (collimated jet)</span></div>
-    <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="labels" /><span>Zone labels</span></div>
+    <div class="section-header" data-section="poloidal"><span class="caret">▸</span><span>Poloidal Flow</span></div>
+    <div class="section-body" data-section-body="poloidal">
+      <div class="row"><input type="checkbox" data-key="poloidalFlow" /><span class="bold">Poloidal Flow (master)</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone1" /><span>Zone 1 — Convergence</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold1" /><span class="italic">Threshold 1 — Separatrix</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="blackMembrane" /><span>Black membrane (south-pole event horizon)</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone2" /><span>Zone 2 — Compression Zone</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold2" /><span class="italic">Zone 3 / Threshold 2 — Foundation Semi-Spiral</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="lowerSheath" /><span>Lower sheath (Zone 1 – base of Zone 3)</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone4" /><span>Zone 4 — Queen's Chamber — Green Ray</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="bubbleEnvelope" /><span>Bubble envelope</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold3" /><span class="italic">Threshold 3 — Wake</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone5" /><span>Zone 5 — King's Chamber — Blue Ray</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold4" /><span class="italic">Threshold 4 — Helical Breakdown</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone6" /><span>Zone 6 — Building Spiral</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold5" /><span class="italic">Threshold 5 — Turbulence Negotiation</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone7" /><span>Zone 7 — Relaminarization — Violet (7th Density)</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold6" /><span class="italic">Threshold 6 — Silence Between Octaves</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone8" /><span>Zone 8 — Next Octave (collimated jet)</span></div>
+      <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="labels" /><span>Zone labels</span></div>
+    </div>
 
     <!-- ============================================================
          SECTION 3: RA CONTACT OVERLAYS
          ============================================================ -->
-    <div class="section-header">Ra Contact Overlays</div>
-    <div class="row"><input type="checkbox" data-key="ovoids" /><span class="bold">Age-Regression Ovoids (Ra 59.18–59.20)</span></div>
-    <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlow" /><span>recirculation flow within ovoids</span></div>
-    <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFigure" /><span>age-regressing figures at rest</span></div>
-    <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlowLines" /><span>click to see ovoids' formative inner toroidal flows</span></div>
-    <div class="row"><input type="checkbox" data-key="spirals" /><span>Spirals overlay (Don/Ra schematic)</span></div>
-    <div class="row"><input type="checkbox" data-key="merkaba" /><span>Merkaba overlay</span></div>
-    <div class="row"><input type="checkbox" data-key="mbsct" /><span>MBSCT doorway (Position 2 vesica)</span></div>
-    <div class="row"><input type="checkbox" data-key="chakraBubbles" /><span>Chakra bubbles (red · yellow · blue · violet + overlaps)</span></div>
-    <div class="row"><input type="checkbox" data-key="densityAll" /><span class="bold">Density bands — all</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityRed" /><span>Red</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityOrange" /><span>Orange</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityYellow" /><span>Yellow</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityGreen" /><span>Green</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityBlue" /><span>Blue</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityIndigo" /><span>Indigo</span></div>
-    <div class="row indented"><input type="checkbox" data-key="densityViolet" /><span>Violet</span></div>
+    <div class="section-header" data-section="ra"><span class="caret">▸</span><span>Ra Contact Overlays</span></div>
+    <div class="section-body" data-section-body="ra">
+      <div class="row"><input type="checkbox" data-key="ovoids" /><span class="bold">Age-Regression Ovoids (Ra 59.18–59.20)</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlow" /><span>recirculation flow within ovoids</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFigure" /><span>age-regressing figures at rest</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlowLines" /><span>click to see ovoids' formative inner toroidal flows</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidLabels" /><span>Age-Regression Ovoids label</span></div>
+      <div class="row"><input type="checkbox" data-key="spirals" /><span>Spirals overlay (Don/Ra schematic)</span></div>
+      <div class="row"><input type="checkbox" data-key="merkaba" /><span>Merkaba overlay</span></div>
+      <div class="row"><input type="checkbox" data-key="mbsct" /><span>Mind-Body-Spirit-Complex Totality Interface Zone</span></div>
+      <div class="row"><input type="checkbox" data-key="chakraBubbles" /><span>Chakra bubbles (red · yellow · blue · violet + overlaps)</span></div>
+      <div class="row"><input type="checkbox" data-key="densityAll" /><span class="bold">Density bands — all</span></div>
+      <div class="density-grid">
+        <label><input type="checkbox" data-key="densityRed" /><span>Red</span></label>
+        <label><input type="checkbox" data-key="densityOrange" /><span>Orange</span></label>
+        <label><input type="checkbox" data-key="densityYellow" /><span>Yellow</span></label>
+        <label><input type="checkbox" data-key="densityGreen" /><span>Green</span></label>
+        <label><input type="checkbox" data-key="densityBlue" /><span>Blue</span></label>
+        <label><input type="checkbox" data-key="densityIndigo" /><span>Indigo</span></label>
+        <label><input type="checkbox" data-key="densityViolet" /><span>Violet</span></label>
+      </div>
+    </div>
 
     <!-- ============================================================
          SECTION 4: MISCELLANEOUS
          ============================================================ -->
-    <div class="section-header">Miscellaneous</div>
-    <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
-    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
-    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
-    <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidP2" checked /><span>Position 2 marker</span></div>
+    <div class="section-header" data-section="misc"><span class="caret">▸</span><span>Miscellaneous</span></div>
+    <div class="section-body" data-section-body="misc">
+      <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidP2" checked /><span>Position 2 marker</span></div>
+    </div>
   </div>
 
   <!-- Camera Angles: button at lower-left, drop-up panel with all camera controls -->
-  <button id="camera-toggle">Camera Angles ▴</button>
+  <button id="camera-toggle">Camera Angles ▾</button>
   <div id="camera-panel">
     <div class="ctrl-label">Camera tilt (up / down)</div>
     <input type="range" id="elevation-slider" min="-80" max="80" value="9" step="1" />
@@ -296,6 +341,7 @@
     ovoidFlow: true,              // sub of ovoids; auto-populated when master on
     ovoidFigure: true,            // sub of ovoids; auto-populated when master on
     ovoidFlowLines: false,        // sibling of ovoidFlow/ovoidFigure under ovoids; drives blue-mode override
+    ovoidLabels: false,           // sibling: shows "Age-Regression Ovoids per Ra" labels at each face
     spirals: false,
     merkaba: false,
     mbsct: false,
@@ -1073,7 +1119,9 @@
       { const coreR = rOuter * 0.55; const seg = 32; const verts = [0, 0, 0]; for (let k = 0; k <= seg; k++) { const ph = (k / seg) * Math.PI * 2; verts.push(coreR * Math.cos(ph), 0, coreR * Math.sin(ph)); } const idx = []; for (let k = 0; k < seg; k++) idx.push(0, k + 1, k + 2); const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3)); g.setIndex(idx); g.computeVertexNormals(); const disk = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0x080510, transparent: true, opacity, side: THREE.DoubleSide, depthWrite: false })); disk.position.set(0, y, 0); threshold6Group.add(disk); }
       { const haloR = rOuter * 1.05; const seg = 32; const verts = [0, 0, 0]; for (let k = 0; k <= seg; k++) { const ph = (k / seg) * Math.PI * 2; verts.push(haloR * Math.cos(ph), 0, haloR * Math.sin(ph)); } const idx = []; for (let k = 0; k < seg; k++) idx.push(0, k + 1, k + 2); const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(verts, 3)); g.setIndex(idx); g.computeVertexNormals(); const disk = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color: 0x0a0614, transparent: true, opacity: opacity * 0.35, side: THREE.DoubleSide, depthWrite: false })); disk.position.set(0, y, 0); threshold6Group.add(disk); }
     }
-    for (let i = 0; i < 6; i++) { const blobY = t6Base + (0.15 + jitter(i + 100) * 0.7) * t6Height; const blobR = (jitter(i + 200) - 0.5) * (topRdark * 0.6); const blobPhi = jitter(i + 300) * Math.PI * 2; const blobSize = 0.06 + jitter(i + 400) * 0.06; const blob = new THREE.Mesh(new THREE.SphereGeometry(blobSize, 12, 8), new THREE.MeshBasicMaterial({ color: 0x050308, transparent: true, opacity: 0.30 + jitter(i + 500) * 0.20, depthWrite: false })); blob.position.set(blobR * Math.cos(blobPhi), blobY, blobR * Math.sin(blobPhi)); threshold6Group.add(blob); }
+    // (Dark blob spheres formerly scattered through the silence band
+    // have been removed — the stack of dark disks alone carries the
+    // band's character without speckling.)
     { const apexMarker = new THREE.Mesh(new THREE.SphereGeometry(0.05, 24, 16), new THREE.MeshStandardMaterial({ color: 0xd8a850, emissive: 0x8a5a18, emissiveIntensity: 0.55, roughness: 0.4 })); apexMarker.position.set(0, apexY, 0); threshold6Group.add(apexMarker); }
     { const baseRingR = columnRadius * 0.36; const ringPtsBase = []; for (let k = 0; k <= 48; k++) { const ph = (k / 48) * Math.PI * 2; ringPtsBase.push(new THREE.Vector3(baseRingR * Math.cos(ph), t6Base, baseRingR * Math.sin(ph))); } threshold6Group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPtsBase), new THREE.LineBasicMaterial({ color: 0x8844a8, transparent: true, opacity: 0.30 }))); const topRingR = columnRadius * 0.20; const ringPtsTop = []; for (let k = 0; k <= 48; k++) { const ph = (k / 48) * Math.PI * 2; ringPtsTop.push(new THREE.Vector3(topRingR * Math.cos(ph), t6Top, topRingR * Math.sin(ph))); } threshold6Group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPtsTop), new THREE.LineBasicMaterial({ color: 0xc8862c, transparent: true, opacity: 0.30 }))); }
   }
@@ -1500,6 +1548,77 @@
   }
 
   // ====================================================================
+  // OVOID LABELS — "Age-Regression Ovoids per Ra"
+  // ====================================================================
+  // Four labels, one per face-centered ovoid. Each label sits beyond
+  // the ovoid (further out from the central column) with an arrow line
+  // running back to the ovoid's centroid. Labels use the same italic
+  // tan/brown typography as the zone labels.
+  // ====================================================================
+  const ovoidLabelsGroup = new THREE.Group();
+  refs.ovoidLabels = ovoidLabelsGroup;
+  scene.add(ovoidLabelsGroup);
+  {
+    const QC_LEVEL_Y_LBL = 0.504;
+    const FACE_DISTANCE_AT_QC_LBL = 5.99;
+    const CENTROID_RADIAL_LBL = FACE_DISTANCE_AT_QC_LBL * 0.75;
+    const LABEL_TEXT = "Age-Regression Ovoids per Ra";
+    const LABEL_OFFSET = 4.5;   // how far beyond the ovoid the label sits
+    const LABEL_COLOR_HEX = "#6b4a1a";
+    const POINTER_COLOR = 0x6b4a1a;
+
+    // Approximate the sprite width that makeLabel will produce so we can
+    // anchor the arrow at the inner edge of the label.
+    const measureCanvas = document.createElement("canvas");
+    const measureCtx = measureCanvas.getContext("2d");
+    measureCtx.font = "italic 64px Georgia, serif";
+    const textW = Math.ceil(measureCtx.measureText(LABEL_TEXT).width);
+    const spriteW = 0.5 * (textW + 40) / Math.ceil(64 * 1.4);
+
+    const faceNormalsLbl = [
+      new THREE.Vector3(-1, 0,  0),   // west face — label sits opposite the zone-label column
+    ];
+
+    faceNormalsLbl.forEach((normal) => {
+      const ovoidCentroid = new THREE.Vector3()
+        .copy(normal).multiplyScalar(CENTROID_RADIAL_LBL);
+      ovoidCentroid.y = QC_LEVEL_Y_LBL;
+
+      // Label sits outward along the same direction, beyond the ovoid
+      const labelOuter = new THREE.Vector3()
+        .copy(normal).multiplyScalar(CENTROID_RADIAL_LBL + LABEL_OFFSET);
+      labelOuter.y = QC_LEVEL_Y_LBL;
+
+      // makeLabel anchors at the LEFT edge of the sprite. The sprite
+      // text reads west-to-east on screen regardless of where it's placed.
+      // For the east-face label, anchoring at labelOuter let the text
+      // extend further east (away from figure). For the west-face label,
+      // we instead shift the anchor further west by the sprite's width
+      // so the text extends west and the sprite's right edge sits at
+      // labelOuter (the inner end of the arrow line).
+      const labelLeftAnchor = labelOuter.clone();
+      labelLeftAnchor.x -= spriteW;
+      ovoidLabelsGroup.add(makeLabel(LABEL_TEXT, labelLeftAnchor, 64, LABEL_COLOR_HEX));
+
+      // Arrow line from the inner edge of the label (= labelOuter +
+      // small step toward ovoid) back to the ovoid centroid (slightly
+      // short of it, so the arrowhead points TO the ovoid).
+      const lineStart = labelOuter.clone()
+        .add(normal.clone().multiplyScalar(-0.10));
+      const lineEnd = ovoidCentroid.clone()
+        .add(normal.clone().multiplyScalar(0.55));   // stop near the ovoid's outer rim
+      ovoidLabelsGroup.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
+        new THREE.LineBasicMaterial({ color: POINTER_COLOR, transparent: true, opacity: 0.65 })
+      ));
+      const arrowDir = lineEnd.clone().sub(lineStart);
+      if (arrowDir.length() > 1e-5) {
+        addArrow(ovoidLabelsGroup, lineEnd.clone(), arrowDir, POINTER_COLOR, 0.12);
+      }
+    });
+  }
+
+  // ====================================================================
   // OVOID FORMATION FLOW — recirculation flow within ovoids
   // ====================================================================
   const ovoidFlowGroup = new THREE.Group();
@@ -1511,28 +1630,11 @@
     const CENTROID_RADIAL = FACE_DISTANCE_AT_QC * 0.75;
     const FLOW_COLOR = 0x6a9aa8;
     const FLOW_EMISSIVE = 0x305058;
-    const SHEAR_COLOR = 0x88a8b8;
     const ARROW_COLOR = 0x5a8898;
-    {
-      const shearRadii = [1.8, 2.6, 3.4, 4.2];
-      shearRadii.forEach((r, ri) => {
-        const ringPts = [];
-        const nPts = 80;
-        for (let k = 0; k <= nPts; k++) {
-          const ph = (k / nPts) * Math.PI * 2;
-          ringPts.push(new THREE.Vector3(r * Math.cos(ph), QC_LEVEL_Y, r * Math.sin(ph)));
-        }
-        ovoidFlowGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts),
-          new THREE.LineBasicMaterial({ color: SHEAR_COLOR, transparent: true, opacity: 0.40 })));
-        const nArrows = 8;
-        for (let i = 0; i < nArrows; i++) {
-          const ph = (i / nArrows) * Math.PI * 2 + (ri % 2) * 0.2;
-          const pos = new THREE.Vector3(r * Math.cos(ph), QC_LEVEL_Y, r * Math.sin(ph));
-          const tangent = new THREE.Vector3(-Math.sin(ph), 0, Math.cos(ph));
-          addArrow(ovoidFlowGroup, pos, tangent, ARROW_COLOR, 0.10);
-        }
-      });
-    }
+    // (Horizontal shear-belt rings at QC altitude removed — that
+    // azimuthal flow is shown by the equatorial shear belt in the
+    // Toroidal Field Flow section, and reading both at once was
+    // redundant.)
     {
       const faceNormals = [
         new THREE.Vector3( 1, 0, 0),
@@ -2781,7 +2883,7 @@
     // Resonance Chamber
     { const rcGeo = new THREE.BoxGeometry(27, 7.5, 16);
       const rc = new THREE.Mesh(rcGeo, new THREE.MeshBasicMaterial({
-        color: 0x101010, transparent: true, opacity: 0.25, depthWrite: false,
+        color: 0x101010, transparent: true, opacity: 0.50, depthWrite: false,
       }));
       rc.position.set(14, -60 + 7.5 / 2, 0);
       chambersGroup.add(rc);
@@ -2789,7 +2891,7 @@
     }
     // Queen's Chamber + gable
     { const qcMat = new THREE.MeshBasicMaterial({
-        color: 0x0a0a0a, transparent: true, opacity: 0.25, depthWrite: false,
+        color: 0x0a0a0a, transparent: true, opacity: 0.50, depthWrite: false,
       });
       const qcBox = new THREE.Mesh(new THREE.BoxGeometry(10, 8, 10), qcMat);
       qcBox.position.set(0, 51.89, 0);
@@ -3111,6 +3213,7 @@
     if (refs.ovoids)      refs.ovoids.visible      = visibility.ovoids;
     if (refs.ovoidFlow)   refs.ovoidFlow.visible   = visibility.ovoids && visibility.ovoidFlow;
     if (refs.ovoidFigure) refs.ovoidFigure.visible = visibility.ovoids && visibility.ovoidFigure;
+    if (refs.ovoidLabels) refs.ovoidLabels.visible = visibility.ovoids && visibility.ovoidLabels;
 
     // Gold↔blue color shift on registered formative-flow materials.
     formativeFlowMaterials.forEach((mat) => {
@@ -3165,22 +3268,44 @@
     cb.addEventListener("change", () => {
       visibility[key] = cb.checked;
       applyVisibility();
-      updateChildDisabledState();
+      updateChildVisibilityState();
     });
   });
 
-  function updateChildDisabledState() {
+  function updateChildVisibilityState() {
+    // Sub-toggles (rows with data-parent) hide entirely when their
+    // parent master is off, rather than rendering grayed. The parent
+    // row stays visible so the user can turn the master on.
     document.querySelectorAll('#panel .row.indented, #panel .row.indented2').forEach((row) => {
       const parentKey = row.getAttribute("data-parent");
-      if (!parentKey) return;  // density-band rows have no parent (independent toggles)
+      if (!parentKey) return;  // density-band labels have no data-parent
       const parentOn = !!visibility[parentKey];
-      const cb = row.querySelector('input[type="checkbox"]');
-      if (cb) cb.disabled = !parentOn;
-      if (parentOn) row.classList.remove("disabled");
-      else row.classList.add("disabled");
+      if (parentOn) row.classList.remove("row-hidden");
+      else row.classList.add("row-hidden");
     });
   }
-  updateChildDisabledState();
+  updateChildVisibilityState();
+
+  // Accordion: clicking a section header toggles its body open/closed.
+  // Single-open behavior — opening one section closes the others —
+  // keeps the panel compact and gives a clear sense of focus.
+  document.querySelectorAll('#panel .section-header').forEach((header) => {
+    header.addEventListener("click", () => {
+      const sectionId = header.getAttribute("data-section");
+      const body = document.querySelector(`#panel .section-body[data-section-body="${sectionId}"]`);
+      if (!body) return;
+      const wasOpen = body.classList.contains("open");
+      // Close all sections and rotate their carets back
+      document.querySelectorAll('#panel .section-body').forEach((b) => b.classList.remove("open"));
+      document.querySelectorAll('#panel .section-header .caret').forEach((c) => { c.textContent = "\u25B8"; });
+      // If this one was closed, open it; otherwise leave all closed
+      if (!wasOpen) {
+        body.classList.add("open");
+        const myCaret = header.querySelector(".caret");
+        if (myCaret) myCaret.textContent = "\u25BE";
+      }
+    });
+  });
 
   const panel = document.getElementById("panel");
   const panelToggleBtn = document.getElementById("panel-toggle");
@@ -3202,10 +3327,10 @@
     cameraToggleBtn.addEventListener("click", () => {
       if (cameraPanel.classList.contains("open")) {
         cameraPanel.classList.remove("open");
-        cameraToggleBtn.textContent = "Camera Angles \u25B4";
+        cameraToggleBtn.textContent = "Camera Angles \u25BE";
       } else {
         cameraPanel.classList.add("open");
-        cameraToggleBtn.textContent = "Camera Angles \u25BE";
+        cameraToggleBtn.textContent = "Camera Angles \u25B4";
       }
     });
   }
