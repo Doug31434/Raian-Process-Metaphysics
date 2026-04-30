@@ -138,6 +138,19 @@
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   }
   #camera-toggle:hover { background: rgba(245, 239, 221, 1); }
+  /* Updated-date stamp: small text to the left of the Camera Angles button */
+  #updated-stamp {
+    position: absolute;
+    top: 18px;          /* visually centered with #camera-toggle */
+    right: 245px;       /* sits to the left of #camera-toggle (which is at right:130px) */
+    z-index: 20;
+    font-family: Georgia, serif;
+    font-size: 10px;
+    font-style: italic;
+    color: #6b4a1a;
+    pointer-events: none;
+    user-select: none;
+  }
   #camera-panel {
     position: absolute;
     top: 50px;
@@ -261,10 +274,15 @@
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidP2" checked /><span>Position 2 marker</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidCorridors" /><span>corridors &amp; Grand Gallery</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidShafts" /><span>star shafts &amp; Well Shaft</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidVoids" /><span>ScanPyramids voids (2016–23)</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidFeatureLabels" /><span>feature labels (corridors · shafts · voids)</span></div>
     </div>
   </div>
 
   <!-- Camera Angles: button at lower-left, drop-up panel with all camera controls -->
+  <div id="updated-stamp">updated: 4-30-26</div>
   <button id="camera-toggle">Camera Angles ▾</button>
   <div id="camera-panel">
     <div class="ctrl-label">Camera tilt (up / down)</div>
@@ -360,6 +378,10 @@
     pyramidChambers: true,
     pyramidRelieving: true,
     pyramidP2: true,
+    pyramidCorridors: false,
+    pyramidShafts: false,
+    pyramidVoids: false,
+    pyramidFeatureLabels: false,
 
     // Below-image (not in panel)
     chamberLabels: false,
@@ -1368,7 +1390,7 @@
   scene.add(ovoidsGroup);
   {
     const QC_LEVEL_Y = 0.504;
-    const FACE_DISTANCE_AT_QC = 5.99;
+    const FACE_DISTANCE_AT_QC = 5.6932;  // exact: pyramid face at QC altitude (Ra 59.19 'three-quarters from center')
     const CENTROID_RADIAL = FACE_DISTANCE_AT_QC * 0.75;
     const INWARD_LOBE_LENGTH = CENTROID_RADIAL * 0.5;
     const VERT_LOBE_LENGTH = 1.0;
@@ -1560,7 +1582,7 @@
   scene.add(ovoidLabelsGroup);
   {
     const QC_LEVEL_Y_LBL = 0.504;
-    const FACE_DISTANCE_AT_QC_LBL = 5.99;
+    const FACE_DISTANCE_AT_QC_LBL = 5.6932;  // exact: pyramid face at QC altitude (Ra 59.19)
     const CENTROID_RADIAL_LBL = FACE_DISTANCE_AT_QC_LBL * 0.75;
     const LABEL_TEXT = "Age-Regression Ovoids per Ra";
     const LABEL_OFFSET = 4.5;   // how far beyond the ovoid the label sits
@@ -1626,7 +1648,7 @@
   scene.add(ovoidFlowGroup);
   {
     const QC_LEVEL_Y = 0.504;
-    const FACE_DISTANCE_AT_QC = 5.99;
+    const FACE_DISTANCE_AT_QC = 5.6932;  // exact: pyramid face at QC altitude (Ra 59.19 'three-quarters from center')
     const CENTROID_RADIAL = FACE_DISTANCE_AT_QC * 0.75;
     const FLOW_COLOR = 0x6a9aa8;
     const FLOW_EMISSIVE = 0x305058;
@@ -2237,7 +2259,7 @@
         new THREE.Vector3( 0, 0,  1),
         new THREE.Vector3( 0, 0, -1),
       ];
-      const FACE_DISTANCE_AT_QC = 5.99;
+      const FACE_DISTANCE_AT_QC = 5.6932;  // exact: pyramid face at QC altitude (Ra 59.19 'three-quarters from center')
       const EDDY_CENTROID_RADIAL = FACE_DISTANCE_AT_QC * 0.75;
 
       // Helper: registered arrow at given position/direction
@@ -2350,7 +2372,7 @@
         const uHat = normal.clone().multiplyScalar(-1).normalize();
         const vHat = new THREE.Vector3(0, 1, 0);
         const wHat = new THREE.Vector3().crossVectors(vHat, uHat).normalize();
-        const INWARD_LOBE_LENGTH = 2.25;
+        const INWARD_LOBE_LENGTH = EDDY_CENTROID_RADIAL * 0.5;  // matches ovoid definition; was hardcoded 2.25
         const stations = [
           { s: 0.15, ringR: 0.20 },
           { s: 0.30, ringR: 0.30 },
@@ -2427,7 +2449,7 @@
         const eddyCenter = new THREE.Vector3().copy(normal).multiplyScalar(EDDY_CENTROID_RADIAL);
         eddyCenter.y = QC_LEVEL_Y;
         const uHat = normal.clone().multiplyScalar(-1).normalize();
-        const INWARD_LOBE_LENGTH = 2.25;
+        const INWARD_LOBE_LENGTH = EDDY_CENTROID_RADIAL * 0.5;  // matches ovoid definition; was hardcoded 2.25
         const stagnationPositions = [
           { offset: 0.00, radius: 0.10 },
           { offset: 0.50, radius: 0.07 },
@@ -2581,7 +2603,7 @@
   scene.add(ovoidFigureGroup);
   {
     const QC_LEVEL_Y = 0.504;
-    const FACE_DISTANCE_AT_QC = 5.99;
+    const FACE_DISTANCE_AT_QC = 5.6932;  // exact: pyramid face at QC altitude (Ra 59.19 'three-quarters from center')
     const CENTROID_RADIAL = FACE_DISTANCE_AT_QC * 0.75;
     const HUMAN_SCALE = 0.060;
 
@@ -2599,7 +2621,7 @@
     });
 
     const buildReclinedFigure = (faceNormal, inwardOffset) => {
-      const INWARD_LOBE_LENGTH = 2.25;
+      const INWARD_LOBE_LENGTH = CENTROID_RADIAL * 0.5;  // matches ovoid definition; was hardcoded 2.25
       const inwardDir = faceNormal.clone().multiplyScalar(-1).normalize();
       const heartCenter = new THREE.Vector3().copy(faceNormal).multiplyScalar(CENTROID_RADIAL);
       heartCenter.y = QC_LEVEL_Y;
@@ -3025,6 +3047,456 @@
       p2Inner.position.set(0, p2Y, 0);
       p2Group.add(p2Inner);
     }
+
+    // === CORRIDORS, SHAFTS, AND DISCOVERED VOIDS (April 2026 NCH) ===
+    // Coordinates are in royal cubits, inside pyramidGroup. The parent
+    // group's scale (1/POLOIDAL_TO_PYRAMID_SCALE) and PYRAMID_Y_OFFSET
+    // bring them into the same world units as the chambers.
+    //
+    // NCH coordinates were authored against a base model with QC at
+    // y=44. In this scene the QC sits at y=51.89, so corridor/shaft
+    // endpoints that anchor at the QC level are shifted up by ~8 cubits.
+    // Everything anchored to KC (floor y=80) matches the NCH directly.
+
+    // Tube helper: cylinder between two points
+    const makeNchTube = (from, to, radius, mat, wireMat) => {
+      const dir = new THREE.Vector3().subVectors(to, from);
+      const length = dir.length();
+      const geo = new THREE.CylinderGeometry(radius, radius, length, 10, 1, false);
+      const mesh = new THREE.Mesh(geo, mat);
+      const axis = new THREE.Vector3(0, 1, 0);
+      mesh.quaternion.setFromUnitVectors(axis, dir.clone().normalize());
+      mesh.position.copy(from).add(dir.clone().multiplyScalar(0.5));
+      if (wireMat) {
+        const wire = new THREE.LineSegments(new THREE.EdgesGeometry(geo), wireMat);
+        wire.quaternion.copy(mesh.quaternion);
+        wire.position.copy(mesh.position);
+        return [mesh, wire];
+      }
+      return [mesh];
+    };
+
+    // Materials
+    const corridorMat = new THREE.MeshBasicMaterial({
+      color: 0xa89578, transparent: true, opacity: 0.65, depthWrite: false,
+    });
+    const corridorWireMat = new THREE.LineBasicMaterial({
+      color: 0x6a5840, transparent: true, opacity: 0.6,
+    });
+    const shaftMat = new THREE.MeshBasicMaterial({
+      color: 0x9a8568, transparent: true, opacity: 0.55, depthWrite: false,
+    });
+    const shaftWireMat = new THREE.LineBasicMaterial({
+      color: 0x5a4830, transparent: true, opacity: 0.5,
+    });
+    const voidMat = new THREE.MeshBasicMaterial({
+      color: 0x4a90c2, transparent: true, opacity: 0.55, depthWrite: false,
+    });
+    const voidWireMat = new THREE.LineBasicMaterial({
+      color: 0x2a6090, transparent: true, opacity: 0.75,
+    });
+    // Dashed wireframe for features whose location/dimensions are NOT
+    // confirmed in peer-reviewed sources — used for the NE Edge cavity
+    // (2016 muon excess: altitude ~110m verified, but lateral position
+    // and shape never published with precision).
+    const voidWireMatUnverified = new THREE.LineDashedMaterial({
+      color: 0x2a6090, transparent: true, opacity: 0.85,
+      dashSize: 0.10, gapSize: 0.08, scale: 1,
+    });
+
+    // ---- CORRIDORS GROUP ----
+    const corridorsGroup = new THREE.Group();
+    refs.pyramidCorridors = corridorsGroup;
+    pyramidGroup.add(corridorsGroup);
+    const addCorridor = (from, to, r) => {
+      makeNchTube(from, to, r, corridorMat, corridorWireMat).forEach(m => corridorsGroup.add(m));
+    };
+
+    // Descending Corridor: north face (+z) entrance ~17m up, descends at 26.5° to
+    // junction with Ascending Corridor, then continues at 26.5° down to a brief
+    // horizontal segment that meets the Subterranean Chamber.
+    // Junction position derived by solving the two-corridor constraint:
+    // DC entrance (0, 34, 193) at 26.5°, AC reaching ggBottom (0, 51.89, 68.28)
+    // at 26.1°. Resulting junction: (0, 12.20, 149.28).
+    const dcEntrance = new THREE.Vector3(0, 34, 193);
+    const dcJunction = new THREE.Vector3(0, 12.20, 149.28);
+    const dcLowerEnd = new THREE.Vector3(0, -56, 12.49);   // where 26.5° DC reaches subterranean altitude
+    const dcSubterranean = new THREE.Vector3(14, -56, 0);  // existing chamber center
+    addCorridor(dcEntrance, dcJunction, 1.5);     // upper DC, 26.5°
+    addCorridor(dcJunction, dcLowerEnd, 1.5);     // lower DC, continues at 26.5°
+    addCorridor(dcLowerEnd, dcSubterranean, 1.5); // brief horizontal to subterranean
+
+    // Ascending Corridor: junction up to bottom of Grand Gallery at 26.1° slope.
+    // ggBottom is now placed at QC altitude (y=51.89) so the QC Horizontal Corridor
+    // can run cleanly horizontal between QC and the GG floor (real archaeology has
+    // them at essentially the same altitude — Petrie measured QC y=40.5, GG bottom
+    // y=41.5, only 1 cubit different; here we anchor both to the framework's QC
+    // altitude of y=51.89).
+    const ggBottom = new THREE.Vector3(0, 51.89, 68.28);
+    addCorridor(dcJunction, ggBottom, 1.3);
+
+    // Grand Gallery: dimensions adjusted to span from QC altitude to KC altitude
+    // within the framework's chamber positions, while preserving the 26.20° slope
+    // from Petrie/Alison construction.
+    //   Floor length: 76.10 cubits along slope (real GG is 88; shortened to fit framework)
+    //   Slope: 26.20° rising toward SOUTH (toward -z in this scene)
+    //   Box position raised so the FLOOR (not box center) connects properly:
+    //     North-end FLOOR:    y=51.89 (QC altitude), z=+68.28 (where AC + QC corridor arrive)
+    //     South-end FLOOR:    y=85.50 (KC altitude), z=0 (where antechamber passage exits)
+    //     North-end CEILING:  y=66.25, z=+75.34
+    //     South-end CEILING:  y=99.85, z=+7.06
+    //   Box rotation.x = +0.4573 → +z (north) end LOW, -z (south) end HIGH ✓
+    {
+      const ggGeo = new THREE.BoxGeometry(4, 16, 76.10);
+      const gg = new THREE.Mesh(ggGeo, corridorMat);
+      gg.position.set(0, 75.87, 37.67);  // raised so FLOOR corners land at connection points
+      gg.rotation.x = +0.4573;           // +26.20°: north-low → south-high
+      corridorsGroup.add(gg);
+      const ggWire = new THREE.LineSegments(new THREE.EdgesGeometry(ggGeo), corridorWireMat);
+      ggWire.position.copy(gg.position);
+      ggWire.rotation.copy(gg.rotation);
+      corridorsGroup.add(ggWire);
+    }
+
+    // KC Antechamber Passage: GG top now lands essentially at KC altitude
+    // (y=85.49 vs KC y=85.5), so the great step is implicit in the GG itself.
+    // The passage runs horizontally south from the GG top to the KC north wall.
+    // KC mesh is 10 cubits deep (z) at center z=-25, so north wall is at z=-20.
+    addCorridor(new THREE.Vector3(0, 85.5, 0), new THREE.Vector3(0, 85.5, -20), 1.3);
+
+    // QC Horizontal Corridor: GG-bottom (north-low end of GG) runs south to
+    // QC's north wall (y=51.89, z=+5). Real horizontal corridor descends
+    // ~1m near the QC end (the floor step); approximated here as straight.
+    addCorridor(ggBottom, new THREE.Vector3(0, 51.89, 5), 1.3);
+
+    // ---- SHAFTS GROUP ----
+    const shaftsGroup = new THREE.Group();
+    refs.pyramidShafts = shaftsGroup;
+    pyramidGroup.add(shaftsGroup);
+    const addShaft = (from, to, r) => {
+      makeNchTube(from, to, r, shaftMat, shaftWireMat).forEach(m => shaftsGroup.add(m));
+    };
+
+    // Well Shaft (Escape Shaft): drops nearly vertically from the GG north-end
+    // floor down through the masonry, passing the grotto cavity partway down,
+    // and reconnecting to the Descending Corridor near its lower extent. Real
+    // archaeology shows this as a near-vertical bored shaft, used by workers
+    // as an escape route after the AC was sealed.
+    //   Upper: GG-floor (0, 51.89, 68.28) → grotto (0, 5, 68.28)
+    //   Lower: grotto (0, 5, 68.28) → DC at (0, -28.19, 68.28)
+    addShaft(ggBottom, new THREE.Vector3(0, 5, 68.28), 1.0);
+    addShaft(new THREE.Vector3(0, 5, 68.28), new THREE.Vector3(0, -28.19, 68.28), 1.0);
+
+    // KC North Shaft: straight at 32.5° from KC north wall to north face exit.
+    // Real archaeology shows this shaft is straight (no dogleg). Earlier code had
+    // a dogleg that was an artifact, not a real feature.
+    addShaft(new THREE.Vector3(0, 82, -20), new THREE.Vector3(0, 156.54, 97.00), 0.6);
+
+    // KC South Shaft: straight at 45° from KC south wall to south face exit.
+    addShaft(new THREE.Vector3(0, 82, -30), new THREE.Vector3(0, 153.4, -99.4), 0.6);
+
+    // QC North Shaft: blocked, doesn't reach surface (start anchored to QC y=51.89)
+    addShaft(new THREE.Vector3(0, 51.89, 5), new THREE.Vector3(0, 51.89, 9), 0.5);
+    addShaft(new THREE.Vector3(0, 51.89, 9), new THREE.Vector3(0, 115, 80), 0.5);
+
+    // QC South Shaft: blocked by Gantenbrink's door
+    addShaft(new THREE.Vector3(0, 51.89, -5), new THREE.Vector3(0, 51.89, -9), 0.5);
+    addShaft(new THREE.Vector3(0, 51.89, -9), new THREE.Vector3(0, 115, -93), 0.5);
+
+    // ---- FACE EXIT APERTURES ----
+    // Where shafts pierce the pyramid faces, render a soft glowing patch
+    // so the viewer reads "this shaft exits to the outside." Two layers
+    // per aperture: a bright disk on the face plane + a softer halo behind.
+    // Placed in shaftsGroup so they toggle with the shafts checkbox.
+    //
+    // Pyramid face slope: atan(280 / 220) ≈ 51.84°.
+    // North face outward normal: (0, sin(38.16°), cos(38.16°)) = (0, 0.617, 0.787).
+    // South face outward normal: (0, 0.617, -0.787).
+    // Wait — actually for a face going from base (z=220) to apex (z=0),
+    // the inward-pointing surface normal is (0, 220, -280) and outward
+    // is (0, -220, 280)? Let me redo: the face contains points
+    // P1=(±HALF, 0, +HALF), P2=(0, HEIGHT, 0). The outward normal of
+    // the north face (the +z face) points in +z direction overall, so:
+    //   along-slope vector (going up-slope from base to apex) =
+    //     (0, HEIGHT, 0) - (0, 0, HALF) = (0, HEIGHT, -HALF), pointing up & inward
+    //   horizontal-along-face vector: (HALF, 0, HALF) - (-HALF, 0, HALF) = (HALF*2, 0, 0)
+    //   outward normal = horizontal × up-slope (right-hand rule, with horizontal east)
+    //     = (2*HALF, 0, 0) × (0, HEIGHT, -HALF)
+    //     = (0*-HALF - 0*HEIGHT, 0*0 - 2*HALF*-HALF, 2*HALF*HEIGHT - 0*0)
+    //     = (0, HALF*HALF*2, 2*HALF*HEIGHT)
+    //     proportional to (0, HALF, HEIGHT) = (0, 220, 280).
+    //   normalized: (0, 0.617, 0.787). Outward (+z and +y). ✓
+    const SLOPE_NORMAL_Y = 220 / Math.sqrt(220*220 + 280*280);   // ≈ 0.617
+    const SLOPE_NORMAL_FACE = 280 / Math.sqrt(220*220 + 280*280); // ≈ 0.787
+
+    const buildFaceAperture = (position, faceSign, shaftRadius) => {
+      // faceSign = +1 for north face, -1 for south face.
+      // The aperture lies in the face plane at `position`. Its normal
+      // matches the face's outward normal.
+      const outwardNormal = new THREE.Vector3(0, SLOPE_NORMAL_Y, faceSign * SLOPE_NORMAL_FACE);
+
+      // Outer halo: soft, large, low opacity — simulates light bleed
+      // around the aperture's edge.
+      const haloR = shaftRadius * 4.0;
+      const haloGeom = new THREE.CircleGeometry(haloR, 24);
+      const haloMat = new THREE.MeshBasicMaterial({
+        color: 0xf4d68a, transparent: true, opacity: 0.28,
+        side: THREE.DoubleSide, depthWrite: false,
+      });
+      const halo = new THREE.Mesh(haloGeom, haloMat);
+      halo.position.copy(position);
+      halo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), outwardNormal);
+      // Push the halo *just* outside the face (along outward normal) so
+      // it sits proud of the shaded pyramid skin and reads as a glow.
+      halo.position.add(outwardNormal.clone().multiplyScalar(0.4));
+      shaftsGroup.add(halo);
+
+      // Inner bright disk: smaller, more saturated — the aperture itself.
+      const innerR = shaftRadius * 1.7;
+      const innerGeom = new THREE.CircleGeometry(innerR, 20);
+      const innerMat = new THREE.MeshBasicMaterial({
+        color: 0xfff4c8, transparent: true, opacity: 0.85,
+        side: THREE.DoubleSide, depthWrite: false,
+      });
+      const inner = new THREE.Mesh(innerGeom, innerMat);
+      inner.position.copy(position).add(outwardNormal.clone().multiplyScalar(0.6));
+      inner.quaternion.copy(halo.quaternion);
+      shaftsGroup.add(inner);
+
+      // Thin rim around the inner disk — gives the aperture a defined
+      // edge against the face material.
+      const rimGeom = new THREE.RingGeometry(innerR * 0.95, innerR * 1.15, 28);
+      const rimMat = new THREE.MeshBasicMaterial({
+        color: 0xc8a050, transparent: true, opacity: 0.75,
+        side: THREE.DoubleSide, depthWrite: false,
+      });
+      const rim = new THREE.Mesh(rimGeom, rimMat);
+      rim.position.copy(position).add(outwardNormal.clone().multiplyScalar(0.55));
+      rim.quaternion.copy(halo.quaternion);
+      shaftsGroup.add(rim);
+    };
+
+    // Same builder, but with corridor coloring (warmer tan) for the
+    // Descending Corridor entrance — distinguishes it from the star
+    // shaft apertures, which use the gold/cream palette above.
+    const buildCorridorAperture = (position, faceSign, corridorRadius) => {
+      const outwardNormal = new THREE.Vector3(0, SLOPE_NORMAL_Y, faceSign * SLOPE_NORMAL_FACE);
+
+      const haloR = corridorRadius * 3.0;
+      const halo = new THREE.Mesh(
+        new THREE.CircleGeometry(haloR, 24),
+        new THREE.MeshBasicMaterial({
+          color: 0xc8a578, transparent: true, opacity: 0.30,
+          side: THREE.DoubleSide, depthWrite: false,
+        })
+      );
+      halo.position.copy(position).add(outwardNormal.clone().multiplyScalar(0.4));
+      halo.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), outwardNormal);
+      corridorsGroup.add(halo);
+
+      const innerR = corridorRadius * 1.4;
+      const inner = new THREE.Mesh(
+        new THREE.CircleGeometry(innerR, 20),
+        new THREE.MeshBasicMaterial({
+          color: 0x4a3818, transparent: true, opacity: 0.90,
+          side: THREE.DoubleSide, depthWrite: false,
+        })
+      );
+      // Dark fill — represents the open mouth of the corridor (looking
+      // *into* a tunnel). The original entrance, unlike the sealed star
+      // shafts, is a true opening you can walk into.
+      inner.position.copy(position).add(outwardNormal.clone().multiplyScalar(0.6));
+      inner.quaternion.copy(halo.quaternion);
+      corridorsGroup.add(inner);
+
+      const rim = new THREE.Mesh(
+        new THREE.RingGeometry(innerR * 0.95, innerR * 1.20, 28),
+        new THREE.MeshBasicMaterial({
+          color: 0xa8784c, transparent: true, opacity: 0.85,
+          side: THREE.DoubleSide, depthWrite: false,
+        })
+      );
+      rim.position.copy(position).add(outwardNormal.clone().multiplyScalar(0.55));
+      rim.quaternion.copy(halo.quaternion);
+      corridorsGroup.add(rim);
+    };
+
+    // KC North Shaft exit on north face
+    buildFaceAperture(new THREE.Vector3(0, 156.54, 97.00), +1, 0.6);
+
+    // KC South Shaft exit on south face
+    buildFaceAperture(new THREE.Vector3(0, 153.4, -99.4), -1, 0.6);
+
+    // Descending Corridor entrance on north face — original entrance
+    buildCorridorAperture(new THREE.Vector3(0, 34, 193), +1, 1.5);
+
+    // ---- DISCOVERED VOIDS GROUP ----
+    const voidsGroup = new THREE.Group();
+    refs.pyramidVoids = voidsGroup;
+    pyramidGroup.add(voidsGroup);
+
+    // Big Void (2017): 21m above King's Chamber floor per Bettin et al. 2022
+    // and Magli 2017 ('40-50m above QC floor'). KC floor at y=85.5; +21m/0.524 = +40 cubits.
+    // Center: y = 85.5 + 40 = 125.5 cubits ≈ 67m above pyramid base.
+    // Horizontal: described as "above the Grand Gallery." Corrected GG runs from
+    // z=0 (south, high) to z=+81.7 (north, low). Big Void center at z=+35
+    // (above GG center area, slightly south of GG midpoint for a clean view).
+    {
+      const bvGeo = new THREE.BoxGeometry(4, 15, 50);
+      const bv = new THREE.Mesh(bvGeo, voidMat);
+      bv.position.set(0, 126, 35);
+      bv.rotation.x = +0.05;            // ~3° gentle southward slope (image-matched, between Magli's horizontal/inclined hypotheses)
+      voidsGroup.add(bv);
+      const bvWire = new THREE.LineSegments(new THREE.EdgesGeometry(bvGeo), voidWireMat);
+      bvWire.position.copy(bv.position);
+      bvWire.rotation.copy(bv.rotation);
+      voidsGroup.add(bvWire);
+    }
+
+    // North Face Corridor (2023): long axis perpendicular to north face.
+    // Length extends INTO the pyramid (z-axis), near the original entrance.
+    //
+    // Position from Procureur, Morishima et al. 2023 (Nat Commun 14:1144):
+    //   Length L = 9.06 ± 0.07 m  (17.29 cubits)
+    //   Width W = 1.87 ± 0.11 m   (3.57 cubits)
+    //   Height H = 1.85 ± 0.12 m  (3.53 cubits) [CEA] / 2.18 [Nagoya]
+    //   North end inset 0.84 ± 0.05 m behind Chevron outer face (1.60 cubits)
+    //   Bottom altitude ~20 m above ground (y ≈ 38 cubits)
+    //   East-West position essentially coincident with DC (Y = -0.07 ± 0.11 m)
+    //   Slope ~0° (horizontal)
+    // Face at y=38 sits at z ≈ 190.14 cubits (taper from base z=220).
+    // North end of box: z = 190.14 - 1.60 = 188.54
+    // Center z = 188.54 - 17.29/2 = 179.89
+    {
+      const nfcGeo = new THREE.BoxGeometry(3.57, 3.53, 17.29);
+      const nfc = new THREE.Mesh(nfcGeo, voidMat);
+      nfc.position.set(0, 38, 179.89);
+      voidsGroup.add(nfc);
+      const nfcWire = new THREE.LineSegments(new THREE.EdgesGeometry(nfcGeo), voidWireMat);
+      nfcWire.position.copy(nfc.position);
+      voidsGroup.add(nfcWire);
+    }
+
+    // NE Edge Cavity (2016): muon excess detected at NE edge, ~110m altitude.
+    // Altitude ~y=210 cubits is verified by published reports; lateral position
+    // (45,_,45) and 6×6×6 dimensions are NOT in any peer-reviewed source —
+    // the original 2016 announcement gave only the altitude band and noted
+    // "similar void volume characteristics as a known cave at 83m on the same
+    // edge." Dashed wireframe marks this as unverified placement.
+    {
+      const neGeo = new THREE.BoxGeometry(6, 6, 6);
+      const ne = new THREE.Mesh(neGeo, voidMat);
+      ne.position.set(45, 210, 45);
+      voidsGroup.add(ne);
+      const neWire = new THREE.LineSegments(new THREE.EdgesGeometry(neGeo), voidWireMatUnverified);
+      neWire.position.copy(ne.position);
+      neWire.computeLineDistances();
+      voidsGroup.add(neWire);
+    }
+
+    // Djedi/Gantenbrink small chamber (Djedi Project 2011): tiny empty cavity
+    // behind Gantenbrink's Door at the end of the QC south shaft. Snake-camera
+    // images by the Djedi robot revealed red-painted hieroglyphs on the floor
+    // and ornamental copper-pin loops on the back of the door. A second
+    // blocking stone sits at the chamber's far wall — extent of any further
+    // passage unknown. Approximate dimensions ~1m³. Dashed edges mark the
+    // exact size and orientation as not precisely surveyed.
+    {
+      const djediGeo = new THREE.BoxGeometry(1.9, 1.9, 3.8);
+      const djedi = new THREE.Mesh(djediGeo, voidMat);
+      djedi.position.set(0, 116.8, -95.4);
+      djedi.rotation.x = -0.927;        // align long axis with shaft direction (~53° south-down)
+      voidsGroup.add(djedi);
+      const djediWire = new THREE.LineSegments(new THREE.EdgesGeometry(djediGeo), voidWireMatUnverified);
+      djediWire.position.copy(djedi.position);
+      djediWire.rotation.copy(djedi.rotation);
+      djediWire.computeLineDistances();
+      voidsGroup.add(djediWire);
+    }
+  }
+
+  // ====================================================================
+  // PYRAMID FEATURE LABELS
+  // ====================================================================
+  // Toggleable text labels for each corridor, shaft, and discovered void.
+  // Stacked in a vertical column on the RIGHT side of the pyramid (chamber
+  // labels use the LEFT column, so the two systems don't collide). Each
+  // label has an arrowed pointer running back to the feature. Sprites are
+  // scaled down to half the chamber-label size to avoid crowding.
+  const pyramidFeatureLabelsGroup = new THREE.Group();
+  refs.pyramidFeatureLabels = pyramidFeatureLabelsGroup;
+  scene.add(pyramidFeatureLabelsGroup);
+  {
+    const PYR_S = 1 / POLOIDAL_TO_PYRAMID_SCALE;
+    const PYR_Y = PYRAMID_Y_OFFSET;
+    // Convert (x_cubits, y_cubits, z_cubits) → world coords
+    const pc = (x, y, z) => new THREE.Vector3(x * PYR_S, y * PYR_S + PYR_Y, z * PYR_S);
+
+    const FEATURE_COLOR = "#3a2a08";
+    const POINTER_COLOR_HEX = 0x3a2a08;
+    const FEATURE_FONT = 64;            // same canvas resolution as chamber labels
+    const FEATURE_SCALE = 0.45;          // ~half size of chamber labels (which are 0.5)
+    const labelLeftX = 3.0;              // right column (chambers use -3.0)
+
+    // Mirror of approxLabelWidth from chamber labels but scaled to FEATURE_SCALE
+    const approxLabelWidth = (text, fontSize) => {
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      ctx.font = `italic ${fontSize}px Georgia, serif`;
+      const textWidth = ctx.measureText(text).width;
+      // Mirror of makeLabel: spriteHeight=0.5 default, aspectRatio = canvasW/canvasH
+      // but here we override the sprite scale, so width = scale * (canvasW/canvasH)
+      const canvasH = Math.ceil(fontSize * 1.4);
+      const canvasW = textWidth + 40;
+      return FEATURE_SCALE * (canvasW / canvasH);
+    };
+
+    const placeFeatureLabel = (text, target, labelYOverride) => {
+      const labelY = (labelYOverride !== undefined) ? labelYOverride : target.y;
+      const sprite = makeLabel(text, new THREE.Vector3(labelLeftX, labelY, 0), FEATURE_FONT, FEATURE_COLOR);
+      // Shrink sprite to feature size (makeLabel hardcodes height=0.5)
+      sprite.scale.multiplyScalar(FEATURE_SCALE / 0.5);
+      // makeLabel positions sprite center at leftEdge + spriteWidth/2 of the
+      // *original* size; after scaling, recenter at the new effective width.
+      const w = approxLabelWidth(text, FEATURE_FONT);
+      sprite.position.set(labelLeftX + w / 2, labelY, 0);
+      pyramidFeatureLabelsGroup.add(sprite);
+      // Pointer line from label LEFT edge back to target
+      const lineStart = new THREE.Vector3(labelLeftX - 0.05, labelY, 0);
+      const lineEnd = target.clone();
+      pyramidFeatureLabelsGroup.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
+        new THREE.LineBasicMaterial({ color: POINTER_COLOR_HEX, transparent: true, opacity: 0.7 })
+      ));
+      const dir = lineEnd.clone().sub(lineStart);
+      if (dir.length() > 1e-5) addArrow(pyramidFeatureLabelsGroup, lineEnd.clone(), dir, POINTER_COLOR_HEX, 0.06);
+    };
+
+    // Targets ordered by altitude (low to high) so labels stack naturally.
+    // Where features cluster within < 0.20 world-y of each other, an
+    // explicit labelY override nudges the label up or down to avoid
+    // overlap; the pointer arrow still leads back to the true target.
+
+    // ---- LOW ALTITUDE (subterranean to lower 3rd) ----
+    placeFeatureLabel("Descending Corridor (known antiquity)", pc(7, -10, 96));
+    placeFeatureLabel("Well Shaft (known antiquity)", pc(0, 12, 68.28));
+
+    // ---- ENTRANCE / QC LEVEL (collision cluster: NFC y=38, AC y=40) ----
+    placeFeatureLabel("North Face Corridor (2016 detected, 2023 confirmed)", pc(0, 38, 180), 0.18);
+    placeFeatureLabel("Ascending Corridor (known antiquity)", pc(0, 40, 51), 0.55);
+    placeFeatureLabel("QC Horizontal Corridor (known antiquity)", pc(0, 55, 12));
+
+    // ---- MID-HEIGHT (KC level — collision cluster: y=80,85,85) ----
+    placeFeatureLabel("Grand Gallery (known antiquity)", pc(0, 75.87, 37.67));
+    placeFeatureLabel("KC Antechamber Passage (known antiquity)", pc(0, 85.5, -8), 1.55);
+    placeFeatureLabel("QC North Shaft (Dixon 1872, blocked)", pc(0, 85, 45), 1.95);
+    placeFeatureLabel("QC South Shaft (Dixon 1872, Gantenbrink's Door 1993)", pc(0, 85, -50), 2.25);
+
+    // ---- UPPER (above KC — collision cluster: BV y=126, KCs y=135, KCn y=140) ----
+    placeFeatureLabel("ScanPyramids Big Void (2017)", pc(0, 126, 35));
+    placeFeatureLabel("Djedi Chamber behind Gantenbrink's Door (Djedi 2011)", pc(0, 116.8, -95.4), 3.10);    placeFeatureLabel("KC South Shaft (cleared 1872)", pc(0, 135, -55), 3.45);
+    placeFeatureLabel("KC North Shaft (cleared 1872)", pc(0, 140, 35), 3.85);
+    placeFeatureLabel("NE Edge Cavity (2016 — position approximate)", pc(45, 210, 45));
   }
 
   // ====================================================================
@@ -3252,6 +3724,10 @@
     if (refs.pyramidChambers)   refs.pyramidChambers.visible   = visibility.pyramid && visibility.pyramidChambers;
     if (refs.pyramidRelieving)  refs.pyramidRelieving.visible  = visibility.pyramid && visibility.pyramidRelieving;
     if (refs.pyramidP2)         refs.pyramidP2.visible         = visibility.pyramid && visibility.pyramidP2;
+    if (refs.pyramidCorridors)  refs.pyramidCorridors.visible  = visibility.pyramid && visibility.pyramidCorridors;
+    if (refs.pyramidShafts)     refs.pyramidShafts.visible     = visibility.pyramid && visibility.pyramidShafts;
+    if (refs.pyramidVoids)      refs.pyramidVoids.visible      = visibility.pyramid && visibility.pyramidVoids;
+    if (refs.pyramidFeatureLabels) refs.pyramidFeatureLabels.visible = visibility.pyramid && visibility.pyramidFeatureLabels;
 
     // ---- CHAMBER LABELS (below-image control) ----
     if (refs.chamberLabels) refs.chamberLabels.visible = visibility.chamberLabels;
