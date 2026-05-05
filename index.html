@@ -11,14 +11,14 @@
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #f5efdd;
+    background: #ffffff;
     font-family: Georgia, serif;
   }
   #stage {
     position: relative;
     width: 100vw;
     height: 100vh;
-    background: #f5efdd;
+    background: #ffffff;
   }
   #mount {
     width: 100%;
@@ -266,9 +266,9 @@
     </div>
 
     <!-- ============================================================
-         SECTION 4: MISCELLANEOUS
+         SECTION 4: PYRAMID OVERLAY
          ============================================================ -->
-    <div class="section-header" data-section="misc"><span class="caret">▸</span><span>Miscellaneous</span></div>
+    <div class="section-header" data-section="misc"><span class="caret">▸</span><span>Pyramid Overlay</span></div>
     <div class="section-body" data-section-body="misc">
       <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
@@ -278,11 +278,12 @@
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidShafts" /><span>star shafts &amp; Well Shaft</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidVoids" /><span>ScanPyramids voids (2016–23)</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidFeatureLabels" /><span>feature labels (corridors · shafts · voids)</span></div>
+      <div class="row"><input type="checkbox" id="chamber-labels-toggle" /><span>Pyramid chamber labels</span></div>
     </div>
   </div>
 
   <!-- Camera Angles: button at lower-left, drop-up panel with all camera controls -->
-  <div id="updated-stamp">updated: 4-30-26</div>
+  <div id="updated-stamp">updated: 5-5-26</div>
   <button id="camera-toggle">Camera Angles ▾</button>
   <div id="camera-panel">
     <div class="ctrl-label">Camera tilt (up / down)</div>
@@ -297,10 +298,6 @@
     <div class="ctrl-label">Side-to-side pan (left / right of view)</div>
     <input type="range" id="pan-slider" min="-10" max="10" value="0" step="0.05" />
 
-    <div class="checkbox-row">
-      <input type="checkbox" id="chamber-labels-toggle" />
-      <label for="chamber-labels-toggle">Pyramid chamber labels</label>
-    </div>
     <div class="footer">Drag scene to orbit · scroll or pinch to zoom</div>
   </div>
 </div>
@@ -373,7 +370,7 @@
     densityIndigo: false,
     densityViolet: false,
 
-    // Section 4: Miscellaneous
+    // Section 4: Pyramid Overlay
     pyramid: true,                // auto-populated
     pyramidChambers: true,
     pyramidRelieving: true,
@@ -393,7 +390,7 @@
   if (!mount) return;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color("#f5efdd");
+  scene.background = new THREE.Color("#ffffff");
   refs.scene = scene;
 
   const width = mount.clientWidth;
@@ -1168,10 +1165,15 @@
     const A_TOP = 6.178;
     const A_BOT = 5.422;
     const B_horiz = 11.72;
-    const nLoops = 24;
+    const nLoops = 72;
+    // Azimuthal drift: how far each line winds around the central axis
+    // over one full poloidal sweep (alpha from 0 to π). 1.0 = one full
+    // turn around the axis per poloidal half-circuit. This makes each
+    // fluid parcel trace a helix on the toroidal surface rather than a
+    // pure cross-sectional loop.
+    const phiDriftPerSweep = Math.PI * 2;
     for (let i = 0; i < nLoops; i++) {
-      const phi = (i / nLoops) * Math.PI * 2;
-      const cosPh = Math.cos(phi), sinPh = Math.sin(phi);
+      const phi0 = (i / nLoops) * Math.PI * 2;
       const nPts = 80;
       const pts = [];
       for (let k = 0; k < nPts; k++) {
@@ -1180,29 +1182,109 @@
         const a_local = (cosA >= 0) ? A_TOP : A_BOT;
         const r = B_horiz * Math.sin(alpha);
         const y = y_center + a_local * cosA;
+        // Azimuth drifts as the loop sweeps poloidally:
+        // alpha = 0..π maps to phi advance of 0..phiDriftPerSweep.
+        const phi = phi0 + phiDriftPerSweep * (alpha / Math.PI);
+        const cosPh = Math.cos(phi), sinPh = Math.sin(phi);
         pts.push(new THREE.Vector3(r * cosPh, y, r * sinPh));
       }
       const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.5);
       const tubeGeom = new THREE.TubeGeometry(curve, 96, 0.015, 8, false);
       ambientFieldGroup.add(new THREE.Mesh(tubeGeom, new THREE.MeshStandardMaterial({
         color: AMBIENT_GOLD, emissive: AMBIENT_GOLD_EM, emissiveIntensity: 0.25,
-        roughness: 0.7, metalness: 0.1, transparent: true, opacity: 0.50, depthWrite: false,
+        roughness: 0.7, metalness: 0.1, transparent: true, opacity: 0.18, depthWrite: false,
       })));
-      [0.30, 0.80].forEach((tA) => {
-        const idx = Math.floor(tA * (pts.length - 1));
-        const pos = pts[idx];
-        const next = pts[Math.min(idx + 1, pts.length - 1)];
-        const d = next.clone().sub(pos);
-        if (d.length() > 1e-5) addArrow(ambientFieldGroup, pos, d, AMBIENT_GOLD, 0.12);
+    }
+    // Highlighted single streamline: pole-to-pole spiral flow line.
+    // Uses the same parametric form as the helical mesh, but rendered
+    // thicker and at higher opacity so one specific flow path reads as
+    // a highlighted "primary streamline" against the surrounding ambient
+    // field. Begins at the north pole (alpha = 0, y = y_center + A_TOP)
+    // and ends at the south pole (alpha = π, y = y_center - A_BOT).
+    {
+      const phi0 = 0;                 // starting azimuth — could be any value
+      const nPts = 120;
+      const pts = [];
+      for (let k = 0; k < nPts; k++) {
+        const alpha = (k / (nPts - 1)) * Math.PI;
+        const cosA = Math.cos(alpha);
+        const a_local = (cosA >= 0) ? A_TOP : A_BOT;
+        const r = B_horiz * Math.sin(alpha);
+        const y = y_center + a_local * cosA;
+        const phi = phi0 + phiDriftPerSweep * (alpha / Math.PI);
+        pts.push(new THREE.Vector3(r * Math.cos(phi), y, r * Math.sin(phi)));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.5);
+      const bandGeom = new THREE.TubeGeometry(curve, 192, 0.06, 12, false);
+      // Custom shader: front-of-torus fragments render at 0.85 opacity;
+      // fragments behind the torus center (relative to the current camera
+      // position) fade to 0.10, so the streamline reads as wrapping
+      // around to the far side of the toroidal envelope as the user
+      // orbits. The decision is per-fragment and recomputed every frame
+      // via the camera uniform Three.js auto-binds.
+      const streamlineVS = `
+        varying vec3 vWorldPos;
+        void main() {
+          vec4 wp = modelMatrix * vec4(position, 1.0);
+          vWorldPos = wp.xyz;
+          gl_Position = projectionMatrix * viewMatrix * wp;
+        }
+      `;
+      const streamlineFS = `
+        uniform vec3 uColor;
+        uniform vec3 uTorusCenter;
+        uniform float uFrontOpacity;
+        uniform float uBackOpacity;
+        uniform float uFalloff;
+        varying vec3 vWorldPos;
+        void main() {
+          // View direction: from camera toward the torus center.
+          vec3 viewDir = normalize(uTorusCenter - cameraPosition);
+          // Signed depth of the fragment along that view direction,
+          // measured from the torus center. Positive = behind the
+          // center (away from camera); negative = in front.
+          float fragDepth   = dot(vWorldPos    - uTorusCenter, viewDir);
+          // Smooth transition across the center plane so the spiral
+          // doesn't pop. uFalloff controls the half-width of the band
+          // over which front fades to back.
+          float t = smoothstep(-uFalloff, uFalloff, fragDepth);
+          float alpha = mix(uFrontOpacity, uBackOpacity, t);
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `;
+      const streamlineMat = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor:        { value: new THREE.Color(AMBIENT_GOLD) },
+          uTorusCenter:  { value: new THREE.Vector3(0, y_center, 0) },
+          uFrontOpacity: { value: 0.85 },
+          uBackOpacity:  { value: 0.10 },
+          uFalloff:      { value: 1.5 },   // soft transition band, world units
+        },
+        vertexShader: streamlineVS,
+        fragmentShader: streamlineFS,
+        transparent: true,
+        depthWrite: false,
+        side: THREE.DoubleSide,
       });
+      ambientFieldGroup.add(new THREE.Mesh(bandGeom, streamlineMat));
     }
-    const ringPts = [];
-    for (let k = 0; k <= 64; k++) {
-      const ph = (k / 64) * Math.PI * 2;
-      ringPts.push(new THREE.Vector3(B_horiz * Math.cos(ph), y_center, B_horiz * Math.sin(ph)));
+    // Equatorial reference band — a wider band rather than a hairline,
+    // built from a few concentric rings stacked vertically. Kept at
+    // higher opacity (0.30) than the helical mesh so the belt remains
+    // a visible reference even when the rest of the field is faint.
+    const beltLines = 5;
+    const beltHalfHeight = 0.18;
+    for (let m = 0; m < beltLines; m++) {
+      const tBand = beltLines === 1 ? 0.5 : m / (beltLines - 1);
+      const yBand = y_center + (tBand - 0.5) * 2 * beltHalfHeight;
+      const ringPts = [];
+      for (let k = 0; k <= 96; k++) {
+        const ph = (k / 96) * Math.PI * 2;
+        ringPts.push(new THREE.Vector3(B_horiz * Math.cos(ph), yBand, B_horiz * Math.sin(ph)));
+      }
+      ambientFieldGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts),
+        new THREE.LineBasicMaterial({ color: AMBIENT_GOLD, transparent: true, opacity: 0.30 })));
     }
-    ambientFieldGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ringPts),
-      new THREE.LineBasicMaterial({ color: AMBIENT_GOLD, transparent: true, opacity: 0.40 })));
   }
 
   // CHAKRA BUBBLES
@@ -1899,9 +1981,21 @@
       const ascentBaseY = -3.4;     // just above the south-pole region
       const ascentTopY = APEX_Y;    // up to the apex
       const ascentHeight = ascentTopY - ascentBaseY;
-      const ascentTurns = 3.5;      // total helical turns over full ascent
+      const ascentTurns = 2.4;      // looser pitch (was 3.5)
       const nHelices = 6;
-      const ascentR = 0.45;         // central-column radius
+      // Bulging vortex-breakdown profile: column is narrowest at the
+      // base and apex, broadest near the equatorial shear belt at
+      // y ≈ 1.822 (King's Chamber level). r(y) follows a smooth
+      // bell shape — base radius ~0.30, max radius ~0.62 at the belt,
+      // tapering back to ~0.18 near the apex.
+      const ascentR_base = 0.30;
+      const ascentR_max  = 0.62;
+      const ascentR_apex = 0.18;
+      const yBelt = 1.822;          // equatorial belt elevation
+      // Normalized parameters for the bell: how far the belt sits
+      // along the ascent (0..1), and the bell width.
+      const tBelt = (yBelt - ascentBaseY) / ascentHeight; // ~0.59
+      const sigma = 0.32;           // bell half-width in t-units
       const nPts = 140;
       for (let i = 0; i < nHelices; i++) {
         const phaseOffset = (i / nHelices) * Math.PI * 2;
@@ -1910,8 +2004,11 @@
           const t = k / (nPts - 1);
           const phi = phaseOffset + ascentTurns * Math.PI * 2 * t;
           const y = ascentBaseY + ascentHeight * t;
-          // Slight radial taper near the top (column narrows toward apex)
-          const rNow = ascentR * (1 - 0.3 * Math.max(0, t - 0.7) / 0.3);
+          // Asymmetric end radii (base vs apex) interpolated linearly,
+          // plus a Gaussian bulge centered at the belt.
+          const rEnds = ascentR_base + (ascentR_apex - ascentR_base) * t;
+          const bulge = Math.exp(-((t - tBelt) * (t - tBelt)) / (2 * sigma * sigma));
+          const rNow = rEnds + (ascentR_max - rEnds) * bulge;
           pts.push(new THREE.Vector3(rNow * Math.cos(phi), y, rNow * Math.sin(phi)));
         }
         if (pts.length < 2) continue;
@@ -3903,7 +4000,7 @@
     });
   }
 
-  // Chamber labels checkbox (in the Camera Angles panel)
+  // Chamber labels checkbox (in the Pyramid Overlay panel section)
   const chamberLabelsToggle = document.getElementById("chamber-labels-toggle");
   if (chamberLabelsToggle) {
     chamberLabelsToggle.checked = visibility.chamberLabels;
