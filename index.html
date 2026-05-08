@@ -278,12 +278,13 @@
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidShafts" /><span>star shafts &amp; Well Shaft</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidVoids" /><span>ScanPyramids voids (2016–23)</span></div>
       <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidFeatureLabels" /><span>feature labels (corridors · shafts · voids)</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRaDonPoint" /><span>Ra/Don intersection point (55.9–.11)</span></div>
       <div class="row"><input type="checkbox" id="chamber-labels-toggle" /><span>Pyramid chamber labels</span></div>
     </div>
   </div>
 
   <!-- Camera Angles: button at lower-left, drop-up panel with all camera controls -->
-  <div id="updated-stamp">updated: 5-5-26</div>
+  <div id="updated-stamp">updated: 5-9-26</div>
   <button id="camera-toggle">Camera Angles ▾</button>
   <div id="camera-panel">
     <div class="ctrl-label">Camera tilt (up / down)</div>
@@ -379,6 +380,7 @@
     pyramidShafts: false,
     pyramidVoids: false,
     pyramidFeatureLabels: false,
+    pyramidRaDonPoint: false,
 
     // Below-image (not in panel)
     chamberLabels: false,
@@ -3145,6 +3147,103 @@
       p2Group.add(p2Inner);
     }
 
+    // ====================================================================
+    // RA / DON INTERSECTION POINT (Ra Material 55.9–55.11)
+    // ====================================================================
+    // The point Don calculates (and Ra confirms as "substantially correct")
+    // sits on the central axis at one-sixth the height of the pyramid.
+    //   y = HEIGHT_C / 6 = 280 / 6 = 46.667 cubits
+    //   x = 0, z = 0 (central vertical axis)
+    //
+    // Ra's geometric setup (4.2): divide each triangular face into four
+    // equal smaller triangles; the bottom-edge of the apex sub-triangle
+    // sits at one-quarter the slant-height. Project that horizontal line
+    // around all four faces and you get a horizontal diamond. The diamond's
+    // center on the central axis — where the four-face-diamond cross
+    // (horizontal intersection in S/T) meets the central axis (vertical
+    // intersection in T/S) — is the operative point. Ra: "two intersections
+    // which, when projected in both time/space and space/time, form one
+    // point" (55.9).
+    //
+    // Don then converts slant-quarter to vertical-sixth (55.10), and Ra
+    // confirms "substantially correct." The point sits just above the QC
+    // floor altitude in this visualization (QC at y=51.89 cubits =
+    // world y ~0.504; Ra/Don point at y=46.667 cubits = world y ~0.589 —
+    // close to and just above QC altitude, in the QC zone).
+    //
+    // Rendered as a pulsing point of light: bright cream-gold core,
+    // softer halo, both with sinusoidally-modulated emissive intensity
+    // and opacity driven from the render loop. Lives inside pyramidGroup
+    // so it inherits the parent's scale and Y-offset.
+    // ====================================================================
+    const raDonPointGroup = new THREE.Group();
+    refs.pyramidRaDonPoint = raDonPointGroup;
+    pyramidGroup.add(raDonPointGroup);
+    {
+      // Geometric one-sixth altitude (Don's calculation in 55.10) is at
+      // y = HEIGHT_C / 6 ≈ 46.67 cubits. The QC chamber in this scene
+      // is centered at y = 51.89 (floor 47.89, ceiling 55.89). Place the
+      // marker at QC chamber center so the light shines from inside the
+      // chamber itself — Ra's "configuration of the centered being" (55.11)
+      // is the position, and the QC chamber is its physical analog.
+      // The geometric one-sixth altitude (46.67) sits just below the QC
+      // floor; placing the marker at QC center (51.89) keeps it inside
+      // the chamber Ra and Don are discussing.
+      const POINT_Y = 51.89;
+
+      // Render order high enough to paint over QC chamber walls; depthTest
+      // false so the marker is never occluded by intervening geometry. The
+      // result: the light reads as shining through the chamber regardless
+      // of viewing angle.
+      const SHINE_RENDER_ORDER = 200;
+
+      // Bright core — pure white with high metalness for silvery character
+      const coreMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff, emissive: 0xf8f8ff, emissiveIntensity: 1.8,
+        roughness: 0.15, metalness: 0.45,
+        transparent: true, opacity: 0.95,
+        depthTest: false, depthWrite: false,
+      });
+      const core = new THREE.Mesh(new THREE.SphereGeometry(2.0, 24, 18), coreMat);
+      core.position.set(0, POINT_Y, 0);
+      core.renderOrder = SHINE_RENDER_ORDER + 2;
+      raDonPointGroup.add(core);
+
+      // Soft halo — cool silver-white with a faint blue cast
+      const haloMat = new THREE.MeshStandardMaterial({
+        color: 0xeaf0fa, emissive: 0xb8c8e0, emissiveIntensity: 0.95,
+        roughness: 0.30, metalness: 0.30,
+        transparent: true, opacity: 0.50,
+        depthTest: false, depthWrite: false,
+      });
+      const halo = new THREE.Mesh(new THREE.SphereGeometry(4.5, 20, 14), haloMat);
+      halo.position.set(0, POINT_Y, 0);
+      halo.renderOrder = SHINE_RENDER_ORDER + 1;
+      raDonPointGroup.add(halo);
+
+      // Outer glow — very large, very faint, gives the marker a sense
+      // of radiating into the surrounding chamber space. Slight blue-
+      // white tint reads as cool silver light rather than warm gold.
+      const glowMat = new THREE.MeshBasicMaterial({
+        color: 0xdce6f4,
+        transparent: true, opacity: 0.20,
+        depthTest: false, depthWrite: false,
+      });
+      const glow = new THREE.Mesh(new THREE.SphereGeometry(8.0, 20, 14), glowMat);
+      glow.position.set(0, POINT_Y, 0);
+      glow.renderOrder = SHINE_RENDER_ORDER;
+      raDonPointGroup.add(glow);
+
+      // Stash the materials and base values on userData so the render
+      // loop can modulate emissive intensity / opacity without leaking
+      // state into the closure.
+      raDonPointGroup.userData = {
+        coreMat, haloMat, glowMat,
+        coreEm0: 1.8, haloEm0: 0.95,
+        coreOp0: 0.95, haloOp0: 0.50, glowOp0: 0.20,
+      };
+    }
+
     // === CORRIDORS, SHAFTS, AND DISCOVERED VOIDS (April 2026 NCH) ===
     // Coordinates are in royal cubits, inside pyramidGroup. The parent
     // group's scale (1/POLOIDAL_TO_PYRAMID_SCALE) and PYRAMID_Y_OFFSET
@@ -3690,8 +3789,28 @@
 
   // RENDER LOOP
   let animId = 0;
+  const blinkClock = new THREE.Clock();
   const animate = () => {
     animId = requestAnimationFrame(animate);
+
+    // Ra/Don intersection point — sinusoidal blink. Period ~1.6 s.
+    // Blink only updates material values when the marker is currently
+    // visible; off-toggle leaves materials in whatever state they last
+    // had, which is fine since the group is hidden.
+    if (refs.pyramidRaDonPoint && refs.pyramidRaDonPoint.visible) {
+      const t = blinkClock.getElapsedTime();
+      // Smooth pulse between ~0.25 and ~1.0 (raised to a power to make
+      // the bright phase sharper than the dim phase — feels more like
+      // a heartbeat than a hum).
+      const pulse = Math.pow(0.5 + 0.5 * Math.sin(t * 3.9), 1.4);
+      const ud = refs.pyramidRaDonPoint.userData;
+      ud.coreMat.emissiveIntensity = ud.coreEm0 * (0.35 + 0.65 * pulse);
+      ud.haloMat.emissiveIntensity = ud.haloEm0 * (0.30 + 0.70 * pulse);
+      ud.coreMat.opacity = ud.coreOp0 * (0.55 + 0.45 * pulse);
+      ud.haloMat.opacity = ud.haloOp0 * (0.50 + 0.50 * pulse);
+      ud.glowMat.opacity = ud.glowOp0 * (0.40 + 0.60 * pulse);
+    }
+
     renderer.render(scene, camera);
   };
   animate();
@@ -3825,6 +3944,7 @@
     if (refs.pyramidShafts)     refs.pyramidShafts.visible     = visibility.pyramid && visibility.pyramidShafts;
     if (refs.pyramidVoids)      refs.pyramidVoids.visible      = visibility.pyramid && visibility.pyramidVoids;
     if (refs.pyramidFeatureLabels) refs.pyramidFeatureLabels.visible = visibility.pyramid && visibility.pyramidFeatureLabels;
+    if (refs.pyramidRaDonPoint) refs.pyramidRaDonPoint.visible = visibility.pyramid && visibility.pyramidRaDonPoint;
 
     // ---- CHAMBER LABELS (below-image control) ----
     if (refs.chamberLabels) refs.chamberLabels.visible = visibility.chamberLabels;
