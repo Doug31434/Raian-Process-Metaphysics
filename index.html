@@ -28,7 +28,7 @@
   #panel-toggle {
     position: absolute;
     top: 12px;
-    right: 12px;
+    right: 248px;
     z-index: 20;
     background: rgba(245, 239, 221, 0.95);
     border: 1px solid #c8a85c;
@@ -44,7 +44,7 @@
   #panel {
     position: absolute;
     top: 50px;
-    right: 12px;
+    right: 248px;
     width: 280px;
     max-height: calc(100vh - 80px);
     overflow-y: auto;
@@ -60,6 +60,26 @@
     display: none;
   }
   #panel.open { display: block; }
+  #panel .panel-actions { display: flex; gap: 6px; margin-bottom: 8px; }
+  #panel .panel-actions button {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.55);
+    border: 1px solid #c8a85c;
+    border-radius: 3px;
+    padding: 4px 6px;
+    font-family: Georgia, serif;
+    font-size: 9px;
+    color: #4a3818;
+    cursor: pointer;
+  }
+  #panel .panel-actions button:hover { background: rgba(255, 255, 255, 0.9); }
+  #panel .section-note {
+    font-size: 7.5px;
+    font-style: italic;
+    color: #6b4a1a;
+    margin: 2px 0 5px;
+    line-height: 1.4;
+  }
   #panel .row {
     display: flex;
     align-items: center;
@@ -121,11 +141,11 @@
     cursor: pointer;
   }
 
-  /* Camera Angles control: button at top-right (left of Click Here) */
+  /* Camera Angles control: middle button of the top bar */
   #camera-toggle {
     position: absolute;
     top: 12px;
-    right: 130px;
+    right: 110px;
     z-index: 20;
     background: rgba(245, 239, 221, 0.95);
     border: 1px solid #c8a85c;
@@ -142,7 +162,7 @@
   #updated-stamp {
     position: absolute;
     top: 18px;          /* visually centered with #camera-toggle */
-    right: 260px;       /* sits to the left of #camera-toggle (which is at right:130px) */
+    right: 360px;       /* sits to the left of #panel-toggle (right:248px) */
     z-index: 20;
     font-family: Georgia, serif;
     font-size: 10px;
@@ -154,7 +174,7 @@
   #camera-panel {
     position: absolute;
     top: 50px;
-    right: 130px;
+    right: 110px;
     z-index: 19;
     background: rgba(245, 239, 221, 0.96);
     border: 1px solid #c8a85c;
@@ -185,21 +205,127 @@
   }
   #camera-panel .checkbox-row input[type="checkbox"] { cursor: pointer; }
   #camera-panel .footer { margin-top: 6px; font-size: 10.5px; color: #6b4a1a; font-style: italic; }
+
+  /* About these overlays: asterisk button + drop-down of expandable notes */
+  #about-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 20;
+    background: rgba(245, 239, 221, 0.95);
+    border: 1px solid #c8a85c;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-family: Georgia, serif;
+    font-size: 12px;
+    color: #4a3818;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  }
+  #about-toggle:hover { background: rgba(245, 239, 221, 1); }
+  #about-panel {
+    position: absolute;
+    top: 50px;
+    right: 12px;
+    z-index: 19;
+    background: rgba(245, 239, 221, 0.97);
+    border: 1px solid #c8a85c;
+    border-radius: 4px;
+    padding: 14px 16px;
+    font-family: Georgia, serif;
+    color: #4a3818;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    width: 380px;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    display: none;
+  }
+  #about-panel.open { display: block; }
+  #about-panel .about-title { font-size: 13px; font-weight: bold; margin-bottom: 2px; }
+  #about-panel details {
+    border-top: 1px solid #d8c088;
+    padding: 5px 0;
+  }
+  #about-panel summary {
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    color: #4a3818;
+    user-select: none;
+  }
+  #about-panel details p {
+    font-size: 10.5px;
+    line-height: 1.55;
+    margin: 6px 2px 3px;
+  }
+  #about-panel details ul {
+    margin: 4px 0 6px 16px;
+    padding: 0;
+  }
+  #about-panel details li {
+    font-size: 10px;
+    line-height: 1.5;
+    margin-bottom: 5px;
+  }
+  #about-panel a { color: #6b4a1a; }
 </style>
 </head>
 <body>
 <div id="stage">
   <div id="mount"></div>
-  <button id="panel-toggle">Click Here ▾</button>
+  <button id="panel-toggle">Overlays ▾</button>
   <div id="panel">
 
+    <!-- Bulk controls -->
+    <div class="panel-actions">
+      <button id="clear-all-btn">Clear all overlays</button>
+      <button id="reset-defaults-btn">Reset defaults</button>
+    </div>
+
     <!-- ============================================================
-         SECTION 1: TOROIDAL FIELD FLOW
+         SECTION 1: PYRAMID OVERLAY
+         (objectively established / non-channeled structure)
          ============================================================ -->
-    <div class="section-header first" data-section="toroidal"><span class="caret">▸</span><span>Toroidal Field Flow</span></div>
-    <div class="section-body" data-section-body="toroidal">
+    <div class="section-header first" data-section="misc"><span class="caret">▸</span><span>Pyramid Overlay</span></div>
+    <div class="section-body" data-section-body="misc">
+      <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidCorridors" checked /><span>corridors &amp; Grand Gallery</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidShafts" checked /><span>star shafts &amp; Well Shaft</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidVoids" /><span>ScanPyramids voids (2016–23)</span></div>
+      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidFeatureLabels" /><span>feature labels (corridors · shafts · voids)</span></div>
+      <div class="row"><input type="checkbox" id="chamber-labels-toggle" /><span>Pyramid chamber labels (RC · QC · KC)</span></div>
+    </div>
+
+    <!-- ============================================================
+         SECTION 2: RA CONTACT OVERLAYS
+         (positions and zones identified in the Ra contact)
+         ============================================================ -->
+    <div class="section-header" data-section="ra"><span class="caret">▸</span><span>Ra Contact Overlays</span></div>
+    <div class="section-body" data-section-body="ra">
+      <div class="section-note">These are features Ra describes (citations are session.question in <i>The Ra Material</i>); the renderings are mine.</div>
+      <div class="row"><input type="checkbox" data-key="ovoids" /><span class="bold">Age-Regression Ovoids (Ra 59.18–59.20)</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlow" /><span>recirculation flow within ovoids</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFigure" /><span>age-regressing figures at rest</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlowLines" /><span>click to see ovoids' formative inner toroidal flows</span></div>
+      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidLabels" /><span>Age-Regression Ovoids label</span></div>
+      <div class="row"><input type="checkbox" data-key="spirals" /><span>Spirals overlay (Don/Ra schematic)</span></div>
+      <div class="row"><input type="checkbox" data-key="pyramidP2" /><span>Position 2 marker (Ra 59.14–.15)</span></div>
+      <div class="row"><input type="checkbox" data-key="pyramidRaDonPoint" /><span>Ra/Don intersection point (55.9–.11)</span></div>
+      <div class="row"><input type="checkbox" data-key="interdimLabel" /><span>Interdimensional Area label (Ra 59.14–.15)</span></div>
+    </div>
+
+    <!-- ============================================================
+         SECTION 3: DEEP READING — SPECULATIVE OVERLAYS *
+         (interpretive synthesis: field architecture, zone mapping,
+         and framework extensions Ra does not directly stipulate)
+         ============================================================ -->
+    <div class="section-header" data-section="deep"><span class="caret">▸</span><span>Deep Reading: Speculative Overlays&nbsp;*</span></div>
+    <div class="section-body" data-section-body="deep">
+      <div class="section-note">* My interpretive synthesis, offered without authority — see "About these overlays" above the image.</div>
       <div class="row"><input type="checkbox" data-key="toroidalFlow" /><span class="bold">Toroidal Field Flow (master)</span></div>
-      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="ambientField" /><span>Ambient toroidal field</span></div>
+      <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="ambientField" /><span>Ambient toroidal field&nbsp;*</span></div>
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowPoloidal" /><span>poloidal sweep (the great wheel)</span></div>
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowToroidal" /><span>toroidal procession (around the axis)</span></div>
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowHelical" /><span>helical streamlines (combined)</span></div>
@@ -212,13 +338,7 @@
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowConvergenceEddies" /><span>convergence eddies (ovoid-forming)</span></div>
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowZonal" /><span>secondary zonal flows</span></div>
       <div class="row indented" data-parent="toroidalFlow"><input type="checkbox" data-key="flowCounterCurrents" /><span>core-edge counter-currents</span></div>
-    </div>
-
-    <!-- ============================================================
-         SECTION 2: POLOIDAL FLOW
-         ============================================================ -->
-    <div class="section-header" data-section="poloidal"><span class="caret">▸</span><span>Poloidal Flow</span></div>
-    <div class="section-body" data-section-body="poloidal">
+      <div class="gap"></div>
       <div class="row"><input type="checkbox" data-key="poloidalFlow" /><span class="bold">Poloidal Flow (master)</span></div>
       <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone1" /><span>Zone 1 — Convergence</span></div>
       <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold1" /><span class="italic">Threshold 1 — Separatrix</span></div>
@@ -237,19 +357,7 @@
       <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="threshold6" /><span class="italic">Threshold 6 — Silence Between Octaves</span></div>
       <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="zone8" /><span>Zone 8 — Next Octave (collimated jet)</span></div>
       <div class="row indented" data-parent="poloidalFlow"><input type="checkbox" data-key="labels" /><span>Zone labels</span></div>
-    </div>
-
-    <!-- ============================================================
-         SECTION 3: RA CONTACT OVERLAYS
-         ============================================================ -->
-    <div class="section-header" data-section="ra"><span class="caret">▸</span><span>Ra Contact Overlays</span></div>
-    <div class="section-body" data-section-body="ra">
-      <div class="row"><input type="checkbox" data-key="ovoids" /><span class="bold">Age-Regression Ovoids (Ra 59.18–59.20)</span></div>
-      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlow" /><span>recirculation flow within ovoids</span></div>
-      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFigure" /><span>age-regressing figures at rest</span></div>
-      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidFlowLines" /><span>click to see ovoids' formative inner toroidal flows</span></div>
-      <div class="row indented" data-parent="ovoids"><input type="checkbox" data-key="ovoidLabels" /><span>Age-Regression Ovoids label</span></div>
-      <div class="row"><input type="checkbox" data-key="spirals" /><span>Spirals overlay (Don/Ra schematic)</span></div>
+      <div class="gap"></div>
       <div class="row"><input type="checkbox" data-key="merkaba" /><span>Merkaba overlay</span></div>
       <div class="row"><input type="checkbox" data-key="mbsct" /><span>Mind-Body-Spirit-Complex Totality Interface Zone</span></div>
       <div class="row"><input type="checkbox" data-key="chakraBubbles" /><span>Chakra bubbles (red · yellow · blue · violet + overlaps)</span></div>
@@ -264,27 +372,69 @@
         <label><input type="checkbox" data-key="densityViolet" /><span>Violet</span></label>
       </div>
     </div>
+  </div>
 
-    <!-- ============================================================
-         SECTION 4: PYRAMID OVERLAY
-         ============================================================ -->
-    <div class="section-header" data-section="misc"><span class="caret">▸</span><span>Pyramid Overlay</span></div>
-    <div class="section-body" data-section-body="misc">
-      <div class="row"><input type="checkbox" data-key="pyramid" /><span class="bold">Pyramid overlay</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidChambers" checked /><span>chambers (RC · QC · KC)</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRelieving" checked /><span>relieving chambers</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidP2" checked /><span>Position 2 marker</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidCorridors" /><span>corridors &amp; Grand Gallery</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidShafts" /><span>star shafts &amp; Well Shaft</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidVoids" /><span>ScanPyramids voids (2016–23)</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidFeatureLabels" /><span>feature labels (corridors · shafts · voids)</span></div>
-      <div class="row indented" data-parent="pyramid"><input type="checkbox" data-key="pyramidRaDonPoint" /><span>Ra/Don intersection point (55.9–.11)</span></div>
-      <div class="row"><input type="checkbox" id="chamber-labels-toggle" /><span>Pyramid chamber labels</span></div>
-    </div>
+  <!-- Camera Angles:
   </div>
 
   <!-- Camera Angles: button at lower-left, drop-up panel with all camera controls -->
-  <div id="updated-stamp">updated: 5-9-26</div>
+  <div id="updated-stamp">updated: 7-16-26</div>
+  <button id="about-toggle">* About ▾</button>
+  <div id="about-panel">
+    <div class="about-title">About these overlays</div>
+
+    <details>
+      <summary>Who made this</summary>
+      <p>I'm Doug Scott — a psychotherapist (LCSW, MA) by profession and a longtime student of the Law of One. I write at cosmicchrist.net, where this visualization sits within a larger body of work I call Raian Process Metaphysics. The model here grew out of five years of trying to make Ra's pyramid teachings (sessions 55–59) cohere as a single picture, and out of the one reframe that finally unlocked them for me: the Great Pyramid marks the central axis of a toroidal energy field vastly larger than itself. The structure is the axis-marker; the field is the working reality.</p>
+    </details>
+
+    <details>
+      <summary>What Ra actually says (Ra Contact Overlays)</summary>
+      <p>Everything under Ra Contact Overlays traces to specific passages: the age-regression ovoids to 59.18–.20; the spiral energy schematic to Don and Ra's exchanges across sessions 55–59; Position 2 and the interdimensional area to 59.14–.15; the blinking point of light to the intersection Don calculates and Ra confirms as "substantially correct" in 55.9–.11. Honesty requires a caveat even here — Ra supplies descriptions in words, and the sizes, shapes, and exact placements you see are my renderings of those words, kept as faithful as I can make them. Where Ra confirms something only “substantially,” I have tried to preserve that reservation — to render the gist Ra affirms without hardening it into a precision Ra withheld. Every citation can be checked in <i>The Ra Material</i> (L/L Research) or free at lawofone.info.</p>
+    </details>
+
+    <details>
+      <summary>The toroidal field (why it's so much bigger than the pyramid)</summary>
+      <p>The golden envelope you see on loading is the heart of my speculation — Ra never draws it. What Ra does describe is the pyramid as a funnel and concentrator of instreaming intelligent energy, with prana spiraling through it (sessions 56–59). Reading those passages against the physics of swirling flows, I came to see the Great Pyramid as a space/time object whose angles and proportions provoke a toroidal circulation far larger than the structure — the pyramid seated on the field's inner central axis. In other words, the energy lives in the field; the stone marks its center. Everything else in the Deep Reading section unfolds from that reframe.</p>
+    </details>
+
+    <details>
+      <summary>The poloidal core and vortex breakdown</summary>
+      <p>Fluid dynamics gives a well-studied account of what happens along the central axis of a strongly swirling flow: the column passes through characteristic transitions — recirculation bubbles, wakes, helical breakdown, turbulence, relaminarization (the phenomenon called vortex breakdown). The Poloidal Flow overlay maps seven zones and six thresholds of that sequence onto the pyramid's vertical axis, with the Queen's Chamber at the first recirculation bubble and the King's Chamber in the bulge above it. The physics is real and published; the correspondence between that physics and the development of consciousness through the densities is my interpretive synthesis. That synthesis has an anchor in Ra's own imagery. Describing graduation between densities, Ra pictures an entity climbing a set of stairs, each imbued with its own quality of light, and names the crossing between them difficult: “There is resistance at the edge, shall we say, of each density” (82.29) — a boundary passed only through the understood, nourished, and developed faculty of faith or will. I extrapolate from that edge to every crossing along the way: chakra to chakra, zone to zone. The six thresholds in the Poloidal Flow overlay are that resistance made visible, and vortex breakdown supplies the fluid picture of what meeting and passing it looks like.</p>
+    </details>
+
+    <details>
+      <summary>Density bands and chakra bubbles</summary>
+      <p>Ra teaches a seven-density octave with chakra-ray correspondences. Ra does not — so far as I can find — assign those densities to horizontal bands of the Great Pyramid, or set chakra spheres along its axis. Those placements are my extrapolation: the pyramid's height read in seven 40-cubit bands against the ray system. Careful readers at L/L Research have expressed doubt about this congruency, and they are right that Ra never states it. I include the overlays because the mapping keeps proving generative in my own study, and I flag it here so you can weigh it with open eyes.</p>
+    </details>
+
+    <details>
+      <summary>Deeper reading: Ra on the energy centers</summary>
+      <p>The chakra-ray mapping in this model follows Ra's teaching on the energy centers as closely as I can manage, and a few passages carry most of the weight. I offer them here for the reader who wants to check the footing. My own reading of the lower triad — that in third density the orange ray of personal identity is catalyzed and honed in the friction between the red ray (the one) and the yellow ray (the many) — is developed on my blog, linked below.</p>
+      <ul>
+        <li><a href="https://www.lawofone.info/s/49#6" target="_blank" rel="noopener">49.6</a> — ~experience is sequentially understood by the growing and seeking mind/body/spirit complex: survival, then personal identity, then social relations, then universal love, then free communication, then universal energies, and finally the sacramental nature of each experience.</li>
+        <li><a href="https://www.lawofone.info/s/47#8" target="_blank" rel="noopener">47.8</a> — ~the seven bodies, red-ray through violet-ray: from the elemental chemical body up through the gateway body of indigo to the completed body of violet.</li>
+        <li><a href="https://www.lawofone.info/s/40#3" target="_blank" rel="noopener">40.3</a> — ~each density is the metaphysical characteristic complex of its ray — primarily its own ray, plus the attraction of the following ray pulling it forward in evolution.</li>
+        <li><a href="https://www.lawofone.info/s/41#25" target="_blank" rel="noopener">41.25</a> — ~red, yellow, and blue as the primary centers; green as the movement of compassion toward blue, the first ray of radiation of self.</li>
+        <li><a href="https://www.lawofone.info/s/15#12" target="_blank" rel="noopener">15.12</a> — ~the balancing of the centers, blockage by blockage, with green ray as the springboard toward intelligent infinity and indigo holding the key to the gateway.</li>
+        <li><a href="https://www.lawofone.info/s/82#29" target="_blank" rel="noopener">82.29</a> — “There is resistance at the edge, shall we say, of each density” — the passage behind the six thresholds (see the vortex-breakdown note above).</li>
+      </ul>
+      <p>The Poloidal Flow overlay, I came to see, renders this development visibly — the fluid dynamics and the metaphysics tell one story. Watch what happens between Zone 1 and Zone 3. The prana scooped in at the Convergence arrives undifferentiated: the red-ray foundation, the one. In the Compression Zone it churns — short chaotic strands, bursts, half-formed eddies — and that turbulence is exactly the negotiation a third-density being makes in developing a sense of identity: the orange ray, catalyzed and honed in the friction between the one below it and the many above it. Coherence arrives only as the flow approaches the order at the top of Zone 3, where the Foundation Semi-Spiral gathers the chaos into disciplined threads. There, at last, a stable sense of self — and only a stabilized self can rise into the green ray of the Queen's Chamber.</p>
+      <p>The ascent continues in the same key, and the sequence Ra gives in 49.6 — universal love, then free communication, then universal energies, then the sacramental — plays out zone by zone. The stabilized self rises into Zone 4, the Queen's Chamber bubble: the heart, a bounded stillness where the flow recirculates and the being learns to hold and be held — universal love in the green ray, the initiatory center. The Wake above it (Threshold 3) is the heart's testing: love must leave its shelter and keep its shape in disturbed water. Zone 5, the King's Chamber, opens the full spectrum — the blue ray of free communication, the first outward radiation of self (41.25), the flow ~moving through the King's Chamber position in sharply delineated form (59.8). At Threshold 4 the helical order loosens and grays: the constructed voice surrenders its grip so something larger can work.</p>
+      <p>Zone 6 is that work — the Building Spiral, where ~the intense red-end energy is spiraled once again for building (59.9): universal energies harnessed, the co-creator's labor. Threshold 5 is the last and deepest turbulence, and it is no accident that the Mind/Body/Spirit Complex Totality doorway stands inside it — the totality of self is met precisely where the negotiation is hardest. Then Zone 7: relaminarization. The flow goes smooth because nothing remains to negotiate — the violet, sacramental completion, the being “as it will be” (15.12). Threshold 6 is 82.29's resistance in its ultimate form, the Silence Between Octaves; and Zone 8, the collimated jet, answers that silence — the first density of the next octave, an ending that is a beginning. Turn on the Poloidal Flow overlay and you can watch the whole ascent.</p>
+      <p>Article: <a href="https://cosmicchrist.net/2025/01/14/exploring-the-chakra-system-through-the-ra-material/" target="_blank" rel="noopener">Exploring the Chakra System through the Ra Material</a> at cosmicchrist.net.</p>
+    </details>
+
+    <details>
+      <summary>Merkaba and the MBSCT interface</summary>
+      <p>The merkaba — twin interlocked tetrahedra at the Queen's Chamber bubble — comes from the broader esoteric tradition; Ra never mentions it in connection with these chambers. The Mind/Body/Spirit Complex Totality interface zone borrows Ra's own term (the totality of self the higher self draws upon), but its placement at the turbulence threshold below the relaminarization zone is my positioning, following the logic of the vortex-breakdown map. Both belong squarely in the speculative section.</p>
+    </details>
+
+    <details>
+      <summary>Take what resonates</summary>
+      <p>In the spirit L/L Research has always practiced: take what resonates and leave the rest. Everything under Deep Reading: Speculative Overlays is one seeker's subjective synthesis, offered without authority. Ra's actual words are freely available at lawofone.info and in <i>The Ra Material</i>; I would rather you weigh them for yourself than take my picture of them on trust.</p>
+    </details>
+  </div>
   <button id="camera-toggle">Camera Angles ▾</button>
   <div id="camera-panel">
     <div class="ctrl-label">Camera tilt (up / down)</div>
@@ -371,20 +521,26 @@
     densityIndigo: false,
     densityViolet: false,
 
-    // Section 4: Pyramid Overlay
+    // Section: Pyramid Overlay (objectively established structure)
     pyramid: true,                // auto-populated
     pyramidChambers: true,
     pyramidRelieving: true,
-    pyramidP2: true,
-    pyramidCorridors: false,
-    pyramidShafts: false,
+    pyramidCorridors: true,
+    pyramidShafts: true,
     pyramidVoids: false,
     pyramidFeatureLabels: false,
+    // Ra Contact Overlays: channeled positions (independent of the
+    // Pyramid overlay master)
+    pyramidP2: false,
     pyramidRaDonPoint: false,
+    interdimLabel: false,
 
     // Below-image (not in panel)
     chamberLabels: false,
   };
+
+  // Snapshot of the shipped defaults, used by the Reset defaults button.
+  const DEFAULT_VISIBILITY = Object.assign({}, visibility);
 
   const refs = {};
 
@@ -2851,102 +3007,158 @@
   }
 
   // ====================================================================
-  // LABELS (zone labels — sub of poloidalFlow)
+  // BILLBOARD LABEL COLUMNS
   // ====================================================================
+  // Chamber labels, pyramid feature labels, and the Interdimensional
+  // Area label live in two camera-tracking columns — LEFT (side −1) and
+  // RIGHT (side +1) of the figure in *screen space*. Whenever the camera
+  // azimuth changes, every registered label is repositioned so the
+  // columns stay to the sides of the current view instead of landing in
+  // front of or behind the chambers (which is what happened when the
+  // labels lived at fixed world x with z = 0). Pointer lines and
+  // arrowheads are rebuilt each update so they keep leading back to
+  // their true 3D targets.
+  //
+  // Registered entries: { sprite, lineGeom, arrow, target, labelY,
+  // side, gap, width }. The update runs from the render loop, gated on
+  // azimuth change, so idle frames cost nothing.
+  // ====================================================================
+  const billboardLabels = [];
+  const registerBillboardLabel = (group, text, target, labelY, side, opts) => {
+    const o = opts || {};
+    const gap = (o.gap !== undefined) ? o.gap : 3.0;
+    const fontSize = (o.fontSize !== undefined) ? o.fontSize : 64;
+    const scale = (o.scale !== undefined) ? o.scale : 0.5;
+    const color = o.color || "#000000";
+    const pointerColor = (o.pointerColor !== undefined) ? o.pointerColor : 0x000000;
+    const pointerOpacity = (o.pointerOpacity !== undefined) ? o.pointerOpacity : 0.85;
+    const arrowSize = (o.arrowSize !== undefined) ? o.arrowSize : 0.08;
+    const sprite = makeLabel(text, new THREE.Vector3(0, labelY, 0), fontSize, color);
+    sprite.scale.multiplyScalar(scale / 0.5);
+    group.add(sprite);
+    const lineGeom = new THREE.BufferGeometry().setFromPoints([
+      new THREE.Vector3(), new THREE.Vector3(),
+    ]);
+    const line = new THREE.Line(lineGeom, new THREE.LineBasicMaterial({
+      color: pointerColor, transparent: true, opacity: pointerOpacity,
+    }));
+    group.add(line);
+    const arrowGeom = new THREE.ConeGeometry(arrowSize * 0.45, arrowSize * 1.3, 6);
+    const arrowMat = new THREE.MeshStandardMaterial({
+      color: pointerColor, emissive: pointerColor, emissiveIntensity: 0.5, roughness: 0.5,
+    });
+    const arrow = new THREE.Mesh(arrowGeom, arrowMat);
+    group.add(arrow);
+    billboardLabels.push({
+      sprite, lineGeom, arrow,
+      target: target.clone(), labelY, side, gap,
+      width: sprite.scale.x,
+    });
+  };
+  const updateBillboardLabels = () => {
+    const az = orbit.azimuth;
+    // Screen-right unit vector in the horizontal plane for the current
+    // azimuth (same convention as the side-to-side pan control).
+    const rx = Math.cos(az);
+    const rz = -Math.sin(az);
+    billboardLabels.forEach((L) => {
+      const innerX = rx * L.side * L.gap;
+      const innerZ = rz * L.side * L.gap;
+      L.sprite.position.set(
+        innerX + rx * L.side * (L.width / 2),
+        L.labelY,
+        innerZ + rz * L.side * (L.width / 2)
+      );
+      const startX = innerX - rx * L.side * 0.05;
+      const startZ = innerZ - rz * L.side * 0.05;
+      const lineStart = new THREE.Vector3(startX, L.labelY, startZ);
+      L.lineGeom.setFromPoints([lineStart, L.target]);
+      const dir = L.target.clone().sub(lineStart);
+      if (dir.length() > 1e-5) {
+        L.arrow.position.copy(L.target);
+        L.arrow.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      }
+    });
+  };
+
+  // ====================================================================
+  // LABELS (zone labels — sub of poloidalFlow — billboard columns)
+  // ====================================================================
+  // Converted to the camera-tracking billboard system so the zone labels
+  // behave like the chamber / feature / interdimensional labels: the
+  // column stays to the screen-right of the figure from any longitude,
+  // and the Ambient Toroidal Field label rides the left column. Label
+  // altitudes and pointer targets carry over from the earlier static
+  // layout (targets sit at each zone's outer edge in the x–y plane).
   const labelsGroup = new THREE.Group(); refs.labels = labelsGroup; scene.add(labelsGroup);
-  { const labelX = 3.2; const LABEL_COLOR = 0x6b4a1a;
-    const makeLabelPointer = (labelLeftX, labelY, targetX, targetY) => {
-      const lineStart = new THREE.Vector3(labelLeftX - 0.1, labelY, 0);
-      const lineEnd = new THREE.Vector3(targetX, targetY, 0);
-      labelsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
-        new THREE.LineBasicMaterial({ color: LABEL_COLOR, transparent: true, opacity: 0.55 })));
-      const dir = lineEnd.clone().sub(lineStart);
-      if (dir.length() > 1e-5) addArrow(labelsGroup, lineEnd.clone(), dir, LABEL_COLOR, 0.08);
+  {
+    const zOpts = {
+      gap: 3.2, scale: 0.5, color: "#6b4a1a",
+      pointerColor: 0x6b4a1a, pointerOpacity: 0.55, arrowSize: 0.08,
     };
-    const placeLabeled = (text, labelLeftX, y, targetX, targetY) => {
-      labelsGroup.add(makeLabel(text, new THREE.Vector3(labelLeftX, y, 0)));
-      makeLabelPointer(labelLeftX, y, targetX, targetY ?? y);
-    };
-    { const zone1Text = "Zone 1 — Convergence"; const zone1FontSize = 64;
-      const mc = document.createElement("canvas"); const mcCtx = mc.getContext("2d");
-      mcCtx.font = `italic ${zone1FontSize}px Georgia, serif`;
-      const zone1TextWidth = Math.ceil(mcCtx.measureText(zone1Text).width);
-      const zone1SpriteWidth = 0.5 * (zone1TextWidth + 40) / Math.ceil(zone1FontSize * 1.4);
-      const zone1LabelY = -4.7;
-      labelsGroup.add(makeLabel(zone1Text, new THREE.Vector3(-zone1SpriteWidth / 2, zone1LabelY, 0)));
-      const as = new THREE.Vector3(0, zone1LabelY + 0.28, 0);
-      const ae = new THREE.Vector3(0, -3.8, 0);
-      labelsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([as, ae]),
-        new THREE.LineBasicMaterial({ color: LABEL_COLOR, transparent: true, opacity: 0.55 })));
-      addArrow(labelsGroup, ae.clone(), new THREE.Vector3(0, 1, 0), LABEL_COLOR, 0.10);
-    }
-    placeLabeled("Threshold 1 — Separatrix", labelX, separatrixBaseY + 0.2, 1.8, separatrixBaseY + 0.2);
-    placeLabeled("Zone 2 — Compression Zone", labelX, (zone2Base + zone2Top) / 2, 1.05, (zone2Base + zone2Top) / 2);
-    placeLabeled("Zone 3 / Threshold 2 — Foundation Semi-Spiral", labelX, (thresh2Base + thresh2Top) / 2, 1.05, (thresh2Base + thresh2Top) / 2);
-    placeLabeled("Zone 4 — Queen's Chamber — Green Ray", labelX, bubbleCenterY, bubbleHalfWidth + 0.05, bubbleCenterY);
-    placeLabeled("Threshold 3 — Wake", labelX, (threshold3Base + threshold3Top) / 2, 0.7, (threshold3Base + threshold3Top) / 2);
-    placeLabeled("Zone 5 — King's Chamber — Blue Ray", labelX, (zone5Base + zone5Top) / 2, columnRadius * 0.85, (zone5Base + zone5Top) / 2);
-    placeLabeled("Threshold 4 — Helical Breakdown", labelX, (t4Base + t4Top) / 2, columnRadius * 0.85, (t4Base + t4Top) / 2);
-    placeLabeled("Zone 6 — Building Spiral", labelX, (zone6Base + zone6Top) / 2, columnRadius * 0.55, (zone6Base + zone6Top) / 2);
-    placeLabeled("Threshold 5 — Turbulence Negotiation", labelX, (t5Base + t5Top) / 2, columnRadius * 0.85, (t5Base + t5Top) / 2);
-    placeLabeled("Zone 7 — Relaminarization — Seventh Density — Violet", labelX, (zone7Base + zone7Top) / 2, columnRadius * 0.55, (zone7Base + zone7Top) / 2);
-    placeLabeled("Threshold 6 — Apex Ignition — Silence Between Octaves", labelX, (t6Base + t6Top) / 2, columnRadius * 0.15, (t6Base + t6Top) / 2);
-    placeLabeled("Zone 8 — First Density of the Next Octave — Collimated Jet", labelX + 1.0, 11.5, 0.4, 11.5);
-    { const toroidalText = "Ambient Toroidal Field"; const toroidalFontSize = 64;
-      const mc2 = document.createElement("canvas"); const mc2Ctx = mc2.getContext("2d");
-      mc2Ctx.font = `italic ${toroidalFontSize}px Georgia, serif`;
-      const toroidalTextWidth = Math.ceil(mc2Ctx.measureText(toroidalText).width);
-      const toroidalSpriteWidth = 0.5 * (toroidalTextWidth + 40) / Math.ceil(toroidalFontSize * 1.4);
-      const labelRightX = -6.8;
-      const labelLeftX = labelRightX - toroidalSpriteWidth;
-      const labelY = 7.2;
-      const arrowEndX = labelRightX + 1.0;
-      const arrowEndY = labelY - 0.4;
-      labelsGroup.add(makeLabel(toroidalText, new THREE.Vector3(labelLeftX, labelY, 0)));
-      const lineStart = new THREE.Vector3(labelRightX + 0.1, labelY, 0);
-      const lineEnd = new THREE.Vector3(arrowEndX, arrowEndY, 0);
-      labelsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
-        new THREE.LineBasicMaterial({ color: LABEL_COLOR, transparent: true, opacity: 0.55 })));
-      const dir = lineEnd.clone().sub(lineStart);
-      if (dir.length() > 1e-5) addArrow(labelsGroup, lineEnd.clone(), dir, LABEL_COLOR, 0.10);
-    }
+    const RIGHT = +1;
+    const LEFT = -1;
+    registerBillboardLabel(labelsGroup, "Zone 1 — Convergence", new THREE.Vector3(0, -3.8, 0), -4.2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Threshold 1 — Separatrix", new THREE.Vector3(1.8, separatrixBaseY + 0.2, 0), separatrixBaseY + 0.2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 2 — Compression Zone", new THREE.Vector3(1.05, (zone2Base + zone2Top) / 2, 0), (zone2Base + zone2Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 3 / Threshold 2 — Foundation Semi-Spiral", new THREE.Vector3(1.05, (thresh2Base + thresh2Top) / 2, 0), (thresh2Base + thresh2Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 4 — Queen's Chamber — Green Ray", new THREE.Vector3(bubbleHalfWidth + 0.05, bubbleCenterY, 0), bubbleCenterY, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Threshold 3 — Wake", new THREE.Vector3(0.7, (threshold3Base + threshold3Top) / 2, 0), (threshold3Base + threshold3Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 5 — King's Chamber — Blue Ray", new THREE.Vector3(columnRadius * 0.85, (zone5Base + zone5Top) / 2, 0), (zone5Base + zone5Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Threshold 4 — Helical Breakdown", new THREE.Vector3(columnRadius * 0.85, (t4Base + t4Top) / 2, 0), (t4Base + t4Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 6 — Building Spiral", new THREE.Vector3(columnRadius * 0.55, (zone6Base + zone6Top) / 2, 0), (zone6Base + zone6Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Threshold 5 — Turbulence Negotiation", new THREE.Vector3(columnRadius * 0.85, (t5Base + t5Top) / 2, 0), (t5Base + t5Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 7 — Relaminarization — Seventh Density — Violet", new THREE.Vector3(columnRadius * 0.55, (zone7Base + zone7Top) / 2, 0), (zone7Base + zone7Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Threshold 6 — Apex Ignition — Silence Between Octaves", new THREE.Vector3(columnRadius * 0.15, (t6Base + t6Top) / 2, 0), (t6Base + t6Top) / 2, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Zone 8 — First Density of the Next Octave — Collimated Jet", new THREE.Vector3(0.4, 11.5, 0), 11.5, RIGHT, zOpts);
+    registerBillboardLabel(labelsGroup, "Ambient Toroidal Field", new THREE.Vector3(-5.8, 6.8, 0), 7.2, LEFT, zOpts);
   }
 
   // ====================================================================
-  // CHAMBER LABELS (controlled by below-image checkbox, not panel)
+  // CHAMBER LABELS (RC · QC · KC — left billboard column;
+  // controlled by the Pyramid Overlay checkbox)
   // ====================================================================
   const chamberLabelsGroup = new THREE.Group(); refs.chamberLabels = chamberLabelsGroup; scene.add(chamberLabelsGroup);
-  { const chamberLabelColor = "#000000"; const POINTER_COLOR = 0x000000; const labelRightX = -3.0;
-    const approxLabelWidth = (text, fontSize = 64) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      ctx.font = `italic ${fontSize}px Georgia, serif`;
-      const textWidth = ctx.measureText(text).width;
-      return 0.5 * (textWidth + 40) / Math.ceil(fontSize * 1.4);
+  {
+    const chOpts = {
+      gap: 3.0, scale: 0.5, color: "#000000",
+      pointerColor: 0x000000, pointerOpacity: 0.85, arrowSize: 0.08,
     };
-    const placeChamberLabel = (text, labelY, targetX, targetY) => {
-      const w = approxLabelWidth(text);
-      const leftX = labelRightX - w;
-      chamberLabelsGroup.add(makeLabel(text, new THREE.Vector3(leftX, labelY, 0), 64, chamberLabelColor));
-      const lineStart = new THREE.Vector3(labelRightX + 0.1, labelY, 0);
-      const lineEnd = new THREE.Vector3(targetX, targetY, 0);
-      chamberLabelsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
-        new THREE.LineBasicMaterial({ color: POINTER_COLOR, transparent: true, opacity: 0.85 })));
-      const dir = lineEnd.clone().sub(lineStart);
-      if (dir.length() > 1e-5) addArrow(chamberLabelsGroup, lineEnd.clone(), dir, POINTER_COLOR, 0.08);
-    };
-    placeChamberLabel("Resonance Chamber", -2.68, 0.44, -2.68);
-    placeChamberLabel("Queen's Chamber", 0.754, -0.05, 0.754);
-    placeChamberLabel("King's Chamber", 1.822, -0.05, 1.822);
-    placeChamberLabel("Interdimensional Area per Ra (59.14-.15), Don/Ra's \"Position 2\"", 5.776, -0.05, 5.776);
+    registerBillboardLabel(chamberLabelsGroup, "Resonance Chamber", new THREE.Vector3(0.44, -2.68, 0), -2.68, -1, chOpts);
+    registerBillboardLabel(chamberLabelsGroup, "Queen's Chamber", new THREE.Vector3(0, 0.754, 0), 0.754, -1, chOpts);
+    registerBillboardLabel(chamberLabelsGroup, "King's Chamber", new THREE.Vector3(0, 1.822, 0), 1.822, -1, chOpts);
   }
 
+  // ====================================================================
+  // INTERDIMENSIONAL AREA LABEL (Ra 59.14–.15 — Ra Contact Overlays)
+  // ====================================================================
+  // Split out of the chamber-label set: RC/QC/KC are objectively
+  // established chambers; this zone is identified in the Ra contact,
+  // so its label toggles from the Ra Contact Overlays section.
+  const interdimLabelGroup = new THREE.Group(); refs.interdimLabel = interdimLabelGroup; scene.add(interdimLabelGroup);
+  registerBillboardLabel(
+    interdimLabelGroup,
+    "Interdimensional Area per Ra (59.14-.15), Don/Ra's \"Position 2\"",
+    new THREE.Vector3(0, 5.776, 0), 5.776, -1,
+    { gap: 3.0, scale: 0.5, color: "#000000", pointerColor: 0x000000, pointerOpacity: 0.85, arrowSize: 0.08 }
+  );
+
+  // ====================================================================
+  // PYRAMID OVERLAY
   // ====================================================================
   // PYRAMID OVERLAY
   // ====================================================================
   const pyramidGroup = new THREE.Group(); refs.pyramid = pyramidGroup; scene.add(pyramidGroup);
   pyramidGroup.scale.set(1 / POLOIDAL_TO_PYRAMID_SCALE, 1 / POLOIDAL_TO_PYRAMID_SCALE, 1 / POLOIDAL_TO_PYRAMID_SCALE);
   pyramidGroup.position.y = PYRAMID_Y_OFFSET;
+  // Ra-overlay geometry that shares the pyramid's cubit coordinate frame
+  // but belongs to the Ra Contact Overlays (Position 2 marker, Ra/Don
+  // intersection point) and so must stay visible when the Pyramid
+  // overlay master is off. Same scale and Y offset as pyramidGroup.
+  const raScaledGroup = new THREE.Group();
+  raScaledGroup.scale.set(1 / POLOIDAL_TO_PYRAMID_SCALE, 1 / POLOIDAL_TO_PYRAMID_SCALE, 1 / POLOIDAL_TO_PYRAMID_SCALE);
+  raScaledGroup.position.y = PYRAMID_Y_OFFSET;
+  scene.add(raScaledGroup);
   { const BASE_C = 440; const HALF_C = BASE_C / 2; const HEIGHT_C = 280;
     const goldColor = 0x8a6818; const edgeColor = 0x5e4610;
     { const faceGeo = new THREE.BufferGeometry();
@@ -3129,7 +3341,7 @@
       relievingGroup.add(tg);
     }
     // Position 2
-    const p2Group = new THREE.Group(); refs.pyramidP2 = p2Group; pyramidGroup.add(p2Group);
+    const p2Group = new THREE.Group(); refs.pyramidP2 = p2Group; raScaledGroup.add(p2Group);
     { const p2Y = 210; const p2R = 12;
       const p2Solid = new THREE.Mesh(new THREE.SphereGeometry(p2R, 24, 16), new THREE.MeshBasicMaterial({
         color: 0x2a1e70, transparent: true, opacity: 0.30, depthWrite: false,
@@ -3146,6 +3358,7 @@
       p2Inner.position.set(0, p2Y, 0);
       p2Group.add(p2Inner);
     }
+
 
     // ====================================================================
     // RA / DON INTERSECTION POINT (Ra Material 55.9–55.11)
@@ -3173,12 +3386,13 @@
     //
     // Rendered as a pulsing point of light: bright cream-gold core,
     // softer halo, both with sinusoidally-modulated emissive intensity
-    // and opacity driven from the render loop. Lives inside pyramidGroup
-    // so it inherits the parent's scale and Y-offset.
+    // and opacity driven from the render loop. Lives inside raScaledGroup
+    // (Ra Contact Overlays) so it inherits the pyramid's scale and
+    // Y-offset while staying independent of the Pyramid overlay master.
     // ====================================================================
     const raDonPointGroup = new THREE.Group();
     refs.pyramidRaDonPoint = raDonPointGroup;
-    pyramidGroup.add(raDonPointGroup);
+    raScaledGroup.add(raDonPointGroup);
     {
       // Geometric one-sixth altitude (Don's calculation in 55.10) is at
       // y = HEIGHT_C / 6 ≈ 46.67 cubits. The QC chamber in this scene
@@ -3615,10 +3829,12 @@
   // PYRAMID FEATURE LABELS
   // ====================================================================
   // Toggleable text labels for each corridor, shaft, and discovered void.
-  // Stacked in a vertical column on the RIGHT side of the pyramid (chamber
-  // labels use the LEFT column, so the two systems don't collide). Each
-  // label has an arrowed pointer running back to the feature. Sprites are
-  // scaled down to half the chamber-label size to avoid crowding.
+  // Split between the LEFT and RIGHT billboard columns (about half per
+  // side) so no single column has to hold all fourteen labels — the old
+  // single right-hand stack overlapped badly when enabled. Left-column
+  // altitude slots are chosen to interleave cleanly with the chamber
+  // labels (RC −2.68 · QC 0.754 · KC 1.822), which share that column.
+  // Pointer arrows lead back to each feature's true 3D location.
   const pyramidFeatureLabelsGroup = new THREE.Group();
   refs.pyramidFeatureLabels = pyramidFeatureLabelsGroup;
   scene.add(pyramidFeatureLabelsGroup);
@@ -3627,74 +3843,34 @@
     const PYR_Y = PYRAMID_Y_OFFSET;
     // Convert (x_cubits, y_cubits, z_cubits) → world coords
     const pc = (x, y, z) => new THREE.Vector3(x * PYR_S, y * PYR_S + PYR_Y, z * PYR_S);
-
-    const FEATURE_COLOR = "#3a2a08";
-    const POINTER_COLOR_HEX = 0x3a2a08;
-    const FEATURE_FONT = 64;            // same canvas resolution as chamber labels
-    const FEATURE_SCALE = 0.45;          // ~half size of chamber labels (which are 0.5)
-    const labelLeftX = 3.0;              // right column (chambers use -3.0)
-
-    // Mirror of approxLabelWidth from chamber labels but scaled to FEATURE_SCALE
-    const approxLabelWidth = (text, fontSize) => {
-      const canvas = document.createElement("canvas");
-      const ctx = canvas.getContext("2d");
-      ctx.font = `italic ${fontSize}px Georgia, serif`;
-      const textWidth = ctx.measureText(text).width;
-      // Mirror of makeLabel: spriteHeight=0.5 default, aspectRatio = canvasW/canvasH
-      // but here we override the sprite scale, so width = scale * (canvasW/canvasH)
-      const canvasH = Math.ceil(fontSize * 1.4);
-      const canvasW = textWidth + 40;
-      return FEATURE_SCALE * (canvasW / canvasH);
+    const fOpts = {
+      gap: 3.0, scale: 0.45, color: "#3a2a08",
+      pointerColor: 0x3a2a08, pointerOpacity: 0.7, arrowSize: 0.06,
     };
+    const LEFT = -1;
+    const RIGHT = +1;
 
-    const placeFeatureLabel = (text, target, labelYOverride) => {
-      const labelY = (labelYOverride !== undefined) ? labelYOverride : target.y;
-      const sprite = makeLabel(text, new THREE.Vector3(labelLeftX, labelY, 0), FEATURE_FONT, FEATURE_COLOR);
-      // Shrink sprite to feature size (makeLabel hardcodes height=0.5)
-      sprite.scale.multiplyScalar(FEATURE_SCALE / 0.5);
-      // makeLabel positions sprite center at leftEdge + spriteWidth/2 of the
-      // *original* size; after scaling, recenter at the new effective width.
-      const w = approxLabelWidth(text, FEATURE_FONT);
-      sprite.position.set(labelLeftX + w / 2, labelY, 0);
-      pyramidFeatureLabelsGroup.add(sprite);
-      // Pointer line from label LEFT edge back to target
-      const lineStart = new THREE.Vector3(labelLeftX - 0.05, labelY, 0);
-      const lineEnd = target.clone();
-      pyramidFeatureLabelsGroup.add(new THREE.Line(
-        new THREE.BufferGeometry().setFromPoints([lineStart, lineEnd]),
-        new THREE.LineBasicMaterial({ color: POINTER_COLOR_HEX, transparent: true, opacity: 0.7 })
-      ));
-      const dir = lineEnd.clone().sub(lineStart);
-      if (dir.length() > 1e-5) addArrow(pyramidFeatureLabelsGroup, lineEnd.clone(), dir, POINTER_COLOR_HEX, 0.06);
-    };
+    // ---- LEFT column (interleaved with chamber labels) ----
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "Descending Corridor (known antiquity)", pc(7, -10, 96), -1.21, LEFT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "North Face Corridor (2016 detected, 2023 confirmed)", pc(0, 38, 180), 0.18, LEFT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "QC Horizontal Corridor (known antiquity)", pc(0, 55, 12), 1.30, LEFT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "QC North Shaft (Dixon 1872, blocked)", pc(0, 85, 45), 2.35, LEFT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "ScanPyramids Big Void (2017)", pc(0, 126, 35), 3.10, LEFT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "KC North Shaft (cleared 1872)", pc(0, 140, 35), 3.85, LEFT, fOpts);
 
-    // Targets ordered by altitude (low to high) so labels stack naturally.
-    // Where features cluster within < 0.20 world-y of each other, an
-    // explicit labelY override nudges the label up or down to avoid
-    // overlap; the pointer arrow still leads back to the true target.
-
-    // ---- LOW ALTITUDE (subterranean to lower 3rd) ----
-    placeFeatureLabel("Descending Corridor (known antiquity)", pc(7, -10, 96));
-    placeFeatureLabel("Well Shaft (known antiquity)", pc(0, 12, 68.28));
-
-    // ---- ENTRANCE / QC LEVEL (collision cluster: NFC y=38, AC y=40) ----
-    placeFeatureLabel("North Face Corridor (2016 detected, 2023 confirmed)", pc(0, 38, 180), 0.18);
-    placeFeatureLabel("Ascending Corridor (known antiquity)", pc(0, 40, 51), 0.55);
-    placeFeatureLabel("QC Horizontal Corridor (known antiquity)", pc(0, 55, 12));
-
-    // ---- MID-HEIGHT (KC level — collision cluster: y=80,85,85) ----
-    placeFeatureLabel("Grand Gallery (known antiquity)", pc(0, 75.87, 37.67));
-    placeFeatureLabel("KC Antechamber Passage (known antiquity)", pc(0, 85.5, -8), 1.55);
-    placeFeatureLabel("QC North Shaft (Dixon 1872, blocked)", pc(0, 85, 45), 1.95);
-    placeFeatureLabel("QC South Shaft (Dixon 1872, Gantenbrink's Door 1993)", pc(0, 85, -50), 2.25);
-
-    // ---- UPPER (above KC — collision cluster: BV y=126, KCs y=135, KCn y=140) ----
-    placeFeatureLabel("ScanPyramids Big Void (2017)", pc(0, 126, 35));
-    placeFeatureLabel("Djedi Chamber behind Gantenbrink's Door (Djedi 2011)", pc(0, 116.8, -95.4), 3.10);    placeFeatureLabel("KC South Shaft (cleared 1872)", pc(0, 135, -55), 3.45);
-    placeFeatureLabel("KC North Shaft (cleared 1872)", pc(0, 140, 35), 3.85);
-    placeFeatureLabel("NE Edge Cavity (2016 — position approximate)", pc(45, 210, 45));
+    // ---- RIGHT column ----
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "Well Shaft (known antiquity)", pc(0, 12, 68.28), -0.51, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "Ascending Corridor (known antiquity)", pc(0, 40, 51), 0.35, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "Grand Gallery (known antiquity)", pc(0, 75.87, 37.67), 1.10, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "KC Antechamber Passage (known antiquity)", pc(0, 85.5, -8), 1.70, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "QC South Shaft (Dixon 1872, Gantenbrink's Door 1993)", pc(0, 85, -50), 2.30, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "Djedi Chamber behind Gantenbrink's Door (Djedi 2011)", pc(0, 116.8, -95.4), 2.95, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "KC South Shaft (cleared 1872)", pc(0, 135, -55), 3.55, RIGHT, fOpts);
+    registerBillboardLabel(pyramidFeatureLabelsGroup, "NE Edge Cavity (2016 — position approximate)", pc(45, 210, 45), 5.30, RIGHT, fOpts);
   }
 
+  // ====================================================================
+  // CAMERA + ORBIT CONTROLS
   // ====================================================================
   // CAMERA + ORBIT CONTROLS
   // ====================================================================
@@ -3790,8 +3966,16 @@
   // RENDER LOOP
   let animId = 0;
   const blinkClock = new THREE.Clock();
+  let lastLabelAz = null;
   const animate = () => {
     animId = requestAnimationFrame(animate);
+
+    // Billboard label columns track the camera azimuth so they stay to
+    // the screen-left / screen-right of the figure from any longitude.
+    if (lastLabelAz === null || lastLabelAz !== orbit.azimuth) {
+      updateBillboardLabels();
+      lastLabelAz = orbit.azimuth;
+    }
 
     // Ra/Don intersection point — sinusoidal blink. Period ~1.6 s.
     // Blink only updates material values when the marker is currently
@@ -3935,18 +4119,23 @@
       });
     }
 
-    // ---- PYRAMID ----
+    // ---- PYRAMID (objectively established structure) ----
     if (refs.pyramid)           refs.pyramid.visible           = visibility.pyramid;
     if (refs.pyramidChambers)   refs.pyramidChambers.visible   = visibility.pyramid && visibility.pyramidChambers;
     if (refs.pyramidRelieving)  refs.pyramidRelieving.visible  = visibility.pyramid && visibility.pyramidRelieving;
-    if (refs.pyramidP2)         refs.pyramidP2.visible         = visibility.pyramid && visibility.pyramidP2;
     if (refs.pyramidCorridors)  refs.pyramidCorridors.visible  = visibility.pyramid && visibility.pyramidCorridors;
     if (refs.pyramidShafts)     refs.pyramidShafts.visible     = visibility.pyramid && visibility.pyramidShafts;
     if (refs.pyramidVoids)      refs.pyramidVoids.visible      = visibility.pyramid && visibility.pyramidVoids;
     if (refs.pyramidFeatureLabels) refs.pyramidFeatureLabels.visible = visibility.pyramid && visibility.pyramidFeatureLabels;
-    if (refs.pyramidRaDonPoint) refs.pyramidRaDonPoint.visible = visibility.pyramid && visibility.pyramidRaDonPoint;
 
-    // ---- CHAMBER LABELS (below-image control) ----
+    // ---- RA CONTACT POSITION MARKERS ----
+    // Channeled positions: independent of the Pyramid overlay master so
+    // they can be studied against the field alone.
+    if (refs.pyramidP2)         refs.pyramidP2.visible         = visibility.pyramidP2;
+    if (refs.pyramidRaDonPoint) refs.pyramidRaDonPoint.visible = visibility.pyramidRaDonPoint;
+    if (refs.interdimLabel)     refs.interdimLabel.visible     = visibility.interdimLabel;
+
+    // ---- CHAMBER LABELS (Pyramid Overlay section control) ----
     if (refs.chamberLabels) refs.chamberLabels.visible = visibility.chamberLabels;
   }
   applyVisibility();
@@ -4005,10 +4194,10 @@
   panelToggleBtn.addEventListener("click", () => {
     if (panel.classList.contains("open")) {
       panel.classList.remove("open");
-      panelToggleBtn.textContent = "Click Here \u25BE";
+      panelToggleBtn.textContent = "Overlays \u25BE";
     } else {
       panel.classList.add("open");
-      panelToggleBtn.textContent = "Click Here \u25B4";
+      panelToggleBtn.textContent = "Overlays \u25B4";
     }
   });
 
@@ -4024,6 +4213,22 @@
       } else {
         cameraPanel.classList.add("open");
         cameraToggleBtn.textContent = "Camera Angles \u25B4";
+      }
+    });
+  }
+
+  // About these overlays drop-down: houses the asterisk explanations —
+  // who made this, what Ra stipulates, and where speculation begins.
+  const aboutPanel = document.getElementById("about-panel");
+  const aboutToggleBtn = document.getElementById("about-toggle");
+  if (aboutPanel && aboutToggleBtn) {
+    aboutToggleBtn.addEventListener("click", () => {
+      if (aboutPanel.classList.contains("open")) {
+        aboutPanel.classList.remove("open");
+        aboutToggleBtn.textContent = "* About \u25BE";
+      } else {
+        aboutPanel.classList.add("open");
+        aboutToggleBtn.textContent = "* About \u25B4";
       }
     });
   }
@@ -4127,6 +4332,39 @@
     chamberLabelsToggle.addEventListener("change", () => {
       visibility.chamberLabels = chamberLabelsToggle.checked;
       applyVisibility();
+    });
+  }
+
+  // ====================================================================
+  // BULK CONTROLS — Clear all overlays / Reset defaults
+  // ====================================================================
+  // Clear all: every visibility flag off in one click (no more clearing
+  // groups one at a time). Reset defaults: restore the shipped default
+  // set (pyramid + chambers + relieving + corridors + shafts + ambient
+  // field). Both re-sync every panel checkbox to the flag state.
+  const syncPanelCheckboxes = () => {
+    document.querySelectorAll('#panel input[type="checkbox"]').forEach((cb) => {
+      const key = cb.getAttribute("data-key");
+      if (key) cb.checked = !!visibility[key];
+    });
+    if (chamberLabelsToggle) chamberLabelsToggle.checked = !!visibility.chamberLabels;
+  };
+  const clearAllBtn = document.getElementById("clear-all-btn");
+  if (clearAllBtn) {
+    clearAllBtn.addEventListener("click", () => {
+      Object.keys(visibility).forEach((k) => { visibility[k] = false; });
+      syncPanelCheckboxes();
+      applyVisibility();
+      updateChildVisibilityState();
+    });
+  }
+  const resetDefaultsBtn = document.getElementById("reset-defaults-btn");
+  if (resetDefaultsBtn) {
+    resetDefaultsBtn.addEventListener("click", () => {
+      Object.keys(DEFAULT_VISIBILITY).forEach((k) => { visibility[k] = DEFAULT_VISIBILITY[k]; });
+      syncPanelCheckboxes();
+      applyVisibility();
+      updateChildVisibilityState();
     });
   }
 
