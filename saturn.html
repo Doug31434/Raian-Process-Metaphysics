@@ -1,0 +1,1152 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Saturn Toroidal Field</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D stage; title upper-left, control drawers upper-right,
+   correspondence card lower-left, playback bar lower-center. Single dark look (deep space). */
+:root{
+  --ink:#07080c;
+  --panel:rgba(13,14,20,.88);
+  --panel-solid:#0f1017;
+  --line:#2b2a33;
+  --text:#ebe4d2;
+  --muted:#a0977f;
+  --gold:#d8a648;
+  --gold-dim:#8a6a2c;
+  --rain:#9cc4e8;
+  --silver:#eef3fa;
+  --ring:#e9d9b4;
+  --f-display:"Marcellus","Cinzel","Trajan Pro",Georgia,serif;
+  --f-body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;}
+body{background:var(--ink);color:var(--text);font-family:var(--f-body);font-size:15px;overflow:hidden;}
+#stage{position:fixed;inset:0;}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
+#stage canvas:active{cursor:grabbing;}
+
+.title{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:16px;max-width:min(440px,calc(100% - 32px));pointer-events:none;}
+.eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+.title h1{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.4vw,34px);line-height:1.1;margin:.25em 0 .2em;text-wrap:balance;letter-spacing:.01em;}
+.title p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;max-width:38ch;}
+
+.topbar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;z-index:5;}
+button{font-family:var(--f-body);font-size:14px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 11px;cursor:pointer;}
+button:hover{border-color:var(--gold-dim);}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+button[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);}
+
+.drawer{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));right:16px;width:min(330px,calc(100% - 32px));max-height:calc(100% - 140px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:4px;padding:12px 14px;z-index:6;}
+.drawer h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0 0 6px;}
+.sec{border-top:1px solid var(--line);padding-block:8px 6px;}
+.sec:first-of-type{border-top:0;}
+.sec-h{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.sec-h.ra{color:var(--silver);}
+label.row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px;line-height:1.3;cursor:pointer;}
+label.row input{margin-top:2px;accent-color:var(--gold);}
+label.row .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px;}
+label.row small{display:block;color:var(--muted);font-size:12.5px;}
+.drawer-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.scale-box{margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:3px;display:grid;gap:6px;}
+.scale-h{font-size:12.5px;color:var(--muted);}
+.scale-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.scale-btns button{font-size:12.5px;padding:4px 6px;}
+.scale-btns button.on{border-color:var(--gold);color:var(--gold);}
+.scale-box input[type=range]{width:100%;accent-color:var(--gold);}
+
+#about{width:min(460px,calc(100% - 32px));}
+#about details{border-top:1px solid var(--line);padding-block:8px;}
+#about summary{cursor:pointer;font-family:var(--f-display);font-size:15.5px;}
+#about p{margin:.55em 0;line-height:1.55;font-size:14.5px;color:var(--text);}
+#about blockquote{margin:.6em 0;padding-left:10px;border-left:2px solid var(--silver);color:var(--silver);font-style:italic;line-height:1.5;}
+.cite{font-family:var(--f-mono);font-size:12px;color:var(--gold);font-style:normal;}
+
+.corr{position:fixed;left:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px;z-index:4;}
+.corr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.corr-h span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.corr-h button{padding:2px 8px;font-size:12px;}
+.corr table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px;}
+.corr th{font-weight:500;text-align:left;color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 4px;border-bottom:1px solid var(--line);}
+.corr td{padding:5px 4px;vertical-align:top;border-bottom:1px solid rgba(43,42,51,.6);line-height:1.3;}
+.corr td:first-child{color:var(--text);}
+.corr td:last-child{color:var(--ring);}
+
+.playbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 10px;z-index:4;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);}
+.playbar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);}
+.playbar input[type=range]{width:110px;accent-color:var(--gold);}
+.readout{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+@media (max-width:640px){
+  .title p{display:none;}
+  .corr{bottom:calc(108px + env(safe-area-inset-bottom,0px));}
+  .drawer{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));max-height:58%;}
+  .playbar input[type=range]{width:80px;}
+}
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} }
+</style>
+
+<div id="stage"></div>
+
+<header class="title">
+  <div class="eyebrow">Raian Process · Field Studies</div>
+  <h1>Saturn as a Toroidal Field</h1>
+  <p>The planet is the toroidal field. The rings are its equatorial spirals, the same spirals that gather at the King's Chamber level of the Great Pyramid.</p>
+</header>
+
+<nav class="topbar" aria-label="Controls">
+  <button id="btn-overlays" aria-expanded="false" aria-controls="overlays">Overlays ▾</button>
+  <button id="btn-camera" aria-expanded="false" aria-controls="camera">Camera ▾</button>
+  <button id="btn-about" aria-expanded="false" aria-controls="about">About</button>
+</nav>
+
+<section class="drawer" id="overlays" hidden aria-label="Overlays">
+  <h2>Overlays</h2>
+  <div class="sec">
+    <div class="sec-h">Toroidal field</div>
+    <label class="row"><input type="checkbox" id="k-shell" data-key="shell"><span class="sw" style="background:var(--gold)"></span><span>Ambient toroidal field *<small>The planet's own field, reaching just past the rings</small></span></label>
+    <label class="row"><input type="checkbox" id="k-poloidal" data-key="poloidal"><span class="sw" style="background:var(--gold)"></span><span>Poloidal sweep (the great wheel)<small>Down the outside, in through the poles</small></span></label>
+    <label class="row"><input type="checkbox" id="k-poloidalFlow" data-key="poloidalFlow"><span class="sw" style="background:#f1cf7e"></span><span>Poloidal flow particles</span></label>
+    <label class="row"><input type="checkbox" id="k-toroidal" data-key="toroidal"><span class="sw" style="background:#c98f3a"></span><span>Toroidal procession<small>Counter-clockwise around the axis, viewed from above</small></span></label>
+    <label class="row"><input type="checkbox" id="k-helical" data-key="helical"><span class="sw" style="background:#b98a3c"></span><span>Helical streamlines (combined)</span></label>
+    <label class="row"><input type="checkbox" id="k-axis" data-key="axis"><span class="sw" style="background:#f6e6b8"></span><span>Central axis, polar cyclone &amp; hexagon<small>The cyclone sits on the axis; the hexagon is a jet stream around it</small></span></label>
+    <label class="row"><input type="checkbox" id="k-ascent" data-key="ascent"><span class="sw" style="background:#9a6f22"></span><span>Helical ascent<small>Widest and most tightly wound at the equator</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Equatorial plane · King's Chamber latitude</div>
+    <label class="row"><input type="checkbox" id="k-rings" data-key="rings"><span class="sw" style="background:var(--ring)"></span><span>Main rings (D, C, B, A, F)</span></label>
+    <label class="row"><input type="checkbox" id="k-kepler" data-key="kepler"><span class="sw" style="background:#fff3d6"></span><span>Keplerian shear particles<small>Inner ring material orbits faster than outer</small></span></label>
+    <label class="row"><input type="checkbox" id="k-belt" data-key="belt"><span class="sw" style="background:var(--gold)"></span><span>Ring spirals (King's Chamber spirals) *<small>Outward spirals above the plane, inward spirals below</small></span></label>
+    <label class="row"><input type="checkbox" id="k-rain" data-key="rain"><span class="sw" style="background:var(--rain)"></span><span>Ring rain (poloidal return)<small>Charged ring material carried along field lines to mid-latitudes</small></span></label>
+    <label class="row"><input type="checkbox" id="k-sync" data-key="sync"><span class="sw" style="background:#f4a7a0"></span><span>Synchronous orbit &amp; spokes<small>Where the rings and the magnetic field turn at the same rate</small></span></label>
+    <label class="row"><input type="checkbox" id="k-waves" data-key="waves"><span class="sw" style="background:#e3c27e"></span><span>Spiral density waves</span></label>
+    <label class="row"><input type="checkbox" id="k-mimas" data-key="mimas"><span class="sw" style="background:#cfc7b6"></span><span>Mimas &amp; the 2:1 resonance<small>Clears the Cassini Division</small></span></label>
+    <label class="row"><input type="checkbox" id="k-ering" data-key="ering"><span class="sw" style="background:#a9c9e4"></span><span>E ring &amp; Enceladus plasma torus<small>Plasma carried outward in the equatorial plane</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Great Pyramid superimposed</div>
+    <label class="row"><input type="checkbox" id="k-pyramid" data-key="pyramid"><span class="sw" style="background:#f1cf7e"></span><span>Great Pyramid<small>King's Chamber locked to Saturn's equatorial plane</small></span></label>
+    <label class="row"><input type="checkbox" id="k-chambers" data-key="chambers"><span class="sw" style="background:#f2c14e"></span><span>Chambers &amp; Grand Gallery<small>Positions approximate</small></span></label>
+    <label class="row"><input type="checkbox" id="k-qcBubble" data-key="qcBubble"><span class="sw" style="background:#bfd3e6"></span><span>Queen's Chamber recirculation bubble *<small>From the poloidal core model, with its two stagnation points</small></span></label>
+    <label class="row"><input type="checkbox" id="k-ghost" data-key="ghost"><span class="sw" style="background:#a0977f"></span><span>Ghost Saturn<small>See the chambers inside the planet</small></span></label>
+    <div class="scale-box">
+      <div class="scale-h">Pyramid scale</div>
+      <div class="scale-btns">
+        <button data-pscale="rings">Base spans rings</button>
+        <button data-pscale="crown">Apex at field crown</button>
+        <button data-pscale="flow">Flow match</button>
+        <button data-pscale="belt">Base spans field</button>
+      </div>
+      <input type="range" id="pyr-scale" min="0.2" max="1.6" step="0.005" value="0.325" aria-label="Pyramid scale">
+      <div class="readout" id="pyr-readout"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-h ra">Ra Contact Overlays</div>
+    <label class="row"><input type="checkbox" id="k-council" data-key="council"><span class="sw" style="background:var(--silver)"></span><span>Council of Saturn (Ra 6.8, 7.9)<small>"...in third-dimensional terms as the rings"</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Display</div>
+    <label class="row"><input type="checkbox" id="k-labels" data-key="labels"><span class="sw" style="background:var(--muted)"></span><span>Labels</span></label>
+    <label class="row"><input type="checkbox" id="k-equator" data-key="equator"><span class="sw" style="background:var(--muted)"></span><span>Field equator marker</span></label>
+  </div>
+  <div class="drawer-actions">
+    <button id="btn-clear">Clear all overlays</button>
+    <button id="btn-reset">Reset defaults</button>
+  </div>
+  <p style="color:var(--muted);font-size:12px;margin:.6em 0 0">* Speculative overlay — the Raian toroidal reading.</p>
+</section>
+
+<section class="drawer" id="camera" hidden aria-label="Camera angles">
+  <h2>Camera angles</h2>
+  <div class="cam-grid">
+    <button data-cam="oblique">Oblique</button>
+    <button data-cam="edge">Edge-on equator</button>
+    <button data-cam="pole">Down the axis</button>
+    <button data-cam="rings">Close on rings</button>
+    <button data-cam="field">Whole field</button>
+    <button data-cam="rain">Ring rain</button>
+    <button data-cam="pyramid">Pyramid in the field</button>
+    <button data-cam="kc">King's Chamber plane</button>
+  </div>
+  <p style="color:var(--muted);font-size:12.5px;margin:.7em 0 0">Drag to orbit · scroll or pinch to zoom.</p>
+</section>
+
+<section class="drawer" id="about" hidden aria-label="About">
+  <h2>About this model</h2>
+  <details open>
+    <summary>What this shows</summary>
+    <p>Here the planet itself is the toroidal field. The field rises up the central axis through the planet, sweeps out over the north pole, descends around the outside just beyond the rings, and returns through the south pole — the poloidal wheel — while the whole thing turns counter-clockwise around the axis — the toroidal procession.</p>
+    <p>The rings are read as the spirals of the King's Chamber latitude. In the pyramid model, the rising inner stream curves outward just above the equator and the descending outer stream curves inward just below it, all turning the same way. So the C ring and inner B ring carry outward spirals above the plane, the outer B ring and A ring carry inward spirals below it, and the thin F ring marks the outer edge.</p>
+    <p>Saturn is a good test case because its magnetic field is aligned with its spin axis to within a tiny fraction of a degree, the most axially symmetric field of any planet measured. The field lines drawn here use the planet's own dipole shape as their template, stretched upward to suggest the larger toroidal envelope.</p>
+  </details>
+  <details>
+    <summary>Why the rings sit at the King's Chamber latitude</summary>
+    <p>In the pyramid model, the King's Chamber level is the field's equatorial plane — the busiest latitude in the whole circulation. Three things meet there: an equatorial shear layer, the poloidal turnaround, and the widest point of the helical ascent. For a sphere, that plane runs through the planet's middle, and that is exactly where the rings live.</p>
+    <p>The rings stay in that plane for the same reason the shear belt holds together in the pyramid model. Ring particles collide and lose energy, but angular momentum is conserved, so the material settles into the one plane where rotation holds it. The result is a disk tens of meters thick spread across tens of thousands of kilometers.</p>
+  </details>
+  <details>
+    <summary>The three correspondences</summary>
+    <p><strong>Shear layer → the rings.</strong> The rings co-rotate with the planet, and inner material orbits faster than outer (Keplerian differential rotation). Watch the streaks in the ring texture and the ring particles drift past one another.</p>
+    <p><strong>Shear between field and matter → the synchronous orbit.</strong> Saturn's magnetic field turns rigidly with the planet, once every ten and a half hours or so. Ring particles move at orbital speed. At about 1.86 Saturn radii, inside the B ring, the two rates match. Inside that line the ring material outruns the field; outside it, the field outruns the ring material. The spokes, faint radial streaks of charged dust, gather around this line and turn with the field. So the rings hold a real shear between the field and the matter, and that is the closest match to the King's Chamber belt — two motions meeting in one plane and holding together.</p>
+    <p><strong>Poloidal turnaround → ring rain.</strong> Cassini found two inflows from the rings. Charged ring material is drawn out of the equatorial plane and carried along magnetic field lines into Saturn's atmosphere at mid-latitudes, in both hemispheres. That is the poloidal return made visible, and the blue particles trace it. A larger flow of neutral grains drifts in from the innermost ring near the equator, pulled by atmospheric drag rather than the field; it isn't drawn here.</p>
+    <p><strong>Helical structure → spiral waves and resonance.</strong> The A ring carries tightly wound spiral density waves raised by the moons, and the Cassini Division sits where ring particles orbit twice for each orbit of Mimas. Out beyond the main rings, Enceladus feeds a literal plasma torus in the same plane, and that plasma is carried outward in fingers while emptier flux tubes move inward to take its place — part of the stream peeling off radially at the equatorial level, as it does in the pyramid model. On the axis itself sits the north polar cyclone; the famous hexagon is a jet stream circling it at about 78°N.</p>
+  </details>
+  <details>
+    <summary>The superimposed pyramid</summary>
+    <p>The pyramid is placed so the middle of the King's Chamber sits exactly on Saturn's equatorial plane, with the apex up the central axis. That is the one fixed point. Everything else follows from the pyramid's own proportions (440 cubits at the base, 280 high) and from the poloidal core model's own coordinates.</p>
+    <p><strong>Base spans rings</strong> is the default scale: the pyramid's base reaches the outer edge of the A ring, so the pyramid and the ring spirals share one footprint. At that scale one Saturn radius comes to about 97 cubits. The Queen's Chamber falls just inside the planet, below the equator; turn on Ghost Saturn to see it.</p>
+    <p>The other buttons are alternative readings: the apex reaching the crown of the field, the base reaching the field's equator, and a flow match that lines up the helical ascent of the two models. The King's Chamber stays on the equator in every case. Chamber positions are approximate.</p>
+  </details>
+  <details>
+    <summary>What Ra says</summary>
+    <p>Asked where the Council that guards this planet is located, Ra answered:</p>
+    <blockquote>"This Council is located in the octave, or eighth dimension, of the planet Saturn, taking its place in an area which you understand in third-dimensional terms as the rings." <span class="cite">6.8</span></blockquote>
+    <p>~Ra describes the Council of Saturn as the body before which a social memory complex lays any proposal for aiding this planet, and which decides whether the quarantine is lifted <span class="cite">7.8</span>. ~It sits in constant session as nine, working by telepathic contact so that the members' distortions blend harmoniously <span class="cite">7.9</span>.</p>
+    <p>The overlay draws nine lights spread through the main rings. Ra gives no position within the rings, so their placement is illustrative.</p>
+  </details>
+  <details>
+    <summary>Where the analogy holds, and where it bends</summary>
+    <p>The ring shear is mostly in rotational speed (inner orbits faster), while the pyramid model's shear is mostly in radial motion (inner pushing out, outer pulling in). Both are shear layers in the equatorial plane, and the belt overlay shows the pyramid-style version alongside the real rings.</p>
+    <p>Saturn's real magnetosphere is also squeezed by the solar wind on the sunward side and stretched into a tail on the far side. The envelope here is drawn symmetric to show the toroidal reading. Distances are in Saturn radii; the rings and moons are placed to scale with one another, and the field envelope is schematic.</p>
+    <p>The correspondence between the Council's location and the equatorial shear plane is my reading. Ra places the Council in the rings; the toroidal interpretation is the Raian synthesis. Take what resonates.</p>
+  </details>
+</section>
+
+<aside class="corr" id="corr" aria-label="Pyramid to Saturn correspondence">
+  <div class="corr-h"><span>King's Chamber level ↔ Saturn's equator</span><button id="btn-corr" aria-expanded="true">Hide</button></div>
+  <table id="corr-table">
+    <thead><tr><th>Great Pyramid</th><th>Saturn</th></tr></thead>
+    <tbody>
+      <tr><td>Equatorial spirals (out above, in below)</td><td>The rings: C, B, A, F</td></tr>
+      <tr><td>Equatorial shear layer</td><td>Synchronous orbit: field and rings cross rates</td></tr>
+      <tr><td>Poloidal turnaround</td><td>Ring rain along field lines</td></tr>
+      <tr><td>Widened helical ascent</td><td>Spiral waves, Mimas resonance</td></tr>
+      <tr><td>Central axis</td><td>Polar cyclone on the spin axis, ringed by the hexagon</td></tr>
+    </tbody>
+  </table>
+</aside>
+
+<div class="playbar">
+  <button id="btn-play" aria-label="Pause animation">Pause</button>
+  <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+  <label><input type="checkbox" id="tilt"> True axial tilt 26.7°</label>
+  <label><input type="checkbox" id="spin" checked> Auto-orbit</label>
+  <span class="readout" id="readout">t = 0.0</span>
+</div>
+
+<div id="err" hidden style="position:fixed;left:16px;right:16px;top:45%;padding:12px 14px;background:var(--panel-solid);border:1px solid var(--gold);border-radius:4px;color:var(--text);font-family:var(--f-mono);font-size:12.5px;z-index:9"></div>
+<script>
+window.addEventListener("error", function(e){
+  if (e.target && e.target !== window && e.target.tagName !== "SCRIPT") return; // ignore font/stylesheet load failures
+  var el = document.getElementById("err");
+  if (el){ el.hidden = false; el.textContent = "The 3D view could not start: " + (e.message || "a script failed to load") + ". Try reloading the page."; }
+}, true);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if (typeof THREE === "undefined"){
+    var el = document.getElementById("err"); el.hidden = false;
+    el.textContent = "The 3D library (three.js) did not load, so the scene can't be drawn. Reload the page, or open the HTML file directly in a browser.";
+    return;
+  }
+  try { var probe = document.createElement("canvas"); if (!(probe.getContext("webgl") || probe.getContext("experimental-webgl"))) throw 0; }
+  catch(_){ var el2 = document.getElementById("err"); el2.hidden = false; el2.textContent = "This browser or view has WebGL turned off, so the 3D scene can't be drawn. Try opening the page in Chrome, Safari or Firefox on a computer."; return; }
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x07080c, 1);
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 600);
+  const system = new THREE.Group();
+  scene.add(system);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+  const sun = new THREE.DirectionalLight(0xfff4e0, 1.15);
+  sun.position.set(12, 5, 8);
+  scene.add(sun);
+
+  // ---------- palette ----------
+  const GOLD = 0xd8a648, GOLD_LIGHT = 0xf1cf7e, GOLD_DARK = 0x9a6f22, GOLD_MID = 0xc98f3a;
+  const RAIN = 0x9cc4e8, SILVER = 0xeef3fa, RING_IVORY = 0xfff3d6, ERING = 0xa9c9e4;
+  const POLAR_SQUASH = 0.902;
+  const R_SYNC = 1.86;                       // synchronous orbit, Saturn radii
+  const SPIN = 0.35*Math.pow(R_SYNC, -1.5);   // planet (and field) spin matches Keplerian rate at R_SYNC
+
+  // ---------- helpers ----------
+  const refs = {};
+  const labels = [];
+  const updaters = [];
+  function reg(key, obj){ refs[key] = obj; system.add(obj); return obj; }
+  function az(r, a, y){ return new THREE.Vector3(r*Math.cos(a), y, -r*Math.sin(a)); } // a increasing = CCW from above
+
+  function dotTexture(){
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d");
+    const grd = g.createRadialGradient(32,32,0,32,32,32);
+    grd.addColorStop(0,"rgba(255,255,255,1)"); grd.addColorStop(0.35,"rgba(255,255,255,0.7)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+  }
+  const DOT = dotTexture();
+  function pointsMat(color, size, opacity){
+    return new THREE.PointsMaterial({ color, size, map:DOT, transparent:true, opacity, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true });
+  }
+
+  function makeLabel(text, color, height){
+    const c = document.createElement("canvas");
+    const g = c.getContext("2d");
+    const fs = 44;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    const w = Math.ceil(g.measureText(text).width) + 28;
+    c.width = w; c.height = 64;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    g.fillStyle = "rgba(7,8,12,0.55)";
+    g.fillRect(0,6,w,52);
+    g.fillStyle = color; g.textBaseline = "middle";
+    g.fillText(text, 14, 33);
+    const tex = new THREE.CanvasTexture(c);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false, depthWrite:false });
+    const s = new THREE.Sprite(mat);
+    const h = 0.11 + 0.22*(height || 0.32);
+    s.scale.set(h * w/64, h, 1);
+    s.renderOrder = 20;
+    labels.push(s);
+    return s;
+  }
+  function addLabel(group, text, pos, color, h){ const l = makeLabel(text, color, h); l.position.copy(pos); group.add(l); return l; }
+
+  function addArrow(group, pos, dir, color, size, opacity){
+    const geo = new THREE.ConeGeometry(size*0.42, size*1.25, 8);
+    const mat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity: opacity==null?0.9:opacity });
+    const m = new THREE.Mesh(geo, mat);
+    m.position.copy(pos);
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.clone().normalize());
+    group.add(m);
+    return m;
+  }
+  function lineFrom(points, color, opacity){
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    return new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent:true, opacity, depthWrite:false }));
+  }
+  function insidePlanet(x, y){ return (x*x + (y/POLAR_SQUASH)*(y/POLAR_SQUASH)) < 1.0; }
+
+  // Field-line template: Saturn's dipole r = L cos^2(lat), stretched upward with L to read as a torus.
+  const FIELD_L = 3.5; // envelope: the planet's own field reaches just past the rings
+  function stretch(L){ return 1 + 0.10*L; }
+  function dipoleLoop(L, n){ // outer side, from north footpoint down to south footpoint (flow direction: descending outside)
+    const pts = [];
+    const l0 = Math.acos(Math.sqrt(Math.min(1, 1.0/L)));
+    for (let i=0;i<n;i++){
+      const lam = l0 - 2*l0*i/(n-1);
+      const r = L*Math.cos(lam)*Math.cos(lam);
+      pts.push([r*Math.cos(lam), r*Math.sin(lam)*stretch(L)]);
+    }
+    return pts;
+  }
+  function dipoleToSurface(L, n){ // equator -> northern footpoint, trimmed at the planet surface
+    const pts = [];
+    for (let i=0;i<n;i++){
+      const lam = (Math.PI*0.49)*i/(n-1);
+      const r = L*Math.cos(lam)*Math.cos(lam);
+      const x = r*Math.cos(lam), y = r*Math.sin(lam)*stretch(L);
+      pts.push([x,y]);
+      if (insidePlanet(x,y)) break;
+    }
+    return pts;
+  }
+  function samplePath(path, s){ // s in [0,1]
+    const f = s*(path.length-1);
+    const i = Math.min(path.length-2, Math.floor(f)), t = f - i;
+    return [path[i][0] + (path[i+1][0]-path[i][0])*t, path[i][1] + (path[i+1][1]-path[i][1])*t];
+  }
+
+  // ---------- starfield ----------
+  {
+    const n = 2200, pos = new Float32Array(n*3);
+    for (let i=0;i<n;i++){
+      const u = Math.random()*2-1, th = Math.random()*Math.PI*2, r = 220;
+      const s = Math.sqrt(1-u*u);
+      pos[i*3] = r*s*Math.cos(th); pos[i*3+1] = r*u; pos[i*3+2] = r*s*Math.sin(th);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color:0xc9c4b8, size:0.9, sizeAttenuation:false, transparent:true, opacity:0.55, depthWrite:false })));
+  }
+
+  // ---------- Saturn ----------
+  const planetGroup = new THREE.Group();
+  system.add(planetGroup);
+  {
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+    const g = c.getContext("2d");
+    const img = g.createImageData(1024, 512);
+    const bands = [[233,212,165],[214,186,134],[196,160,108],[226,204,160],[184,150,104],[221,196,148],[203,173,124]];
+    for (let y=0;y<512;y++){
+      const lat = (0.5 - y/512)*Math.PI;
+      const v = Math.sin(lat*9.0)*0.5 + Math.sin(lat*23.0+0.7)*0.25 + Math.sin(lat*41.0+1.3)*0.12;
+      const k = Math.abs(Math.floor((v+1)*3.4)) % bands.length;
+      const k2 = (k+1) % bands.length;
+      const t = ((v+1)*3.4) % 1;
+      let col = bands[k].map((cv,i)=> cv*(1-t) + bands[k2][i]*t);
+      const polar = Math.pow(Math.abs(Math.sin(lat)), 6);
+      col = col.map((cv,i)=> cv*(1-polar*0.45) + [150,160,170][i]*polar*0.45);
+      for (let x=0;x<1024;x++){
+        const n = (Math.sin(x*0.05 + y*0.31)*Math.sin(x*0.013 - y*0.07))*6;
+        const idx = (y*1024 + x)*4;
+        img.data[idx] = col[0]+n; img.data[idx+1] = col[1]+n; img.data[idx+2] = col[2]+n*0.8; img.data[idx+3] = 255;
+      }
+    }
+    g.putImageData(img,0,0);
+    const tex = new THREE.CanvasTexture(c);
+    const planet = new THREE.Mesh(new THREE.SphereGeometry(1, 96, 64), new THREE.MeshStandardMaterial({ map:tex, roughness:0.95, metalness:0 }));
+    planet.scale.set(1, POLAR_SQUASH, 1);
+    planet.renderOrder = 0;
+    planetGroup.add(planet);
+    refs.planet = planet;
+    updaters.push((dt)=>{ planet.rotation.y += dt*SPIN; });
+    addLabel(planetGroup, "Saturn", new THREE.Vector3(0, -1.25, 0), "#ebe4d2", 0.34);
+  }
+
+  // ---------- ambient toroidal field shell ----------
+  {
+    const grp = new THREE.Group();
+    const loop = dipoleLoop(FIELD_L, 120).map(p=> new THREE.Vector2(Math.max(p[0],0.0001), p[1]));
+    const geo = new THREE.LatheGeometry(loop, 96);
+    const mat = new THREE.MeshBasicMaterial({ color:GOLD, transparent:true, opacity:0.055, side:THREE.DoubleSide, depthWrite:false });
+    grp.add(new THREE.Mesh(geo, mat));
+    const wire = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.LatheGeometry(loop.filter((_,i)=>i%10===0), 24), 1),
+      new THREE.LineBasicMaterial({ color:GOLD, transparent:true, opacity:0.07, depthWrite:false }));
+    grp.add(wire);
+    addLabel(grp, "Toroidal field (the planet's own field)", az(FIELD_L*0.8, Math.PI*0.25, 1.75), "#d8a648", 0.3);
+    reg("shell", grp);
+  }
+
+  // ---------- poloidal field lines ----------
+  const FIELD_LS_UNUSED = 0;
+  const Ls = [1.45, 1.8, 2.15, 2.5, 2.85, 3.2, 3.5];
+  const loops = Ls.map(L=> dipoleLoop(L, 140));
+  {
+    const grp = new THREE.Group();
+    const nAz = 14;
+    loops.forEach((loop, li)=>{
+      for (let k=0;k<nAz;k++){
+        const a = k/nAz*Math.PI*2 + li*0.12;
+        const pts = loop.map(p=> az(p[0], a, p[1]));
+        grp.add(lineFrom(pts, GOLD, 0.16 + 0.03*(li%2)));
+        if (k % 2 === 0){
+          const mid = Math.floor(loop.length/2);
+          const p0 = az(loop[mid][0], a, loop[mid][1]);
+          const p1 = az(loop[mid+1][0], a, loop[mid+1][1]);
+          addArrow(grp, p0, p1.clone().sub(p0), GOLD, 0.09, 0.6);
+        }
+      }
+    });
+    reg("poloidal", grp);
+  }
+  // poloidal flow particles
+  {
+    const per = 70, total = per*loops.length;
+    const pos = new Float32Array(total*3), meta = [];
+    for (let li=0; li<loops.length; li++){
+      for (let k=0;k<per;k++) meta.push({ li, a: Math.random()*Math.PI*2, s: Math.random(), v: 0.05 + 0.02*Math.random() });
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    const pts = new THREE.Points(geo, pointsMat(GOLD_LIGHT, 0.06, 0.9));
+    reg("poloidalFlow", pts);
+    updaters.push((dt)=>{
+      for (let i=0;i<meta.length;i++){
+        const m = meta[i];
+        m.s += dt*m.v*(3.2/Ls[m.li]);
+        if (m.s >= 1) { m.s %= 1; m.a = Math.random()*Math.PI*2; }
+        const p = samplePath(loops[m.li], m.s);
+        pos[i*3] = p[0]*Math.cos(m.a); pos[i*3+1] = p[1]; pos[i*3+2] = -p[0]*Math.sin(m.a);
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+  }
+
+  // ---------- toroidal procession ----------
+  {
+    const grp = new THREE.Group();
+    const n = 900, pos = new Float32Array(n*3), meta = [];
+    for (let i=0;i<n;i++){
+      const r = 1.15 + Math.random()*2.3;
+      const ymax = 0.38*r*stretch(r)*0.8;
+      meta.push({ r, y:(Math.random()*2-1)*ymax, a:Math.random()*Math.PI*2 });
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    grp.add(new THREE.Points(geo, pointsMat(GOLD_MID, 0.05, 0.75)));
+    [[1.6,0.55],[2.6,0.7],[2.6,-0.7]].forEach(([r,yy])=>{
+      const pts = []; for (let i=0;i<=128;i++) pts.push(az(r, i/128*Math.PI*2, yy));
+      grp.add(lineFrom(pts, GOLD_MID, 0.25));
+      for (let k=0;k<4;k++){ const a = k*Math.PI/2 + 0.4; addArrow(grp, az(r,a,yy), new THREE.Vector3(-Math.sin(a),0,-Math.cos(a)), GOLD_MID, 0.1, 0.8); }
+    });
+    reg("toroidal", grp);
+    updaters.push((dt)=>{
+      for (let i=0;i<n;i++){
+        const m = meta[i];
+        m.a += dt*0.9/Math.sqrt(m.r);
+        pos[i*3] = m.r*Math.cos(m.a); pos[i*3+1] = m.y; pos[i*3+2] = -m.r*Math.sin(m.a);
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+  }
+
+  // ---------- helical streamlines (poloidal + toroidal combined) ----------
+  {
+    const grp = new THREE.Group();
+    [2.5, 3.3].forEach((L, j)=>{
+      const loop = dipoleLoop(L, 220);
+      for (let k=0;k<6;k++){
+        const a0 = k/6*Math.PI*2 + j*0.5;
+        const pts = loop.map((p,i)=> az(p[0], a0 + 2.4*i/(loop.length-1), p[1]));
+        grp.add(lineFrom(pts, 0xb98a3c, 0.55));
+        const mi = Math.floor(loop.length*0.3);
+        addArrow(grp, pts[mi], pts[mi+1].clone().sub(pts[mi]), 0xb98a3c, 0.09, 0.85);
+      }
+    });
+    reg("helical", grp);
+  }
+
+  // ---------- central axis, axial jet, polar hexagon ----------
+  {
+    const grp = new THREE.Group();
+    grp.add(lineFrom([new THREE.Vector3(0,-4.5,0), new THREE.Vector3(0,4.5,0)], 0xf6e6b8, 0.35));
+    const n = 160, pos = new Float32Array(n*3), ys = [];
+    for (let i=0;i<n;i++) ys.push(-4.2 + Math.random()*8.4);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    grp.add(new THREE.Points(geo, pointsMat(0xf6e6b8, 0.06, 0.85)));
+    updaters.push((dt)=>{
+      for (let i=0;i<n;i++){
+        ys[i] += dt*0.8; if (ys[i] > 4.2) ys[i] = -4.2;
+        const sw = 0.05*Math.sin(ys[i]*3 + i);
+        pos[i*3] = sw*Math.cos(i); pos[i*3+1] = ys[i]; pos[i*3+2] = sw*Math.sin(i);
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+    // hexagon at ~77 N, projected onto the oblate surface
+    const lat = 77*Math.PI/180, hexPts = [];
+    const verts = []; for (let k=0;k<6;k++){ const a = k/6*Math.PI*2; verts.push(az(Math.cos(lat), a, Math.sin(lat)*POLAR_SQUASH)); }
+    for (let k=0;k<6;k++){
+      const A = verts[k], B = verts[(k+1)%6];
+      for (let i=0;i<12;i++){
+        const p = A.clone().lerp(B, i/12);
+        const s = 1.008/Math.sqrt(p.x*p.x + p.z*p.z + (p.y/POLAR_SQUASH)*(p.y/POLAR_SQUASH));
+        hexPts.push(p.multiplyScalar(s));
+      }
+    }
+    hexPts.push(hexPts[0].clone());
+    const hex = lineFrom(hexPts, 0xf6e6b8, 0.95);
+    planetGroup.add(hex);
+    refs.hex = hex;
+    addLabel(grp, "Central axis", new THREE.Vector3(0.25, 3.6, 0), "#f6e6b8", 0.34);
+    // polar cyclone on the axis, inside the hexagon jet
+    {
+      const cyc = new THREE.Group();
+      for (let arm=0; arm<3; arm++){
+        const pts = [];
+        for (let i=0;i<=60;i++){
+          const t = i/60, rr = 0.02 + 0.13*t, a = arm*Math.PI*2/3 + t*Math.PI*2.2;
+          const x = rr*Math.cos(a), z = -rr*Math.sin(a);
+          const y = POLAR_SQUASH*Math.sqrt(Math.max(0, 1 - x*x - z*z))*1.01;
+          pts.push(new THREE.Vector3(x, y, z));
+        }
+        cyc.add(lineFrom(pts, 0xf6e6b8, 0.85));
+      }
+      planetGroup.add(cyc);
+      refs.cyclone = cyc;
+      updaters.push((dt)=>{ cyc.rotation.y += dt*0.6; });
+    }
+    addLabel(grp, "Polar cyclone on the axis · hexagon jet around it", new THREE.Vector3(0.35, 1.25, 0), "#f6e6b8", 0.24);
+    reg("axis", grp);
+  }
+
+  // ---------- helical ascent (widens & tightens at the equator) ----------
+  {
+    const grp = new THREE.Group();
+    const sig = 0.8;
+    for (let h=0; h<4; h++){
+      const pts = []; let phi = h*Math.PI/2;
+      const yMin = -3.4, yMax = 3.4, N = 420, dy = (yMax-yMin)/N;
+      for (let i=0;i<=N;i++){
+        const y = yMin + i*dy;
+        const gz = Math.exp(-(y*y)/(2*sig*sig));
+        const r = 0.22 + 0.88*gz;
+        phi += dy*(1.1 + 2.6*gz);
+        pts.push(az(r, phi, y));
+      }
+      const curve = new THREE.CatmullRomCurve3(pts);
+      grp.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 400, 0.018, 6, false),
+        new THREE.MeshBasicMaterial({ color:GOLD_DARK, transparent:true, opacity:0.85 })));
+      [0.15, 0.82].forEach(t=>{ const i = Math.floor(t*N); addArrow(grp, pts[i], pts[i+1].clone().sub(pts[i]), GOLD_DARK, 0.12, 0.95); });
+    }
+    reg("ascent", grp);
+  }
+
+  // ---------- main rings (shader: radial profile, Keplerian streaks, spiral density waves) ----------
+  const ringUniforms = { uTime:{value:0}, uWaves:{value:1}, uOpacity:{value:1} };
+  {
+    const grp = new THREE.Group();
+    const geo = new THREE.RingGeometry(1.10, 2.36, 512, 1);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: ringUniforms, transparent:true, depthWrite:false, side:THREE.DoubleSide,
+      vertexShader: `varying vec2 vP; void main(){ vP = position.xy; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader: `
+        precision highp float;
+        uniform float uTime; uniform float uWaves; uniform float uOpacity;
+        varying vec2 vP;
+        float band(float r, float a, float b){ return smoothstep(a-0.004, a, r)*(1.0-smoothstep(b, b+0.004, r)); }
+        float h1(float n){ return fract(sin(n*91.3458)*47453.5453); }
+        void main(){
+          float r = length(vP);
+          float th = atan(vP.y, vP.x);
+          float D = band(r,1.110,1.236)*0.07;
+          float C = band(r,1.236,1.526)*(0.22 + 0.08*sin(r*190.0));
+          float B = band(r,1.526,1.950)*(0.86 + 0.10*sin(r*130.0) + 0.05*sin(r*410.0));
+          float Cd = band(r,1.965,2.025)*0.07;
+          float A = band(r,2.025,2.270)*(0.62 + 0.06*sin(r*260.0));
+          A *= 1.0 - band(r,2.212,2.219);
+          A *= 1.0 - 0.8*band(r,2.258,2.261);
+          float F = band(r,2.322,2.330)*0.75;
+          float dens = D + C + B + Cd + A + F;
+          float omega = 0.35*pow(r, -1.5);
+          float ph = th + omega*uTime;
+          float ringlet = floor(r*160.0);
+          float streak = 0.5 + 0.5*sin(ph*24.0 + h1(ringlet)*6.2831);
+          dens *= 0.84 + 0.28*streak;
+          float w = 0.0;
+          w += exp(-pow((r-2.065)/0.012,2.0))*sin(2.0*ph - 950.0*(r-2.065));
+          w += exp(-pow((r-2.125)/0.011,2.0))*sin(3.0*ph - 1150.0*(r-2.125));
+          w += exp(-pow((r-2.180)/0.010,2.0))*sin(2.0*ph - 1300.0*(r-2.180));
+          dens *= 1.0 + uWaves*0.45*w;
+          vec3 cC = vec3(0.62,0.58,0.54);
+          vec3 cB = vec3(0.95,0.88,0.72);
+          vec3 cA = vec3(0.82,0.74,0.60);
+          vec3 col = mix(cC, cB, smoothstep(1.50,1.58,r));
+          col = mix(col, cA, smoothstep(1.98,2.05,r));
+          col += uWaves*0.18*w*exp(-pow((r-2.12)/0.08,2.0))*vec3(0.25,0.18,0.05);
+          float alpha = clamp(dens,0.0,1.0)*0.92*uOpacity;
+          if (alpha < 0.01) discard;
+          gl_FragColor = vec4(col, alpha);
+        }`
+    });
+    const ring = new THREE.Mesh(geo, mat);
+    ring.rotation.x = -Math.PI/2;
+    ring.renderOrder = 2;
+    grp.add(ring);
+    addLabel(grp, "C ring", az(1.38, Math.PI*1.1, 0.08), "#cfc7b6", 0.22);
+    addLabel(grp, "B ring", az(1.75, Math.PI*1.25, 0.08), "#e9d9b4", 0.24);
+    addLabel(grp, "Cassini Division", az(2.0, Math.PI*1.42, 0.12), "#e9d9b4", 0.22);
+    addLabel(grp, "A ring", az(2.15, Math.PI*1.58, 0.08), "#e9d9b4", 0.24);
+    addLabel(grp, "F ring", az(2.36, Math.PI*1.72, 0.08), "#e9d9b4", 0.2);
+    reg("rings", grp);
+  }
+
+  // ---------- Keplerian shear particles ----------
+  {
+    const n = 2600, pos = new Float32Array(n*3), meta = [];
+    for (let i=0;i<n;i++){
+      let r; const u = Math.random();
+      if (u < 0.18) r = 1.24 + Math.random()*0.29;
+      else if (u < 0.72) r = 1.53 + Math.random()*0.42;
+      else if (u < 0.98) r = 2.03 + Math.random()*0.24;
+      else r = 2.322 + Math.random()*0.008;
+      meta.push({ r, a: Math.random()*Math.PI*2, y:(Math.random()-0.5)*0.01 });
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    const pts = new THREE.Points(geo, pointsMat(RING_IVORY, 0.035, 0.75));
+    pts.renderOrder = 3;
+    reg("kepler", pts);
+    updaters.push((dt)=>{
+      for (let i=0;i<n;i++){
+        const m = meta[i];
+        m.a += dt*0.35*Math.pow(m.r, -1.5);
+        pos[i*3] = m.r*Math.cos(m.a); pos[i*3+1] = m.y; pos[i*3+2] = -m.r*Math.sin(m.a);
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+  }
+
+  // ---------- ring spirals: the King's Chamber spirals read as the rings ----------
+  // Pyramid model: at the King's Chamber level the rising inner stream curves outward just above the
+  // equator and the descending outer stream curves inward just below it, all circulating counter-clockwise.
+  // Here each main ring is one of those spiral layers: C and inner B spiral outward above the plane,
+  // outer B and A spiral inward below it, F marks the outer boundary.
+  {
+    const grp = new THREE.Group();
+    const prof = [];
+    const r0 = 1.05, r1 = 2.5;
+    for (let i=0;i<=40;i++){ const t = i/40; prof.push(new THREE.Vector2(r0 + (r1-r0)*t, 0.16*Math.sin(Math.PI*t))); }
+    for (let i=40;i>=0;i--){ const t = i/40; prof.push(new THREE.Vector2(r0 + (r1-r0)*t, -0.16*Math.sin(Math.PI*t))); }
+    grp.add(new THREE.Mesh(new THREE.LatheGeometry(prof, 96), new THREE.MeshBasicMaterial({ color:GOLD, transparent:true, opacity:0.06, side:THREE.DoubleSide, depthWrite:false })));
+    const bands = [
+      { a:1.24, b:1.52, y: 0.045, out:true,  col:0xf1cf7e, name:"C ring · outward spiral" },
+      { a:1.53, b:1.74, y: 0.025, out:true,  col:0xf1cf7e, name:"inner B · outward" },
+      { a:1.76, b:1.95, y:-0.025, out:false, col:0xc98f3a, name:"outer B · inward" },
+      { a:2.03, b:2.27, y:-0.045, out:false, col:0xc98f3a, name:"A ring · inward spiral" }
+    ];
+    const arms = [];
+    bands.forEach((bd, bi)=>{
+      const nArms = 9;
+      for (let k=0;k<nArms;k++){
+        const a0 = k/nArms*Math.PI*2 + bi*0.35, pts = [];
+        for (let i=0;i<=80;i++){
+          const t = i/80;
+          const r = bd.out ? bd.a + (bd.b-bd.a)*t : bd.b - (bd.b-bd.a)*t;
+          pts.push(az(r, a0 + t*Math.PI*1.4, bd.y));
+        }
+        grp.add(lineFrom(pts, bd.col, 0.75));
+        const mi = 44; addArrow(grp, pts[mi], pts[mi+1].clone().sub(pts[mi]), bd.col, 0.05, 0.95);
+        arms.push(pts);
+      }
+    });
+    { const pts = []; for (let i=0;i<=200;i++) pts.push(az(2.326, i/200*Math.PI*2, 0)); grp.add(lineFrom(pts, 0xfff0c8, 0.8)); }
+    const n = 900, pos = new Float32Array(n*3), meta = [];
+    for (let i=0;i<n;i++) meta.push({ arm: Math.floor(Math.random()*arms.length), s: Math.random(), v: 0.08 + Math.random()*0.06 });
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    const pp = new THREE.Points(geo, pointsMat(GOLD_LIGHT, 0.04, 0.95)); pp.renderOrder = 4;
+    grp.add(pp);
+    updaters.push((dt)=>{
+      for (let i=0;i<n;i++){
+        const m = meta[i]; m.s += dt*m.v; if (m.s >= 1){ m.s -= 1; m.arm = Math.floor(Math.random()*arms.length); }
+        const arm = arms[m.arm], f = m.s*(arm.length-1), j = Math.min(arm.length-2, Math.floor(f)), t = f-j;
+        pos[i*3]   = arm[j].x + (arm[j+1].x-arm[j].x)*t;
+        pos[i*3+1] = arm[j].y + (arm[j+1].y-arm[j].y)*t;
+        pos[i*3+2] = arm[j].z + (arm[j+1].z-arm[j].z)*t;
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+    addLabel(grp, "Outward spirals (above the plane)", az(1.45, Math.PI*0.62, 0.3), "#f1cf7e", 0.17);
+    addLabel(grp, "Inward spirals (below the plane)", az(2.2, Math.PI*0.8, -0.3), "#c98f3a", 0.17);
+    reg("belt", grp);
+  }
+
+  // ---------- ring rain along field lines ----------
+  {
+    const grp = new THREE.Group();
+    const rainLs = [1.55, 1.7, 1.85, 2.0, 2.15, 2.25];
+    const paths = rainLs.map(L=> dipoleToSurface(L, 120));
+    for (let k=0;k<12;k++){
+      const a = k/12*Math.PI*2 + 0.3;
+      paths.forEach((p, j)=>{
+        if (j % 2) return;
+        [1,-1].forEach(sg=> grp.add(lineFrom(p.map(q=> az(q[0], a, sg*q[1])), RAIN, 0.22)));
+      });
+    }
+    const n = 700, pos = new Float32Array(n*3), meta = [];
+    const spawn = (m)=>{ m.p = Math.floor(Math.random()*paths.length); m.a = Math.random()*Math.PI*2; m.sg = Math.random()<0.5?1:-1; m.s = 0; m.v = 0.12 + Math.random()*0.12; };
+    for (let i=0;i<n;i++){ const m = {}; spawn(m); m.s = Math.random(); meta.push(m); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    grp.add(new THREE.Points(geo, pointsMat(RAIN, 0.06, 0.9)));
+    updaters.push((dt)=>{
+      for (let i=0;i<n;i++){
+        const m = meta[i];
+        m.s += dt*m.v*(0.4 + 1.2*m.s);
+        m.a += dt*0.35*Math.pow(rainLs[m.p], -1.5)*(1-m.s);
+        if (m.s >= 1) spawn(m);
+        const q = samplePath(paths[m.p], m.s);
+        pos[i*3] = q[0]*Math.cos(m.a); pos[i*3+1] = m.sg*q[1]; pos[i*3+2] = -q[0]*Math.sin(m.a);
+      }
+      geo.attributes.position.needsUpdate = true;
+    });
+    addLabel(grp, "Ring rain", az(1.55, Math.PI*0.15, 0.95), "#9cc4e8", 0.26);
+    reg("rain", grp);
+  }
+
+  // ---------- synchronous orbit + spokes ----------
+  {
+    const grp = new THREE.Group();
+    const pts = []; for (let i=0;i<=256;i++) pts.push(az(R_SYNC, i/256*Math.PI*2, 0.012));
+    const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color:0xf4a7a0, dashSize:0.07, gapSize:0.05, transparent:true, opacity:0.95 }));
+    ln.computeLineDistances(); grp.add(ln);
+    // spokes: faint radial wedges of charged dust that turn with the field (rate SPIN), not with the ring particles
+    const spokes = new THREE.Group();
+    for (let k=0;k<7;k++){
+      const a0 = k/7*Math.PI*2 + (k%2)*0.2, w = 0.035 + 0.02*(k%3);
+      const shape = [az(1.62, a0-w*0.6, 0.016), az(2.02, a0-w, 0.016), az(2.02, a0+w, 0.016), az(1.62, a0+w*0.6, 0.016)];
+      const geo = new THREE.BufferGeometry().setFromPoints([shape[0],shape[1],shape[2], shape[0],shape[2],shape[3]]);
+      spokes.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color:0x8a8070, transparent:true, opacity:0.55, side:THREE.DoubleSide, depthWrite:false })));
+    }
+    grp.add(spokes);
+    // arrows: inside, ring material outruns the field; outside, the field outruns the ring material
+    addArrow(grp, az(1.70, 0.3, 0.05), new THREE.Vector3(-Math.sin(0.3),0,-Math.cos(0.3)), 0xfff3d6, 0.07, 0.9);
+    addArrow(grp, az(2.03, 0.3, 0.05), new THREE.Vector3(Math.sin(0.3),0,Math.cos(0.3)), 0xf4a7a0, 0.07, 0.9);
+    addLabel(grp, "Synchronous orbit · field and rings co-rotate", az(R_SYNC, Math.PI*1.25, 0.32), "#f4a7a0", 0.24);
+    addLabel(grp, "Spokes turn with the field", az(2.05, Math.PI*0.05, 0.22), "#c8bca6", 0.2);
+    let t = 0;
+    updaters.push((dt)=>{ t += dt; spokes.rotation.y += dt*SPIN; spokes.children.forEach((m,i)=> m.material.opacity = 0.25 + 0.3*(0.5+0.5*Math.sin(t*0.5 + i*1.7))); });
+    reg("sync", grp);
+  }
+
+  // ---------- Mimas and the 2:1 resonance ----------
+  {
+    const grp = new THREE.Group();
+    const RM = 3.08;
+    const mimas = new THREE.Mesh(new THREE.SphereGeometry(0.06, 20, 14), new THREE.MeshStandardMaterial({ color:0xcfc7b6, roughness:1 }));
+    grp.add(mimas);
+    const orbitPts = []; for (let i=0;i<=200;i++) orbitPts.push(az(RM, i/200*Math.PI*2, 0));
+    grp.add(lineFrom(orbitPts, 0xcfc7b6, 0.25));
+    const edgePts = []; for (let i=0;i<=200;i++) edgePts.push(az(1.95, i/200*Math.PI*2, 0.003));
+    grp.add(lineFrom(edgePts, 0xfff0c8, 0.85));
+    const linkGeo = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(), new THREE.Vector3()]);
+    const link = new THREE.Line(linkGeo, new THREE.LineDashedMaterial({ color:0xcfc7b6, dashSize:0.08, gapSize:0.06, transparent:true, opacity:0.8 }));
+    grp.add(link);
+    const mLabel = addLabel(grp, "Mimas", new THREE.Vector3(), "#cfc7b6", 0.24);
+    const rLabel = addLabel(grp, "2:1 resonance", new THREE.Vector3(), "#fff0c8", 0.22);
+    let aM = 0.8;
+    updaters.push((dt)=>{
+      aM += dt*0.35*Math.pow(RM, -1.5);
+      const p = az(RM, aM, 0); mimas.position.copy(p);
+      const e = az(1.95, aM, 0);
+      linkGeo.setFromPoints([e, p]); link.computeLineDistances();
+      mLabel.position.copy(az(RM, aM, 0.22));
+      rLabel.position.copy(az(2.5, aM, 0.16));
+    });
+    reg("mimas", grp);
+  }
+
+  // ---------- E ring + Enceladus plasma torus ----------
+  {
+    const grp = new THREE.Group();
+    const n = 3400, pos = new Float32Array(n*3);
+    for (let i=0;i<n;i++){
+      let r; do { r = 3.95 + (Math.random()+Math.random()+Math.random()-1.5)*2.6; } while (r < 3.0 || r > 8.2);
+      const a = Math.random()*Math.PI*2;
+      const sig = 0.05 + 0.06*(r-3);
+      const y = (Math.random()+Math.random()+Math.random()-1.5)*sig*1.4;
+      pos[i*3] = r*Math.cos(a); pos[i*3+1] = y; pos[i*3+2] = -r*Math.sin(a);
+    }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    const cloud = new THREE.Points(geo, pointsMat(ERING, 0.07, 0.4));
+    grp.add(cloud);
+    const torus = new THREE.Mesh(new THREE.TorusGeometry(3.95, 0.16, 16, 128), new THREE.MeshBasicMaterial({ color:ERING, transparent:true, opacity:0.08, depthWrite:false }));
+    torus.rotation.x = Math.PI/2;
+    grp.add(torus);
+    const enc = new THREE.Mesh(new THREE.SphereGeometry(0.05, 20, 14), new THREE.MeshStandardMaterial({ color:0xf4f8ff, emissive:0x223344, roughness:0.6 }));
+    grp.add(enc);
+    const eLabel = addLabel(grp, "Enceladus", new THREE.Vector3(), "#a9c9e4", 0.22);
+    addLabel(grp, "E ring · plasma torus", az(6.4, Math.PI*0.85, 0.5), "#a9c9e4", 0.3);
+    // radial transport: plasma fingers carried outward, emptier flux tubes moving inward between them
+    const nF = 420, fpos = new Float32Array(nF*3), fmeta = [];
+    for (let i=0;i<nF;i++){ const finger = i%8; fmeta.push({ out: (i%3)!==0, a0: finger/8*Math.PI*2 + ((i%3)===0 ? Math.PI/8 : 0), r: 3.95 + Math.random()*4, j: (Math.random()-0.5)*0.12 }); }
+    const fgeo = new THREE.BufferGeometry(); fgeo.setAttribute("position", new THREE.BufferAttribute(fpos,3));
+    const fingers = new THREE.Points(fgeo, pointsMat(0xd5e6f5, 0.06, 0.8));
+    grp.add(fingers);
+    let fRot = 0;
+    addLabel(grp, "Plasma carried outward", az(6.9, Math.PI*0.2, 0.32), "#d5e6f5", 0.24);
+    let aE = 2.2;
+    updaters.push((dt)=>{
+      fRot += dt*SPIN*0.6;
+      for (let i=0;i<nF;i++){
+        const m = fmeta[i];
+        m.r += dt*(m.out ? 0.35 : -0.22);
+        if (m.out && m.r > 8.0) m.r = 3.95;
+        if (!m.out && m.r < 3.95) m.r = 8.0;
+        const a = m.a0 + m.j + fRot + 0.18*Math.log(m.r/3.95);
+        fpos[i*3] = m.r*Math.cos(a); fpos[i*3+1] = 0; fpos[i*3+2] = -m.r*Math.sin(a);
+      }
+      fgeo.attributes.position.needsUpdate = true;
+      cloud.rotation.y += dt*0.02;
+      aE += dt*0.35*Math.pow(3.95, -1.5);
+      enc.position.copy(az(3.95, aE, 0));
+      eLabel.position.copy(az(3.95, aE, 0.2));
+    });
+    reg("ering", grp);
+  }
+
+  // ---------- field equator marker ----------
+  {
+    const grp = new THREE.Group();
+    const pts = []; for (let i=0;i<=256;i++) pts.push(az(FIELD_L+0.25, i/256*Math.PI*2, 0));
+    const ln = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), new THREE.LineDashedMaterial({ color:0xa0977f, dashSize:0.12, gapSize:0.09, transparent:true, opacity:0.55 }));
+    ln.computeLineDistances();
+    grp.add(ln);
+    addLabel(grp, "Field equator · King's Chamber latitude", az(FIELD_L+0.3, Math.PI*1.86, 0.2), "#a0977f", 0.26);
+    reg("equator", grp);
+  }
+
+  // ---------- Ra Contact: Council of Saturn ----------
+  {
+    const grp = new THREE.Group();
+    const glow = new THREE.Mesh(new THREE.RingGeometry(1.53, 2.27, 256, 1), new THREE.MeshBasicMaterial({ color:SILVER, transparent:true, opacity:0.12, side:THREE.DoubleSide, depthWrite:false, blending:THREE.AdditiveBlending }));
+    glow.rotation.x = -Math.PI/2; glow.position.y = 0.004;
+    grp.add(glow);
+    const lights = [];
+    for (let k=0;k<9;k++){
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:DOT, color:SILVER, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending }));
+      s.scale.set(0.22,0.22,1);
+      s.userData.a = k/9*Math.PI*2;
+      lights.push(s); grp.add(s);
+    }
+    addLabel(grp, "Council of Saturn · Ra 6.8", az(2.3, Math.PI*0.42, 0.55), "#eef3fa", 0.3);
+    let tC = 0;
+    updaters.push((dt)=>{
+      tC += dt;
+      glow.material.opacity = 0.09 + 0.05*Math.sin(tC*1.4);
+      lights.forEach((s,i)=>{
+        s.userData.a += dt*0.35*Math.pow(1.85, -1.5);
+        s.position.copy(az(1.85, s.userData.a, 0.03));
+        const p = 0.18 + 0.06*Math.sin(tC*2.0 + i);
+        s.scale.set(p,p,1);
+      });
+    });
+    reg("council", grp);
+  }
+
+  // ---------- superimposed Great Pyramid ----------
+  // Built in the poloidal core visualization's own coordinates (cubits / 31.4815, base at y = -0.8941),
+  // re-anchored so the King's Chamber mid-height (zone 5 bulge peak, y = 1.822) sits at Saturn's equator.
+  const CUBITS_PER_VIZ = 31.4815, PYR_BASE_Y = -0.8941, KC_MID_VIZ = 1.822;
+  const PYR_HALF = 220, PYR_H = 280;
+  const APEX_REL = PYR_H/CUBITS_PER_VIZ + PYR_BASE_Y - KC_MID_VIZ;
+  const SCALE_PRESETS = {
+    flow: 1.10/1.45,                                   // Saturn ascent max radius / pyramid-model zone 5 bulge radius
+    rings: 2.27/(PYR_HALF/CUBITS_PER_VIZ),             // half-base = outer A ring
+    belt: FIELD_L/(PYR_HALF/CUBITS_PER_VIZ),           // half-base = field equator
+    crown: (0.385*FIELD_L*stretch(FIELD_L))/APEX_REL         // apex = top of field envelope
+  };
+  function C(cx, cy, cz){ return new THREE.Vector3(cx/CUBITS_PER_VIZ, cy/CUBITS_PER_VIZ + PYR_BASE_Y - KC_MID_VIZ, cz/CUBITS_PER_VIZ); }
+  const pyrRoot = new THREE.Group(), pyrScaled = new THREE.Group(), pyrLabels = new THREE.Group(), chamberLabels = new THREE.Group();
+  pyrRoot.add(pyrScaled, pyrLabels, chamberLabels);
+  const labelAnchors = [];
+  function pyrLabel(group, text, c, color, h){ const s = makeLabel(text, color, h); group.add(s); labelAnchors.push({ s, c }); return s; }
+  {
+    const hV = PYR_H/CUBITS_PER_VIZ, rV = PYR_HALF/CUBITS_PER_VIZ*Math.SQRT2;
+    const pgeo = new THREE.ConeGeometry(rV, hV, 4, 1);
+    const pmesh = new THREE.Mesh(pgeo, new THREE.MeshBasicMaterial({ color:0xd9b77a, transparent:true, opacity:0.09, side:THREE.DoubleSide, depthWrite:false }));
+    pmesh.rotation.y = Math.PI/4; pmesh.position.y = C(0, PYR_H/2, 0).y;
+    pyrScaled.add(pmesh);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(pgeo), new THREE.LineBasicMaterial({ color:0xf1cf7e, transparent:true, opacity:0.95 }));
+    edges.rotation.y = Math.PI/4; edges.position.y = pmesh.position.y;
+    pyrScaled.add(edges);
+    // King's Chamber level traced around the faces
+    const kcC = 85.5, hk = PYR_HALF*(1 - kcC/PYR_H);
+    const sq = [[hk,hk],[-hk,hk],[-hk,-hk],[hk,-hk],[hk,hk]].map(([x,z])=> C(x, kcC, z));
+    pyrScaled.add(lineFrom(sq, 0xfff0c8, 0.95));
+    // Queen's Chamber level traced around the faces (dimmer)
+    const qcC = 46, hq = PYR_HALF*(1 - qcC/PYR_H);
+    pyrScaled.add(lineFrom([[hq,hq],[-hq,hq],[-hq,-hq],[hq,-hq],[hq,hq]].map(([x,z])=> C(x, qcC, z)), 0xbfd3e6, 0.5));
+    pyrLabel(pyrLabels, "Apex", [0, 296, 0], "#f1cf7e", 0.26);
+    pyrLabel(pyrLabels, "King's Chamber level = Saturn's equator", [hk*0.98, kcC+6, hk*0.98], "#fff0c8", 0.3);
+  }
+  const chambers = new THREE.Group();
+  {
+    function box(x0,x1,y0,y1,z0,z1,color,op){
+      const a = C(x0,y0,z0), b = C(x1,y1,z1);
+      const g = new THREE.BoxGeometry(b.x-a.x, b.y-a.y, b.z-a.z);
+      const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ color, transparent:true, opacity:op, depthWrite:false }));
+      m.position.set((a.x+b.x)/2, (a.y+b.y)/2, (a.z+b.z)/2);
+      const e = new THREE.LineSegments(new THREE.EdgesGeometry(g), new THREE.LineBasicMaterial({ color, transparent:true, opacity:0.95 }));
+      e.position.copy(m.position);
+      chambers.add(m, e);
+    }
+    box(-10,10, 80,91, -10,0, 0xf2c14e, 0.55);            // King's Chamber
+    box(-2.6,2.6, 80,87, 0,5.6, 0xd8a648, 0.35);          // Antechamber
+    [93,101,109,117].forEach(y=> box(-10,10, y,y+2.2, -10,0, 0xb8995c, 0.35)); // relieving chambers
+    box(-10,10, 125,127.5, -10,0, 0xb8995c, 0.35);
+    box(-5.5,5.5, 40,52, -5,5, 0xbfd3e6, 0.5);            // Queen's Chamber
+    box(-1,1, 40,42.2, 5,86, 0xbfd3e6, 0.25);             // Queen's Chamber passage
+    box(-13,13, -58,-51, -12,4, 0xc0574a, 0.45);          // Subterranean Chamber
+    // Grand Gallery: sloped box rising south from the passage junction to the Antechamber
+    const zLo = 86, yLo = 43, zHi = 6, yHi = 80, GH = 16, GW = 4;
+    const Lg = Math.hypot(zLo-zHi, yHi-yLo), th = Math.atan2(yHi-yLo, zLo-zHi);
+    const gg = new THREE.BoxGeometry(GW/CUBITS_PER_VIZ, GH/CUBITS_PER_VIZ, Lg/CUBITS_PER_VIZ);
+    const ggm = new THREE.Mesh(gg, new THREE.MeshBasicMaterial({ color:0xe0b45c, transparent:true, opacity:0.3, depthWrite:false }));
+    ggm.position.copy(C(0, (yLo+yHi)/2 + GH/2, (zLo+zHi)/2)); ggm.rotation.x = th;
+    const gge = new THREE.LineSegments(new THREE.EdgesGeometry(gg), new THREE.LineBasicMaterial({ color:0xe0b45c, transparent:true, opacity:0.9 }));
+    gge.position.copy(ggm.position); gge.rotation.x = th;
+    chambers.add(ggm, gge);
+    // descending passage from the north-face entrance to the Subterranean Chamber
+    chambers.add(lineFrom([C(0,32,192), C(0,-51,28), C(0,-51,4)], 0xc0574a, 0.8));
+    pyrLabel(chamberLabels, "King's Chamber", [22, 86, -5], "#f2c14e", 0.24);
+    pyrLabel(chamberLabels, "Queen's Chamber", [16, 46, 0], "#bfd3e6", 0.22);
+    pyrLabel(chamberLabels, "Grand Gallery", [12, 66, 50], "#e0b45c", 0.22);
+    pyrLabel(chamberLabels, "Relieving chambers", [24, 112, -5], "#b8995c", 0.2);
+    pyrLabel(chamberLabels, "Subterranean Chamber", [28, -54, -4], "#c0574a", 0.22);
+  }
+  pyrScaled.add(chambers);
+  const qcBubble = new THREE.Group();
+  let bubbleLabel;
+  {
+    const cy = 0.754 - KC_MID_VIZ, hh = 0.55, hw = 0.82;
+    const ell = new THREE.Mesh(new THREE.SphereGeometry(1, 40, 24), new THREE.MeshBasicMaterial({ color:0xbfd3e6, transparent:true, opacity:0.16, depthWrite:false }));
+    ell.scale.set(hw, hh, hw); ell.position.y = cy;
+    qcBubble.add(ell);
+    const wire = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.SphereGeometry(1, 16, 8), 10), new THREE.LineBasicMaterial({ color:0xbfd3e6, transparent:true, opacity:0.35 }));
+    wire.scale.copy(ell.scale); wire.position.copy(ell.position);
+    qcBubble.add(wire);
+    [cy-hh, cy+hh].forEach(y=>{
+      const p = new THREE.Mesh(new THREE.SphereGeometry(0.07, 14, 10), new THREE.MeshBasicMaterial({ color:0xeef3fa }));
+      p.position.set(0, y, 0); qcBubble.add(p);
+    });
+    // recirculation loops inside the bubble (meridional), rising on the rim and falling on the axis
+    for (let k=0;k<4;k++){
+      const a = k*Math.PI/2, pts = [];
+      for (let i=0;i<=64;i++){ const t = i/64*Math.PI*2; pts.push(az(0.08 + 0.42*hw*(1+Math.cos(t))/2*1.6, a, cy + 0.75*hh*Math.sin(t))); }
+      qcBubble.add(lineFrom(pts, 0xbfd3e6, 0.6));
+    }
+    bubbleLabel = pyrLabel(pyrLabels, "Recirculation bubble · stagnation points", [30, 30, 0], "#bfd3e6", 0.22);
+  }
+  pyrScaled.add(qcBubble);
+  reg("pyramid", pyrRoot);
+  refs.chambers = chambers;
+  refs.qcBubble = qcBubble;
+
+  let pyrScale = SCALE_PRESETS.rings;
+  const pyrSlider = document.getElementById("pyr-scale"), pyrReadout = document.getElementById("pyr-readout");
+  const scaleBtns = Array.from(document.querySelectorAll("[data-pscale]"));
+  function setPyrScale(s, key){
+    pyrScale = s;
+    pyrScaled.scale.setScalar(s);
+    labelAnchors.forEach(({s:sp, c})=> sp.position.copy(C(c[0], c[1], c[2]).multiplyScalar(pyrScale)));
+    pyrSlider.value = s;
+    pyrReadout.textContent = "1 Saturn radius ≈ " + Math.round(CUBITS_PER_VIZ/s) + " cubits · height " + (PYR_H/CUBITS_PER_VIZ*s).toFixed(2) + " Rs";
+    scaleBtns.forEach(b=> b.classList.toggle("on", b.dataset.pscale === key));
+  }
+  scaleBtns.forEach(b=> b.addEventListener("click", ()=> setPyrScale(SCALE_PRESETS[b.dataset.pscale], b.dataset.pscale)));
+  pyrSlider.addEventListener("input", ()=> setPyrScale(parseFloat(pyrSlider.value), null));
+  setPyrScale(SCALE_PRESETS.rings, "rings");
+
+  // ---------- visibility ----------
+  const DEFAULTS = { shell:true, poloidal:true, poloidalFlow:true, toroidal:true, helical:true, axis:true, ascent:false,
+    rings:true, kepler:true, belt:true, rain:true, sync:true, waves:true, mimas:true, ering:false, council:false, labels:false, equator:false,
+    pyramid:true, chambers:false, qcBubble:false, ghost:false };
+  const boxes = Array.from(document.querySelectorAll("#overlays input[data-key]"));
+  function applyVisibility(){
+    const st = {}; boxes.forEach(b=> st[b.dataset.key] = b.checked);
+    Object.keys(refs).forEach(k=>{ if (k in st) refs[k].visible = st[k]; });
+    ringUniforms.uWaves.value = st.waves ? 1 : 0;
+    labels.forEach(l=> l.visible = st.labels);
+    chamberLabels.visible = st.chambers;
+    if (bubbleLabel) bubbleLabel.visible = st.labels && st.qcBubble;
+    const pm = refs.planet.material;
+    pm.transparent = true; pm.opacity = st.ghost ? 0.28 : 1; pm.depthWrite = !st.ghost; pm.needsUpdate = true;
+    if (refs.hex) refs.hex.material.opacity = st.ghost ? 0.5 : 0.95;
+    if (refs.hex) refs.hex.visible = st.axis;
+    if (refs.cyclone) refs.cyclone.visible = st.axis;
+  }
+  function setAll(obj){ boxes.forEach(b=> b.checked = !!obj[b.dataset.key]); applyVisibility(); }
+  boxes.forEach(b=> b.addEventListener("change", applyVisibility));
+  setAll(DEFAULTS);
+  document.getElementById("btn-clear").addEventListener("click", ()=>{
+    const o = {}; boxes.forEach(b=> o[b.dataset.key] = (b.dataset.key === "labels")); setAll(o);
+  });
+  document.getElementById("btn-reset").addEventListener("click", ()=> setAll(DEFAULTS));
+
+  // ---------- drawers ----------
+  const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
+  Object.entries(drawers).forEach(([id, btnId])=>{
+    const btn = document.getElementById(btnId), el = document.getElementById(id);
+    btn.addEventListener("click", ()=>{
+      const open = el.hidden;
+      Object.entries(drawers).forEach(([oid,ob])=>{ document.getElementById(oid).hidden = true; document.getElementById(ob).setAttribute("aria-expanded","false"); });
+      if (open){ el.hidden = false; btn.setAttribute("aria-expanded","true"); }
+    });
+  });
+  const corrBtn = document.getElementById("btn-corr"), corrTable = document.getElementById("corr-table");
+  corrBtn.addEventListener("click", ()=>{
+    corrTable.hidden = !corrTable.hidden;
+    corrBtn.textContent = corrTable.hidden ? "Show" : "Hide";
+    corrBtn.setAttribute("aria-expanded", String(!corrTable.hidden));
+  });
+  if (window.innerWidth < 640){ corrTable.hidden = true; corrBtn.textContent = "Show"; corrBtn.setAttribute("aria-expanded","false"); }
+
+  // ---------- camera ----------
+  const orbit = { az:0.65, el:0.36, dist:11 };
+  let tween = null;
+  const PRESETS = {
+    oblique:{ az:0.65, el:0.36, dist:11 },
+    edge:{ az:0.3, el:0.03, dist:9 },
+    pole:{ az:0.0, el:1.54, dist:10 },
+    rings:{ az:0.9, el:0.42, dist:5.5 },
+    field:{ az:0.5, el:0.22, dist:24 },
+    rain:{ az:1.2, el:0.12, dist:4.6 },
+    pyramid:{ az:0.42, el:0.14, dist:8.5 },
+    kc:{ az:0.7, el:0.04, dist:5.5 }
+  };
+  function updateCamera(){
+    const c = Math.cos(orbit.el);
+    camera.position.set(orbit.dist*c*Math.sin(orbit.az), orbit.dist*Math.sin(orbit.el), orbit.dist*c*Math.cos(orbit.az));
+    camera.lookAt(0,0,0);
+  }
+  document.querySelectorAll("[data-cam]").forEach(b=> b.addEventListener("click", ()=>{
+    const p = PRESETS[b.dataset.cam];
+    let daz = ((p.az - orbit.az) % (Math.PI*2) + Math.PI*3) % (Math.PI*2) - Math.PI;
+    tween = { from:{...orbit}, to:{ az: orbit.az + daz, el:p.el, dist:p.dist }, t:0 };
+  }));
+
+  const ptrs = new Map(); let pinch0 = 0, dist0 = orbit.dist, dragging = false;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", e=>{ cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); dragging = true; tween = null;
+    if (ptrs.size === 2){ const [a,b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); dist0 = orbit.dist; } });
+  cv.addEventListener("pointermove", e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    const prev = ptrs.get(e.pointerId); const cur = {x:e.clientX, y:e.clientY}; ptrs.set(e.pointerId, cur);
+    if (ptrs.size === 1){
+      orbit.az -= (cur.x-prev.x)*0.0055;
+      orbit.el = Math.max(-1.54, Math.min(1.54, orbit.el + (cur.y-prev.y)*0.0055));
+    } else if (ptrs.size === 2){
+      const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (pinch0 > 0) orbit.dist = Math.max(3.2, Math.min(90, dist0*pinch0/d));
+    }
+  });
+  const endPtr = e=>{ ptrs.delete(e.pointerId); if (ptrs.size === 0) dragging = false; pinch0 = 0; };
+  cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+  cv.addEventListener("wheel", e=>{ e.preventDefault(); tween = null; orbit.dist = Math.max(3.2, Math.min(90, orbit.dist*Math.exp(e.deltaY*0.0012))); }, { passive:false });
+
+  // ---------- playback ----------
+  let paused = false, speed = 1, simT = 0;
+  const playBtn = document.getElementById("btn-play");
+  playBtn.addEventListener("click", ()=>{ paused = !paused; playBtn.textContent = paused ? "Play" : "Pause"; playBtn.setAttribute("aria-label", paused ? "Play animation" : "Pause animation"); });
+  document.getElementById("speed").addEventListener("input", e=> speed = parseFloat(e.target.value));
+  const tiltBox = document.getElementById("tilt"), spinBox = document.getElementById("spin");
+  const TILT = 26.73*Math.PI/180;
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){ spinBox.checked = false; speed = 0.4; document.getElementById("speed").value = 0.4; }
+  const readout = document.getElementById("readout");
+
+  function resize(){
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/Math.max(1,h);
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let last = performance.now();
+  function frame(now){
+    const rdt = Math.max(0, Math.min(0.05, (now-last)/1000)); last = now;
+    const dt = paused ? 0 : rdt*speed;
+    simT += dt;
+    ringUniforms.uTime.value = simT;
+    updaters.forEach(f=> f(dt));
+    const targetTilt = tiltBox.checked ? TILT : 0;
+    system.rotation.z += (targetTilt - system.rotation.z)*Math.min(1, rdt*3);
+    if (tween){
+      tween.t = Math.min(1, tween.t + rdt/1.1);
+      const k = tween.t<.5 ? 2*tween.t*tween.t : 1-Math.pow(-2*tween.t+2,2)/2;
+      orbit.az = tween.from.az + (tween.to.az-tween.from.az)*k;
+      orbit.el = tween.from.el + (tween.to.el-tween.from.el)*k;
+      orbit.dist = tween.from.dist + (tween.to.dist-tween.from.dist)*k;
+      if (tween.t >= 1) tween = null;
+    } else if (spinBox.checked && !dragging){
+      orbit.az += rdt*0.045;
+    }
+    updateCamera();
+    readout.textContent = "t = " + simT.toFixed(1);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
