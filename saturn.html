@@ -400,6 +400,15 @@ window.addEventListener("error", function(e){
       let col = bands[k].map((cv,i)=> cv*(1-t) + bands[k2][i]*t);
       const polar = Math.pow(Math.abs(Math.sin(lat)), 6);
       col = col.map((cv,i)=> cv*(1-polar*0.45) + [150,160,170][i]*polar*0.45);
+      // northern winter look (Cassini, ~2012): blue wash deepening poleward, blue cap inside the hexagon (~77 N)
+      if (lat > 0){
+        const latD = lat*180/Math.PI;
+        const wash = 0.8*Math.pow(Math.min(1,Math.max(0,(latD-8)/50)), 0.9);
+        const cap = 1/(1+Math.exp(-(latD-75.5)*1.6));
+        const w = Math.min(0.94, wash + cap*0.3);
+        const blue = [104-24*cap, 142-22*cap, 206-12*cap];
+        col = col.map((cv,i)=> cv*(1-w) + blue[i]*w);
+      }
       for (let x=0;x<1024;x++){
         const n = (Math.sin(x*0.05 + y*0.31)*Math.sin(x*0.013 - y*0.07))*6;
         const idx = (y*1024 + x)*4;
@@ -546,7 +555,7 @@ window.addEventListener("error", function(e){
       }
     }
     hexPts.push(hexPts[0].clone());
-    const hex = lineFrom(hexPts, 0xf6e6b8, 0.95);
+    const hex = lineFrom(hexPts, 0xcfe4ff, 0.95);
     planetGroup.add(hex);
     refs.hex = hex;
     addLabel(grp, "Central axis", new THREE.Vector3(0.25, 3.6, 0), "#f6e6b8", 0.34);
@@ -561,7 +570,7 @@ window.addEventListener("error", function(e){
           const y = POLAR_SQUASH*Math.sqrt(Math.max(0, 1 - x*x - z*z))*1.01;
           pts.push(new THREE.Vector3(x, y, z));
         }
-        cyc.add(lineFrom(pts, 0xf6e6b8, 0.85));
+        cyc.add(lineFrom(pts, 0xdbeaff, 0.85));
       }
       planetGroup.add(cyc);
       refs.cyclone = cyc;
