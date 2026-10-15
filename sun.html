@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Sun's Toroidal Belts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D stage; title upper-left, control drawers upper-right,
+   correspondence card lower-left, playback bar lower-center. Single dark look (deep space). */
+:root{
+  --ink:#07080c;
+  --panel:rgba(13,14,20,.88);
+  --panel-solid:#0f1017;
+  --line:#2b2a33;
+  --text:#ebe4d2;
+  --muted:#a0977f;
+  --gold:#d8a648;
+  --gold-dim:#8a6a2c;
+  --north:#e8a93f;
+  --south:#7fb6d9;
+  --spot:#cfc3ad;
+  --silver:#eef3fa;
+  --f-display:"Marcellus","Cinzel","Trajan Pro",Georgia,serif;
+  --f-body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;}
+body{background:var(--ink);color:var(--text);font-family:var(--f-body);font-size:15px;overflow:hidden;}
+#stage{position:fixed;inset:0;}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
+#stage canvas:active{cursor:grabbing;}
+
+.title{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:16px;max-width:min(440px,calc(100% - 32px));pointer-events:none;}
+.eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+.title h1{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.4vw,34px);line-height:1.1;margin:.25em 0 .2em;text-wrap:balance;letter-spacing:.01em;}
+.title p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;max-width:38ch;}
+
+.topbar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;z-index:5;}
+button{font-family:var(--f-body);font-size:14px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 11px;cursor:pointer;}
+button:hover{border-color:var(--gold-dim);}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+button[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);}
+
+.drawer{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));right:16px;width:min(330px,calc(100% - 32px));max-height:calc(100% - 140px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:4px;padding:12px 14px;z-index:6;}
+.drawer h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0 0 6px;}
+.sec{border-top:1px solid var(--line);padding-block:8px 6px;}
+.sec:first-of-type{border-top:0;}
+.sec-h{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+label.row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px;line-height:1.3;cursor:pointer;}
+label.row input{margin-top:2px;accent-color:var(--gold);}
+label.row .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px;}
+label.row small{display:block;color:var(--muted);font-size:12.5px;}
+.drawer-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.scale-box{margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:3px;display:grid;gap:6px;}
+.scale-h{font-size:12.5px;color:var(--muted);}
+.scale-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.scale-btns button{font-size:12.5px;padding:4px 6px;}
+.scale-btns button.on{border-color:var(--gold);color:var(--gold);}
+
+#about{width:min(460px,calc(100% - 32px));}
+#about details{border-top:1px solid var(--line);padding-block:8px;}
+#about summary{cursor:pointer;font-family:var(--f-display);font-size:15.5px;}
+#about p{margin:.55em 0;line-height:1.55;font-size:14.5px;color:var(--text);}
+.cite{font-family:var(--f-mono);font-size:12px;color:var(--gold);font-style:normal;}
+
+.corr{position:fixed;left:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px;z-index:4;}
+.corr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.corr-h span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.corr-h button{padding:2px 8px;font-size:12px;}
+.corr table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px;}
+.corr th{font-weight:500;text-align:left;color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 4px;border-bottom:1px solid var(--line);}
+.corr td{padding:5px 4px;vertical-align:top;border-bottom:1px solid rgba(43,42,51,.6);line-height:1.3;}
+.corr td:first-child{color:var(--text);}
+.corr td:last-child{color:var(--gold);}
+
+.playbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 10px;z-index:4;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);}
+.playbar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);}
+.playbar input[type=range]{width:110px;accent-color:var(--gold);}
+.readout{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+@media (max-width:640px){
+  .title p{display:none;}
+  .corr{bottom:calc(108px + env(safe-area-inset-bottom,0px));}
+  .drawer{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));max-height:58%;}
+  .playbar input[type=range]{width:80px;}
+}
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} }
+</style>
+
+<div id="stage"></div>
+
+<header class="title">
+  <div class="eyebrow">Raian Process · Field Studies</div>
+  <h1>The Sun's Toroidal Belts</h1>
+  <p>Inside the Sun the magnetic field really is a torus — two rings encircling the rotation axis, wound by shear, surfacing as sunspots, reversing every eleven years.</p>
+</header>
+
+<nav class="topbar" aria-label="Controls">
+  <button id="btn-overlays" aria-expanded="false" aria-controls="overlays">Overlays ▾</button>
+  <button id="btn-camera" aria-expanded="false" aria-controls="camera">Camera ▾</button>
+  <button id="btn-about" aria-expanded="false" aria-controls="about">About</button>
+</nav>
+
+<section class="drawer" id="overlays" hidden aria-label="Overlays">
+  <h2>Overlays</h2>
+  <div class="sec">
+    <div class="sec-h">The toroidal field</div>
+    <label class="row"><input type="checkbox" id="k-belts" data-key="belts"><span class="sw" style="background:var(--north)"></span><span>Toroidal belts<small>One ring per hemisphere, opposite polarity</small></span></label>
+    <label class="row"><input type="checkbox" id="k-winding" data-key="winding"><span class="sw" style="background:var(--gold)"></span><span>Ω-effect winding<small>Meridional lines sheared into hoops by differential rotation</small></span></label>
+    <label class="row"><input type="checkbox" id="k-poloidal" data-key="poloidal"><span class="sw" style="background:#cdbf9a"></span><span>Poloidal field<small>Pole to pole; strongest at solar minimum</small></span></label>
+    <label class="row"><input type="checkbox" id="k-emergence" data-key="emergence"><span class="sw" style="background:#f1cf7e"></span><span>Flux emergence &amp; sunspot pairs<small>A loop bows up, breaks the surface, leaves two spots</small></span></label>
+    <label class="row"><input type="checkbox" id="k-butterfly" data-key="butterfly"><span class="sw" style="background:#b98a3c"></span><span>Butterfly latitude band<small>Where spots are emerging in the present cycle</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Interior structure</div>
+    <label class="row"><input type="checkbox" id="k-photosphere" data-key="photosphere"><span class="sw" style="background:#ffd9a0"></span><span>Photosphere</span></label>
+    <label class="row"><input type="checkbox" id="k-core" data-key="core"><span class="sw" style="background:#fff4d8"></span><span>Core &amp; radiative interior<small>Fusion inside 0.25 R; radiative out to 0.7 R</small></span></label>
+    <label class="row"><input type="checkbox" id="k-tacho" data-key="tacho"><span class="sw" style="background:#9fe1cb"></span><span>Tachocline shell (0.7 R)<small>The classical shear layer</small></span></label>
+    <label class="row"><input type="checkbox" id="k-nssl" data-key="nssl"><span class="sw" style="background:#c0a0e0"></span><span>Near-surface shear layer (0.95 R)<small>The shallow-dynamo alternative</small></span></label>
+    <label class="row"><input type="checkbox" id="k-diffrot" data-key="diffrot"><span class="sw" style="background:#e3c27e"></span><span>Differential rotation markers<small>25 days at the equator, 34 near the poles</small></span></label>
+    <label class="row"><input type="checkbox" id="k-axis" data-key="axis"><span class="sw" style="background:#f6e6b8"></span><span>Rotation axis</span></label>
+    <div class="scale-box">
+      <div class="scale-h">Where are the belts buried?</div>
+      <div class="scale-btns">
+        <button data-depth="tacho">Tachocline 0.70 R</button>
+        <button data-depth="nssl">Near-surface 0.95 R</button>
+      </div>
+      <div class="readout" id="depth-readout"></div>
+    </div>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Beyond the surface</div>
+    <label class="row"><input type="checkbox" id="k-parker" data-key="parker"><span class="sw" style="background:#8fa6bd"></span><span>Parker spiral<small>The toroidal phase unwound into the solar wind</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Display</div>
+    <label class="row"><input type="checkbox" id="k-labels" data-key="labels"><span class="sw" style="background:var(--muted)"></span><span>Labels</span></label>
+    <label class="row"><input type="checkbox" id="k-equator" data-key="equator"><span class="sw" style="background:var(--muted)"></span><span>Equator marker</span></label>
+  </div>
+  <div class="drawer-actions">
+    <button id="btn-clear">Clear all overlays</button>
+    <button id="btn-reset">Reset defaults</button>
+  </div>
+  <p style="color:var(--muted);font-size:12px;margin:.6em 0 0">Belt depth, belt thickness and loop shape are model choices, not measurements. See About.</p>
+</section>
+
+<section class="drawer" id="camera" hidden aria-label="Camera angles">
+  <h2>Camera angles</h2>
+  <div class="cam-grid">
+    <button data-cam="oblique">Oblique</button>
+    <button data-cam="edge">Edge-on equator</button>
+    <button data-cam="pole">Down the axis</button>
+    <button data-cam="belt">Close on a belt</button>
+    <button data-cam="spots">Sunspot emergence</button>
+    <button data-cam="wide">Whole field</button>
+  </div>
+  <p style="color:var(--muted);font-size:12.5px;margin:.7em 0 0">Drag to orbit · scroll or pinch to zoom.</p>
+</section>
+
+<section class="drawer" id="about" hidden aria-label="About">
+  <h2>About this model</h2>
+  <details open>
+    <summary>What this shows</summary>
+    <p>This is the one place in the solar system where the torus is literal. The Sun's magnetic field, below the surface, is wound into two rings that encircle the rotation axis — one per hemisphere, carrying opposite polarity. The near hemisphere of the Sun is cut away so you can see them.</p>
+    <p>The winding is the thing to watch. Turn on <strong>Ω-effect winding</strong> and you see meridional field lines — lines running north to south — being dragged by differential rotation. The Sun turns faster at its equator than near its poles, so a line threaded through that shear gets stretched east-west until it closes on itself as a hoop. That is the Ω-effect, and the hoops it makes are the belts.</p>
+    <p>Everything runs on the eleven-year cycle. The belts build, migrate toward the equator, throw up loops that surface as sunspot pairs, and dissolve; then the field rebuilds with the polarities swapped. Two of those cycles — twenty-two years — make one full round trip, the Hale cycle.</p>
+  </details>
+  <details>
+    <summary>Why the spots come in pairs</summary>
+    <p>Magnetic pressure makes a flux tube lighter than the plasma around it, so sections of the belt bow upward. Where a loop breaks the photosphere it leaves two dark marks — one where the field exits, one where it re-enters. That is why sunspots come in pairs, and why the leading spot in the northern hemisphere has the opposite polarity to the leading spot in the south.</p>
+    <p>The polarity orientation flips between hemispheres and flips again with each new cycle. That regularity is Hale's law, and it is the strongest observational evidence that the thing underneath is a ring rather than a tangle.</p>
+  </details>
+  <details>
+    <summary>The two geometries</summary>
+    <p>The Sun alternates between a <strong>poloidal</strong> field, running pole to pole like a bar magnet, and a <strong>toroidal</strong> field, the belts. Poloidal is what you see at solar minimum; toroidal is what produces the spots at maximum. Turn both overlays on and watch the cycle — one fades as the other builds.</p>
+    <p>What the solar wind carries out to the heliopause is the toroidal phase, unwound and stretched across the solar system. Turn on <strong>Parker spiral</strong> to see that handoff: the rotation of the footpoints inside a radially streaming wind draws the field into a spiral that is nearly azimuthal by the time it reaches the outer planets.</p>
+  </details>
+  <details>
+    <summary>How deep are the belts?</summary>
+    <p>This is live and contested, so the model lets you move them.</p>
+    <p>The textbook position is the <strong>tachocline</strong> at about 0.7 solar radii — the thin shear layer where the rigidly rotating radiative interior meets the differentially rotating convection zone. That is the default here.</p>
+    <p>Vasil and colleagues argued in 2024 that helioseismology puts low-latitude torsional oscillations in the outer five to ten percent of the Sun — the near-surface shear layer — and that a magneto-rotational instability there better explains what is observed, with belt strengths of only 300 to 1,000 gauss. A January 2026 helioseismic analysis pushed back, finding butterfly-like behavior in the rotation gradient near the tachocline, and read that as favoring a deep-seated dynamo.</p>
+    <p>Unsettled, and being argued with data. The depth buttons let you see what each reading looks like.</p>
+  </details>
+  <details>
+    <summary>Where the model simplifies</summary>
+    <p>We cannot measure subsurface magnetic fields by helioseismology. Depth, strength and shape of the belts are all inferred from what surfaces and from flow patterns — so the tidy rings drawn here are a schematic of an inference, not a picture of a measurement.</p>
+    <p>Real emergence happens at many points along a belt at once, not from a handful of loops. The belts themselves are almost certainly fibril and ragged rather than smooth tubes. Differential rotation varies with depth as well as latitude, and only the latitude part is drawn. The winding here completes in one cycle for legibility; the real shear rate and the real field strengths are not to scale with each other.</p>
+    <p>The Sun's true color is white — the warm cream here follows how the photosphere is conventionally rendered, and how it looks through an atmosphere.</p>
+  </details>
+  <details>
+    <summary>On the Ra material</summary>
+    <p>I have left the Ra correspondences out of this one. The 75,000-year structure in the Ra material resolves to precession and its twelfths, which is an Earth-axis cycle — it has no counterpart in the solar dynamo, whose longest detectable rhythms run to a couple of thousand years at most. Drawing a correspondence here would be inventing one.</p>
+    <p>My proposal: the honest bridge between this material and the archaeoastronomy interest runs through cosmic-ray shielding, not through solar periodicity. The heliosphere blocks roughly seventy percent of galactic cosmic rays, and passages through denser interstellar clouds compress it and thin that shielding. That is a real mechanism on a tens-of-thousands-of-years timescale. It is a separate build.</p>
+    <p>I'm offering these thoughts for what they are worth.</p>
+  </details>
+</section>
+
+<aside class="corr" id="corr" aria-label="Where the torus is real">
+  <div class="corr-h"><span>Where the torus is real</span><button id="btn-corr" aria-expanded="true">Hide</button></div>
+  <table id="corr-table">
+    <thead><tr><th>Structure</th><th>Is it a torus?</th></tr></thead>
+    <tbody>
+      <tr><td>Belts inside the Sun</td><td>Yes — rings with a hole on the axis</td></tr>
+      <tr><td>Heliospheric field</td><td>Toroidal topology, no hole</td></tr>
+      <tr><td>Heliosphere as a volume</td><td>No — a bubble with a tail</td></tr>
+      <tr><td>Poloidal phase</td><td>No — pole-to-pole, not a ring</td></tr>
+    </tbody>
+  </table>
+</aside>
+
+<div class="playbar">
+  <button id="btn-play" aria-label="Pause animation">Pause</button>
+  <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+  <label><input type="checkbox" id="cut" checked> Cut away</label>
+  <label><input type="checkbox" id="spin" checked> Auto-orbit</label>
+  <span class="readout" id="readout">year 0.0</span>
+</div>
+
+<div id="err" hidden style="position:fixed;left:16px;right:16px;top:45%;padding:12px 14px;background:var(--panel-solid);border:1px solid var(--gold);border-radius:4px;color:var(--text);font-family:var(--f-mono);font-size:12.5px;z-index:9"></div>
+<script>
+window.addEventListener("error", function(e){
+  if (e.target && e.target !== window && e.target.tagName !== "SCRIPT") return; // ignore font/stylesheet load failures
+  var el = document.getElementById("err");
+  if (el){ el.hidden = false; el.textContent = "The 3D view could not start: " + (e.message || "a script failed to load") + ". Try reloading the page."; }
+}, true);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if (typeof THREE === "undefined"){
+    var el = document.getElementById("err"); el.hidden = false;
+    el.textContent = "The 3D library (three.js) did not load, so the scene can't be drawn. Reload the page, or open the HTML file directly in a browser.";
+    return;
+  }
+  try { var probe = document.createElement("canvas"); if (!(probe.getContext("webgl") || probe.getContext("experimental-webgl"))) throw 0; }
+  catch(_){ var el2 = document.getElementById("err"); el2.hidden = false; el2.textContent = "This browser or view has WebGL turned off, so the 3D scene can't be drawn. Try opening the page in Chrome, Safari or Firefox on a computer."; return; }
+
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x07080c, 1);
+  renderer.localClippingEnabled = true;
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 600);
+  const system = new THREE.Group();
+  scene.add(system);
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+  const key = new THREE.DirectionalLight(0xfff4e0, 1.15);
+  key.position.set(12, 5, 8);
+  scene.add(key);
+
+  // ---------- palette ----------
+  const GOLD = 0xd8a648, GOLD_LIGHT = 0xf1cf7e, GOLD_DARK = 0x9a6f22, GOLD_MID = 0xc98f3a;
+  const NORTH = 0xe8a93f, SOUTH = 0x7fb6d9, SPOT = 0x33261a, UMBRA = 0x1a1209;
+  const SHOW_ARROWS = false;
+
+  // ---------- geometry constants (1 unit = 1 solar radius) ----------
+  const R_CORE = 0.25, R_RAD = 0.70, R_NSSL = 0.95, R_SUN = 1.0;
+  const DEPTHS = { tacho: 0.70, nssl: 0.95 };
+  let beltDepth = DEPTHS.tacho, depthKey = "tacho";
+  const CYCLE = 22.0;            // sim seconds per 11-year cycle: a calm pace
+  const LAT_START = 30*Math.PI/180, LAT_END = 8*Math.PI/180;
+
+  // Carrington differential rotation, degrees per day
+  function omegaDeg(lat){ const s = Math.sin(lat), s2 = s*s; return 14.713 - 2.396*s2 - 1.787*s2*s2; }
+  const OMEGA_EQ = omegaDeg(0);
+  function omegaNorm(lat){ return omegaDeg(lat)/OMEGA_EQ; }
+
+  // ---------- helpers ----------
+  const refs = {};
+  const labels = [];
+  const updaters = [];
+  function reg(key, obj){ refs[key] = obj; system.add(obj); return obj; }
+  function az(r, a, y){ return new THREE.Vector3(r*Math.cos(a), y, -r*Math.sin(a)); } // a increasing = CCW from above
+  function onShell(r, lat, lon){ return az(r*Math.cos(lat), lon, r*Math.sin(lat)); }
+
+  function dotTexture(){
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d");
+    const grd = g.createRadialGradient(32,32,0,32,32,32);
+    grd.addColorStop(0,"rgba(255,255,255,1)"); grd.addColorStop(0.35,"rgba(255,255,255,0.7)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+  }
+  const DOT = dotTexture();
+  function pointsMat(color, size, opacity){
+    return new THREE.PointsMaterial({ color, size, map:DOT, transparent:true, opacity, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true });
+  }
+
+  function makeLabel(text, color, height){
+    const c = document.createElement("canvas");
+    const g = c.getContext("2d");
+    const fs = 44;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    const w = Math.ceil(g.measureText(text).width) + 28;
+    c.width = w; c.height = 64;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    g.fillStyle = "rgba(7,8,12,0.55)";
+    g.fillRect(0,6,w,52);
+    g.fillStyle = color; g.textBaseline = "middle";
+    g.fillText(text, 14, 33);
+    const tex = new THREE.CanvasTexture(c);
+    tex.minFilter = THREE.LinearFilter;
+    const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false, depthWrite:false });
+    const s = new THREE.Sprite(mat);
+    const h = 0.045 + 0.09*(height || 0.32);
+    s.scale.set(h * w/64, h, 1);
+    s.renderOrder = 20;
+    labels.push(s);
+    return s;
+  }
+  function addLabel(group, text, pos, color, h){ const l = makeLabel(text, color, h); l.position.copy(pos); group.add(l); return l; }
+
+  function addArrow(group, pos, dir, color, size, opacity){
+    if (!SHOW_ARROWS) return null;   // arrowheads removed; flow direction is carried by the moving particles
+    return null;
+  }
+  function lineFrom(points, color, opacity){
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    return new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent:true, opacity, depthWrite:false }));
+  }
+
+  // ---------- cutaway ----------
+  const CUT_OFFSET = 0.40;   // cut a near cap rather than a full half, so the photosphere still rims the opening
+  const clipPlane = new THREE.Plane(new THREE.Vector3(0, 0, -1), CUT_OFFSET);
+  const clipped = [];                // materials that respond to the cutaway toggle
+  function clipMat(m){ clipped.push(m); return m; }
+
+  // ---------- starfield ----------
+  {
+    const n = 2200, pos = new Float32Array(n*3);
+    for (let i=0;i<n;i++){
+      const u = Math.random()*2-1, th = Math.random()*Math.PI*2, r = 220;
+      const s = Math.sqrt(1-u*u);
+      pos[i*3] = r*s*Math.cos(th); pos[i*3+1] = r*u; pos[i*3+2] = r*s*Math.sin(th);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color:0xc9c4b8, size:0.9, sizeAttenuation:false, transparent:true, opacity:0.55, depthWrite:false })));
+  }
+
+  // ---------- photosphere ----------
+  function granulationTexture(){
+    const c = document.createElement("canvas"); c.width = 1024; c.height = 512;
+    const g = c.getContext("2d");
+    g.fillStyle = "#f0a94e"; g.fillRect(0,0,1024,512);
+    for (let i=0;i<9000;i++){
+      const x = Math.random()*1024, y = Math.random()*512, r = 2 + Math.random()*5;
+      const v = Math.random();
+      g.fillStyle = v > 0.55 ? "rgba(255,221,160,0.30)" : "rgba(196,110,36,0.26)";
+      g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+    }
+    for (let i=0;i<120;i++){   // faint supergranule mottling
+      const x = Math.random()*1024, y = Math.random()*512, r = 18 + Math.random()*40;
+      g.fillStyle = "rgba(255,210,140,0.07)";
+      g.beginPath(); g.arc(x,y,r,0,Math.PI*2); g.fill();
+    }
+    const t = new THREE.CanvasTexture(c);
+    t.wrapS = THREE.RepeatWrapping;
+    return t;
+  }
+  {
+    const tex = granulationTexture();
+    const mat = clipMat(new THREE.MeshBasicMaterial({ map: tex, side: THREE.FrontSide }));
+    const m = new THREE.Mesh(new THREE.SphereGeometry(R_SUN, 96, 64), mat);
+    reg("photosphere", new THREE.Group()).add(m);
+    // inner wall of the cut shell: same granulation, heavily darkened, so the cutaway reads as a cutaway
+    const wall = new THREE.Mesh(new THREE.SphereGeometry(R_SUN*0.999, 96, 64),
+      clipMat(new THREE.MeshBasicMaterial({ map: tex, color: 0x4a2f16, side: THREE.BackSide })));
+    refs.photosphere.add(wall);
+    const glow = new THREE.Mesh(new THREE.SphereGeometry(R_SUN*1.035, 48, 32),
+      clipMat(new THREE.MeshBasicMaterial({ color:0xffb554, transparent:true, opacity:0.10, side:THREE.BackSide, depthWrite:false })));
+    refs.photosphere.add(glow);
+    addLabel(refs.photosphere, "photosphere", new THREE.Vector3(0, 1.1, 0), "#ffd9a0", 0.3);
+  }
+
+  // ---------- core and radiative interior ----------
+  {
+    const g = new THREE.Group();
+    const coreMat = clipMat(new THREE.MeshBasicMaterial({ color:0xfff1cf, side:THREE.DoubleSide }));
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(R_CORE, 48, 32), coreMat));
+    const radMat = clipMat(new THREE.MeshBasicMaterial({ color:0xd9823a, transparent:true, opacity:0.55, side:THREE.DoubleSide }));
+    g.add(new THREE.Mesh(new THREE.SphereGeometry(R_RAD*0.94, 64, 44), radMat));
+    addLabel(g, "core", new THREE.Vector3(0.0, 0.05, 0.0), "#fff4d8", 0.22);
+    addLabel(g, "radiative interior", new THREE.Vector3(0.0, 0.45, 0.0), "#f3b97e", 0.24);
+    addLabel(g, "convection zone", new THREE.Vector3(0.0, 0.84, 0.0), "#ffcf96", 0.24);
+    reg("core", g);
+  }
+
+  // ---------- shear shells ----------
+  function shearShell(r, color, opacity){
+    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 10),
+      new THREE.MeshBasicMaterial({ color, wireframe:true, transparent:true, opacity, depthWrite:false }));
+    return m;
+  }
+  {
+    const g = new THREE.Group();
+    g.add(shearShell(R_RAD, 0x9fe1cb, 0.11));
+    addLabel(g, "tachocline 0.70 R", new THREE.Vector3(0, -0.78, 0), "#9fe1cb", 0.26);
+    reg("tacho", g);
+  }
+  {
+    const g = new THREE.Group();
+    g.add(shearShell(R_NSSL, 0xc0a0e0, 0.14));
+    addLabel(g, "near-surface shear layer 0.95 R", new THREE.Vector3(0, -1.02, 0), "#c0a0e0", 0.26);
+    reg("nssl", g);
+  }
+
+  // ---------- rotation axis ----------
+  {
+    const g = new THREE.Group();
+    g.add(lineFrom([new THREE.Vector3(0,-1.45,0), new THREE.Vector3(0,1.45,0)], 0xf6e6b8, 0.45));
+    addLabel(g, "rotation axis", new THREE.Vector3(0, 1.52, 0), "#f6e6b8", 0.26);
+    reg("axis", g);
+  }
+
+  // ---------- equator marker ----------
+  {
+    const pts = [];
+    for (let i=0;i<=192;i++) pts.push(az(R_SUN*1.01, i/192*Math.PI*2, 0));
+    reg("equator", lineFrom(pts, 0xa0977f, 0.4));
+  }
+
+  // ---------- toroidal belts ----------
+  const belts = [];
+  {
+    const g = new THREE.Group();
+    [1,-1].forEach(sign=>{
+      const mat = new THREE.MeshPhongMaterial({ color: sign>0 ? NORTH : SOUTH, emissive: sign>0 ? 0x5c3505 : 0x0d2533, shininess: 18, transparent:true, opacity:0.85 });
+      const mesh = new THREE.Mesh(new THREE.TorusGeometry(0.6, 0.045, 14, 96), mat);
+      mesh.rotation.x = Math.PI/2;
+      const holder = new THREE.Group();
+      holder.add(mesh);
+      g.add(holder);
+      belts.push({ holder, mesh, mat, sign, ringR:-1, tube:-1 });
+    });
+    addLabel(g, "northern belt", new THREE.Vector3(0.78, 0.46, 0), "#e8a93f", 0.26);
+    addLabel(g, "southern belt", new THREE.Vector3(0.78, -0.46, 0), "#7fb6d9", 0.26);
+    reg("belts", g);
+  }
+
+  // ---------- Omega-effect winding ----------
+  const windLines = [];
+  {
+    const g = new THREE.Group();
+    const NLAT = 90, NLINE = 4;
+    for (let k=0;k<NLINE;k++){
+      const lon0 = k/NLINE*Math.PI*2;
+      const lats = [];
+      for (let i=0;i<NLAT;i++) lats.push(-1.30 + 2.60*i/(NLAT-1));
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(NLAT*3), 3));
+      const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color: GOLD_LIGHT, transparent:true, opacity:0.9, depthWrite:false }));
+      g.add(line);
+      windLines.push({ line, geo, lats, lon0 });
+    }
+    addLabel(g, "Ω-effect: shear winds the field", new THREE.Vector3(0, -1.22, 0), "#d8a648", 0.28);
+    reg("winding", g);
+  }
+
+  // ---------- poloidal field ----------
+  const poloidalMats = [];
+  {
+    const g = new THREE.Group();
+    for (let k=0;k<6;k++){
+      const lon = k/6*Math.PI*2;
+      const L = 1.10;
+      const pts = [];
+      for (let i=0;i<=80;i++){
+        const lam = -1.40 + 2.80*i/80;
+        const r = L*Math.cos(lam)*Math.cos(lam);
+        pts.push(az(r*Math.cos(lam), lon, r*Math.sin(lam)*1.22));
+      }
+      const mat = new THREE.LineBasicMaterial({ color:0xcdbf9a, transparent:true, opacity:0.55, depthWrite:false });
+      poloidalMats.push(mat);
+      g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), mat));
+    }
+    addLabel(g, "poloidal field", new THREE.Vector3(0, 1.62, 0), "#cdbf9a", 0.26);
+    reg("poloidal", g);
+  }
+
+  // ---------- flux emergence and sunspot pairs ----------
+  const sites = [];
+  {
+    const g = new THREE.Group();
+    const SITE_LON = [0.35, 2.05, 4.15];
+    [1,-1].forEach(sign=>{
+      SITE_LON.forEach((lon, i)=>{
+        const holder = new THREE.Group();
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(64*3), 3));
+        const mat = new THREE.LineBasicMaterial({ color: sign>0 ? GOLD_LIGHT : 0xa8cde6, transparent:true, opacity:0.9, depthWrite:false });
+        const loop = new THREE.Line(geo, mat);
+        holder.add(loop);
+
+        const spots = [];
+        for (let s=0;s<2;s++){
+          const sm = new THREE.Mesh(new THREE.SphereGeometry(0.032, 18, 12),
+            clipMat(new THREE.MeshBasicMaterial({ color: UMBRA, transparent:true, opacity:0 })));
+          const pen = new THREE.Mesh(new THREE.SphereGeometry(0.048, 18, 12),
+            clipMat(new THREE.MeshBasicMaterial({ color: SPOT, transparent:true, opacity:0 })));
+          holder.add(sm); holder.add(pen);
+          spots.push({ sm, pen });
+        }
+        g.add(holder);
+        sites.push({ holder, geo, mat, spots, sign, lon, phase: i/SITE_LON.length });
+      });
+    });
+    reg("emergence", g);
+  }
+
+  // ---------- butterfly latitude band ----------
+  const bands = [];
+  {
+    const g = new THREE.Group();
+    [1,-1].forEach(sign=>{
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.Float32BufferAttribute(new Float32Array(97*3), 3));
+      const mat = new THREE.LineBasicMaterial({ color: sign>0 ? NORTH : SOUTH, transparent:true, opacity:0.5, depthWrite:false });
+      const line = new THREE.Line(geo, mat);
+      g.add(line);
+      bands.push({ geo, mat, sign });
+    });
+    reg("butterfly", g);
+  }
+
+  // ---------- differential rotation markers ----------
+  const rotMarkers = [];
+  {
+    const g = new THREE.Group();
+    const LATS = [0, 40, 75];
+    LATS.forEach(d=>{
+      const lat = d*Math.PI/180;
+      [1,-1].forEach(sign=>{
+        if (d === 0 && sign < 0) return;
+        const m = new THREE.Mesh(new THREE.SphereGeometry(0.017, 12, 10),
+          new THREE.MeshBasicMaterial({ color:0xffe6ad }));
+        g.add(m);
+        rotMarkers.push({ m, lat: sign*lat });
+        const ring = [];
+        for (let i=0;i<=120;i++) ring.push(onShell(R_SUN*1.004, sign*lat, i/120*Math.PI*2));
+        g.add(lineFrom(ring, 0xe3c27e, 0.10));
+      });
+    });
+    addLabel(g, "equator 25 d · 75° 33 d", new THREE.Vector3(0, -1.34, 0), "#e3c27e", 0.26);
+    reg("diffrot", g);
+  }
+
+  // ---------- Parker spiral ----------
+  {
+    const g = new THREE.Group();
+    const V = 2.6;   // wind speed in model units per unit angle: sets how tight the spiral is
+    for (let k=0;k<10;k++){
+      const lon0 = k/10*Math.PI*2;
+      const lat = (k%2 ? 1 : -1) * (0.10 + 0.22*Math.random());
+      const pts = [];
+      for (let i=0;i<=140;i++){
+        const r = R_SUN*1.02 + i/140*7.0;
+        const lon = lon0 - (r - R_SUN)/V;
+        pts.push(onShell(r, lat*Math.exp(-(r-1)/6), lon));
+      }
+      g.add(lineFrom(pts, 0x8fa6bd, 0.34));
+    }
+    addLabel(g, "Parker spiral", new THREE.Vector3(0, 2.6, 0), "#8fa6bd", 0.3);
+    reg("parker", g);
+  }
+
+  // ---------- cycle state ----------
+  let simT = 0;
+  function cyclePhase(){ return (simT % CYCLE) / CYCLE; }             // 0..1 within one 11-year cycle
+  function cycleIndex(){ return Math.floor(simT / CYCLE); }           // parity gives the polarity flip
+  function beltLat(p){ return LAT_START + (LAT_END - LAT_START)*p; }
+  function toroidalAmp(p){ return Math.sin(Math.PI*p); }
+  function poloidalAmp(p){ return Math.abs(Math.cos(Math.PI*p)); }
+
+  updaters.push(function(){
+    const p = cyclePhase(), lat = beltLat(p), amp = toroidalAmp(p);
+    const flip = (cycleIndex() % 2 === 0) ? 1 : -1;
+
+    // belts: radius and height follow the migrating latitude; opacity follows the cycle
+    belts.forEach(b=>{
+      const sign = b.sign;
+      const rr = beltDepth*Math.cos(lat), yy = sign*beltDepth*Math.sin(lat);
+      b.holder.position.set(0, yy, 0);
+      const warm = (sign*flip > 0);
+      b.mat.color.setHex(warm ? NORTH : SOUTH);
+      b.mat.emissive.setHex(warm ? 0x5c3505 : 0x0d2533);
+      b.mat.opacity = 0.18 + 0.72*amp;
+      const tube = 0.018 + 0.026*amp;
+      // rebuild only when the ring has actually moved, so we aren't churning geometry every frame
+      if (Math.abs(rr - b.ringR) > 0.0025 || Math.abs(tube - b.tube) > 0.0015){
+        b.ringR = rr; b.tube = tube;
+        b.mesh.geometry.dispose();
+        b.mesh.geometry = new THREE.TorusGeometry(rr, tube, 14, 96);
+      }
+    });
+
+    // poloidal field fades in as the toroidal fades out
+    const pa = poloidalAmp(p);
+    poloidalMats.forEach(m=> m.opacity = 0.08 + 0.50*pa);
+
+    // butterfly band: a ring on the surface at the present emergence latitude
+    bands.forEach(b=>{
+      const arr = b.geo.attributes.position.array;
+      for (let i=0;i<=96;i++){
+        const v = onShell(R_SUN*1.006, b.sign*lat, i/96*Math.PI*2);
+        arr[i*3] = v.x; arr[i*3+1] = v.y; arr[i*3+2] = v.z;
+      }
+      b.geo.attributes.position.needsUpdate = true;
+      b.mat.opacity = 0.12 + 0.48*amp;
+    });
+  });
+
+  // Omega-effect winding: each point advances in longitude at its own latitude's rate
+  updaters.push(function(){
+    const p = cyclePhase();
+    const wind = p * 46;    // radians of equatorial advance across one cycle
+    windLines.forEach(w=>{
+      const arr = w.geo.attributes.position.array;
+      for (let i=0;i<w.lats.length;i++){
+        const lat = w.lats[i];
+        const lon = w.lon0 + omegaNorm(lat)*wind;
+        const v = onShell(beltDepth, lat, lon);
+        arr[i*3] = v.x; arr[i*3+1] = v.y; arr[i*3+2] = v.z;
+      }
+      w.geo.attributes.position.needsUpdate = true;
+      w.line.material.opacity = 0.45 + 0.45*Math.sin(Math.PI*p);
+    });
+  });
+
+  // emergence loops and their sunspot pairs
+  updaters.push(function(){
+    const p = cyclePhase(), lat = beltLat(p), amp = toroidalAmp(p);
+    const flip = (cycleIndex() % 2 === 0) ? 1 : -1;
+    const SEP = 0.34;        // longitude separation of the footpoints
+    sites.forEach(st=>{
+      const local = (p*2.4 + st.phase) % 1;
+      // loops always reach past the surface once started; the cycle governs how often and how high
+      const rise = Math.max(0, Math.sin(Math.PI*local)) * (0.38 + 0.62*amp);
+      const rTop = beltDepth + (1.30 - beltDepth)*rise;
+      const arr = st.geo.attributes.position.array;
+      const lon0 = st.lon + omegaNorm(st.sign*lat)*p*46;
+      let crossed = [];
+      for (let i=0;i<64;i++){
+        const u = i/63;
+        const r = beltDepth + (rTop - beltDepth)*Math.pow(Math.sin(Math.PI*u), 0.65);
+        const lon = lon0 + SEP*(u - 0.5);
+        const v = onShell(r, st.sign*lat, lon);
+        arr[i*3] = v.x; arr[i*3+1] = v.y; arr[i*3+2] = v.z;
+        if (crossed.length < 2 && r >= R_SUN && (crossed.length === 0 ? u < 0.5 : u > 0.5)) crossed.push(lon);
+      }
+      st.geo.attributes.position.needsUpdate = true;
+      st.mat.opacity = 0.85*rise;
+      const warm = (st.sign*flip > 0);
+      st.mat.color.setHex(warm ? GOLD_LIGHT : 0xa8cde6);
+
+      const out = rTop > R_SUN ? Math.min(1, (rTop - R_SUN)/0.12) : 0;
+      st.spots.forEach((sp, j)=>{
+        const lon = (crossed.length === 2) ? crossed[j] : lon0 + SEP*(j ? 0.5 : -0.5);
+        const v = onShell(R_SUN*0.995, st.sign*lat, lon);
+        sp.sm.position.copy(v); sp.pen.position.copy(v);
+        sp.sm.material.opacity = out;
+        sp.pen.material.opacity = 0.42*out;
+        const sc = 0.6 + 0.4*out;
+        sp.sm.scale.setScalar(sc); sp.pen.scale.setScalar(sc);
+      });
+    });
+  });
+
+  // differential rotation markers
+  updaters.push(function(){
+    const spinT = simT * 1.6;
+    rotMarkers.forEach(rm=>{
+      const lon = omegaNorm(rm.lat)*spinT;
+      rm.m.position.copy(onShell(R_SUN*1.0, rm.lat, lon));
+    });
+  });
+
+  // ---------- visibility ----------
+  const DEFAULTS = { belts:true, winding:true, poloidal:true, emergence:true, butterfly:true,
+    photosphere:true, core:true, tacho:true, nssl:false, diffrot:true, axis:true,
+    parker:false, labels:false, equator:false };
+  const boxes = Array.from(document.querySelectorAll("#overlays input[data-key]"));
+  function applyVisibility(){
+    const st = {}; boxes.forEach(b=> st[b.dataset.key] = b.checked);
+    Object.keys(refs).forEach(k=>{ if (k in st) refs[k].visible = st[k]; });
+    labels.forEach(l=> l.visible = st.labels);
+  }
+  function setAll(obj){ boxes.forEach(b=> b.checked = !!obj[b.dataset.key]); applyVisibility(); }
+  boxes.forEach(b=> b.addEventListener("change", applyVisibility));
+  setAll(DEFAULTS);
+  document.getElementById("btn-clear").addEventListener("click", ()=>{
+    const o = {}; boxes.forEach(b=> o[b.dataset.key] = false); setAll(o);
+  });
+  document.getElementById("btn-reset").addEventListener("click", ()=> setAll(DEFAULTS));
+
+  // ---------- belt depth ----------
+  const depthBtns = Array.from(document.querySelectorAll("[data-depth]"));
+  const depthReadout = document.getElementById("depth-readout");
+  function setDepth(k){
+    depthKey = k; beltDepth = DEPTHS[k];
+    depthBtns.forEach(b=> b.classList.toggle("on", b.dataset.depth === k));
+    depthReadout.textContent = (k === "tacho")
+      ? "Textbook: belts seated at the tachocline."
+      : "Vasil et al. 2024: belts in the outer 5–10%.";
+  }
+  depthBtns.forEach(b=> b.addEventListener("click", ()=> setDepth(b.dataset.depth)));
+  setDepth("tacho");
+
+  // ---------- drawers ----------
+  const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
+  Object.entries(drawers).forEach(([id, btnId])=>{
+    const btn = document.getElementById(btnId), el = document.getElementById(id);
+    btn.addEventListener("click", ()=>{
+      const open = el.hidden;
+      Object.entries(drawers).forEach(([oid,ob])=>{ document.getElementById(oid).hidden = true; document.getElementById(ob).setAttribute("aria-expanded","false"); });
+      if (open){ el.hidden = false; btn.setAttribute("aria-expanded","true"); }
+    });
+  });
+  const corrBtn = document.getElementById("btn-corr"), corrTable = document.getElementById("corr-table");
+  corrBtn.addEventListener("click", ()=>{
+    corrTable.hidden = !corrTable.hidden;
+    corrBtn.textContent = corrTable.hidden ? "Show" : "Hide";
+    corrBtn.setAttribute("aria-expanded", String(!corrTable.hidden));
+  });
+  if (window.innerWidth < 640){ corrTable.hidden = true; corrBtn.textContent = "Show"; corrBtn.setAttribute("aria-expanded","false"); }
+
+  // ---------- camera ----------
+  const orbit = { az:0.62, el:0.34, dist:3.6 };
+  let tween = null;
+  const PRESETS = {
+    oblique:{ az:0.62, el:0.34, dist:3.6 },
+    edge:{ az:0.30, el:0.03, dist:3.2 },
+    pole:{ az:0.0, el:1.54, dist:3.4 },
+    belt:{ az:0.95, el:0.30, dist:2.1 },
+    spots:{ az:0.20, el:0.42, dist:2.5 },
+    wide:{ az:0.55, el:0.26, dist:9.5 }
+  };
+  function updateCamera(){
+    const c = Math.cos(orbit.el);
+    camera.position.set(orbit.dist*c*Math.sin(orbit.az), orbit.dist*Math.sin(orbit.el), orbit.dist*c*Math.cos(orbit.az));
+    camera.lookAt(0,0,0);
+  }
+  document.querySelectorAll("[data-cam]").forEach(b=> b.addEventListener("click", ()=>{
+    const p = PRESETS[b.dataset.cam];
+    let daz = ((p.az - orbit.az) % (Math.PI*2) + Math.PI*3) % (Math.PI*2) - Math.PI;
+    tween = { from:{...orbit}, to:{ az: orbit.az + daz, el:p.el, dist:p.dist }, t:0 };
+  }));
+
+  const ptrs = new Map(); let pinch0 = 0, dist0 = orbit.dist, dragging = false;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", e=>{ cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); dragging = true; tween = null;
+    if (ptrs.size === 2){ const [a,b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); dist0 = orbit.dist; } });
+  cv.addEventListener("pointermove", e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    const prev = ptrs.get(e.pointerId); const cur = {x:e.clientX, y:e.clientY}; ptrs.set(e.pointerId, cur);
+    if (ptrs.size === 1){
+      orbit.az -= (cur.x-prev.x)*0.0055;
+      orbit.el = Math.max(-1.54, Math.min(1.54, orbit.el + (cur.y-prev.y)*0.0055));
+    } else if (ptrs.size === 2){
+      const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y);
+      if (pinch0 > 0) orbit.dist = Math.max(1.25, Math.min(40, dist0*pinch0/d));
+    }
+  });
+  const endPtr = e=>{ ptrs.delete(e.pointerId); if (ptrs.size === 0) dragging = false; pinch0 = 0; };
+  cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+  cv.addEventListener("wheel", e=>{ e.preventDefault(); tween = null; orbit.dist = Math.max(1.25, Math.min(40, orbit.dist*Math.exp(e.deltaY*0.0012))); }, { passive:false });
+
+  // ---------- playback ----------
+  let paused = false, speed = 1;
+  const playBtn = document.getElementById("btn-play");
+  playBtn.addEventListener("click", ()=>{ paused = !paused; playBtn.textContent = paused ? "Play" : "Pause"; playBtn.setAttribute("aria-label", paused ? "Play animation" : "Pause animation"); });
+  document.getElementById("speed").addEventListener("input", e=> speed = parseFloat(e.target.value));
+  const cutBox = document.getElementById("cut"), spinBox = document.getElementById("spin");
+  function applyCut(){
+    const planes = cutBox.checked ? [clipPlane] : [];
+    clipped.forEach(m=>{ m.clippingPlanes = planes; m.needsUpdate = true; });
+  }
+  cutBox.addEventListener("change", applyCut);
+  applyCut();
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){ spinBox.checked = false; speed = 0.4; document.getElementById("speed").value = 0.4; }
+  const readout = document.getElementById("readout");
+
+  function resize(){
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/Math.max(1,h);
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let last = performance.now();
+  function frame(now){
+    const rdt = Math.max(0, Math.min(0.05, (now-last)/1000)); last = now;
+    const dt = paused ? 0 : rdt*speed;
+    simT += dt;
+    updaters.forEach(f=> f(dt));
+    if (tween){
+      tween.t = Math.min(1, tween.t + rdt/1.1);
+      const k = tween.t<.5 ? 2*tween.t*tween.t : 1-Math.pow(-2*tween.t+2,2)/2;
+      orbit.az = tween.from.az + (tween.to.az-tween.from.az)*k;
+      orbit.el = tween.from.el + (tween.to.el-tween.from.el)*k;
+      orbit.dist = tween.from.dist + (tween.to.dist-tween.from.dist)*k;
+      if (tween.t >= 1) tween = null;
+    } else if (spinBox.checked && !dragging){
+      orbit.az += rdt*0.045;
+    }
+    updateCamera();
+    // the cut follows the camera, so the opening always faces the viewer
+    if (cutBox.checked){
+      const d = new THREE.Vector3(camera.position.x, 0, camera.position.z);
+      if (d.lengthSq() > 0.01){ d.normalize(); clipPlane.normal.copy(d).negate(); clipPlane.constant = CUT_OFFSET; }
+    }
+    const p = cyclePhase();
+    const latDeg = Math.round(beltLat(p)*180/Math.PI);
+    const polarity = (cycleIndex() % 2 === 0) ? "N+" : "N−";
+    readout.textContent = "year " + (p*11).toFixed(1) + " of 11 · lat " + latDeg + "° · " + polarity;
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
