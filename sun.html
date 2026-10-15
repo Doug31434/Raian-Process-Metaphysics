@@ -158,8 +158,9 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
         <button data-pscale="apex">Apex at photosphere</button>
         <button data-pscale="tacho">Base spans tachocline</button>
         <button data-pscale="belts">Base spans belts</button>
+        <button data-pscale="contain">Sun inside pyramid</button>
       </div>
-      <input type="range" id="pyr-scale" min="0.30" max="1.60" step="0.005" value="1.0" aria-label="Pyramid scale">
+      <input type="range" id="pyr-scale" min="0.30" max="3.20" step="0.005" value="1.0" aria-label="Pyramid scale">
       <div class="readout" id="pyr-readout"></div>
     </div>
   </div>
@@ -230,6 +231,7 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
     <p>Real emergence happens at many points along a belt at once, not from a handful of loops. The belts themselves are almost certainly fibril and ragged rather than smooth tubes. Differential rotation varies with depth as well as latitude, and only the latitude part is drawn. The winding here completes in one cycle for legibility; the real shear rate and the real field strengths are not to scale with each other.</p>
     <p>The Sun's true color is white — the warm cream here follows how the photosphere is conventionally rendered, and how it looks through an atmosphere.</p>
     <p>On the pyramid: the King's Chamber is placed north-south from Petrie's measurements, sixteen cubits from the pyramid's midline to the north wall and twenty-six to the south wall, with the chamber ten cubits deep and twenty wide. Its east-west displacement from the axis is left at zero here, because I have not found a figure I trust for it — the passage system is known to sit off the north-south axis, so treat the east-west placement as unset rather than measured. The Queen's Chamber and Position 2 are on the axis as the poloidal core model has them.</p>
+    <p>The scale slider runs from a pyramid buried inside the convection zone up to one that encloses the whole Sun. The <strong>Sun inside pyramid</strong> preset is the smallest scale at which the sphere clears all five planes at once — base, apex and the four slant faces. The base plane is the binding constraint, because the King's Chamber sits well below the pyramid's mid-height, so the base has further to travel than the apex. At that scale one solar radius comes to about 83 cubits and Position 2 lifts clear of the photosphere.</p>
   </details>
   <details>
     <summary>On the Ra material</summary>
@@ -752,7 +754,19 @@ window.addEventListener("error", function(e){
   // The anchor here is the King's Chamber mid-level on the solar equator.
   const PYR_BASE_C = 440, PYR_HALF_C = 220, PYR_H_C = 280, KC_MID_C = 85.5;
   const CPV_REF = 220;                 // cubits per solar radius at scale 1.0 (base spans the photosphere)
-  const SCALE_PRESETS = { photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66 };
+  // Scale f multiplies every pyramid length. At f = 1 the base edge spans the
+  // photosphere. For the Sun to sit wholly inside the pyramid, three conditions
+  // must hold at once — base plane below the sphere, apex above it, and all four
+  // slant faces clear of it. The base plane is the binding one.
+  const HC = PYR_HALF_C/CPV_REF;              // base half-side at f = 1
+  const HH = PYR_H_C/CPV_REF;                 // height at f = 1
+  const YB = -KC_MID_C/CPV_REF;               // base plane, relative to the equator
+  const YA = YB + HH;                         // apex
+  const F_BASE = 1/(-YB);                     // base plane reaches y = -1
+  const F_APEX = 1/YA;                        // apex reaches y = +1
+  const F_FACE = 1/(HC*YA/Math.hypot(HH, HC));  // slant faces clear the sphere
+  const F_CONTAIN = Math.max(F_BASE, F_APEX, F_FACE)*1.03;
+  const SCALE_PRESETS = { photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66, contain: F_CONTAIN };
   const pyrRoot = new THREE.Group();
   const pyrScaled = new THREE.Group();
   const pyrShell = new THREE.Group();   // the pyramid itself, toggled separately from the chambers
@@ -991,7 +1005,8 @@ window.addEventListener("error", function(e){
     pyrSlider.value = f;
     const cpv = CPV_REF/f;
     pyrReadout.textContent = "1 solar radius ≈ " + Math.round(cpv) + " cubits · apex "
-      + (((PYR_H_C - KC_MID_C)/cpv)).toFixed(2) + " R above the equator";
+      + (((PYR_H_C - KC_MID_C)/cpv)).toFixed(2) + " R above the equator"
+      + (f >= F_CONTAIN/1.03 ? " · Sun enclosed" : "");
     scaleBtns.forEach(b=> b.classList.toggle("on", b.dataset.pscale === kkey));
   }
   scaleBtns.forEach(b=> b.addEventListener("click", ()=> setPyrScale(SCALE_PRESETS[b.dataset.pscale], b.dataset.pscale)));
