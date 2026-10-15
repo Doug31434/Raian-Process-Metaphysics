@@ -153,8 +153,9 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
     <label class="row"><input type="checkbox" id="k-qc" data-key="qc"><span class="sw" style="background:#bfd3e6"></span><span>Queen's Chamber *<small>40–52 cubits, below the equatorial plane</small></span></label>
     <label class="row"><input type="checkbox" id="k-p2" data-key="p2"><span class="sw" style="background:#8a6ad0"></span><span>Position 2 *<small>Interdimensional area per Ra 59.14–.15, on the axis at 210 cubits</small></span></label>
     <div class="scale-box">
-      <div class="scale-h">Pyramid scale — opens with Position 2 on the photosphere</div>
+      <div class="scale-h">Pyramid scale — opens with the core resting on the Queen's Chamber</div>
       <div class="scale-btns">
+        <button data-pscale="qcore">Core on Queen's Chamber</button>
         <button data-pscale="p2surface">Position 2 at surface</button>
         <button data-pscale="photo">Base spans photosphere</button>
         <button data-pscale="apex">Apex at photosphere</button>
@@ -162,7 +163,7 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
         <button data-pscale="belts">Base spans belts</button>
         <button data-pscale="contain">Sun inside pyramid</button>
       </div>
-      <input type="range" id="pyr-scale" min="0.30" max="3.20" step="0.005" value="1.767" aria-label="Pyramid scale">
+      <input type="range" id="pyr-scale" min="0.30" max="3.20" step="0.005" value="1.642" aria-label="Pyramid scale">
       <div class="readout" id="pyr-readout"></div>
     </div>
   </div>
@@ -987,10 +988,13 @@ window.addEventListener("error", function(e){
   const F_FACE = 1/(HC*YA/Math.hypot(HH, HC));  // slant faces clear the sphere
   const F_CONTAIN = Math.max(F_BASE, F_APEX, F_FACE)*1.03;
   // Position 2 sits at 210 cubits on the axis, so this is the scale that lands
-  // it exactly on the photosphere. At the same scale the core's underside comes
-  // to rest on the Queen's Chamber ceiling.
+  // it exactly on the photosphere.
   const F_P2_SURFACE = CPV_REF/(P2_Y_C - KC_MID_C);
-  const SCALE_PRESETS = { p2surface: F_P2_SURFACE, photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66, contain: F_CONTAIN };
+  // DEFAULT (Doug's choice): the core's underside rests exactly on the Queen's
+  // Chamber ceiling at 52 cubits. Position 2 then sits at about 0.93 R.
+  const QC_TOP_C = 52;
+  const F_QC_CORE = CPV_REF*R_CORE/(KC_MID_C - QC_TOP_C);
+  const SCALE_PRESETS = { qcore: F_QC_CORE, p2surface: F_P2_SURFACE, photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66, contain: F_CONTAIN };
   const pyrRoot = new THREE.Group();
   const pyrScaled = new THREE.Group();
   const pyrShell = new THREE.Group();   // the pyramid itself, toggled separately from the chambers
@@ -1236,7 +1240,7 @@ window.addEventListener("error", function(e){
   }
   scaleBtns.forEach(b=> b.addEventListener("click", ()=> setPyrScale(SCALE_PRESETS[b.dataset.pscale], b.dataset.pscale)));
   pyrSlider.addEventListener("input", ()=> setPyrScale(parseFloat(pyrSlider.value), null));
-  setPyrScale(SCALE_PRESETS.p2surface, "p2surface");
+  setPyrScale(SCALE_PRESETS.qcore, "qcore");
 
   // ---------- drawers ----------
   const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
