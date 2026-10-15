@@ -278,6 +278,7 @@ window.addEventListener("error", function(e){
   // ---------- palette ----------
   const GOLD = 0xd8a648, GOLD_LIGHT = 0xf1cf7e, GOLD_DARK = 0x9a6f22, GOLD_MID = 0xc98f3a;
   const RAIN = 0x9cc4e8, SILVER = 0xeef3fa, RING_IVORY = 0xfff3d6, ERING = 0xa9c9e4;
+  const SHOW_ARROWS = false;
   const POLAR_SQUASH = 0.902;
   const R_SYNC = 1.86;                       // synchronous orbit, Saturn radii
   const SPIN = 0.35*Math.pow(R_SYNC, -1.5);   // planet (and field) spin matches Keplerian rate at R_SYNC
@@ -327,6 +328,7 @@ window.addEventListener("error", function(e){
   function addLabel(group, text, pos, color, h){ const l = makeLabel(text, color, h); l.position.copy(pos); group.add(l); return l; }
 
   function addArrow(group, pos, dir, color, size, opacity){
+    if (!SHOW_ARROWS) return null;   // arrowheads removed; flow direction is carried by the moving particles
     const geo = new THREE.ConeGeometry(size*0.42, size*1.25, 8);
     const mat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity: opacity==null?0.9:opacity });
     const m = new THREE.Mesh(geo, mat);
