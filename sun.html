@@ -152,15 +152,16 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
     <label class="row"><input type="checkbox" id="k-qc" data-key="qc"><span class="sw" style="background:#bfd3e6"></span><span>Queen's Chamber *<small>40–52 cubits, below the equatorial plane</small></span></label>
     <label class="row"><input type="checkbox" id="k-p2" data-key="p2"><span class="sw" style="background:#8a6ad0"></span><span>Position 2 *<small>Interdimensional area per Ra 59.14–.15, on the axis at 210 cubits</small></span></label>
     <div class="scale-box">
-      <div class="scale-h">Pyramid scale — opens with the Sun enclosed</div>
+      <div class="scale-h">Pyramid scale — opens with Position 2 on the photosphere</div>
       <div class="scale-btns">
+        <button data-pscale="p2surface">Position 2 at surface</button>
         <button data-pscale="photo">Base spans photosphere</button>
         <button data-pscale="apex">Apex at photosphere</button>
         <button data-pscale="tacho">Base spans tachocline</button>
         <button data-pscale="belts">Base spans belts</button>
         <button data-pscale="contain">Sun inside pyramid</button>
       </div>
-      <input type="range" id="pyr-scale" min="0.30" max="3.20" step="0.005" value="2.65" aria-label="Pyramid scale">
+      <input type="range" id="pyr-scale" min="0.30" max="3.20" step="0.005" value="1.767" aria-label="Pyramid scale">
       <div class="readout" id="pyr-readout"></div>
     </div>
   </div>
@@ -752,7 +753,7 @@ window.addEventListener("error", function(e){
   // and the Saturn build: base 440, height 280, King's Chamber 80–91,
   // Queen's Chamber 40–52, Position 2 on the axis at 210 (Ra 59.14–.15).
   // The anchor here is the King's Chamber mid-level on the solar equator.
-  const PYR_BASE_C = 440, PYR_HALF_C = 220, PYR_H_C = 280, KC_MID_C = 85.5;
+  const PYR_BASE_C = 440, PYR_HALF_C = 220, PYR_H_C = 280, KC_MID_C = 85.5, P2_Y_C = 210;
   const CPV_REF = 220;                 // cubits per solar radius at scale 1.0 (base spans the photosphere)
   // Scale f multiplies every pyramid length. At f = 1 the base edge spans the
   // photosphere. For the Sun to sit wholly inside the pyramid, three conditions
@@ -766,7 +767,11 @@ window.addEventListener("error", function(e){
   const F_APEX = 1/YA;                        // apex reaches y = +1
   const F_FACE = 1/(HC*YA/Math.hypot(HH, HC));  // slant faces clear the sphere
   const F_CONTAIN = Math.max(F_BASE, F_APEX, F_FACE)*1.03;
-  const SCALE_PRESETS = { photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66, contain: F_CONTAIN };
+  // Position 2 sits at 210 cubits on the axis, so this is the scale that lands
+  // it exactly on the photosphere. At the same scale the core's underside comes
+  // to rest on the Queen's Chamber ceiling.
+  const F_P2_SURFACE = CPV_REF/(P2_Y_C - KC_MID_C);
+  const SCALE_PRESETS = { p2surface: F_P2_SURFACE, photo: 1.0, apex: CPV_REF/(PYR_H_C - KC_MID_C), tacho: 0.70, belts: 0.66, contain: F_CONTAIN };
   const pyrRoot = new THREE.Group();
   const pyrScaled = new THREE.Group();
   const pyrShell = new THREE.Group();   // the pyramid itself, toggled separately from the chambers
@@ -827,7 +832,7 @@ window.addEventListener("error", function(e){
     pyrLabel(qcGroup, "Queen's Chamber", [18, 46, 0], "#bfd3e6", 0.22);
   }
   const p2Group = new THREE.Group();
-  { const p2Y = 210, p2R = 12;
+  { const p2Y = P2_Y_C, p2R = 12;
     const shell = new THREE.Mesh(new THREE.SphereGeometry(p2R/CPV_REF, 24, 16),
       new THREE.MeshBasicMaterial({ color:0x2a1e70, transparent:true, opacity:0.30, depthWrite:false }));
     shell.position.copy(C(0, p2Y, 0));
@@ -1011,7 +1016,7 @@ window.addEventListener("error", function(e){
   }
   scaleBtns.forEach(b=> b.addEventListener("click", ()=> setPyrScale(SCALE_PRESETS[b.dataset.pscale], b.dataset.pscale)));
   pyrSlider.addEventListener("input", ()=> setPyrScale(parseFloat(pyrSlider.value), null));
-  setPyrScale(SCALE_PRESETS.contain, "contain");
+  setPyrScale(SCALE_PRESETS.p2surface, "p2surface");
 
   // ---------- drawers ----------
   const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
@@ -1032,16 +1037,16 @@ window.addEventListener("error", function(e){
   if (window.innerWidth < 640){ corrTable.hidden = true; corrBtn.textContent = "Show"; corrBtn.setAttribute("aria-expanded","false"); }
 
   // ---------- camera ----------
-  const orbit = { az:0.62, el:0.34, dist:7.0 };
+  const orbit = { az:0.62, el:0.34, dist:5.2 };
   let tween = null;
   const PRESETS = {
-    oblique:{ az:0.62, el:0.34, dist:7.0 },
-    edge:{ az:0.30, el:0.03, dist:6.4 },
-    pole:{ az:0.0, el:1.54, dist:6.8 },
+    oblique:{ az:0.62, el:0.34, dist:5.2 },
+    edge:{ az:0.30, el:0.03, dist:4.8 },
+    pole:{ az:0.0, el:1.54, dist:5.0 },
     belt:{ az:0.95, el:0.30, dist:2.1 },
     spots:{ az:0.20, el:0.42, dist:2.5 },
     wide:{ az:0.55, el:0.26, dist:12.0 },
-    pyramid:{ az:0.48, el:0.16, dist:7.6 },
+    pyramid:{ az:0.48, el:0.16, dist:5.6 },
     p2:{ az:0.40, el:0.30, dist:2.4 }
   };
   function updateCamera(){
