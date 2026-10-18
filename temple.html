@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="An interactive 3-D model of Herod's Temple built from the Mishnah and Josephus, with Troy Caldwell's psyche overlay and a first-person walk through his guided meditation.">
+<meta name="description" content="An interactive 3-D model of Herod's Temple built from the Mishnah and Josephus, with Troy Caldwell's psyche overlay and a first-person Walk Through Journey of his guided meditation.">
 <title>Temple of the Soul</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -75,29 +75,45 @@ body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);ov
 .btn.walk{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
 .btn.walk:hover{filter:brightness(1.08);}
 body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .drawer{display:none!important;}
-#walkcard{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(520px,calc(100vw - 32px));max-height:min(62vh,560px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px 12px;z-index:12;backdrop-filter:blur(6px);}
+/* Walk Through Journey: the text lives in its own panel; the 3-D view shrinks to sit beside it */
+:root{--panelW:min(400px,36vw);--panelH:44vh;}
+body.walking #stage{right:var(--panelW);}
+body.walking.textHidden #stage{right:0;}
+#walkcard{position:fixed;top:0;right:0;bottom:0;width:var(--panelW);display:flex;flex-direction:column;background:var(--panel-solid);border-left:1px solid var(--line);z-index:12;
+  padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));padding-left:18px;padding-right:max(18px,env(safe-area-inset-right,0px));}
+#walkcard .scroll{flex:1;min-height:0;overflow-y:auto;padding-right:4px;}
 #walkcard .eyebrow{display:flex;justify-content:space-between;gap:8px;}
-#walkcard h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.6vw,25px);margin:4px 0 8px;letter-spacing:.03em;text-wrap:balance;}
-#walkcard .body{font-size:16px;line-height:1.5;margin:0 0 8px;}
+#walkcard h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.2vw,26px);margin:6px 0 8px;letter-spacing:.03em;text-wrap:balance;}
+#walkcard .body{font-size:16.5px;line-height:1.55;margin:0 0 10px;}
 #walkcard .body em{color:var(--gold);font-style:italic;}
-#walkcard .psy{font-family:var(--display);font-size:14.5px;color:var(--gold);margin:0 0 6px;letter-spacing:.02em;}
-#walkcard .hist{font-size:13px;line-height:1.4;color:var(--muted);margin:0 0 10px;border-left:2px solid var(--line);padding-left:8px;}
-#walkcard.collapsed .body,#walkcard.collapsed .psy,#walkcard.collapsed .hist{display:none;}
-#walkcard .ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-#walkcard .ctl label{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:5px;align-items:center;margin-left:auto;cursor:pointer;}
-#walkcard .ctl input{accent-color:var(--gold);}
-#walkbar{height:2px;background:var(--line);margin:0 0 10px;border-radius:2px;overflow:hidden;}
+#walkcard .psy{font-family:var(--display);font-size:15px;color:var(--gold);margin:0 0 8px;letter-spacing:.02em;line-height:1.4;}
+#walkcard .hist{font-size:13.5px;line-height:1.45;color:var(--muted);margin:0 0 10px;border-left:2px solid var(--line);padding-left:9px;}
+#walkcard .hint{font-family:var(--mono);font-size:11px;color:var(--muted);margin:8px 0 8px;letter-spacing:.03em;}
+#walkcard .ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;border-top:1px solid var(--line);padding-top:10px;}
+#walkcard .ctl .spacer{flex:1;}
+#walkbar{height:2px;background:var(--line);margin:0 0 12px;border-radius:2px;overflow:hidden;}
 #walkbar i{display:block;height:100%;width:0;background:var(--gold);transition:width .4s;}
-#walkfade{position:fixed;inset:0;pointer-events:none;z-index:11;opacity:0;transition:opacity 1.2s ease;background:#fff3d6;}
-#walkhint{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:12;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 9px;}
-@media (max-width:640px){ #walkcard{max-height:48vh;} #walkcard .body{font-size:15px;} #walkhint{display:none;} }
+#walkfade{position:absolute;inset:0;pointer-events:none;z-index:2;opacity:0;transition:opacity 1.2s ease;background:#fff3d6;}
+/* text hidden: the panel shrinks to a slim control bar so the whole screen is the view */
+body.textHidden #walkcard{top:auto;width:auto;left:auto;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));border:1px solid var(--line);border-radius:4px;padding:8px 10px;background:var(--panel);}
+body.textHidden #walkcard .scroll,body.textHidden #walkcard .hint{display:none;}
+body.textHidden #walkcard .ctl{border-top:0;padding-top:0;}
+/* phones and narrow windows: panel below the view */
+@media (max-width:760px), (max-aspect-ratio:4/5){
+  body.walking #stage{right:0;bottom:var(--panelH);}
+  body.walking.textHidden #stage{bottom:0;}
+  #walkcard{top:auto;left:0;width:auto;height:var(--panelH);border-left:0;border-top:1px solid var(--line);padding-top:12px;padding-left:max(16px,env(safe-area-inset-left,0px));}
+  #walkcard h2{font-size:21px;margin:4px 0 6px;}
+  #walkcard .body{font-size:15.5px;}
+  body.textHidden #walkcard{height:auto;left:auto;}
+}
 @media (max-width:640px){ .title{top:calc(58px + env(safe-area-inset-top,0px));} .title p{display:none;} .playbar input[type=range]{width:70px;} }
 </style>
 </head>
 <body>
 
 
-<div id="stage"></div>
+<div id="stage"><div id="walkfade"></div></div>
 
 <div class="title">
   <div class="eyebrow">Building 4th · Adventures in Soul Making</div>
@@ -106,7 +122,7 @@ body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .dra
 </div>
 
 <div class="topbar">
-  <button class="btn walk" id="b-walk">Walk with Troy</button>
+  <button class="btn walk" id="b-walk">Walk Through Journey</button>
   <button class="btn" id="b-layers" aria-expanded="false" aria-controls="d-layers">Layers ▾</button>
   <button class="btn" id="b-cam" aria-expanded="false" aria-controls="d-cam">Camera ▾</button>
   <button class="btn" id="b-about" aria-expanded="false" aria-controls="d-about">About</button>
@@ -136,7 +152,7 @@ body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .dra
 <div class="drawer" id="d-cam" hidden>
   <h2>Camera</h2>
   <div class="cams">
-    <button class="btn walk" id="cam-walk" style="grid-column:1/-1">Walk with Troy (first person)</button>
+    <button class="btn walk" id="cam-walk" style="grid-column:1/-1">Walk Through Journey (first person)</button>
     <button class="btn" data-cam="olives">Mount of Olives</button>
     <button class="btn" data-cam="mount">Whole Mount</button>
     <button class="btn" data-cam="courts">The courts</button>
@@ -152,7 +168,7 @@ body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .dra
   <p><b>What it shows.</b> This is the Second Temple as Herod rebuilt it, the Temple Jesus walked through. I built the courts from the measurements in the Mishnah's tractate Middot (in cubits, one cubit taken as about half a meter), the platform from the walls that still stand in Jerusalem, and the warning stone from the two inscriptions archaeologists have recovered. East faces the Mount of Olives. Everything climbs as it moves west: twelve steps up to the terrace, fifteen curved steps (where the Levites sang the Songs of Ascents) up to the Nicanor Gate, and twelve more up to the porch.</p>
   <p><b>What it reads.</b> Troy Caldwell's <i>Adventures in Soul Making</i> walks this Temple as a picture of the soul. The crowded Court of the Gentiles is the ego and its daily noise. The Court of the Women is the anima, receptive presence. The Nicanor Gate and the altar are the summons to strength and the letting go of what we grasp. The windowless side chambers around the sanctuary become the sarx, the shadow's hidden storerooms. The Holy Place is the still point, tended daily; the Holy of Holies is the archetypal Self. Turn on the psyche overlay to see the mapping, and the pilgrim's way to follow his route.</p>
   <p><b>Where the model simplifies.</b> The sources disagree in places. Josephus and the Mishnah count the gates differently. Scholars still argue whether the "Beautiful Gate" of Acts 3 is the eastern gate of the Court of the Women or the Nicanor Gate itself; I follow the first view, as Troy does. Herod's Holy Place held one menorah and one table; the ten tables and ten lampstands belong to Solomon's Temple, as do the pillars Boaz and Jachin. The Holy of Holies was empty except for the bare Foundation Stone, so the Ark is an optional layer. Heights of the porticoes, gatehouses and walls are approximate, and the platform's slightly skewed outline is drawn from modern wall lengths.</p>
-  <p><b>Walk with Troy.</b> The gold button walks the route at eye level in seventeen stations, with his story paraphrased at each stop. Drag to look around, use the arrow keys or the Continue button to move on, and turn off "Walk on by itself" to set your own pace. The hidden room of idols is Troy's imagining, and the pillars Boaz and Jachin appear as ghosts because they belonged to Solomon's Temple.</p>
+  <p><b>Walk Through Journey.</b> The gold button walks Troy's route at eye level in seventeen stations, with his story paraphrased at each stop in a panel beside the view. You move only when you choose: press Continue (or the right arrow key) to walk to the next station, Back to return, and drag the view to look around. Hide text gives the whole screen to the view. The hidden room of idols is Troy's imagining, and the pillars Boaz and Jachin appear as ghosts because they belonged to Solomon's Temple.</p>
   <p class="note">Model by Claude for Doug Scott, after Dr. Troy Caldwell (troycaldwell.com).</p>
 </div>
 
@@ -163,21 +179,22 @@ body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .dra
 </div>
 
 <div id="err" hidden></div>
-<div id="walkfade"></div>
-<div id="walkhint" hidden>Drag to look around · <button class="btn" id="w-exit" style="padding:3px 8px;margin-left:6px">Exit walk</button></div>
 <div id="walkcard" hidden aria-live="polite">
-  <div class="eyebrow"><span id="w-num">Station 1 of 17</span><span>After Troy Caldwell</span></div>
-  <h2 id="w-title"></h2>
-  <div id="walkbar"><i id="w-prog"></i></div>
-  <p class="body" id="w-body"></p>
-  <p class="psy" id="w-psy"></p>
-  <p class="hist" id="w-hist"></p>
+  <div class="scroll">
+    <div class="eyebrow"><span id="w-num">Station 1 of 17</span><span>After Troy Caldwell</span></div>
+    <h2 id="w-title"></h2>
+    <div id="walkbar"><i id="w-prog"></i></div>
+    <p class="body" id="w-body"></p>
+    <p class="psy" id="w-psy"></p>
+    <p class="hist" id="w-hist"></p>
+  </div>
+  <p class="hint">Drag the view to look around · ← → keys move between stations</p>
   <div class="ctl">
-    <button class="btn" id="w-hide" aria-pressed="false">Hide text</button>
     <button class="btn" id="w-prev">◀ Back</button>
-    <button class="btn" id="w-pause">Pause</button>
     <button class="btn walk" id="w-next">Continue ▶</button>
-    <label for="w-auto"><input type="checkbox" id="w-auto" checked> Walk on by itself</label>
+    <span class="spacer"></span>
+    <button class="btn" id="w-hide" aria-pressed="false">Hide text</button>
+    <button class="btn" id="w-exit">Exit</button>
   </div>
 </div>
 
@@ -753,7 +770,7 @@ function buildStations(){
 }
 let ST=null;
 const walk={on:false,idx:0,phase:"dwell",u:0,t:0,dwell:0,paused:false,yawOff:0,pitchOff:0,curve:null,len:1,saved:null,savedOrbit:null};
-const wEls={card:document.getElementById("walkcard"),num:document.getElementById("w-num"),title:document.getElementById("w-title"),body:document.getElementById("w-body"),psy:document.getElementById("w-psy"),hist:document.getElementById("w-hist"),prog:document.getElementById("w-prog"),auto:document.getElementById("w-auto"),pause:document.getElementById("w-pause"),next:document.getElementById("w-next"),fade:document.getElementById("walkfade"),hint:document.getElementById("walkhint")};
+const wEls={card:document.getElementById("walkcard"),num:document.getElementById("w-num"),title:document.getElementById("w-title"),body:document.getElementById("w-body"),psy:document.getElementById("w-psy"),hist:document.getElementById("w-hist"),prog:document.getElementById("w-prog"),auto:document.getElementById("w-auto"),pause:document.getElementById("w-pause"),next:document.getElementById("w-next"),fade:document.getElementById("walkfade"),hint:null};
 const V=(a)=>new THREE.Vector3(c(a[0]),c(a[1]),c(a[2]));
 let camPos=new THREE.Vector3(), camDir=new THREE.Vector3(-1,0,0);
 function showStation(i){const s=ST[i];
@@ -786,13 +803,13 @@ function enterWalk(){
   walk.saved=Object.assign({},state); walk.savedOrbit=Object.assign({},orbit);
   window.__walkOn=true;
   setAll({mount:true,soreg:true,women:true,inner:true,sanct:true,smoke:true,life:true});
-  walk.on=true; document.body.classList.add("walking"); wEls.card.hidden=false; wEls.hint.hidden=false;
+  walk.on=true; document.body.classList.add("walking"); wEls.card.hidden=false;
   Object.keys(drawers).forEach(o=>{document.getElementById(o).setAttribute("aria-expanded","false");document.getElementById(drawers[o]).hidden=true;});
   camera.fov=62; camera.near=0.02; camera.updateProjectionMatrix();
-  walk.paused=false; wEls.pause.textContent="Pause"; jumpTo(0);
+  walk.paused=false; document.body.classList.remove("textHidden"); requestAnimationFrame(fitStage); jumpTo(0);
 }
 function exitWalk(){
-  if(!walk.on)return; walk.on=false; window.__walkOn=false; document.body.classList.remove("walking"); wEls.card.hidden=true; wEls.hint.hidden=true; wEls.fade.style.opacity=0;
+  if(!walk.on)return; walk.on=false; window.__walkOn=false; document.body.classList.remove("walking"); wEls.card.hidden=true; document.body.classList.remove("textHidden"); requestAnimationFrame(fitStage); wEls.fade.style.opacity=0;
   camera.fov=38; camera.near=0.1; camera.updateProjectionMatrix(); sizeLabels();
   if(refs.torch){refs.torch.intensity=0;refs.flame.visible=false;} if(refs.dust)refs.dust.visible=false; if(refs.corLight)refs.corLight.intensity=0; if(refs.glow)refs.glow.intensity=1.4;
   amb.intensity=.30; hemi.intensity=.30; sun.intensity=1.05; fill.intensity=.25;
@@ -807,10 +824,10 @@ function prevStation(){ if(!walk.on)return; jumpTo(Math.max(0,walk.idx-(walk.pha
 document.getElementById("b-walk").addEventListener("click",enterWalk);
 document.getElementById("cam-walk").addEventListener("click",enterWalk);
 document.getElementById("w-exit").addEventListener("click",exitWalk);
-document.getElementById("w-hide").addEventListener("click",function(){const c2=wEls.card.classList.toggle("collapsed");this.textContent=c2?"Show text":"Hide text";this.setAttribute("aria-pressed",c2);});
+document.getElementById("w-hide").addEventListener("click",function(){const c2=document.body.classList.toggle("textHidden");this.textContent=c2?"Show text":"Hide text";this.setAttribute("aria-pressed",c2);requestAnimationFrame(fitStage);});
 wEls.next.addEventListener("click",nextStation);
 document.getElementById("w-prev").addEventListener("click",prevStation);
-wEls.pause.addEventListener("click",()=>{walk.paused=!walk.paused;wEls.pause.textContent=walk.paused?"Resume":"Pause";});
+
 window.addEventListener("keydown",e=>{if(!walk.on)return; if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();nextStation();} else if(e.key==="ArrowLeft"){prevStation();} else if(e.key==="Escape"){exitWalk();}});
 const SPEED=c(10); // ten cubits per second, an unhurried walk
 const up=new THREE.Vector3(0,1,0);
@@ -835,7 +852,6 @@ function updateWalk(rdt,now){
     const sway=(s.sway||0)*Math.sin(walk.t*0.32)*Math.min(1,walk.t/2);
     camDir.copy(dirFromYawPitch(base,sway+walk.yawOff,walk.pitchOff));
     if(s.end){wEls.fade.style.background="#fff3d6";}
-    if(wEls.auto.checked&&!walk.paused&&!s.end&&walk.t>walk.dwell){startLeg(walk.idx+1);}
   }
   if(walk.phase==="travel"&&(walk.yawOff||walk.pitchOff)){camDir.copy(dirFromYawPitch(camDir,walk.yawOff,walk.pitchOff));}
   // lighting: daylight in the courts, dim in the side hallway, darkness and torchlight in the hidden room
@@ -917,7 +933,8 @@ if(reduce){autoCb.checked=false;speed=0.4;spd.value=0.4;}
 spd.addEventListener("input",()=>speed=parseFloat(spd.value));
 playBtn.addEventListener("click",()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play";});
 
-window.addEventListener("resize",()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);sizeLabels();});
+function fitStage(){camera.aspect=stage.clientWidth/Math.max(1,stage.clientHeight);camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);if(typeof sizeLabels==="function")sizeLabels();}
+window.addEventListener("resize",fitStage);
 
 let last=performance.now();
 function frame(now){
