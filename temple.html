@@ -175,7 +175,6 @@ body.textHidden #walkcard .ctl{border-top:0;padding-top:0;}
 <div class="playbar">
   <button class="btn" id="play">Pause</button>
   <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
-  <label for="auto"><input type="checkbox" id="auto" checked> Auto-orbit</label>
 </div>
 
 <div id="err" hidden></div>
@@ -928,8 +927,8 @@ dom.addEventListener("wheel",e=>{e.preventDefault();if(walk.on)return;tween=null
 // playback
 let playing=true, speed=1;
 const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
-const autoCb=document.getElementById("auto"), spd=document.getElementById("speed"), playBtn=document.getElementById("play");
-if(reduce){autoCb.checked=false;speed=0.4;spd.value=0.4;}
+const spd=document.getElementById("speed"), playBtn=document.getElementById("play");
+if(reduce){speed=0.4;spd.value=0.4;}
 spd.addEventListener("input",()=>speed=parseFloat(spd.value));
 playBtn.addEventListener("click",()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play";});
 
@@ -942,7 +941,6 @@ function frame(now){
   const dt=playing?rdt*speed:0;
   if(tween){tween.t=Math.min(1,tween.t+rdt/1.1);const k=tween.t<.5?2*tween.t*tween.t:1-Math.pow(-2*tween.t+2,2)/2;
     ["az","el","dist","tx","ty","tz"].forEach(q=>orbit[q]=tween.from[q]+(tween.to[q]-tween.from[q])*k); if(tween.t>=1)tween=null;}
-  else if(!walk.on&&autoCb.checked&&ptrs.size===0&&playing){orbit.az+=rdt*0.03;}
   declutter();
   updaters.forEach(u=>u(dt));
   if(walk.on){updateWalk(rdt,now);} else {placeCamera();}
