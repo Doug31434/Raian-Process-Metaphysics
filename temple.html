@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="An interactive 3-D model of Herod's Temple built from the Mishnah and Josephus, with Troy Caldwell's psyche overlay and a first-person walk through his guided meditation.">
+<title>Temple of the Soul</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+[hidden]{display:none!important}
+/* Layout: one full-bleed scene; title upper-left, drawers upper-right, play bar bottom-center. Herodian limestone at dusk. */
+:root{
+  --scene:#141626;           /* dusk sky behind the Mount */
+  --ink:#141626;
+  --panel:rgba(22,24,40,.9);
+  --panel-solid:#191b2d;
+  --line:#34354c;
+  --text:#eee6d3;
+  --muted:#a69d88;
+  --gold:#d8a648;
+  --gold-dim:#8a6a2c;
+  --stone:#e7dcc4;
+  --display:"Marcellus","Trajan Pro",Georgia,"Times New Roman",serif;
+  --body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --scene:#dfe3e8; --ink:#dfe3e8; --panel:rgba(250,247,240,.93); --panel-solid:#faf7f0;
+    --line:#cfc6b2; --text:#2a2418; --muted:#6e6450; --gold:#9a6f22; --gold-dim:#c9a35a; --stone:#6e6450;
+    color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --scene:#dfe3e8; --ink:#dfe3e8; --panel:rgba(250,247,240,.93); --panel-solid:#faf7f0;
+  --line:#cfc6b2; --text:#2a2418; --muted:#6e6450; --gold:#9a6f22; --gold-dim:#c9a35a; --stone:#6e6450;
+  color-scheme:light;
+}
+html,body{height:100%;}
+body{margin:0;background:var(--ink);color:var(--text);font-family:var(--body);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+#stage{position:fixed;inset:0;}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;}
+.title{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));max-width:min(420px,calc(100vw - 32px));pointer-events:none;z-index:5;}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.title h1{font-family:var(--display);font-weight:400;font-size:clamp(22px,3.2vw,32px);line-height:1.1;margin:4px 0 6px;letter-spacing:.04em;text-wrap:balance;}
+.title p{margin:0;font-size:14.5px;line-height:1.4;color:var(--muted);max-width:36ch;}
+.topbar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:6px;z-index:10;flex-wrap:wrap;justify-content:flex-end;}
+.btn{font-family:var(--mono);font-size:11.5px;letter-spacing:.06em;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:3px;padding:7px 11px;cursor:pointer;}
+.btn:hover{border-color:var(--gold-dim);}
+.btn:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+.btn[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);}
+.drawer{position:fixed;top:calc(52px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(340px,calc(100vw - 32px));max-height:calc(100% - 140px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:12px 14px;z-index:9;backdrop-filter:blur(6px);}
+.drawer h2{font-family:var(--display);font-weight:400;font-size:17px;margin:2px 0 8px;letter-spacing:.03em;}
+.drawer h3{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:12px 0 4px;font-weight:500;}
+.row{display:grid;grid-template-columns:auto 12px 1fr;gap:8px;align-items:start;padding:4px 0;}
+.row input{margin:3px 0 0;accent-color:var(--gold);}
+.sw{width:12px;height:12px;border-radius:2px;margin-top:3px;border:1px solid var(--line);}
+.row label{cursor:pointer;font-size:14px;line-height:1.25;min-width:0;}
+.row small{display:block;color:var(--muted);font-size:12.5px;line-height:1.3;}
+.cams{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.cams .btn{text-align:left;}
+.note{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.35;}
+.about p{font-size:14.5px;line-height:1.5;margin:0 0 10px;}
+.about b{font-family:var(--display);font-weight:400;font-size:15.5px;letter-spacing:.02em;color:var(--gold);}
+.actions{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap;}
+.playbar{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);display:flex;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:7px 12px;z-index:8;font-family:var(--mono);font-size:11.5px;color:var(--muted);flex-wrap:wrap;justify-content:center;max-width:calc(100vw - 32px);}
+.playbar label{display:flex;gap:6px;align-items:center;cursor:pointer;}
+.playbar input[type=range]{width:90px;accent-color:var(--gold);}
+.playbar input[type=checkbox]{accent-color:var(--gold);}
+#err{position:fixed;inset:auto 16px 80px 16px;margin:auto;max-width:520px;background:var(--panel-solid);border:1px solid var(--gold-dim);padding:14px 16px;border-radius:4px;z-index:50;font-size:14.5px;line-height:1.45;}
+.btn.walk{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:500;}
+.btn.walk:hover{filter:brightness(1.08);}
+body.walking .title,body.walking .topbar,body.walking .playbar,body.walking .drawer{display:none!important;}
+#walkcard{position:fixed;left:max(16px,env(safe-area-inset-left,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(520px,calc(100vw - 32px));max-height:min(62vh,560px);overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:14px 16px 12px;z-index:12;backdrop-filter:blur(6px);}
+#walkcard .eyebrow{display:flex;justify-content:space-between;gap:8px;}
+#walkcard h2{font-family:var(--display);font-weight:400;font-size:clamp(20px,2.6vw,25px);margin:4px 0 8px;letter-spacing:.03em;text-wrap:balance;}
+#walkcard .body{font-size:16px;line-height:1.5;margin:0 0 8px;}
+#walkcard .body em{color:var(--gold);font-style:italic;}
+#walkcard .psy{font-family:var(--display);font-size:14.5px;color:var(--gold);margin:0 0 6px;letter-spacing:.02em;}
+#walkcard .hist{font-size:13px;line-height:1.4;color:var(--muted);margin:0 0 10px;border-left:2px solid var(--line);padding-left:8px;}
+#walkcard.collapsed .body,#walkcard.collapsed .psy,#walkcard.collapsed .hist{display:none;}
+#walkcard .ctl{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+#walkcard .ctl label{font-family:var(--mono);font-size:11.5px;color:var(--muted);display:flex;gap:5px;align-items:center;margin-left:auto;cursor:pointer;}
+#walkcard .ctl input{accent-color:var(--gold);}
+#walkbar{height:2px;background:var(--line);margin:0 0 10px;border-radius:2px;overflow:hidden;}
+#walkbar i{display:block;height:100%;width:0;background:var(--gold);transition:width .4s;}
+#walkfade{position:fixed;inset:0;pointer-events:none;z-index:11;opacity:0;transition:opacity 1.2s ease;background:#fff3d6;}
+#walkhint{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));z-index:12;font-family:var(--mono);font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 9px;}
+@media (max-width:640px){ #walkcard{max-height:48vh;} #walkcard .body{font-size:15px;} #walkhint{display:none;} }
+@media (max-width:640px){ .title{top:calc(58px + env(safe-area-inset-top,0px));} .title p{display:none;} .playbar input[type=range]{width:70px;} }
+</style>
+</head>
+<body>
+
+
+<div id="stage"></div>
+
+<div class="title">
+  <div class="eyebrow">Building 4th · Adventures in Soul Making</div>
+  <h1>The Temple of the Soul</h1>
+  <p>Herod's Temple as Troy Caldwell maps it onto the psyche: every step inward is a step upward.</p>
+</div>
+
+<div class="topbar">
+  <button class="btn walk" id="b-walk">Walk with Troy</button>
+  <button class="btn" id="b-layers" aria-expanded="false" aria-controls="d-layers">Layers ▾</button>
+  <button class="btn" id="b-cam" aria-expanded="false" aria-controls="d-cam">Camera ▾</button>
+  <button class="btn" id="b-about" aria-expanded="false" aria-controls="d-about">About</button>
+</div>
+
+<div class="drawer" id="d-layers" hidden>
+  <h2>Layers</h2>
+  <h3>Architecture</h3>
+  <div class="row"><input type="checkbox" id="cb-mount" data-key="mount"><span class="sw" style="background:#cfc4ad"></span><label for="cb-mount">Temple Mount<small>Herod's platform, porticoes, Royal Stoa, Antonia</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-soreg" data-key="soreg"><span class="sw" style="background:#8f8676"></span><label for="cb-soreg">Soreg and Chel<small>The balustrade Gentiles could not pass, and the raised terrace inside it</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-women" data-key="women"><span class="sw" style="background:#e7dcc4"></span><label for="cb-women">Court of the Women<small>Four corner chambers, lampstands, the fifteen steps</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-inner" data-key="inner"><span class="sw" style="background:#d9cfb9"></span><label for="cb-inner">Inner Court<small>Courts of Israel and the Priests, altar, ramp, laver</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-sanct" data-key="sanct"><span class="sw" style="background:#f4efe3"></span><label for="cb-sanct">Sanctuary<small>Porch, Holy Place, Holy of Holies</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-cutaway" data-key="cutaway"><span class="sw" style="background:transparent"></span><label for="cb-cutaway">Cut away the sanctuary<small>See the furnishings, the veil and the side chambers</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-ark" data-key="ark"><span class="sw" style="background:#f1cf7e"></span><label for="cb-ark">Ark of the Covenant *<small>Gone before Herod's day; shown as Troy's meditation imagines it</small></label></div>
+  <h3>Movement</h3>
+  <div class="row"><input type="checkbox" id="cb-path" data-key="path"><span class="sw" style="background:#f1cf7e"></span><label for="cb-path">The pilgrim's way<small>Troy's route from the eastern gate to the Holy of Holies</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-life" data-key="life"><span class="sw" style="background:#8a5a3a"></span><label for="cb-life">People and animals<small>Pilgrims, Levites, priests, the market</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-smoke" data-key="smoke"><span class="sw" style="background:#b8b2a6"></span><label for="cb-smoke">Fire and smoke<small>Altar fire, incense, the lamps</small></label></div>
+  <h3>Reading</h3>
+  <div class="row"><input type="checkbox" id="cb-psyche" data-key="psyche"><span class="sw" style="background:linear-gradient(90deg,#8a5a3a,#2a4ab0,#2f8a5a,#787878,#d9913a)"></span><label for="cb-psyche">The psyche overlay *<small>Ego, anima, sacrifice, sarx, still point, Self</small></label></div>
+  <div class="row"><input type="checkbox" id="cb-labels" data-key="labels"><span class="sw" style="background:transparent"></span><label for="cb-labels">Labels<small>Names of courts, gates and furnishings</small></label></div>
+  <p class="note">* Interpretive layer. The architecture follows the Mishnah (tractate Middot), Josephus and the excavated platform; the overlay is Troy's reading.</p>
+  <div class="actions"><button class="btn" id="reset">Reset to defaults</button><button class="btn" id="clear">Clear all</button></div>
+</div>
+
+<div class="drawer" id="d-cam" hidden>
+  <h2>Camera</h2>
+  <div class="cams">
+    <button class="btn walk" id="cam-walk" style="grid-column:1/-1">Walk with Troy (first person)</button>
+    <button class="btn" data-cam="olives">Mount of Olives</button>
+    <button class="btn" data-cam="mount">Whole Mount</button>
+    <button class="btn" data-cam="courts">The courts</button>
+    <button class="btn" data-cam="plan">Plan from above</button>
+    <button class="btn" data-cam="sanct">Inside the sanctuary</button>
+    <button class="btn" data-cam="holy">Holy of Holies</button>
+  </div>
+  <p class="note">Drag to orbit · scroll or pinch to zoom.</p>
+</div>
+
+<div class="drawer about" id="d-about" hidden>
+  <h2>About this model</h2>
+  <p><b>What it shows.</b> This is the Second Temple as Herod rebuilt it, the Temple Jesus walked through. I built the courts from the measurements in the Mishnah's tractate Middot (in cubits, one cubit taken as about half a meter), the platform from the walls that still stand in Jerusalem, and the warning stone from the two inscriptions archaeologists have recovered. East faces the Mount of Olives. Everything climbs as it moves west: twelve steps up to the terrace, fifteen curved steps (where the Levites sang the Songs of Ascents) up to the Nicanor Gate, and twelve more up to the porch.</p>
+  <p><b>What it reads.</b> Troy Caldwell's <i>Adventures in Soul Making</i> walks this Temple as a picture of the soul. The crowded Court of the Gentiles is the ego and its daily noise. The Court of the Women is the anima, receptive presence. The Nicanor Gate and the altar are the summons to strength and the letting go of what we grasp. The windowless side chambers around the sanctuary become the sarx, the shadow's hidden storerooms. The Holy Place is the still point, tended daily; the Holy of Holies is the archetypal Self. Turn on the psyche overlay to see the mapping, and the pilgrim's way to follow his route.</p>
+  <p><b>Where the model simplifies.</b> The sources disagree in places. Josephus and the Mishnah count the gates differently. Scholars still argue whether the "Beautiful Gate" of Acts 3 is the eastern gate of the Court of the Women or the Nicanor Gate itself; I follow the first view, as Troy does. Herod's Holy Place held one menorah and one table; the ten tables and ten lampstands belong to Solomon's Temple, as do the pillars Boaz and Jachin. The Holy of Holies was empty except for the bare Foundation Stone, so the Ark is an optional layer. Heights of the porticoes, gatehouses and walls are approximate, and the platform's slightly skewed outline is drawn from modern wall lengths.</p>
+  <p><b>Walk with Troy.</b> The gold button walks the route at eye level in seventeen stations, with his story paraphrased at each stop. Drag to look around, use the arrow keys or the Continue button to move on, and turn off "Walk on by itself" to set your own pace. The hidden room of idols is Troy's imagining, and the pillars Boaz and Jachin appear as ghosts because they belonged to Solomon's Temple.</p>
+  <p class="note">Model by Claude for Doug Scott, after Dr. Troy Caldwell (troycaldwell.com).</p>
+</div>
+
+<div class="playbar">
+  <button class="btn" id="play">Pause</button>
+  <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+  <label for="auto"><input type="checkbox" id="auto" checked> Auto-orbit</label>
+</div>
+
+<div id="err" hidden></div>
+<div id="walkfade"></div>
+<div id="walkhint" hidden>Drag to look around · <button class="btn" id="w-exit" style="padding:3px 8px;margin-left:6px">Exit walk</button></div>
+<div id="walkcard" hidden aria-live="polite">
+  <div class="eyebrow"><span id="w-num">Station 1 of 17</span><span>After Troy Caldwell</span></div>
+  <h2 id="w-title"></h2>
+  <div id="walkbar"><i id="w-prog"></i></div>
+  <p class="body" id="w-body"></p>
+  <p class="psy" id="w-psy"></p>
+  <p class="hist" id="w-hist"></p>
+  <div class="ctl">
+    <button class="btn" id="w-hide" aria-pressed="false">Hide text</button>
+    <button class="btn" id="w-prev">◀ Back</button>
+    <button class="btn" id="w-pause">Pause</button>
+    <button class="btn walk" id="w-next">Continue ▶</button>
+    <label for="w-auto"><input type="checkbox" id="w-auto" checked> Walk on by itself</label>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+const errBox=document.getElementById("err");
+function showErr(msg){errBox.textContent=msg;errBox.hidden=false;}
+window.addEventListener("error",function(e){
+  if(e.target&&e.target!==window&&(e.target.tagName==="LINK"||e.target.tagName==="IMG"))return;
+  if(!e.message)return;
+  showErr("The model hit a problem and stopped: "+e.message+". Reloading the page usually clears it.");
+},true);
+if(typeof THREE==="undefined"){showErr("The 3-D library could not load. Check your connection and reload the page.");return;}
+try{const c=document.createElement("canvas");if(!(c.getContext("webgl")||c.getContext("experimental-webgl")))throw 0;}
+catch(e){showErr("This browser cannot show 3-D graphics (WebGL is turned off or unavailable). Try another browser or device.");return;}
+
+// ---------- units: cubits -> scene units ----------
+const K=0.1; const c=v=>v*K;
+// x = east, y = up, z = south.  Floors (cubits): Mount 0, Chel/Women 6, Israel 13.5, Priests 16, Sanctuary 22.
+const Y={mount:0,chel:6,women:6,israel:13.5,priests:16,sanct:22};
+
+const stage=document.getElementById("stage");
+const renderer=new THREE.WebGLRenderer({antialias:true,preserveDrawingBuffer:true});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.95;
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.setSize(stage.clientWidth,stage.clientHeight);
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+function syncTheme(){
+  const v=getComputedStyle(document.documentElement).getPropertyValue("--scene").trim()||"#141626";
+  scene.background=new THREE.Color(v); scene.fog=new THREE.Fog(new THREE.Color(v),180,420);
+}
+syncTheme();
+try{matchMedia("(prefers-color-scheme: dark)").addEventListener("change",syncTheme);}catch(e){}
+new MutationObserver(syncTheme).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+
+const camera=new THREE.PerspectiveCamera(38,stage.clientWidth/stage.clientHeight,0.1,1200);
+scene.add(new THREE.AmbientLight(0xffffff,0.30));
+scene.add(new THREE.HemisphereLight(0xfff1d8,0x4a4560,0.30));
+const sun=new THREE.DirectionalLight(0xfff4e0,1.05); sun.position.set(45,60,30); scene.add(sun);
+sun.castShadow=true; sun.shadow.mapSize.set(1536,1536); const sc=sun.shadow.camera; sc.left=-34;sc.right=34;sc.top=34;sc.bottom=-34;sc.near=1;sc.far=200; sun.shadow.bias=-0.0006; sun.target.position.set(-1,0,2); scene.add(sun.target);
+const fill=new THREE.DirectionalLight(0xc8d2ff,0.25); fill.position.set(-70,40,-50); scene.add(fill);
+
+// ---------- materials ----------
+const M={
+  stone:new THREE.MeshStandardMaterial({color:0xe3d6bb,roughness:.86,metalness:0}),
+  stone2:new THREE.MeshStandardMaterial({color:0xc4b496,roughness:.9}),
+  pave:new THREE.MeshStandardMaterial({color:0xd2c5aa,roughness:.95}),
+  paveW:new THREE.MeshStandardMaterial({color:0xddd1b8,roughness:.95}),
+  mountTop:new THREE.MeshStandardMaterial({color:0xb3a68a,roughness:.97}),
+  mountSide:new THREE.MeshStandardMaterial({color:0x8f8268,roughness:.95}),
+  col:new THREE.MeshStandardMaterial({color:0xf3ede0,roughness:.7}),
+  roof:new THREE.MeshStandardMaterial({color:0x7d5f40,roughness:.8}),
+  gold:new THREE.MeshStandardMaterial({color:0xe0b050,metalness:.3,roughness:.35,emissive:0x7a5214,emissiveIntensity:.45}),
+  bronze:new THREE.MeshStandardMaterial({color:0xc08848,metalness:.35,roughness:.45,emissive:0x3a220a,emissiveIntensity:.3}),
+  dark:new THREE.MeshStandardMaterial({color:0x5c564c,roughness:.9}),
+  cell:new THREE.MeshStandardMaterial({color:0x8b8478,roughness:.9}),
+  rock:new THREE.MeshStandardMaterial({color:0x9a8f7c,roughness:1,flatShading:true}),
+  shell:new THREE.MeshStandardMaterial({color:0xf6f1e6,roughness:.6,transparent:true,opacity:1}),
+  shellGold:new THREE.MeshStandardMaterial({color:0xe0b050,metalness:.3,roughness:.35,emissive:0x7a5214,emissiveIntensity:.45,transparent:true,opacity:1}),
+};
+
+// ---------- registry ----------
+const refs={}, updaters=[], system=new THREE.Group(); scene.add(system);
+function reg(key){const g=new THREE.Group();g.name=key;system.add(g);refs[key]=g;return g;}
+function box(g,mat,x0,x1,y0,y1,z0,z1){ // cubit extents
+  const m=new THREE.Mesh(new THREE.BoxGeometry(c(Math.abs(x1-x0)),c(Math.abs(y1-y0)),c(Math.abs(z1-z0))),mat);
+  m.position.set(c((x0+x1)/2),c((y0+y1)/2),c((z0+z1)/2)); g.add(m); return m;
+}
+function cyl(g,mat,r0,r1,h,x,y,z,seg){const m=new THREE.Mesh(new THREE.CylinderGeometry(c(r0),c(r1),c(h),seg||14),mat);m.position.set(c(x),c(y+h/2),c(z));g.add(m);return m;}
+function dotTex(){const s=64,cv=document.createElement("canvas");cv.width=cv.height=s;const x=cv.getContext("2d");const gr=x.createRadialGradient(s/2,s/2,0,s/2,s/2,s/2);gr.addColorStop(0,"rgba(255,255,255,1)");gr.addColorStop(.4,"rgba(255,255,255,.55)");gr.addColorStop(1,"rgba(255,255,255,0)");x.fillStyle=gr;x.fillRect(0,0,s,s);return new THREE.CanvasTexture(cv);}
+const DOT=dotTex();
+function pointsMat(color,size,op,add){return new THREE.PointsMaterial({color,size,map:DOT,transparent:true,opacity:op,depthWrite:false,blending:add===false?THREE.NormalBlending:THREE.AdditiveBlending,sizeAttenuation:true});}
+
+// ======================================================================
+// TEMPLE MOUNT — Herodian platform (wall lengths: W 485 m, E 466 m, S 278 m, N 315 m)
+// ======================================================================
+const gMount=reg("mount");
+(function(){
+  // corners in cubits (≈0.525 m); inner complex centered on origin, platform extends south
+  const P=[[-270,-300],[330,-310],[300,580],[-230,612]]; // NW, NE, SE, SW
+  const sh=new THREE.Shape(); sh.moveTo(c(P[0][0]),c(P[0][1])); for(let i=1;i<4;i++)sh.lineTo(c(P[i][0]),c(P[i][1])); sh.closePath();
+  const geo=new THREE.ExtrudeGeometry(sh,{depth:c(60),bevelEnabled:false});
+  geo.rotateX(Math.PI/2); // shape xy -> xz, extrude downward
+  const m=new THREE.Mesh(geo,[M.mountTop,M.mountSide]); gMount.add(m);
+  // perimeter porticoes: columns + roof along N, E, W; Royal Stoa along S
+  function colonnade(a,b,rows,h,step,roofW,tall){
+    const ax=a[0],az=a[1],bx=b[0],bz=b[1]; const L=Math.hypot(bx-ax,bz-az); const n=Math.floor(L/step);
+    const ux=(bx-ax)/L,uz=(bz-az)/L; const nx=-uz,nz=ux; // inward normal (platform is CW in xz -> check sign below)
+    const geoC=new THREE.CylinderGeometry(c(1.4),c(1.6),c(h),8);
+    const inst=new THREE.InstancedMesh(geoC,M.col,n*rows); let k=0; const d=new THREE.Object3D();
+    for(let r=0;r<rows;r++)for(let i=0;i<n;i++){const t=(i+.5)*step; const off=8+r*(roofW-12)/Math.max(1,rows-1);
+      d.position.set(c(ax+ux*t+nx*off),c(h/2),c(az+uz*t+nz*off)); d.updateMatrix(); inst.setMatrixAt(k++,d.matrix);}
+    gMount.add(inst);
+    const roof=new THREE.Mesh(new THREE.BoxGeometry(c(L),c(tall?6:4),c(roofW)),M.roof);
+    roof.position.set(c((ax+bx)/2+nx*roofW/2),c(h+(tall?3:2)),c((az+bz)/2+nz*roofW/2)); roof.rotation.y=-Math.atan2(uz,ux); gMount.add(roof);
+    // back wall
+    const w=new THREE.Mesh(new THREE.BoxGeometry(c(L),c(h+4),c(4)),M.stone2);
+    w.position.set(c((ax+bx)/2+nx*1),c((h+4)/2),c((az+bz)/2+nz*1)); w.rotation.y=-Math.atan2(uz,ux); gMount.add(w);
+  }
+  // shape order NW->NE->SE->SW is clockwise viewed from above (+y) in x/z(south) coords; inward normal = (-uz,ux)
+  colonnade(P[0],P[1],2,30,18,30);          // north
+  colonnade(P[1],P[2],2,30,18,30);          // east: Solomon's Portico
+  colonnade(P[3],P[0],2,30,18,30);          // west
+  colonnade(P[2],P[3],4,50,16,70,true);     // south: Royal Stoa (four rows of columns)
+  // Antonia Fortress at NW corner: block with four towers
+  const ag=new THREE.Group(); gMount.add(ag);
+  box(ag,M.stone2,-330,-210,0,40,-380,-300);
+  [[-330,-380],[-210,-380],[-210,-300],[-330,-300]].forEach((p,i)=>{cyl(ag,M.stone2,9,9,i===2?70:50,p[0],0,p[1],10);});
+  // Shushan (eastern) gate on axis
+  box(gMount,M.stone2,300,325,0,40,-25,-8); box(gMount,M.stone2,300,325,0,40,8,25); box(gMount,M.stone2,300,325,24,40,-8,8);
+  // simple market stalls along the south of the Court of the Gentiles
+  const stall=new THREE.MeshStandardMaterial({color:0xa98a62,roughness:.9});
+  for(let i=0;i<14;i++){const x=-160+i*28; box(gMount,stall,x,x+16,0,7,470+(i%2)*14,482+(i%2)*14);}
+})();
+
+// ======================================================================
+// SOREG and CHEL — the balustrade (3 cubits, Josephus) and the 10-cubit terrace
+// ======================================================================
+const gSoreg=reg("soreg");
+(function(){
+  const X0=-161-5, X1=161+5, Z=67.5+5; // outer faces of the complex walls
+  // chel: raised terrace 10 cubits wide, top at y=6
+  const chelMat=new THREE.MeshStandardMaterial({color:0xd3c8b0,roughness:.95});
+  box(gSoreg,chelMat,X0-10,X1+10,0,Y.chel,-Z-10,Z+10);
+  // stairs of 12 steps on east front
+  for(let i=0;i<12;i++){box(gSoreg,chelMat,X1+10+ (12-i)*0.5-0.5, X1+10+(12-i)*0.5,0,(i+1)*0.5,-30,30);}
+  // soreg lattice: low posts and rails with 13 openings
+  const rail=new THREE.MeshStandardMaterial({color:0x8f8676,roughness:.8});
+  const R0=X0-24,R1=X1+24,RZ=Z+24; const segs=[[R0,-RZ,R1,-RZ],[R1,-RZ,R1,RZ],[R1,RZ,R0,RZ],[R0,RZ,R0,-RZ]];
+  let gapCount=0;
+  segs.forEach((s,si)=>{const L=Math.hypot(s[2]-s[0],s[3]-s[1]); const ux=(s[2]-s[0])/L,uz=(s[3]-s[1])/L;
+    const n=Math.floor(L/6); const gaps=si%2?3:4;
+    for(let i=0;i<n;i++){const t=i*6; if(si===1&&Math.abs(s[1]+uz*(t+3))<7)continue; const isGap=(i%Math.floor(n/gaps)===Math.floor(n/gaps/2))&&gapCount<13; if(isGap){gapCount++;continue;}
+      const m=new THREE.Mesh(new THREE.BoxGeometry(c(6),c(3),c(.6)),rail); m.position.set(c(s[0]+ux*(t+3)),c(1.5),c(s[1]+uz*(t+3))); m.rotation.y=-Math.atan2(uz,ux); gSoreg.add(m);}
+  });
+  // warning stele beside the eastern opening
+  box(gSoreg,new THREE.MeshStandardMaterial({color:0xcfc4ad,roughness:.9}),R1+4.5,R1+6,0,2.2,-13,-6);
+  const ic=document.createElement("canvas");ic.width=512;ic.height=360;const ix=ic.getContext("2d");
+  ix.fillStyle="#efe6d0";ix.fillRect(0,0,512,360);ix.fillStyle="#3a3022";ix.font="bold 30px Georgia, serif";ix.textAlign="center";
+  ["ΜΗΘΕΝΑ ΑΛΛΟΓΕΝΗ ΕΙΣ","ΠΟΡΕΥΕΣΘΑΙ ΕΝΤΟΣ ΤΟΥ ΠΕ","ΡΙ ΤΟ ΙΕΡΟΝ ΤΡΥΦΑΚΤΟΥ ΚΑΙ","ΠΕΡΙΒΟΛΟΥ ΟΣ Δ ΑΝ ΛΗ","ΦΘΗ ΕΑΥΤΩΙ ΑΙΤΙΟΣ ΕΣ","ΤΑΙ ΔΙΑ ΤΟ ΕΞΑΚΟΛΟΥ","ΘΕΙΝ ΘΑΝΑΤΟΝ"].forEach((l,i)=>ix.fillText(l,256,52+i*44));
+  const st=new THREE.Mesh(new THREE.BoxGeometry(c(1),c(2.6),c(3.6)),[new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(ic),roughness:.8}),M.stone,M.stone,M.stone,M.stone,M.stone]);
+  st.position.set(c(R1+5.2),c(2.2+1.3),c(-9.5)); gSoreg.add(st);
+})();
+
+// ======================================================================
+// COURT OF THE WOMEN — 135 × 135 cubits (Middot 2.5), floor at 6
+// ======================================================================
+const gWomen=reg("women");
+const WX0=26, WX1=161, WZ=67.5;
+(function(){
+  box(gWomen,M.paveW,WX0,WX1,Y.chel-1,Y.women,-WZ,WZ);
+  const wallH=22;
+  box(gWomen,M.stone,WX0,WX1,Y.women,Y.women+wallH,-WZ-5,-WZ);       // north wall
+  box(gWomen,M.stone,WX0,WX1,Y.women,Y.women+wallH,WZ,WZ+5);         // south wall
+  box(gWomen,M.stone,WX1,WX1+5,Y.women,Y.women+wallH,-WZ-5,-12);     // east wall, left of gate
+  box(gWomen,M.stone,WX1,WX1+5,Y.women,Y.women+wallH,12,WZ+5);       // east wall, right of gate
+  // Beautiful Gate (eastern gate of the Women's court; Acts 3 — traditional identification)
+  box(gWomen,M.gold,WX1-1,WX1+7,Y.women,Y.women+wallH+8,-14,-10);
+  box(gWomen,M.gold,WX1-1,WX1+7,Y.women,Y.women+wallH+8,10,14);
+  box(gWomen,M.gold,WX1-1,WX1+7,Y.women+wallH+2,Y.women+wallH+8,-14,14);
+  // north & south gates
+  [-1,1].forEach(s=>{box(gWomen,M.stone2,90,110,Y.women,Y.women+wallH+6,s*WZ-(s>0?0:7),s*WZ+(s>0?7:0));});
+  // balcony (gallery for women, Middot 2.5) along north, south, east
+  const bal=new THREE.MeshStandardMaterial({color:0xcbbd9f,roughness:.9});
+  box(gWomen,bal,WX0+40,WX1-40,Y.women+10,Y.women+11.5,-WZ,-WZ+8);
+  box(gWomen,bal,WX0+40,WX1-40,Y.women+10,Y.women+11.5,WZ-8,WZ);
+  // four roofless corner chambers, 40 × 40
+  const ch=[[WX1-40,WX1,-WZ,-WZ+40,"wood"],[WX1-40,WX1,WZ-40,WZ,"nazirites"],[WX0,WX0+40,-WZ,-WZ+40,"lepers"],[WX0,WX0+40,WZ-40,WZ,"oil"]];
+  ch.forEach(q=>{const[x0,x1,z0,z1]=q; const t=2,h=14;
+    box(gWomen,M.stone2,x0,x1,Y.women,Y.women+h,z0,z0+t); box(gWomen,M.stone2,x0,x1,Y.women,Y.women+h,z1-t,z1);
+    box(gWomen,M.stone2,x0,x0+t,Y.women,Y.women+h,z0,z1); box(gWomen,M.stone2,x1-t,x1,Y.women,Y.women+h,z0,z1);});
+  // four golden lampstands (Sukkah 5.2: 50 cubits tall, four bowls)
+  [[70,-20],[70,20],[118,-20],[118,20]].forEach(p=>{
+    cyl(gWomen,M.gold,1,1.4,50,p[0],Y.women,p[1],8);
+    [[-3,-3],[3,-3],[-3,3],[3,3]].forEach(o=>cyl(gWomen,M.gold,1.6,1,1.5,p[0]+o[0],Y.women+50,p[1]+o[1],8));
+  });
+  // fifteen semicircular steps up to the Nicanor Gate (Middot 2.5)
+  for(let k=0;k<15;k++){
+    const R=30-k*0.5;
+    const g=new THREE.CylinderGeometry(c(R),c(R),c(0.5),40,1,false,0,Math.PI);
+    const m=new THREE.Mesh(g,M.paveW); m.position.set(c(WX0),c(Y.women+k*0.5+0.25),0); gWomen.add(m);
+  }
+})();
+
+// ======================================================================
+// INNER COURT — 187 × 135 (Middot 5.1): Israel 11, Priests 11, Altar 32, gap 22, Sanctuary 100, rear 11
+// ======================================================================
+const gInner=reg("inner");
+const IX0=-161, IX1=26, IZ=67.5;
+(function(){
+  box(gInner,M.pave,15,IX1,Y.women,Y.israel,-IZ,IZ);              // Court of Israel strip
+  box(gInner,M.pave,IX0,15,Y.women,Y.priests,-IZ,IZ);             // Priests' court and the rest
+  // dukhan steps between Israel and Priests (3 steps of half a cubit)
+  for(let i=0;i<3;i++)box(gInner,M.pave,15-i*1.2-1.2,15-i*1.2,Y.israel,Y.israel+(i+1)*.833,-IZ+6,IZ-6);
+  const wallH=32;
+  box(gInner,M.stone,IX0-5,IX1,Y.priests,Y.priests+wallH,-IZ-5,-IZ);
+  box(gInner,M.stone,IX0-5,IX1,Y.priests,Y.priests+wallH,IZ,IZ+5);
+  box(gInner,M.stone,IX0-5,IX0,Y.priests,Y.priests+wallH,-IZ,IZ);
+  // east wall with Nicanor Gate (Corinthian bronze)
+  box(gInner,M.stone,IX1,IX1+5,Y.israel,Y.israel+wallH,-IZ-5,-14);
+  box(gInner,M.stone,IX1,IX1+5,Y.israel,Y.israel+wallH,14,IZ+5);
+  box(gInner,M.bronze,IX1-2,IX1+8,Y.israel,Y.israel+wallH+10,-16,-10);
+  box(gInner,M.bronze,IX1-2,IX1+8,Y.israel,Y.israel+wallH+10,10,16);
+  box(gInner,M.bronze,IX1-2,IX1+8,Y.israel+wallH+3,Y.israel+wallH+10,-16,16);
+  // gatehouses on north and south walls
+  [-1,1].forEach(s=>{[-130,-80,-30].forEach(x=>box(gInner,M.stone2,x-10,x+10,Y.priests,Y.priests+wallH+8,s>0?IZ-2:-IZ-7,s>0?IZ+7:-IZ+2));});
+  // Altar of burnt offering: 32 × 32, about 10 high (Middot 3.1); center x=-12, a little south
+  const AX=-12, AZ=4;
+  box(gInner,M.stone2,AX-16,AX+16,Y.priests,Y.priests+1,AZ-16,AZ+16);
+  box(gInner,M.stone,AX-15,AX+15,Y.priests+1,Y.priests+6,AZ-15,AZ+15);
+  box(gInner,M.stone,AX-14,AX+14,Y.priests+6,Y.priests+9,AZ-14,AZ+14);
+  [[-13,-13],[13,-13],[-13,13],[13,13]].forEach(o=>box(gInner,M.stone,AX+o[0]-1,AX+o[0]+1,Y.priests+9,Y.priests+10.5,AZ+o[1]-1,AZ+o[1]+1));
+  // ramp on the south side, 32 long × 16 wide
+  const rampLen=32, rampW=16; const rg=new THREE.BoxGeometry(c(rampW),c(1.5),c(Math.hypot(rampLen,9)));
+  const ramp=new THREE.Mesh(rg,M.stone); ramp.position.set(c(AX),c(Y.priests+4.5),c(AZ+14+rampLen/2)); ramp.rotation.x=Math.atan2(9,rampLen); gInner.add(ramp);
+  // altar fire
+  const fire=new THREE.Mesh(new THREE.BoxGeometry(c(10),c(1.4),c(10)),new THREE.MeshBasicMaterial({color:0xff8a2a}));
+  fire.position.set(c(AX),c(Y.priests+9.7),c(AZ)); gInner.add(fire); refs.altarFire=fire;
+  // laver, between porch and altar, toward the south
+  cyl(gInner,M.bronze,3,2,6,-39,Y.priests,20,16); cyl(gInner,M.bronze,4.5,3,2,-39,Y.priests+6,20,16);
+  // place of slaughter, north of the altar: rings, pillars and tables (Middot 3.5)
+  const ringG=new THREE.TorusGeometry(c(1.1),c(.25),6,14);
+  for(let r=0;r<4;r++)for(let i=0;i<6;i++){const m=new THREE.Mesh(ringG,M.bronze);m.rotation.x=Math.PI/2;m.position.set(c(-2-i*4.5),c(Y.priests+.3),c(-24-r*4.5));gInner.add(m);}
+  for(let i=0;i<8;i++)cyl(gInner,M.col,.8,.8,8,-2-i*3.5,Y.priests,-46,8);
+  for(let i=0;i<8;i++)box(gInner,M.col,-30+i*3.6,-27.6+i*3.6,Y.priests,Y.priests+3,-56,-51);
+})();
+
+// ======================================================================
+// SANCTUARY — 100 × 100 × 100 (Middot 4.6–4.7). East face at x=-50.
+// E–W: porch wall 5, porch 11, wall 6, Holy Place 40, amah traksin 1, Holy of Holies 20, wall 6, cell 6, wall 5
+// N–S (body): 25 | wall 6 | Holy Place 20 | wall 6 | 25 ; porch 100 wide
+// ======================================================================
+const gSanct=reg("sanct");
+const gInterior=new THREE.Group(); gSanct.add(gInterior); refs.interior=gInterior;
+const shellParts=[]; const roofParts=[];
+const FX=-50;          // east face
+const X_porch=FX-16;   // after porch wall + porch
+const X_hp0=X_porch-6, X_hp1=X_hp0-40, X_hh0=X_hp1-1, X_hh1=X_hh0-20, X_back=-150;
+(function(){
+  const fy=Y.sanct, top=fy+100;
+  // twelve steps from the Priests' court up to the porch (half a cubit high, one cubit deep)
+  for(let i=0;i<12;i++)box(gSanct,M.paveW,FX+12-i-1+0,FX+12-i,Y.priests,Y.priests+(i+1)*.5,-25,25);
+  box(gSanct,M.pave,X_back,FX,Y.priests,fy,-50,50); // podium
+  function sb(mat,...a){const m=box(gSanct,mat,...a);shellParts.push(m);return m;}
+  // porch: front wall with opening 20 wide × 40 high
+  sb(M.shell,FX-5,FX,fy,top,-50,-10); sb(M.shell,FX-5,FX,fy,top,10,50); sb(M.shell,FX-5,FX,fy+40,top,-10,10);
+  sb(M.shell,X_porch,FX-5,fy,top,-50,-44); sb(M.shell,X_porch,FX-5,fy,top,44,50);
+  // porch rear wall / Holy Place front wall (6 thick) with gate 10 × 20, porch wings beyond the body
+  sb(M.shell,X_hp0,X_porch,fy,top,-50,-29); sb(M.shell,X_hp0,X_porch,fy,top,-23,-5); sb(M.shell,X_hp0,X_porch,fy+9,top,-29,-23); sb(M.shell,X_hp0,X_porch,fy,top,5,50); sb(M.shell,X_hp0,X_porch,fy+20,top,-5,5);
+  // body: outer walls 70 wide
+  sb(M.shell,X_back,X_hp0,fy,top,-35,-30); sb(M.shell,X_back,X_hp0,fy,top,30,35); sb(M.shell,X_back,X_back+5,fy,top,-30,30);
+  // roofs (hidden in cutaway)
+  const r1=box(gSanct,M.shell,X_porch,FX,top,top+2,-50,50); roofParts.push(r1);
+  const r2=box(gSanct,M.shell,X_back,X_hp0,top,top+2,-35,35); roofParts.push(r2);
+  // gold trim: cornice and the golden vine over the entrance
+  const t1=box(gSanct,M.shellGold,FX-0.5,FX+0.6,top-4,top,-50,50); shellParts.push(t1);
+  const t2=box(gSanct,M.shellGold,FX+0.2,FX+0.9,fy+40,fy+44,-14,14); shellParts.push(t2);
+  // Holy Place interior walls (6 thick) and ceiling at 40
+  box(gInterior,M.stone,X_hp1,X_hp0,fy,fy+40,-16,-10); box(gInterior,M.stone,X_hp1,X_hp0,fy,fy+40,10,16);
+  box(gInterior,M.stone,X_hh1-6,X_hh1,fy,fy+40,-16,16);
+  box(gInterior,M.stone,X_hh1,X_hh0,fy,fy+40,-16,-10); box(gInterior,M.stone,X_hh1,X_hh0,fy,fy+40,10,16);
+  const floorG=new THREE.MeshStandardMaterial({color:0xcdb88a,roughness:.6,metalness:.15});
+  box(gInterior,floorG,X_hh1,X_hp0,fy,fy+.3,-10,10);
+  // side chambers (38 cells in three storeys: 15 north, 15 south, 8 west — Middot 4.3)
+  const doorMat=new THREE.MeshBasicMaterial({color:0x221d16});
+  var hiddenCell={};
+  function cellRow(n,story,side){const L=X_hp0-(X_hh1-6); const w=L/n;
+    for(let i=0;i<n;i++){const x1=X_hp0-i*w, x0=x1-w+0.6; const y0=fy+story*12, y1=y0+11; if(story===0&&side<0&&i===1){hiddenCell.x0=x0;hiddenCell.x1=x1;continue;}
+      const z0=side<0?-22:16, z1=side<0?-16:22; const m=box(gInterior,M.cell,x0,x1,y0,y1,z0,z1); m.userData.cell=true;
+      const dz=side<0?-15.9:15.9; const d=new THREE.Mesh(new THREE.PlaneGeometry(c(2.2),c(5)),doorMat); d.position.set(c((x0+x1)/2),c(y0+2.6),c(dz+(side<0?0:0))); d.rotation.y=side<0?0:Math.PI; gInterior.add(d);
+      const d2=new THREE.Mesh(new THREE.PlaneGeometry(c(2.4),c(5.2)),doorMat); d2.position.set(c((x0+x1)/2),c(y0+2.7),c(side<0?-22.05:22.05)); d2.rotation.y=side<0?Math.PI:0; gInterior.add(d2);}}
+  [[5,0],[5,1],[5,2]].forEach(p=>{cellRow(p[0],p[1],-1);cellRow(p[0],p[1],1);});
+  // the hollow cell: Troy's hidden room of idols (imaginative, not historical)
+  (function(){const x0=hiddenCell.x0,x1=hiddenCell.x1,cx=(x0+x1)/2, y0=fy, y1=fy+11, z0=-22, z1=-16, t=.6;
+    const hr=new THREE.Group(); gInterior.add(hr); refs.hiddenRoom=hr;
+    box(hr,M.cell,x0,x1,y0,y1,z1-t,z1); box(hr,M.cell,x0,x0+t,y0,y1,z0,z1); box(hr,M.cell,x1-t,x1,y0,y1,z0,z1); box(hr,M.cell,x0,x1,y1-t,y1,z0,z1);
+    box(hr,M.cell,x0,cx-1.6,y0,y1,z0,z0+t); box(hr,M.cell,cx+1.6,x1,y0,y1,z0,z0+t); box(hr,M.cell,cx-1.6,cx+1.6,y0+3,y1,z0,z0+t);
+    const grain=new THREE.MeshStandardMaterial({color:0xc9a866,roughness:1});
+    const heap=new THREE.Mesh(new THREE.ConeGeometry(c(2.6),c(1.8),14),grain); heap.position.set(c(cx+3.2),c(y0+.9),c(z0-1.4)); hr.add(heap);
+    const jade=new THREE.MeshStandardMaterial({color:0x3f9a74,roughness:.35,metalness:.1,emissive:0x0f3a28,emissiveIntensity:.6});
+    box(hr,new THREE.MeshStandardMaterial({color:0x6a4a2a,roughness:.8}),cx-2.6,cx-0.6,y0,y0+1.2,z1-2.4,z1-1);
+    const idol=new THREE.Group(); hr.add(idol); idol.position.set(c(cx-1.6),c(y0+1.2),c(z1-1.7));
+    const b1=new THREE.Mesh(new THREE.CylinderGeometry(c(.28),c(.42),c(1.1),10),jade); b1.position.y=c(.55); idol.add(b1);
+    const h1=new THREE.Mesh(new THREE.SphereGeometry(c(.3),12,10),jade); h1.position.y=c(1.35); h1.scale.set(1,1.15,1); idol.add(h1);
+    [-1,1].forEach(sd=>{const w=new THREE.Mesh(new THREE.ConeGeometry(c(.18),c(.9),6),jade); w.position.set(0,c(1.0),c(sd*.45)); w.rotation.x=sd*1.1; idol.add(w);});
+    box(hr,M.gold,cx+0.4,cx+1.6,y0,y0+.9,z1-2.2,z1-1.2); box(hr,new THREE.MeshStandardMaterial({color:0x7d6a52,roughness:.9}),cx+2.2,cx+3.4,y0,y0+1.4,z1-2.0,z1-0.8);
+    box(hr,new THREE.MeshStandardMaterial({color:0x8a5a3a,roughness:.9}),cx-3.6,cx-2.8,y0,y0+.8,z0+1,z0+2);
+    const torch=new THREE.PointLight(0xff9a40,0,c(14)); torch.position.set(c(cx),c(y0+3.5),c(z0+2.2)); hr.add(torch); refs.torch=torch;
+    refs.hiddenCX=cx;
+    const cor=new THREE.PointLight(0xffb070,0,c(40)); cor.position.set(c(-86),c(fy+8),c(-26)); gInterior.add(cor); refs.corLight=cor;
+  })();
+  for(let s=0;s<3;s++){const n=s<2?3:2; for(let i=0;i<n;i++){const z0=-15+i*(30/n), z1=z0+30/n-0.6; box(gInterior,M.cell,X_back+5,X_hh1-6,fy+s*12,fy+s*12+11,z0,z1);}}
+  // Table of the bread of the presence (north) with twelve loaves in two stacks
+  box(gInterior,M.gold,-92,-87,fy,fy+3,-7,-4.5);
+  for(let k=0;k<6;k++){box(gInterior,new THREE.MeshStandardMaterial({color:0xd9b77a,roughness:.8}),-91.5,-89.6,fy+3+k*.35,fy+3.3+k*.35,-6.8,-4.7);box(gInterior,new THREE.MeshStandardMaterial({color:0xd9b77a,roughness:.8}),-89.4,-87.5,fy+3+k*.35,fy+3.3+k*.35,-6.8,-4.7);}
+  // Menorah (south): seven branches
+  const MZ=5.5, MX=-89.5; cyl(gInterior,M.gold,.25,.35,5,MX,fy,MZ,8); cyl(gInterior,M.gold,1,1.2,.5,MX,fy,MZ,10);
+  const flames=[];
+  box(gInterior,M.gold,MX-.15,MX+.15,fy+4.9,fy+5.15,MZ-2.5,MZ+2.5);
+  for(let b=-3;b<=3;b++){
+    const z=MZ+b*0.8; cyl(gInterior,M.gold,.18,.12,.35,MX,fy+5.1,z,6);
+    if(b>0){const arc=new THREE.Mesh(new THREE.TorusGeometry(c(b*0.8),c(.1),6,18,Math.PI),M.gold);arc.rotation.y=Math.PI/2;arc.rotation.x=Math.PI;arc.position.set(c(MX),c(fy+5),c(MZ));gInterior.add(arc);}
+    const f=new THREE.Mesh(new THREE.SphereGeometry(c(.32),8,6),new THREE.MeshBasicMaterial({color:0xffc35a})); f.position.set(c(MX),c(fy+5.75),c(z)); gInterior.add(f); flames.push(f);
+  }
+  refs.flames=flames;
+  const lamp=new THREE.PointLight(0xffb555,0.9,c(60)); lamp.position.set(c(MX),c(fy+8),c(MZ)); gInterior.add(lamp);
+  // Altar of incense, on the axis before the veil
+  box(gInterior,M.gold,-101,-99,fy,fy+3,-1,1);
+  // the veil: two curtains a cubit apart (the amah traksin)
+  const vc=document.createElement("canvas");vc.width=256;vc.height=256;const vx=vc.getContext("2d");
+  const cols=["#7a1a2a","#2a3a8a","#5a2a6a","#e8dcc0"];for(let i=0;i<32;i++){vx.fillStyle=cols[i%4];vx.fillRect(i*8,0,8,256);}
+  vx.globalAlpha=.25;for(let j=0;j<256;j+=6){vx.fillStyle="#d8a648";vx.fillRect(0,j,256,1.5);}
+  const vt=new THREE.CanvasTexture(vc);
+  const veils=[];
+  [X_hp1,X_hh0].forEach(x=>{const g=new THREE.PlaneGeometry(c(20),c(40),16,1);const v=new THREE.Mesh(g,new THREE.MeshStandardMaterial({map:vt,side:THREE.DoubleSide,roughness:.9}));
+    v.rotation.y=Math.PI/2; v.position.set(c(x-0.1),c(fy+20),0); gInterior.add(v); veils.push(v);});
+  refs.veils=veils;
+  // Holy of Holies: bare Foundation Stone and a soft light
+  const rockG=new THREE.DodecahedronGeometry(c(3.2),0); const rock=new THREE.Mesh(rockG,M.rock); rock.scale.set(1.3,.25,1); rock.position.set(c((X_hh0+X_hh1)/2),c(fy+.4),0); gInterior.add(rock);
+  const glow=new THREE.PointLight(0xffd58a,1.4,c(45)); glow.position.set(c((X_hh0+X_hh1)/2),c(fy+20),0); gInterior.add(glow); refs.glow=glow;
+  const halo=new THREE.Mesh(new THREE.SphereGeometry(c(7),20,14),new THREE.MeshBasicMaterial({color:0xffd58a,transparent:true,opacity:.12,depthWrite:false,blending:THREE.AdditiveBlending}));
+  halo.position.set(c((X_hh0+X_hh1)/2),c(fy+14),0); gInterior.add(halo); refs.halo=halo;
+})();
+
+// ---------- the Ark (optional, absent historically) ----------
+const gArk=reg("ark");
+(function(){
+  const fy=Y.sanct, cx=(X_hh0+X_hh1)/2, mat=new THREE.MeshStandardMaterial({color:0xf1cf7e,metalness:.6,roughness:.3,transparent:true,opacity:.55,emissive:0x5a3a10,emissiveIntensity:.5});
+  box(gArk,mat,cx-1.25,cx+1.25,fy+.6,fy+2.1,-.75,.75);
+  [-1,1].forEach(s=>{const w=new THREE.Mesh(new THREE.ConeGeometry(c(.5),c(2.2),4),mat); w.position.set(c(cx+s*.8),c(fy+3.1),0); w.rotation.z=-s*0.9; gArk.add(w);});
+})();
+
+// ======================================================================
+// SMOKE AND FIRE
+// ======================================================================
+const gSmoke=reg("smoke");
+function smokeColumn(x,y,z,n,spread,rise,color,size,op){
+  const pos=new Float32Array(n*3), seed=new Float32Array(n);
+  for(let i=0;i<n;i++){seed[i]=Math.random();}
+  const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  const p=new THREE.Points(g,pointsMat(color,size,op,false)); gSmoke.add(p); let t=0;
+  updaters.push(dt=>{t+=dt; for(let i=0;i<n;i++){const ph=((t*0.08+seed[i])%1); const a=seed[i]*40+t*0.3;
+    pos[i*3]=c(x)+Math.cos(a)*c(spread)*ph + c(ph*rise*0.35); pos[i*3+1]=c(y)+c(rise)*ph; pos[i*3+2]=c(z)+Math.sin(a)*c(spread)*ph;}
+    g.attributes.position.needsUpdate=true;});
+}
+smokeColumn(-12,Y.priests+10,4,180,9,70,0xd2cbbe,1.3,0.32);
+smokeColumn(-100,Y.sanct+3,0,50,2,18,0xe6dcc8,0.35,0.3);
+updaters.push(dt=>{const t=performance.now()/1000;
+  if(refs.altarFire)refs.altarFire.scale.y=0.8+0.4*Math.abs(Math.sin(t*5));
+  (refs.flames||[]).forEach((f,i)=>{f.scale.setScalar(0.85+0.25*Math.abs(Math.sin(t*7+i*1.7)));});
+  (refs.veils||[]).forEach((v,j)=>{const p=v.geometry.attributes.position; for(let i=0;i<p.count;i++){const yy=p.getY(i); const xx=p.getX(i); p.setZ(i,Math.sin(xx*3+t*0.8+j)*0.03*(0.5-yy/c(40)));} p.needsUpdate=true;});
+  if(refs.halo)refs.halo.material.opacity=0.10+0.05*Math.sin(t*0.9);
+});
+
+// ======================================================================
+// THE PILGRIM'S WAY — Troy's route, east to west and upward
+// ======================================================================
+const gPath=reg("path");
+(function(){
+  const pts=[[330,2,0],[200,2,0],[178,7,0],[166,7.5,0],[140,7.5,0],[95,7.5,0],[52,7.5,0],[32,13,0],[24,15,0],[18,15,0],[6,17.5,-24],[-20,17.5,-26],[-40,17.5,-8],[-48,23,0],[-60,23.5,0],[-75,23.5,0],[-95,23.5,0],[-108,23.5,0],[-118,24,0],[-123,26,0]]
+    .map(p=>new THREE.Vector3(c(p[0]),c(p[1]),c(p[2])));
+  const curve=new THREE.CatmullRomCurve3(pts,false,"catmullrom",0.2);
+  const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(curve.getPoints(400)),new THREE.LineBasicMaterial({color:0xd8a648,transparent:true,opacity:.45}));
+  gPath.add(line);
+  const n=70,pos=new Float32Array(n*3); const g=new THREE.BufferGeometry(); g.setAttribute("position",new THREE.BufferAttribute(pos,3));
+  const p=new THREE.Points(g,pointsMat(0xf1cf7e,0.9,0.95)); gPath.add(p); let t=0;
+  updaters.push(dt=>{t+=dt*0.018; for(let i=0;i<n;i++){const u=((t+i/n)%1+1)%1; const v=curve.getPointAt(u); pos[i*3]=v.x;pos[i*3+1]=v.y+0.12;pos[i*3+2]=v.z;} g.attributes.position.needsUpdate=true;});
+})();
+
+// ---------- Boaz and Jachin: ghosts from Solomon's Temple, shown only on the walk ----------
+const gPillars=reg("pillars");
+(function(){const gm=new THREE.MeshStandardMaterial({color:0xf1cf7e,transparent:true,opacity:.38,emissive:0x7a5214,emissiveIntensity:.6,depthWrite:false,metalness:.3,roughness:.4});
+  [-15,15].forEach(z=>{cyl(gPillars,gm,1.9,1.9,18,-46,Y.priests+6,z,20); cyl(gPillars,gm,2.6,2.2,5,-46,Y.priests+24,z,20);
+    const fl=new THREE.Mesh(new THREE.ConeGeometry(c(1.6),c(4),10,1,true),new THREE.MeshBasicMaterial({color:0xffb050,transparent:true,opacity:.55,blending:THREE.AdditiveBlending,depthWrite:false}));
+    fl.position.set(c(-46),c(Y.priests+31),c(z)); gPillars.add(fl);});
+})();
+
+// ---------- people, animals and the market (the life of the courts) ----------
+const gLife=reg("life");
+(function(){
+  let seed=7; const rnd=()=>{seed=(seed*16807)%2147483647;return (seed-1)/2147483646;};
+  const people=[]; // [x, floorY, z, color]
+  const robes=[0x8a5a3a,0x6b4a2e,0xa98a62,0x4a5a6a,0x7a6a52,0x9a6a4a,0x5a4a3a,0xb59a72,0x3e4a5a];
+  for(let i=0;i<70;i++){const x=180+rnd()*130, z=(rnd()<.5?-1:1)*(9+rnd()*85); people.push([x,0,z,robes[i%robes.length]]);}
+  for(let i=0;i<46;i++){let x=36+rnd()*118, z=(rnd()<.5?-1:1)*(8+rnd()*54); if((x<70||x>117)&&Math.abs(z)>27)continue; people.push([x,Y.women,z,robes[(i+3)%robes.length]]);}
+  for(let i=0;i<14;i++){const z=(i<7?-1:1)*(16+ (i%7)*1.6); people.push([16+(i%3)*3,Y.israel,z+((i%2)?20:0)*(i<7?-1:1),robes[(i+5)%robes.length]]);}
+  // Levites in white on the fifteen steps, either side of the stair's axis
+  for(let i=0;i<24;i++){const side=i<12?-1:1, k=i%12; const z=side*(10+(k%4)*4); const R=30-(Math.floor(k/4)*2.5+3); const d=Math.sqrt(Math.max(0,R*R-z*z));
+    const kk=Math.max(0,Math.min(14,Math.floor((30-R)/0.5))); people.push([26+d,Y.women+0.5*(kk+1),z,0xf3eee2]);}
+  // priests in white around the altar and the place of slaughter
+  for(let i=0;i<18;i++){const x=-34+rnd()*40, z=(i<10)?(-20-rnd()*30):(24+rnd()*20); people.push([x,Y.priests,z,0xf3eee2]);}
+  const n=people.length;
+  const bodyG=new THREE.CylinderGeometry(c(.55),c(.85),c(2.7),8), headG=new THREE.SphereGeometry(c(.42),10,8);
+  const mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.85});
+  const bodies=new THREE.InstancedMesh(bodyG,mat,n), heads=new THREE.InstancedMesh(headG,new THREE.MeshStandardMaterial({color:0xb08a68,roughness:.8}),n);
+  const d=new THREE.Object3D(), col=new THREE.Color();
+  people.forEach((p,i)=>{d.position.set(c(p[0]),c(p[1]+1.35),c(p[2]));d.updateMatrix();bodies.setMatrixAt(i,d.matrix);bodies.setColorAt(i,col.setHex(p[3]));
+    d.position.set(c(p[0]),c(p[1]+3.05),c(p[2]));d.updateMatrix();heads.setMatrixAt(i,d.matrix);});
+  gLife.add(bodies); gLife.add(heads);
+  // animal pens and money-changers' tables beside the eastern approach
+  const fence=new THREE.MeshStandardMaterial({color:0x7d5f40,roughness:.9}), table=new THREE.MeshStandardMaterial({color:0x8a6a48,roughness:.85});
+  const sheepG=new THREE.BoxGeometry(c(1.6),c(1),c(.9)), sheepM=new THREE.MeshStandardMaterial({color:0xeee6d6,roughness:1});
+  const sheep=new THREE.InstancedMesh(sheepG,sheepM,72); let k=0;
+  [[214,248,18,40],[256,290,-40,-18],[214,240,-44,-22],[262,292,20,44]].forEach(r=>{const[x0,x1,z0,z1]=r;
+    box(gLife,fence,x0,x1,0,2,z0,z0+.4); box(gLife,fence,x0,x1,0,2,z1-.4,z1); box(gLife,fence,x0,x0+.4,0,2,z0,z1); box(gLife,fence,x1-.4,x1,0,2,z0,z1);
+    for(let j=0;j<18;j++){d.position.set(c(x0+2+rnd()*(x1-x0-4)),c(.6),c(z0+2+rnd()*(z1-z0-4)));d.rotation.y=rnd()*3;d.updateMatrix();sheep.setMatrixAt(k++,d.matrix);}});
+  d.rotation.set(0,0,0); gLife.add(sheep);
+  for(let i=0;i<6;i++){box(gLife,table,196+i*8,201+i*8,0,2.4,10,13); box(gLife,table,196+i*8,201+i*8,0,2.4,-13,-10);}
+  [[230,30],[275,-30],[226,-34],[278,32]].forEach(p=>{const ox=new THREE.Mesh(new THREE.BoxGeometry(c(3.4),c(2),c(1.4)),new THREE.MeshStandardMaterial({color:0x7a5a3a,roughness:1})); ox.position.set(c(p[0]),c(1.6),c(p[1])); gLife.add(ox);});
+})();
+
+// ======================================================================
+// PSYCHE OVERLAY — Troy's mapping
+// ======================================================================
+const gPsyche=reg("psyche");
+function tint(x0,x1,y,z0,z1,color,op){const m=new THREE.Mesh(new THREE.PlaneGeometry(c(Math.abs(x1-x0)),c(Math.abs(z1-z0))),new THREE.MeshBasicMaterial({color,transparent:true,opacity:op||.42,depthWrite:false,side:THREE.DoubleSide}));
+  m.rotation.x=-Math.PI/2; m.position.set(c((x0+x1)/2),c(y)+0.02,c((z0+z1)/2)); gPsyche.add(m); return m;}
+(function(){
+  // Ego — Court of the Gentiles (the open platform around the courts)
+  const P=[[-270,-300],[330,-310],[300,580],[-230,612]]; const sh=new THREE.Shape(); sh.moveTo(c(P[0][0]),-c(P[0][1])); for(let i=1;i<4;i++)sh.lineTo(c(P[i][0]),-c(P[i][1]));
+  const hole=new THREE.Path(); hole.moveTo(c(-190),-c(-96)); hole.lineTo(c(190),-c(-96)); hole.lineTo(c(190),-c(96)); hole.lineTo(c(-190),-c(96)); sh.holes.push(hole);
+  const eg=new THREE.Mesh(new THREE.ShapeGeometry(sh),new THREE.MeshBasicMaterial({color:0x8a5a3a,transparent:true,opacity:.30,depthWrite:false,side:THREE.DoubleSide}));
+  eg.rotation.x=-Math.PI/2; eg.position.y=0.03; gPsyche.add(eg);
+  tint(WX0,WX1,Y.women+.2,-WZ,WZ,0x2a4ab0,.40);          // Anima
+  tint(-50,IX1,Y.priests+.2,-IZ,IZ,0x2f8a5a,.36);         // masculine strength, sacrifice
+  tint(15,IX1,Y.israel+.2,-IZ,IZ,0x2f8a5a,.36);
+  // Sarx — side chambers
+  [[-1],[1]].forEach(s=>{const m=new THREE.Mesh(new THREE.BoxGeometry(c(X_hp0-X_hh1+6),c(36),c(6.4)),new THREE.MeshBasicMaterial({color:0x5a5a5a,transparent:true,opacity:.30,depthWrite:false}));
+    m.position.set(c((X_hp0+X_hh1-6)/2),c(Y.sanct+18),c(s[0]*19)); gPsyche.add(m);});
+  tint(X_hp1,X_hp0,Y.sanct+.5,-10,10,0xd9913a,.55);       // Still point
+  tint(X_hh1,X_hh0,Y.sanct+.5,-10,10,0xf1cf7e,.75);       // Archetypal Self
+})();
+
+// ======================================================================
+// LABELS
+// ======================================================================
+const gLabels=reg("labels");
+function makeLabel(text,opts){opts=opts||{};
+  const fs=opts.size||38, pad=10, font=(opts.mono?"500 ":"")+fs+"px "+(opts.mono?'"JetBrains Mono", monospace':'Marcellus, Georgia, serif');
+  const cv=document.createElement("canvas"),x=cv.getContext("2d"); x.font=font; const lines=String(text).split("\n");
+  const w=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width)))+pad*2, h=lines.length*fs*1.2+pad*2; cv.width=w*2;cv.height=h*2; x.scale(2,2);
+  x.font=font; x.textAlign="center"; x.textBaseline="middle";
+  x.fillStyle=opts.bg||"rgba(20,22,38,.72)"; const r=6; x.beginPath(); x.moveTo(r,0);x.lineTo(w-r,0);x.quadraticCurveTo(w,0,w,r);x.lineTo(w,h-r);x.quadraticCurveTo(w,h,w-r,h);x.lineTo(r,h);x.quadraticCurveTo(0,h,0,h-r);x.lineTo(0,r);x.quadraticCurveTo(0,0,r,0);x.fill();
+  x.fillStyle=opts.color||"#f1e3bf"; lines.forEach((l,i)=>x.fillText(l,w/2,pad+fs*0.6+i*fs*1.2));
+  const tex=new THREE.CanvasTexture(cv); tex.minFilter=THREE.LinearFilter;
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,depthWrite:false,transparent:true})); s.renderOrder=999;
+  s.material.sizeAttenuation=false; const wh=(opts.h||2.2)*0.0185; s.scale.set(wh*w/h,wh,1); return s;}
+function addLabel(group,text,x,y,z,opts){const s=makeLabel(text,opts);s.position.set(c(x),c(y),c(z));group.add(s);s.userData.tier=(opts&&opts.tier)||0;
+  if(opts&&opts.leader){const a=new THREE.Vector3(c(opts.leader[0]),c(opts.leader[1]),c(opts.leader[2]));const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,s.position.clone()]),new THREE.LineBasicMaterial({color:0xd8a648,transparent:true,opacity:.6,depthTest:false}));ln.renderOrder=998;group.add(ln);s.userData.line=ln;}
+  return s;}
+const gLabelsIn=new THREE.Group(); gLabels.add(gLabelsIn); // interior labels (shown with cutaway)
+const gPsyLabels=new THREE.Group(); gPsyche.add(gPsyLabels);
+function buildLabels(){
+  addLabel(gLabels,"Court of the Gentiles",80,60,380,{h:3.4});
+  addLabel(gLabels,"Royal Stoa",30,85,600,{h:2.8});
+  addLabel(gLabels,"Solomon's Portico",360,70,150,{h:2.6});
+  addLabel(gLabels,"Antonia Fortress",-270,95,-340,{h:2.6});
+  addLabel(gLabels,"Shushan Gate",312,65,0,{h:2.3});
+  addLabel(gLabels,"Soreg and warning stone",200,30,-110,{h:2.1,leader:[185,3,-95],tier:1});
+  addLabel(gLabels,"Beautiful Gate",175,52,0,{h:2.1,leader:[164,30,0],tier:1});
+  addLabel(gLabels,"Court of the Women",110,46,8,{h:2.4,tier:1});
+  addLabel(gLabels,"Chamber of Wood",140,30,-75,{h:1.6,tier:1});
+  addLabel(gLabels,"Chamber of the Nazirites",140,30,75,{h:1.6,tier:1});
+  addLabel(gLabels,"Chamber of the Lepers",48,30,-75,{h:1.6,tier:1});
+  addLabel(gLabels,"Chamber of Oil",40,26,82,{h:1.5,tier:1});
+  addLabel(gLabels,"Fifteen steps\n(Songs of Ascents)",50,26,-22,{h:2.4,leader:[40,10,-12],tier:1});
+  addLabel(gLabels,"Nicanor Gate",26,70,-12,{h:2.1,leader:[26,58,-8],tier:1});
+  addLabel(gLabels,"Court of the Priests",-24,30,-62,{h:1.6,tier:1});
+  addLabel(gLabels,"Altar of burnt offering",-14,54,36,{h:1.9,leader:[-12,27,10],tier:1});
+  addLabel(gLabels,"Laver",-39,36,34,{h:1.6,leader:[-39,26,20],tier:1});
+  addLabel(gLabels,"Porch (Ulam)",-45,135,40,{h:2.2,tier:1});
+  addLabel(gLabels,"Sanctuary",-105,138,0,{h:2.4});
+  addLabel(gLabelsIn,"Holy Place",-80,70,0,{h:1.7,leader:[-82,48,0]});
+  addLabel(gLabelsIn,"Menorah",-84,38,14,{h:1.3,leader:[-89.5,28,5.5]});
+  addLabel(gLabelsIn,"Table of showbread",-84,38,-15,{h:1.3,leader:[-89.5,26,-6]});
+  addLabel(gLabelsIn,"Altar of incense",-100,34,10,{h:1.3,leader:[-100,26,0]});
+  addLabel(gLabelsIn,"The veil",-112,72,-6,{h:1.4,leader:[-112,55,0]});
+  addLabel(gLabelsIn,"Holy of Holies",-123,82,0,{h:1.7,leader:[-123,48,0]});
+  addLabel(gLabelsIn,"Foundation Stone",-128,34,-8,{h:1.2,leader:[-123,23,0]});
+  addLabel(gLabelsIn,"Side chambers (38 cells)",-95,66,32,{h:1.4,leader:[-95,48,19]});
+  const pl={bg:"rgba(255,248,232,.86)",color:"#2a1d0a"};
+  addLabel(gPsyLabels,"EGO\nouter life, the inner barnyard",-60,40,330,Object.assign({h:3.2},pl));
+  addLabel(gPsyLabels,"ANIMA\nreceptive presence",95,58,-20,Object.assign({h:2.6},pl));
+  addLabel(gPsyLabels,"STRENGTH & SACRIFICE\nthe grasping hand lets go",-8,64,-35,Object.assign({h:2.4},pl));
+  addLabel(gPsyLabels,"SARX\nthe shadow's storerooms",-75,70,-48,Object.assign({h:2.2},pl));
+  addLabel(gPsyLabels,"STILL POINT",-70,128,30,Object.assign({h:2.0},pl));
+  addLabel(gPsyLabels,"ARCHETYPAL SELF",-140,150,-10,Object.assign({h:2.0},pl));
+}
+
+
+// ======================================================================
+// WALK WITH TROY — first-person journey along his guided meditation
+// ======================================================================
+const E=3.3; // eye height in cubits
+function buildStations(){
+  const hx=refs.hiddenCX||-91.8, F=Y.sanct;
+  return [
+  {t:"I approach as a Gentile",pos:[294,E,0],look:[-40,40,0],sway:.18,
+   b:"Jerusalem, around 30 AD. I come to the temple as a Gentile. The building is massive. Some of the Jews' new sect, the Christians, say the temple is a picture of the soul, that inside me are all the structures it symbolizes. That sounds almost too wild. So I will walk these grounds as if I were walking into my own unseen soul, and see whether what they claim is true.",
+   p:"",h:"The Shushan Gate opened the eastern wall of Herod's platform, facing the Mount of Olives."},
+  {t:"The Court of the Gentiles",via:[[292,E,0]],pos:[262,E,5],look:[236,2,36],sway:.5,
+   b:"I expected a quiet place to ponder the God of the Jews. Instead I find an animal marketplace: noisy, crowded, and it stinks. I can't pray in here. But wait. <em>Isn't this a lot like the noise of my everyday life?</em> Worry about money, work, success, the struggle to keep the grime of the world at bay. Thoughts, impulses, clutter, distraction.",
+   p:"The ego: busy, restless, crowded with fears and desires. The inner barnyard.",h:"Herod roughly doubled the platform, to about 36 acres. Anyone could walk here, and the Gospels place the animal sellers and money-changers in this court."},
+  {t:"The barrier",via:[[226,E,-2]],pos:[201,E,-4],look:[196,3.4,-9.5],sway:.22,
+   b:"A stone warns that no foreigner may pass, on pain of death. I strain on my toes to see inside. Perhaps this separation has an echo in my own soul: there are places in me I don't let just anyone see, my deepest thoughts, my loving feelings, my sense of the sacred. Then Jesus comes, disguised, and gives me a white robe with stains like spilled blood, and a staff of two kinds of wood grafted into one.",
+   p:"Boundaries of the inner life. Don't cast your pearls before swine.",h:"The soreg was a low balustrade around the sacred precinct. Two of its warning stones have been found; their Greek text appears on the stone here."},
+  {t:"The climb",via:[[194,E,0]],pos:[189,E,0],look:[160,26,0],sway:.12,
+   b:"Jesus takes my hand as we climb. These stairs require effort, like the discipline of seeking God. Yet the beauty of the place makes the effort seem small. Eyes lift, feet climb, hearts shift from the mundane to the lofty.",
+   p:"The discipline of seeking.",h:"Twelve steps rose to the chel, the terrace surrounding the courts. Every court ahead stands higher than the one before it."},
+  {t:"The Beautiful Gate",via:[[182,E,0],[176.5,6+E,0]],pos:[171,6+E,0],look:[150,22,0],sway:.15,
+   b:"The closer we come, the more majestic everything becomes. The gate's majesty is like the awe and wonder of communal worship, the joy of the new believer. <em>Beauty arises from the union of what is true and what is deeply desired.</em> When we taste it, our childlike, playful selves awaken, and drawing near to God becomes a delight. Without this inner music, approaching God could feel heavy and grim.",
+   p:"Joy, the childlike self. \"I am the gate.\"",h:"Acts 3 names a Beautiful Gate. Many place it here, at the eastern entrance to the Court of the Women; others identify it with the Nicanor Gate."},
+  {t:"The Court of the Women",via:[[150,6+E,0]],pos:[112,6+E,4],look:[78,16,-34],sway:.6,
+   b:"The courtyard radiates openness and receptivity. Here I meet a different kind of attention: presence, a state in which my attention fully attunes to another's being, affirming who they are beyond what they do. In prayer it feels like stillness under the shelter of God's wings. <em>Cease striving, and know that I am God.</em> When Mary came to Jesus after Lazarus died, Jesus wept.",
+   p:"The anima, the feminine soul within: receptive, open, present.",h:"135 cubits square, with a roofless chamber in each corner (Nazirites, wood, the healed, oil) and four great lampstands. Women could come this far; men gathered here too."},
+  {t:"The Nicanor Gate",via:[[78,6+E,0]],pos:[62,6+E,0],look:[26,32,0],sway:.3,
+   b:"Jesus points the way between the Levite choirs singing on the steps. The music and light are so glorious I hardly want to leave. It is good to be here; let us stay. But Jesus had a cross to bear and a valley to cross after that mountain. Nicanor means victory. My being was affirmed in the women's court. Now my masculine strength is being summoned.",
+   p:"The heroic call. Both sides of the soul are addressed: the feminine first, then the masculine.",h:"Fifteen curved steps, where the Levites sang the fifteen Songs of Ascents (Psalms 120–134), rose to doors of Corinthian bronze given by Nicanor of Alexandria."},
+  {t:"The Court of the Priests",via:[[31,6.3+E,0],[23,13.5+E,0],[17,13.5+E,0],[12,16+E,-6]],pos:[14,16+E,-34],look:[-12,30,2],sway:.32,
+   b:"The first thing I sense is violence. An altar with fire and blood, the smell of burning sacrifice. The men of Israel watch the fruit of their labor surrendered to God. Even though I work by the sweat of my brow, God says, <em>give it back to me.</em> He knows how territorial we become about what we call mine. My grasping hand must let go, or idolatry will dwell in my heart.",
+   p:"Strength and sacrifice: the masculine in women and men alike learns to release.",h:"The altar measured 32 cubits square at its base, with a ramp on the south. North of it lay the place of slaughter, with rings set in the pavement."},
+  {t:"A side door",via:[[-18,16+E,-14],[-35,16+E,-8],[-50,22+E,-8],[-60,22+E,-20],[-64,22+E,-26]],pos:[-77,22+E,-26],look:[-130,23.5,-23.5],sway:.08,
+   b:"Jesus has another set of clothes waiting, priestly robes. Out of sight, we put them on and slip up the stairs. Before entering the holy place, he pulls me toward a smaller door off to the side, into a dim hallway with many closed doors. Some rooms hold grain for the Levites. All seems in order. One door will not open. It seems barricaded from within.",
+   p:"",h:"Thirty-eight windowless chambers wrapped the sanctuary on three sides, stacked three storeys high. Their real contents are uncertain; this hallway follows Troy's telling."},
+  {t:"The hidden room",via:[[hx+6,22+E,-26],[hx,22+E,-26],[hx,F+1.8,-23.6]],pos:[hx,F+1.8,-19.8],look:[hx-1.6,F+1.8,-17.2],sway:.35,dim:true,
+   b:"Jesus digs in the grain in the corner and uncovers a small, hidden door. On hands and knees I crawl into a dark room that smells musty and dead. In a chest I find a statue carved in jade: beautiful, strange, some foreign god. The priests here hedge their bets, he says. Then he turns to me. <em>Is this like you in any way, my son?</em> Yes, Lord. This is my flesh, my unfinished business, old wounds, defects of character. Lord, have mercy on me.",
+   p:"The sarx, the shadow: little rooms that need light. God is usually gentle in how he exposes them.",h:"Troy's imagining. The idol room is a picture of the psyche, not a claim about the historical Temple."},
+  {t:"Cleansed",via:[[hx,F+1.8,-23.6],[hx,22+E,-26],[-74,22+E,-26],[-60,22+E,-18]],pos:[-60,22+E,-3],look:[-72,29,0],sway:.12,
+   b:"We return to the door of the holy place. <em>You can go no further unless you are clean,</em> Jesus says. He holds out his left palm, and I see blood oozing from it. With his right thumb he traces the sign of the cross on my forehead. <em>You are clean. We can proceed.</em>",
+   p:"Grace before glory. Even our gut reactions can be off; we stand only through trust.",h:"The gate from the porch into the Holy Place was 10 cubits wide and 20 high."},
+  {t:"The threshold",via:[[-52,22+E,0],[-44,19.5+E,0]],pos:[-30,16+E,0],look:[-50,50,0],sway:.06,
+   b:"Now I look up and I'm dumbfounded. The structure towers over me; the entrance looks like the very gate of heaven. I feel small. Scrutinized, not rejected, but searched. My heart repeats one prayer: <em>Lord Jesus Christ, Son of God, have mercy on me, a sinner.</em> Then my soul floods with holy light and fire and love, and Jesus breathes on me, and strength returns to my legs.",
+   p:"Humility, the doorway into holiness.",h:"The porch rose 100 cubits, about 52 meters. Josephus says from a distance the Temple looked like a snow-clad mountain, white wherever it wasn't gold."},
+  {t:"Boaz and Jachin",pos:[-26,16+E,3],look:[-46,30,0],sway:.5,pillars:true,
+   b:"Jesus points to two great pillars. <em>Boaz:</em> the one who sits on David's throne must be the eternal king of my heart. <em>Jachin:</em> only that king can give me strength. My entrance into glory rests on two things, that he is Lord of the universe and of my soul, and that my strength comes only from his strength. <em>Humility, dependence and my lordship are the doorways into holiness,</em> he says.",
+   p:"Dependence: the ego does not enter on its own power.",h:"Boaz and Jachin stood before Solomon's Temple (1 Kings 7:15–22). Herod's Temple did not have them, so they appear here as ghosts."},
+  {t:"The Holy Place",via:[[-44,19.5+E,0],[-52,22+E,0],[-65,22+E,0]],pos:[-80,22+E,0],look:[-90,25.4,0],sway:.55,
+   b:"Daylight fades and the noise softens. Priests move with quiet reverence; the lamps burn. Why does God want bread set before him? He does not hunger. <em>The bread is me,</em> Jesus says, <em>as I'm experienced in you.</em> The menorah's seven lamps join heaven's three and earth's four. Its oil comes from olives beaten, not crushed. <em>I was beaten, but not crushed.</em>",
+   p:"The still point, tended daily: the mind of Christ, the nous, enlightening the soul.",h:"Herod's Holy Place held one golden menorah on the south, one table for the bread of the presence on the north, and the altar of incense before the veil."},
+  {t:"Incense before the veil",pos:[-96,22+E,0],look:[-112,29,0],sway:.12,
+   b:"The small altar stands right before the veil, a movement closer to the most intimate relationship. The incense rises like the prayers of the saints carried on the wind of the Spirit. <em>Enter into this prayer,</em> he says, <em>by entering the incense, its fragrance, and its smoke.</em> The fragrance envelops me. Whether in the body or in the spirit, I cannot tell.",
+   p:"Prayer in the Spirit.",h:"The veil was two curtains hung a cubit apart. The Gospels say it was torn from top to bottom when Jesus died."},
+  {t:"The Holy of Holies",via:[[-108,22+E,0],[-113,22+E,0]],pos:[-117.5,22+E,0],look:[-127,25,0],sway:.3,holy:true,
+   b:"First a blood-red cascade. Then everything is flooded with light that is alive. Before the mercy seat I hear: <em>I am the resurrection and the life. I am the atonement. I am the mercy seat and the glory.</em> Belief is no longer an idea; it is being. Language lies prostrate in the dust. Yet though the power is overwhelming, the love is greater still. <em>Power and love dance like lovers. Wisdom is the song that joins them.</em>",
+   p:"The archetypal Self, the human spirit, open to the spiritual realm.",h:"By Herod's day the Holy of Holies was empty except for the bare Foundation Stone. The Ark shown faintly here is the meditation's image."},
+  {t:"Beside a stream",pos:[-117.5,22+E,0],look:[-127,25,0],sway:0,end:true,
+   b:"The music seems to go on forever, until I no longer notice whether it has stopped. I awaken beside a stream; the rush and tinkle of the water is the first sound I hear. My next thought is, <em>Lord, is all that glory really inside me?</em><br><br>A meadowlark sings, and answers.",
+   p:"",h:"Guided meditation by Dr. Troy Caldwell, from Adventures in Soul Making (troycaldwell.com). Paraphrased with short quotations."},
+  ];
+}
+let ST=null;
+const walk={on:false,idx:0,phase:"dwell",u:0,t:0,dwell:0,paused:false,yawOff:0,pitchOff:0,curve:null,len:1,saved:null,savedOrbit:null};
+const wEls={card:document.getElementById("walkcard"),num:document.getElementById("w-num"),title:document.getElementById("w-title"),body:document.getElementById("w-body"),psy:document.getElementById("w-psy"),hist:document.getElementById("w-hist"),prog:document.getElementById("w-prog"),auto:document.getElementById("w-auto"),pause:document.getElementById("w-pause"),next:document.getElementById("w-next"),fade:document.getElementById("walkfade"),hint:document.getElementById("walkhint")};
+const V=(a)=>new THREE.Vector3(c(a[0]),c(a[1]),c(a[2]));
+let camPos=new THREE.Vector3(), camDir=new THREE.Vector3(-1,0,0);
+function showStation(i){const s=ST[i];
+  wEls.num.textContent="Station "+(i+1)+" of "+ST.length; wEls.title.textContent=s.t; wEls.body.innerHTML=s.b;
+  wEls.psy.textContent=s.p?("Troy's reading: "+s.p):""; wEls.psy.hidden=!s.p; wEls.hist.textContent=s.h||""; wEls.hist.hidden=!s.h;
+  wEls.prog.style.width=((i+1)/ST.length*100)+"%";
+  wEls.next.textContent=s.end?"Walk again ↺":"Continue ▶";
+  const words=(s.b.replace(/<[^>]+>/g," ").split(/\s+/).length);
+  walk.dwell=Math.max(9,words/2.6+3);
+}
+function stationFx(i,arrived){const s=ST[i];
+  refs.pillars.visible=i>=12; // the ghosts appear when Jesus points to them
+  state.ark=!!s.holy; refs.ark.visible=!!s.holy;
+  if(refs.torch)refs.torch.intensity=s.dim?1.2:0; if(refs.corLight)refs.corLight.intensity=(i>=8&&i<=10)?0.9:0;
+  if(refs.glow)refs.glow.intensity=s.holy||s.end?2.1:1.4;
+  if(s.end&&arrived){wEls.fade.style.opacity=.92;} else if(s.holy&&arrived){wEls.fade.style.opacity=.1;} else if(!s.end){wEls.fade.style.opacity=0;}
+}
+function startLeg(i){ // travel from current position to station i
+  const s=ST[i]; const pts=[camPos.clone()].concat((s.via||[]).map(V)).concat([V(s.pos)]);
+  // drop duplicate points
+  const clean=[pts[0]]; for(let k=1;k<pts.length;k++){if(pts[k].distanceTo(clean[clean.length-1])>0.05)clean.push(pts[k]);}
+  walk.idx=i; showStation(i); stationFx(i,false);
+  if(clean.length<2){walk.phase="dwell";walk.t=0;stationFx(i,true);return;}
+  walk.curve=clean.length===2?new THREE.LineCurve3(clean[0],clean[1]):new THREE.CatmullRomCurve3(clean,false,"centripetal");
+  walk.len=walk.curve.getLength(); walk.u=0; walk.phase="travel"; walk.yawOff=0; walk.pitchOff=0; walk.startDir=camDir.clone();
+}
+function jumpTo(i){const s=ST[i]; camPos.copy(V(s.pos)); camDir.copy(V(s.look).sub(camPos).normalize()); walk.idx=i; walk.phase="dwell"; walk.t=0; walk.yawOff=0; walk.pitchOff=0; showStation(i); stationFx(i,true);}
+function enterWalk(){
+  if(walk.on)return; ST=ST||buildStations();
+  walk.saved=Object.assign({},state); walk.savedOrbit=Object.assign({},orbit);
+  window.__walkOn=true;
+  setAll({mount:true,soreg:true,women:true,inner:true,sanct:true,smoke:true,life:true});
+  walk.on=true; document.body.classList.add("walking"); wEls.card.hidden=false; wEls.hint.hidden=false;
+  Object.keys(drawers).forEach(o=>{document.getElementById(o).setAttribute("aria-expanded","false");document.getElementById(drawers[o]).hidden=true;});
+  camera.fov=62; camera.near=0.02; camera.updateProjectionMatrix();
+  walk.paused=false; wEls.pause.textContent="Pause"; jumpTo(0);
+}
+function exitWalk(){
+  if(!walk.on)return; walk.on=false; window.__walkOn=false; document.body.classList.remove("walking"); wEls.card.hidden=true; wEls.hint.hidden=true; wEls.fade.style.opacity=0;
+  camera.fov=38; camera.near=0.1; camera.updateProjectionMatrix();
+  if(refs.torch)refs.torch.intensity=0; if(refs.corLight)refs.corLight.intensity=0; if(refs.glow)refs.glow.intensity=1.4;
+  setAll(walk.saved||DEFAULTS); Object.assign(orbit,walk.savedOrbit||{});
+}
+function nextStation(){ if(!walk.on)return;
+  if(walk.phase==="travel"){walk.u=1;return;}
+  if(ST[walk.idx].end){wEls.fade.style.opacity=0; jumpTo(0); return;}
+  startLeg(Math.min(ST.length-1,walk.idx+1));
+}
+function prevStation(){ if(!walk.on)return; jumpTo(Math.max(0,walk.idx-(walk.phase==="travel"?1:1))); }
+document.getElementById("b-walk").addEventListener("click",enterWalk);
+document.getElementById("cam-walk").addEventListener("click",enterWalk);
+document.getElementById("w-exit").addEventListener("click",exitWalk);
+document.getElementById("w-hide").addEventListener("click",function(){const c2=wEls.card.classList.toggle("collapsed");this.textContent=c2?"Show text":"Hide text";this.setAttribute("aria-pressed",c2);});
+wEls.next.addEventListener("click",nextStation);
+document.getElementById("w-prev").addEventListener("click",prevStation);
+wEls.pause.addEventListener("click",()=>{walk.paused=!walk.paused;wEls.pause.textContent=walk.paused?"Resume":"Pause";});
+window.addEventListener("keydown",e=>{if(!walk.on)return; if(e.key==="ArrowRight"||e.key===" "){e.preventDefault();nextStation();} else if(e.key==="ArrowLeft"){prevStation();} else if(e.key==="Escape"){exitWalk();}});
+const SPEED=c(10); // ten cubits per second, an unhurried walk
+const up=new THREE.Vector3(0,1,0);
+function dirFromYawPitch(dir,yaw,pitch){const d=dir.clone(); d.applyAxisAngle(up,yaw); const right=new THREE.Vector3().crossVectors(d,up).normalize(); d.applyAxisAngle(right,pitch); return d;}
+function updateWalk(rdt,now){
+  const s=ST[walk.idx]; const step=walk.paused?0:rdt;
+  if(walk.phase==="travel"){
+    walk.u=Math.min(1,walk.u+step*SPEED/Math.max(walk.len,0.01));
+    const e=walk.u<.5?2*walk.u*walk.u:1-Math.pow(-2*walk.u+2,2)/2;
+    camPos.copy(walk.curve.getPointAt(e));
+    const tan=walk.curve.getTangentAt(Math.min(.999,e)).clone(); tan.y*=0.35; tan.normalize();
+    const target=V(s.look).sub(camPos).normalize();
+    const kStart=Math.min(1,walk.u/0.15), kEnd=Math.max(0,(walk.u-0.55)/0.45);
+    const ahead=walk.startDir.clone().lerp(tan,kStart).normalize();
+    camDir.copy(ahead.lerp(target,kEnd*kEnd*(3-2*kEnd)).normalize());
+    // veil crossing: a red cascade, then light
+    if(s.holy){const x=camPos.x/K; wEls.fade.style.background=(x>-113.5)?"#8a1a28":"#fff3d6"; wEls.fade.style.opacity=(x<-110&&x>-114)?0.55:(x<=-114?0.1:0);}
+    if(walk.u>=1){walk.phase="dwell";walk.t=0;stationFx(walk.idx,true); if(s.holy)wEls.fade.style.background="#fff3d6";}
+  } else {
+    walk.t+=step;
+    const base=V(s.look).sub(camPos).normalize();
+    const sway=(s.sway||0)*Math.sin(walk.t*0.32)*Math.min(1,walk.t/2);
+    camDir.copy(dirFromYawPitch(base,sway+walk.yawOff,walk.pitchOff));
+    if(s.end){wEls.fade.style.background="#fff3d6";}
+    if(wEls.auto.checked&&!walk.paused&&!s.end&&walk.t>walk.dwell){startLeg(walk.idx+1);}
+  }
+  if(walk.phase==="travel"&&(walk.yawOff||walk.pitchOff)){camDir.copy(dirFromYawPitch(camDir,walk.yawOff,walk.pitchOff));}
+  camera.position.copy(camPos); camera.lookAt(camPos.clone().add(camDir));
+}
+
+// ======================================================================
+// STATE, CAMERA, UI
+// ======================================================================
+const DEFAULTS={mount:true,soreg:true,women:true,inner:true,sanct:true,cutaway:false,ark:false,path:true,smoke:true,life:true,psyche:false,labels:false};
+const state=Object.assign({},DEFAULTS);
+function apply(){
+  ["mount","soreg","women","inner","sanct","ark","path","smoke","life","psyche","labels"].forEach(k=>{if(refs[k])refs[k].visible=!!state[k];});
+  if(refs.pillars)refs.pillars.visible=!!(window.__walkOn);
+  refs.ark.visible=state.ark&&state.sanct;
+  const cut=state.cutaway;
+  M.shell.opacity=cut?0.10:1; M.shell.depthWrite=!cut; M.shellGold.opacity=cut?0.25:1;
+  roofParts.forEach(r=>r.visible=!cut);
+  gLabelsIn.visible=cut;
+  document.querySelectorAll("input[data-key]").forEach(cb=>cb.checked=!!state[cb.dataset.key]);
+}
+function setAll(s){Object.keys(state).forEach(k=>state[k]=!!s[k]);apply();}
+document.querySelectorAll("input[data-key]").forEach(cb=>cb.addEventListener("change",()=>{state[cb.dataset.key]=cb.checked;apply();}));
+document.getElementById("reset").onclick=()=>setAll(DEFAULTS);
+document.getElementById("clear").onclick=()=>setAll({});
+
+const orbit={az:0.62,el:0.55,dist:66,tx:-1,ty:1.2,tz:2};
+const PRESETS={
+  olives:{az:0.12,el:0.22,dist:88,tx:0,ty:2,tz:4},
+  mount:{az:0.85,el:0.62,dist:150,tx:2,ty:0,tz:14},
+  courts:{az:0.62,el:0.55,dist:66,tx:-1,ty:1.2,tz:2},
+  plan:{az:0.0001,el:1.53,dist:62,tx:0,ty:0,tz:0},
+  sanct:{az:0.95,el:0.62,dist:26,tx:-9.5,ty:3,tz:0,cut:true},
+  holy:{az:1.5708,el:1.42,dist:13,tx:-10.4,ty:2.4,tz:0,cut:true},
+};
+function placeCamera(){const ce=Math.cos(orbit.el);
+  camera.position.set(orbit.tx+orbit.dist*ce*Math.cos(orbit.az),orbit.ty+orbit.dist*Math.sin(orbit.el),orbit.tz+orbit.dist*ce*Math.sin(orbit.az));
+  camera.lookAt(orbit.tx,orbit.ty,orbit.tz);}
+let tween=null;
+function goTo(name){const p=PRESETS[name];if(!p)return; if(p.cut){state.cutaway=true;apply();}
+  const from=Object.assign({},orbit); let daz=p.az-from.az; daz=((daz+Math.PI)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)-Math.PI;
+  tween={t:0,from,to:{az:from.az+daz,el:p.el,dist:p.dist,tx:p.tx,ty:p.ty,tz:p.tz}};}
+document.querySelectorAll("[data-cam]").forEach(b=>b.addEventListener("click",()=>goTo(b.dataset.cam)));
+
+// drawers
+const drawers={"b-layers":"d-layers","b-cam":"d-cam","b-about":"d-about"};
+Object.keys(drawers).forEach(bid=>{const b=document.getElementById(bid);b.addEventListener("click",()=>{
+  const open=b.getAttribute("aria-expanded")!=="true";
+  Object.keys(drawers).forEach(o=>{document.getElementById(o).setAttribute("aria-expanded","false");document.getElementById(drawers[o]).hidden=true;});
+  if(open){b.setAttribute("aria-expanded","true");document.getElementById(drawers[bid]).hidden=false;}});});
+
+// pointer orbit + zoom
+const dom=renderer.domElement; const ptrs=new Map(); let pinch0=0;
+dom.addEventListener("pointerdown",e=>{dom.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});tween=null;
+  if(ptrs.size===2){const a=[...ptrs.values()];pinch0=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y);}});
+dom.addEventListener("pointermove",e=>{if(!ptrs.has(e.pointerId))return;const p=ptrs.get(e.pointerId);
+  if(ptrs.size===1){ if(walk.on){walk.yawOff+=(e.clientX-p.x)*0.004; walk.pitchOff=Math.max(-0.9,Math.min(0.9,walk.pitchOff-(e.clientY-p.y)*0.004));} else {orbit.az+= (e.clientX-p.x)*0.006; orbit.el=Math.max(0.03,Math.min(1.54,orbit.el+(e.clientY-p.y)*0.005));}}
+  p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===2){const a=[...ptrs.values()];const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pinch0>0){orbit.dist=Math.max(6,Math.min(260,orbit.dist*pinch0/d));} pinch0=d;}});
+["pointerup","pointercancel"].forEach(t=>dom.addEventListener(t,e=>{ptrs.delete(e.pointerId);pinch0=0;}));
+dom.addEventListener("wheel",e=>{e.preventDefault();if(walk.on)return;tween=null;orbit.dist=Math.max(6,Math.min(260,orbit.dist*Math.exp(e.deltaY*0.0012)));},{passive:false});
+
+// playback
+let playing=true, speed=1;
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const autoCb=document.getElementById("auto"), spd=document.getElementById("speed"), playBtn=document.getElementById("play");
+if(reduce){autoCb.checked=false;speed=0.4;spd.value=0.4;}
+spd.addEventListener("input",()=>speed=parseFloat(spd.value));
+playBtn.addEventListener("click",()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play";});
+
+window.addEventListener("resize",()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);});
+
+let last=performance.now();
+function frame(now){
+  const rdt=Math.max(0,Math.min(0.05,(now-last)/1000)); last=now;
+  const dt=playing?rdt*speed:0;
+  if(tween){tween.t=Math.min(1,tween.t+rdt/1.1);const k=tween.t<.5?2*tween.t*tween.t:1-Math.pow(-2*tween.t+2,2)/2;
+    ["az","el","dist","tx","ty","tz"].forEach(q=>orbit[q]=tween.from[q]+(tween.to[q]-tween.from[q])*k); if(tween.t>=1)tween=null;}
+  else if(!walk.on&&autoCb.checked&&ptrs.size===0&&playing){orbit.az+=rdt*0.03;}
+  const far=walk.on||orbit.dist>110; gLabels.children.forEach(o=>{if(o.isSprite){o.visible=!(far&&o.userData.tier===1);if(o.userData.line)o.userData.line.visible=o.visible;}});
+  updaters.forEach(u=>u(dt));
+  if(walk.on){updateWalk(rdt,now);} else {placeCamera();}
+  renderer.render(scene,camera);
+  requestAnimationFrame(frame);
+}
+function start(){buildLabels(); if(location.hash==="#walk")setTimeout(enterWalk,300);
+  [refs.women,refs.inner,refs.sanct,refs.soreg].forEach(g=>g.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&!o.material.transparent&&o.material.type!=='MeshBasicMaterial'){o.castShadow=true;o.receiveShadow=true;}}));
+  gMount.children.forEach(o=>{if(o.isMesh&&!o.isInstancedMesh)o.receiveShadow=true;});
+  apply();placeCamera();requestAnimationFrame(frame);}
+window.__temple={orbit,setAll,state,goTo,PRESETS,walk,enterWalk,exitWalk,jumpTo:(i)=>jumpTo(i),startLeg:(i)=>startLeg(i)};
+let started=false; const go=()=>{if(!started){started=true;start();}};
+if(document.fonts&&document.fonts.ready){document.fonts.ready.then(go);setTimeout(go,1500);}else go();
+})();
+</script>
+
+</body>
+</html>
