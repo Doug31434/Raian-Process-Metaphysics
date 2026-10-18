@@ -626,55 +626,68 @@ function tint(x0,x1,y,z0,z1,color,op){const m=new THREE.Mesh(new THREE.PlaneGeom
 // ======================================================================
 const gLabels=reg("labels");
 function makeLabel(text,opts){opts=opts||{};
-  const fs=opts.size||38, pad=10, font=(opts.mono?"500 ":"")+fs+"px "+(opts.mono?'"JetBrains Mono", monospace':'Marcellus, Georgia, serif');
-  const cv=document.createElement("canvas"),x=cv.getContext("2d"); x.font=font; const lines=String(text).split("\n");
-  const w=Math.ceil(Math.max(...lines.map(l=>x.measureText(l).width)))+pad*2, h=lines.length*fs*1.2+pad*2; cv.width=w*2;cv.height=h*2; x.scale(2,2);
-  x.font=font; x.textAlign="center"; x.textBaseline="middle";
-  x.fillStyle=opts.bg||"rgba(20,22,38,.72)"; const r=6; x.beginPath(); x.moveTo(r,0);x.lineTo(w-r,0);x.quadraticCurveTo(w,0,w,r);x.lineTo(w,h-r);x.quadraticCurveTo(w,h,w-r,h);x.lineTo(r,h);x.quadraticCurveTo(0,h,0,h-r);x.lineTo(0,r);x.quadraticCurveTo(0,0,r,0);x.fill();
-  x.fillStyle=opts.color||"#f1e3bf"; lines.forEach((l,i)=>x.fillText(l,w/2,pad+fs*0.6+i*fs*1.2));
+  // Plain text with a soft halo and a small arrow whose tip sits on the feature.
+  const psy=!!opts.psy, lines=String(text).split("\n");
+  const S=2, fs=(opts.big?15:12.5), sub=11, arrow=14, pad=6;
+  const cv=document.createElement("canvas"), x=cv.getContext("2d");
+  const f1=(psy?"600 ":"500 ")+fs+"px Marcellus, Georgia, serif", f2="italic "+sub+"px 'Alegreya Sans', Georgia, serif";
+  x.font=f1; let w=x.measureText(lines[0]).width; if(lines[1]){x.font=f2; w=Math.max(w,x.measureText(lines[1]).width);}
+  w=Math.ceil(w)+pad*2; const th=fs*1.25+(lines[1]?sub*1.3:0); const h=Math.ceil(th+arrow+pad);
+  cv.width=w*S; cv.height=h*S; x.scale(S,S); x.textAlign="center"; x.textBaseline="middle";
+  const ink=psy?"#5a2e08":"#21180c", halo="rgba(255,250,240,0.95)";
+  function txt(t,font,y){x.font=font; x.shadowColor=halo; x.shadowBlur=5; x.fillStyle=halo; for(let k=0;k<3;k++)x.fillText(t,w/2,y); x.shadowBlur=0; x.fillStyle=ink; x.fillText(t,w/2,y);}
+  txt(lines[0],f1,pad/2+fs*0.62); if(lines[1])txt(lines[1],f2,pad/2+fs*1.25+sub*0.62);
+  // arrow: thin shaft and a small head, tip at the bottom centre
+  const y0=th+pad/2+1, y1=h-1; x.lineCap="round";
+  x.strokeStyle=halo; x.lineWidth=3.2; x.beginPath(); x.moveTo(w/2,y0); x.lineTo(w/2,y1-3); x.stroke();
+  x.strokeStyle=ink; x.lineWidth=1.2; x.beginPath(); x.moveTo(w/2,y0); x.lineTo(w/2,y1-3); x.stroke();
+  x.fillStyle=ink; x.beginPath(); x.moveTo(w/2,y1); x.lineTo(w/2-3.2,y1-5); x.lineTo(w/2+3.2,y1-5); x.closePath(); x.fill();
   const tex=new THREE.CanvasTexture(cv); tex.minFilter=THREE.LinearFilter;
-  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,depthWrite:false,transparent:true})); s.renderOrder=999;
-  s.material.sizeAttenuation=false; const wh=(opts.h||2.2)*0.0185; s.scale.set(wh*w/h,wh,1); return s;}
-function addLabel(group,text,x,y,z,opts){const s=makeLabel(text,opts);s.position.set(c(x),c(y),c(z));group.add(s);s.userData.tier=(opts&&opts.tier)||0;
-  if(opts&&opts.leader){const a=new THREE.Vector3(c(opts.leader[0]),c(opts.leader[1]),c(opts.leader[2]));const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([a,s.position.clone()]),new THREE.LineBasicMaterial({color:0xd8a648,transparent:true,opacity:.6,depthTest:false}));ln.renderOrder=998;group.add(ln);s.userData.line=ln;}
-  return s;}
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,depthWrite:false,transparent:true,sizeAttenuation:false}));
+  sp.center.set(0.5,0); sp.renderOrder=999; sp.userData.px=[w,h]; return sp;}
+const allLabels=[];
+function addLabel(group,text,x,y,z,opts){opts=opts||{}; const s=makeLabel(text,opts); s.position.set(c(x),c(y),c(z)); group.add(s);
+  s.userData.prio=(opts.prio==null?5:opts.prio); s.userData.far=!!opts.far; allLabels.push(s); return s;}
+function sizeLabels(){const H=Math.max(1,stage.clientHeight), k=2*Math.tan(camera.fov*Math.PI/360)/H;
+  allLabels.forEach(s=>{const p=s.userData.px; s.scale.set(p[0]*k,p[1]*k,1);});}
 const gLabelsIn=new THREE.Group(); gLabels.add(gLabelsIn); // interior labels (shown with cutaway)
 const gPsyLabels=new THREE.Group(); gPsyche.add(gPsyLabels);
 function buildLabels(){
-  addLabel(gLabels,"Court of the Gentiles",80,60,380,{h:3.4});
-  addLabel(gLabels,"Royal Stoa",30,85,600,{h:2.8});
-  addLabel(gLabels,"Solomon's Portico",360,70,150,{h:2.6});
-  addLabel(gLabels,"Antonia Fortress",-270,95,-340,{h:2.6});
-  addLabel(gLabels,"Shushan Gate",312,65,0,{h:2.3});
-  addLabel(gLabels,"Soreg and warning stone",200,30,-110,{h:2.1,leader:[185,3,-95],tier:1});
-  addLabel(gLabels,"Beautiful Gate",175,52,0,{h:2.1,leader:[164,30,0],tier:1});
-  addLabel(gLabels,"Court of the Women",110,46,8,{h:2.4,tier:1});
-  addLabel(gLabels,"Chamber of Wood",140,30,-75,{h:1.6,tier:1});
-  addLabel(gLabels,"Chamber of the Nazirites",140,30,75,{h:1.6,tier:1});
-  addLabel(gLabels,"Chamber of the Lepers",48,30,-75,{h:1.6,tier:1});
-  addLabel(gLabels,"Chamber of Oil",40,26,82,{h:1.5,tier:1});
-  addLabel(gLabels,"Fifteen steps\n(Songs of Ascents)",50,26,-22,{h:2.4,leader:[40,10,-12],tier:1});
-  addLabel(gLabels,"Nicanor Gate",26,70,-12,{h:2.1,leader:[26,58,-8],tier:1});
-  addLabel(gLabels,"Court of the Priests",-24,30,-62,{h:1.6,tier:1});
-  addLabel(gLabels,"Altar of burnt offering",-14,54,36,{h:1.9,leader:[-12,27,10],tier:1});
-  addLabel(gLabels,"Laver",-39,36,34,{h:1.6,leader:[-39,26,20],tier:1});
-  addLabel(gLabels,"Porch (Ulam)",-45,135,40,{h:2.2,tier:1});
-  addLabel(gLabels,"Sanctuary",-105,138,0,{h:2.4});
-  addLabel(gLabelsIn,"Holy Place",-80,70,0,{h:1.7,leader:[-82,48,0]});
-  addLabel(gLabelsIn,"Menorah",-84,38,14,{h:1.3,leader:[-89.5,28,5.5]});
-  addLabel(gLabelsIn,"Table of showbread",-84,38,-15,{h:1.3,leader:[-89.5,26,-6]});
-  addLabel(gLabelsIn,"Altar of incense",-100,34,10,{h:1.3,leader:[-100,26,0]});
-  addLabel(gLabelsIn,"The veil",-112,72,-6,{h:1.4,leader:[-112,55,0]});
-  addLabel(gLabelsIn,"Holy of Holies",-123,82,0,{h:1.7,leader:[-123,48,0]});
-  addLabel(gLabelsIn,"Foundation Stone",-128,34,-8,{h:1.2,leader:[-123,23,0]});
-  addLabel(gLabelsIn,"Side chambers (38 cells)",-95,66,32,{h:1.4,leader:[-95,48,19]});
-  const pl={bg:"rgba(255,248,232,.86)",color:"#2a1d0a"};
-  addLabel(gPsyLabels,"EGO\nouter life, the inner barnyard",-60,40,330,Object.assign({h:3.2},pl));
-  addLabel(gPsyLabels,"ANIMA\nreceptive presence",95,58,-20,Object.assign({h:2.6},pl));
-  addLabel(gPsyLabels,"STRENGTH & SACRIFICE\nthe grasping hand lets go",-8,64,-35,Object.assign({h:2.4},pl));
-  addLabel(gPsyLabels,"SARX\nthe shadow's storerooms",-75,70,-48,Object.assign({h:2.2},pl));
-  addLabel(gPsyLabels,"STILL POINT",-70,128,30,Object.assign({h:2.0},pl));
-  addLabel(gPsyLabels,"ARCHETYPAL SELF",-140,150,-10,Object.assign({h:2.0},pl));
+  // prio: lower number wins when labels collide. far:true = shown when zoomed out to the whole Mount.
+  addLabel(gLabels,"Court of the Gentiles",60,0,330,{prio:3,far:true,big:true});
+  addLabel(gLabels,"Royal Stoa",30,56,585,{prio:4,far:true});
+  addLabel(gLabels,"Solomon's Portico",322,32,190,{prio:4,far:true});
+  addLabel(gLabels,"Antonia Fortress",-270,72,-340,{prio:4,far:true});
+  addLabel(gLabels,"Shushan Gate",312,41,0,{prio:5,far:true});
+  addLabel(gLabels,"Sanctuary",-100,124,0,{prio:1,far:true,big:true});
+  addLabel(gLabels,"Court of the Women",95,7,10,{prio:1,big:true});
+  addLabel(gLabels,"Beautiful Gate",162,36,0,{prio:2});
+  addLabel(gLabels,"Nicanor Gate",26,58,0,{prio:2});
+  addLabel(gLabels,"Altar",-12,27,4,{prio:2});
+  addLabel(gLabels,"Porch",-50,108,40,{prio:3});
+  addLabel(gLabels,"Soreg & warning stone",196,6.5,-9.5,{prio:4});
+  addLabel(gLabels,"Fifteen steps",40,10,-16,{prio:4});
+  addLabel(gLabels,"Court of the Priests",-30,16.5,-58,{prio:5});
+  addLabel(gLabels,"Laver",-39,26,20,{prio:6});
+  addLabel(gLabels,"Chamber of Wood",141,20,-47,{prio:7});
+  addLabel(gLabels,"Chamber of the Nazirites",141,20,47,{prio:7});
+  addLabel(gLabels,"Chamber of the Lepers",46,20,-47,{prio:7});
+  addLabel(gLabels,"Chamber of Oil",46,20,47,{prio:7});
+  addLabel(gLabelsIn,"Holy Place",-80,23,0,{prio:1});
+  addLabel(gLabelsIn,"Holy of Holies",-126,23,4,{prio:1});
+  addLabel(gLabelsIn,"Menorah",-89.5,28.5,5.5,{prio:2});
+  addLabel(gLabelsIn,"Table of showbread",-89.5,26,-6,{prio:2});
+  addLabel(gLabelsIn,"Altar of incense",-100,25,0,{prio:3});
+  addLabel(gLabelsIn,"The veil",-112.5,50,0,{prio:3});
+  addLabel(gLabelsIn,"Foundation Stone",-123,23.2,-2,{prio:4});
+  addLabel(gLabelsIn,"Side chambers",-100,46,19,{prio:4});
+  addLabel(gPsyLabels,"Ego\nthe inner barnyard",-40,0,300,{psy:true,prio:0,far:true});
+  addLabel(gPsyLabels,"Anima\nreceptive presence",95,7,-22,{psy:true,prio:0});
+  addLabel(gPsyLabels,"Strength & sacrifice\nthe grasping hand lets go",-2,17,-32,{psy:true,prio:0});
+  addLabel(gPsyLabels,"Sarx\nthe shadow's storerooms",-110,123,-30,{psy:true,prio:0});
+  addLabel(gPsyLabels,"Still point",-92,123,0,{psy:true,prio:0});
+  addLabel(gPsyLabels,"Archetypal Self",-124,123,0,{psy:true,prio:0});
+  sizeLabels();
 }
 
 
@@ -780,7 +793,7 @@ function enterWalk(){
 }
 function exitWalk(){
   if(!walk.on)return; walk.on=false; window.__walkOn=false; document.body.classList.remove("walking"); wEls.card.hidden=true; wEls.hint.hidden=true; wEls.fade.style.opacity=0;
-  camera.fov=38; camera.near=0.1; camera.updateProjectionMatrix();
+  camera.fov=38; camera.near=0.1; camera.updateProjectionMatrix(); sizeLabels();
   if(refs.torch){refs.torch.intensity=0;refs.flame.visible=false;} if(refs.dust)refs.dust.visible=false; if(refs.corLight)refs.corLight.intensity=0; if(refs.glow)refs.glow.intensity=1.4;
   amb.intensity=.30; hemi.intensity=.30; sun.intensity=1.05; fill.intensity=.25;
   setAll(walk.saved||DEFAULTS); Object.assign(orbit,walk.savedOrbit||{});
@@ -904,7 +917,7 @@ if(reduce){autoCb.checked=false;speed=0.4;spd.value=0.4;}
 spd.addEventListener("input",()=>speed=parseFloat(spd.value));
 playBtn.addEventListener("click",()=>{playing=!playing;playBtn.textContent=playing?"Pause":"Play";});
 
-window.addEventListener("resize",()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);});
+window.addEventListener("resize",()=>{camera.aspect=stage.clientWidth/stage.clientHeight;camera.updateProjectionMatrix();renderer.setSize(stage.clientWidth,stage.clientHeight);sizeLabels();});
 
 let last=performance.now();
 function frame(now){
@@ -913,11 +926,25 @@ function frame(now){
   if(tween){tween.t=Math.min(1,tween.t+rdt/1.1);const k=tween.t<.5?2*tween.t*tween.t:1-Math.pow(-2*tween.t+2,2)/2;
     ["az","el","dist","tx","ty","tz"].forEach(q=>orbit[q]=tween.from[q]+(tween.to[q]-tween.from[q])*k); if(tween.t>=1)tween=null;}
   else if(!walk.on&&autoCb.checked&&ptrs.size===0&&playing){orbit.az+=rdt*0.03;}
-  const far=walk.on||orbit.dist>110; gLabels.children.forEach(o=>{if(o.isSprite){o.visible=!(far&&o.userData.tier===1);if(o.userData.line)o.userData.line.visible=o.visible;}});
+  declutter();
   updaters.forEach(u=>u(dt));
   if(walk.on){updateWalk(rdt,now);} else {placeCamera();}
   renderer.render(scene,camera);
   requestAnimationFrame(frame);
+}
+const _v=new THREE.Vector3();
+function declutter(){ if(walk.on||!allLabels.length)return;
+  const W=stage.clientWidth,H=stage.clientHeight, zoomedOut=orbit.dist>110, placed=[];
+  camera.updateMatrixWorld();
+  const cand=allLabels.filter(s=>{let o=s; while(o){if(!o.visible&&o!==s)return false; o=o.parent;} return true;}).sort((a,b)=>a.userData.prio-b.userData.prio);
+  allLabels.forEach(s=>s.material.opacity=0);
+  cand.forEach(s=>{ if(zoomedOut&&!s.userData.far)return;
+    _v.copy(s.getWorldPosition(_v)).project(camera); if(_v.z>1||_v.z<-1)return;
+    const px=( _v.x*.5+.5)*W, py=(-_v.y*.5+.5)*H, p=s.userData.px;
+    const r=[px-p[0]/2,py-p[1],px+p[0]/2,py];
+    if(r[2]<0||r[0]>W||r[3]<0||r[1]>H)return;
+    for(const q of placed){if(r[0]<q[2]+4&&r[2]>q[0]-4&&r[1]<q[3]+2&&r[3]>q[1]-2)return;}
+    placed.push(r); s.material.opacity=1; });
 }
 function start(){buildLabels(); if(location.hash==="#walk")setTimeout(enterWalk,300);
   [refs.women,refs.inner,refs.sanct,refs.soreg].forEach(g=>g.traverse(o=>{if(o.isMesh&&!o.isInstancedMesh&&!o.material.transparent&&o.material.type!=='MeshBasicMaterial'){o.castShadow=true;o.receiveShadow=true;}}));
