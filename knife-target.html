@@ -1,0 +1,640 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Knife Target Build</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky 3-D stage on the left, build steps and cut list on the right; stacks on phones. */
+:root {
+  --bg: #e6eae5;
+  --surface: #f4f6f2;
+  --ink: #18211d;
+  --muted: #55645c;
+  --line: #c1cac3;
+  --accent: #b8490f;
+  --accent-fg: #ffffff;
+  --stage: #dce2db;
+  --grid: rgba(24, 33, 29, 0.08);
+  --focus: #1f6fb5;
+  --f-display: "Barlow Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1512; --surface: #18201d; --ink: #e4eae6; --muted: #93a39a; --line: #2c3833;
+    --accent: #f08a4a; --accent-fg: #1a0f08; --stage: #0b100e; --grid: rgba(228, 234, 230, 0.07);
+    --focus: #6fb4f0; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #18201d; --ink: #e4eae6; --muted: #93a39a; --line: #2c3833;
+  --accent: #f08a4a; --accent-fg: #1a0f08; --stage: #0b100e; --grid: rgba(228, 234, 230, 0.07);
+  --focus: #6fb4f0; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.5;
+  padding-block: 20px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+header { display: flex; flex-direction: column; gap: 6px; max-width: 70ch; }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 0; font: 700 clamp(34px, 6vw, 56px)/0.95 var(--f-display); letter-spacing: 0.01em; text-transform: uppercase; text-wrap: balance; }
+.lede { margin: 4px 0 0; color: var(--muted); font-size: 16px; }
+
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 410px); gap: 20px; align-items: start; }
+
+/* Stage */
+.stage {
+  position: sticky; top: 12px;
+  height: min(82vh, 780px); min-height: 440px;
+  background-color: var(--stage);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 28px 28px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  overflow: hidden;
+  min-width: 0;
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+.stage canvas:active { cursor: grabbing; }
+.hud-top { position: absolute; left: 10px; right: 10px; top: 10px; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; pointer-events: none; }
+.hud-top > * { pointer-events: auto; }
+.chips, .views { display: flex; flex-wrap: wrap; gap: 6px; }
+.views { margin-left: auto; }
+.chip, .vbtn {
+  font: 600 13px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase;
+  background: var(--surface); color: var(--ink); border: 1px solid var(--line); border-radius: 3px;
+  padding: 7px 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;
+}
+.chip[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.sw { width: 11px; height: 11px; border-radius: 2px; border: 1px solid rgba(0, 0, 0, 0.35); flex: none; }
+.vbtn:hover, .chip:hover { border-color: var(--muted); }
+
+.hud-bottom {
+  position: absolute; left: 10px; right: 10px; bottom: 10px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 9px 12px;
+}
+.slider { display: flex; align-items: center; gap: 10px; flex: 1 1 220px; min-width: 0; }
+.slider label { font: 600 13px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+.slider input[type="range"] { flex: 1; min-width: 0; accent-color: var(--accent); }
+.slider output { font: 500 12px/1 var(--f-mono); width: 4ch; text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.auto { display: flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+.auto input { accent-color: var(--accent); }
+#err { position: absolute; inset: 60px 16px auto 16px; background: var(--surface); border: 1px solid var(--accent); color: var(--ink); padding: 12px 14px; border-radius: 4px; }
+
+/* Panel */
+.panel { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 4px; }
+.steps button {
+  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+  background: transparent; color: var(--ink); border: 1px solid transparent; border-radius: 4px;
+  padding: 7px 10px; font: 500 15px/1.2 var(--f-body); cursor: pointer;
+}
+.steps button:hover { background: var(--surface); border-color: var(--line); }
+.steps button[aria-current="step"] { background: var(--surface); border-color: var(--ink); font-weight: 600; }
+.num { font: 500 12px/1 var(--f-mono); width: 26px; height: 26px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 3px; flex: none; font-variant-numeric: tabular-nums; }
+.steps button[aria-current="step"] .num { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+
+.detail { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px; }
+.detail h2 { margin: 0; font: 700 30px/1 var(--f-display); text-transform: uppercase; letter-spacing: 0.01em; text-wrap: balance; }
+.detail p { margin: 0; max-width: 62ch; }
+.specs { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0; padding: 0; list-style: none; }
+.specs li { font: 400 12px/1 var(--f-mono); border: 1px solid var(--line); border-radius: 3px; padding: 6px 8px; background: var(--bg); font-variant-numeric: tabular-nums; }
+.nav { display: flex; gap: 8px; margin-top: 4px; }
+.btn { font: 600 14px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; border: 1px solid var(--ink); background: transparent; color: var(--ink); padding: 10px 14px; border-radius: 3px; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-fg); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+
+.callout { border: 1px dashed var(--muted); border-radius: 4px; padding: 11px 13px; }
+.callout strong { font: 700 15px/1 var(--f-display); letter-spacing: 0.08em; text-transform: uppercase; display: block; margin-bottom: 3px; }
+.callout p { margin: 0; color: var(--muted); }
+
+h3 { margin: 0 0 8px; font: 700 20px/1 var(--f-display); letter-spacing: 0.04em; text-transform: uppercase; }
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 4px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: 14px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 11px/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td.mono { font: 400 13px/1.4 var(--f-mono); white-space: nowrap; font-variant-numeric: tabular-nums; }
+td .sw { display: inline-block; margin-right: 8px; vertical-align: -1px; }
+.fine { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+
+details { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; padding: 10px 14px; }
+summary { cursor: pointer; font: 700 20px/1.2 var(--f-display); letter-spacing: 0.04em; text-transform: uppercase; }
+details ul { margin: 10px 0 2px; padding-left: 1.1em; display: flex; flex-direction: column; gap: 4px; }
+details h4 { margin: 12px 0 0; font: 500 11px/1 var(--f-mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: minmax(0, 1fr); }
+  .stage { position: relative; top: 0; height: 64vh; min-height: 380px; }
+}
+[hidden]{display:none!important}
+body{margin:0}
+img{max-width:100%}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Build guide · 2 ft end-grain target</div>
+    <h1>Knife Target Build</h1>
+    <p class="lede">49 blocks of 4x4 stand on end inside a 2x6 frame, with a plywood back and a screw into every block. Drag the model to turn it, pull the parts apart, and step through the build.</p>
+  </header>
+
+  <div class="layout">
+    <section class="stage" id="stage" aria-label="Interactive 3-D model of the target">
+      <canvas id="c" aria-label="3-D model. Drag to rotate, scroll or pinch to zoom."></canvas>
+      <div class="hud-top">
+        <div class="chips" id="chips" role="group" aria-label="Highlight a part"></div>
+        <div class="views" id="views" role="group" aria-label="Camera view">
+          <button class="vbtn" data-view="front" type="button">Front</button>
+          <button class="vbtn" data-view="corner" type="button">Corner</button>
+          <button class="vbtn" data-view="side" type="button">Side</button>
+          <button class="vbtn" data-view="back" type="button">Back</button>
+        </div>
+      </div>
+      <div class="hud-bottom">
+        <div class="slider">
+          <label for="ex">Pull apart</label>
+          <input id="ex" type="range" min="0" max="1" step="0.01" value="0">
+          <output id="exOut" for="ex">0%</output>
+        </div>
+        <label class="auto"><input id="auto" type="checkbox"> Slow turn</label>
+      </div>
+      <div id="err" role="alert" hidden></div>
+    </section>
+
+    <aside class="panel">
+      <ol class="steps" id="steps"></ol>
+      <article class="detail" id="detail" aria-live="polite"></article>
+
+      <div class="callout">
+        <strong>Not included</strong>
+        <p>This build is the target panel only. A stand or mount is a separate project.</p>
+      </div>
+
+      <section>
+        <h3>Cut list</h3>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Part</th><th>Stock</th><th>Size</th><th>Qty</th></tr></thead>
+            <tbody>
+              <tr><td><span class="sw" style="background:#e3cf9f"></span>Blocks</td><td>4x4 SPF</td><td class="mono">3.5 × 3.5 × 6 in</td><td class="mono">49</td></tr>
+              <tr><td><span class="sw" style="background:#cfa468"></span>Frame, top and bottom</td><td>2x6 SPF</td><td class="mono">1.5 × 5.5 × 27.5 in</td><td class="mono">2</td></tr>
+              <tr><td><span class="sw" style="background:#cfa468"></span>Frame, sides</td><td>2x6 SPF</td><td class="mono">1.5 × 5.5 × 24.5 in</td><td class="mono">2</td></tr>
+              <tr><td><span class="sw" style="background:#b08d5e"></span>Backboard</td><td>3/4 in exterior plywood</td><td class="mono">0.75 × 27.5 × 27.5 in</td><td class="mono">1</td></tr>
+              <tr><td><span class="sw" style="background:#e2731f"></span>Block screws</td><td>#10 exterior</td><td class="mono">4 in long</td><td class="mono">49</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="fine">Frame screws (3 in) are not drawn. A real 4x4 measures 3.5 in, so seven blocks make a face 24.5 in square.</p>
+      </section>
+
+      <details>
+        <summary>Materials and tools</summary>
+        <h4>Materials</h4>
+        <ul>
+          <li>4 boards, 4x4 SPF or whitewood, 8 ft (skip Southern Yellow Pine and Douglas fir, which are harder and louder)</li>
+          <li>1 board, 2x6 SPF, 10 ft</li>
+          <li>1 sheet, 3/4 in exterior plywood, cut to 27.5 × 27.5 in</li>
+          <li>Titebond III waterproof wood glue, 1 large bottle</li>
+          <li>49 exterior screws, #10 × 4 in, plus a few spares</li>
+          <li>12 to 16 exterior screws, 3 in, for the frame</li>
+          <li>1 ratchet strap or 2 bar clamps</li>
+        </ul>
+        <h4>Tools</h4>
+        <ul>
+          <li>A saw that cuts a 4x4 (miter saw, or circular saw cutting from two sides)</li>
+          <li>Drill, with 1/8 in and 7/32 in bits</li>
+          <li>Tape measure, square, rubber mallet</li>
+          <li>Eye protection</li>
+        </ul>
+      </details>
+
+      <div class="callout">
+        <strong>Safety</strong>
+        <p>Wear eye protection when cutting and driving screws. Keep people and pets behind the thrower, and check the face regularly for loose blocks.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var errBox = document.getElementById('err');
+  function showErr(msg) { errBox.textContent = msg; errBox.hidden = false; }
+  window.addEventListener('error', function (e) {
+    if (e.target && e.target !== window && e.target.tagName) return; // ignore font and stylesheet load failures
+    showErr('Something stopped the 3-D view. Reload the page to try again.');
+  });
+
+  var ALL = ['back', 'frame', 'blocks', 'screws'];
+
+  var STEPS = [
+    { nav: 'All parts', title: 'The whole target',
+      specs: ['7 × 7 blocks', '24.5 in square face', '27.5 in overall'],
+      body: ['Seven columns and seven rows of 4x4 blocks stand end grain out, glued side to side inside a 2x6 frame. A plywood backboard closes the back, and a 4 in screw runs from the back into every block.',
+             'Move the Pull apart slider to see how the parts stack. Pick a step to watch that stage go together.'],
+      vis: ALL, focus: null, ex: 0, exG: ALL, top: 0, cam: 'corner' },
+    { nav: 'Cut the blocks', title: 'Cut the blocks',
+      specs: ['49 blocks', '6 in each', 'about 15 per 8 ft board'],
+      body: ['Cut 49 blocks, each 6 in long, from 4x4 stock. A circular saw only reaches about 2.5 in deep, so cut from two opposite sides, or use a miter saw.',
+             'Clamp a 6 in stop block to your fence so every piece matches. Stand the blocks side by side to check. Uneven lengths make an uneven face. Four 8 ft boards cover it, with a few spares.'],
+      vis: ['blocks'], focus: ['blocks'], ex: 1, exG: ['blocks'], top: 0, cam: 'corner' },
+    { nav: 'Cut the frame', title: 'Cut the frame',
+      specs: ['2 × 27.5 in', '2 × 24.5 in', 'opening 24.5 in square'],
+      body: ['From one 10 ft 2x6, cut two pieces at 27.5 in (top and bottom) and two at 24.5 in (sides).',
+             'The opening inside the frame comes out 24.5 in square, which holds seven 3.5 in blocks in each direction. About 16 in of board is left over.'],
+      vis: ['frame'], focus: ['frame'], ex: 1, exG: ['frame'], top: 0, cam: 'corner' },
+    { nav: 'Drill the backboard', title: 'Drill the backboard',
+      specs: ['49 holes', '7/32 in bit', '3.25 · 6.75 · 10.25 · 13.75 · 17.25 · 20.75 · 24.25 in'],
+      body: ['On a 27.5 in square of 3/4 in exterior plywood, mark hole centers at the distances above, measured from the left edge and again from the bottom edge. That gives 49 marks, one centered behind each block.',
+             'Drill every mark with a 7/32 in bit.'],
+      vis: ['back'], focus: ['back'], ex: 0, exG: ['back'], top: 0, cam: 'back' },
+    { nav: 'Build the frame', title: 'Build the frame',
+      specs: ['3 in exterior screws', 'pilot holes first', 'top piece stays off'],
+      body: ['Screw the bottom piece and the two side pieces together. The 3 in screws go through the bottom piece into the ends of the sides.',
+             'Lay that U-shape on the backboard with the edges flush, then drive 3 in screws through the plywood into the frame edges, about 6 in apart. Leave the top piece off for now.'],
+      vis: ['back', 'frame'], focus: ['frame'], ex: 0.95, exG: ['frame'], top: 1, then: { ex: 0, delay: 700 }, cam: 'corner' },
+    { nav: 'Dry-fit', title: 'Dry-fit the blocks',
+      specs: ['no glue yet', '49 blocks', 'end grain facing up'],
+      body: ['Lay the assembly flat, backboard down. With no glue, stand all 49 blocks upright inside the frame, end grain facing up, then slide the top piece against them.',
+             'The fit should be snug without forcing. If it is tight, trim a block or two. If it is loose, plan to shim the gaps.'],
+      vis: ['back', 'frame', 'blocks'], focus: ['blocks'], ex: 0.9, exG: ['blocks'], top: 1, then: { ex: 0, delay: 700 }, cam: 'corner' },
+    { nav: 'Glue and pack', title: 'Glue and pack',
+      specs: ['Titebond III', 'side faces only', 'cure 24 hours'],
+      body: ['Take the blocks back out. Work one row at a time: spread waterproof glue on the side faces of each block and skip the end grain, which soaks up glue without bonding. Set each block on the backboard, press it tight against its neighbors, and tap it snug with a rubber mallet.',
+             'Screw the top piece on with 3 in screws, then wrap a ratchet strap around the frame to hold everything under pressure. Wipe off squeeze-out right away. The 6 in blocks stand about 1/2 in proud of the 5.5 in frame, which keeps a missed throw from catching the frame edge.'],
+      vis: ['back', 'frame', 'blocks'], focus: ['blocks'], ex: 0, exG: ALL, top: 1, then: { top: 0, delay: 800, vis: ['back', 'frame', 'blocks', 'strap'] }, cam: 'corner' },
+    { nav: 'Screw from the back', title: 'Screw from the back',
+      specs: ['49 screws', '#10 × 4 in', '1/8 in pilot holes', 'about 3 1/4 in into each block'],
+      body: ['Flip the target over. Through each of the 49 holes in the backboard, drill a 1/8 in pilot hole into the center of the block behind it, then drive a 4 in exterior screw until the head sits flush.',
+             'Each screw passes through 3/4 in of plywood and bites about 3 1/4 in into its block. Screws hold weakly in end grain, so the glue on the block sides carries most of the load. The screws keep a block from working loose over time.'],
+      vis: ALL, focus: ['screws'], ex: 0.9, exG: ['screws'], top: 0, then: { ex: 0, delay: 800 }, cam: 'back' }
+  ];
+
+  var view = null;
+  var current = 0;
+  var stepsEl = document.getElementById('steps');
+  var detailEl = document.getElementById('detail');
+  var exInput = document.getElementById('ex');
+  var exOut = document.getElementById('exOut');
+  var autoInput = document.getElementById('auto');
+  var chipsEl = document.getElementById('chips');
+
+  function syncSlider(v) { exInput.value = v; exOut.textContent = Math.round(v * 100) + '%'; }
+
+  STEPS.forEach(function (s, i) {
+    var li = document.createElement('li');
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = '<span class="num">' + (i === 0 ? '·' : i) + '</span><span>' + s.nav + '</span>';
+    b.addEventListener('click', function () { go(i); });
+    li.appendChild(b);
+    stepsEl.appendChild(li);
+  });
+
+  function renderDetail(i) {
+    var s = STEPS[i];
+    var html = '<h2>' + (i === 0 ? '' : 'Step ' + i + ' · ') + s.title + '</h2>';
+    html += '<ul class="specs">' + s.specs.map(function (x) { return '<li>' + x + '</li>'; }).join('') + '</ul>';
+    html += s.body.map(function (p) { return '<p>' + p + '</p>'; }).join('');
+    html += '<div class="nav"><button class="btn" type="button" id="prev"' + (i === 0 ? ' disabled' : '') + '>Back</button>' +
+            '<button class="btn primary" type="button" id="next"' + (i === STEPS.length - 1 ? ' disabled' : '') + '>Next step</button></div>';
+    detailEl.innerHTML = html;
+    document.getElementById('prev').addEventListener('click', function () { go(current - 1); });
+    document.getElementById('next').addEventListener('click', function () { go(current + 1); });
+  }
+
+  function go(i) {
+    if (i < 0 || i >= STEPS.length) return;
+    current = i;
+    Array.prototype.forEach.call(stepsEl.querySelectorAll('button'), function (b, k) {
+      if (k === i) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+    renderDetail(i);
+    syncSlider(STEPS[i].ex);
+    if (view) view.setStep(STEPS[i]);
+  }
+
+  var CHIPS = [['back', 'Backboard', '#b08d5e'], ['frame', 'Frame', '#cfa468'], ['blocks', 'Blocks', '#e3cf9f'], ['screws', 'Screws', '#e2731f']];
+  CHIPS.forEach(function (c) {
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'chip'; b.dataset.g = c[0]; b.setAttribute('aria-pressed', 'false');
+    b.innerHTML = '<span class="sw" style="background:' + c[2] + '"></span>' + c[1];
+    b.addEventListener('click', function () { if (view) view.toggleFocus(c[0]); });
+    chipsEl.appendChild(b);
+  });
+  function syncChips(name) {
+    Array.prototype.forEach.call(chipsEl.children, function (b) { b.setAttribute('aria-pressed', b.dataset.g === name ? 'true' : 'false'); });
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll('#views button'), function (b) {
+    b.addEventListener('click', function () { if (view) view.setView(b.dataset.view); });
+  });
+  exInput.addEventListener('input', function () {
+    var v = parseFloat(exInput.value);
+    exOut.textContent = Math.round(v * 100) + '%';
+    if (view) view.manualEx(v);
+  });
+
+  go(0);
+
+  if (!window.THREE) { showErr('The 3-D library did not load. Check your connection and reload the page. The steps below still work.'); return; }
+  var T = window.THREE;
+  try { view = build3D(); } catch (err) {
+    showErr('This browser could not start 3-D graphics. The steps below still work.');
+    return;
+  }
+  view.setStep(STEPS[0]);
+  view.intro();
+
+  function build3D() {
+    var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var stage = document.getElementById('stage');
+    var canvas = document.getElementById('c');
+    var renderer = new T.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setClearColor(0x000000, 0);
+    var scene = new T.Scene();
+    var cam = new T.PerspectiveCamera(36, 1, 1, 500);
+
+    scene.add(new T.AmbientLight(0xffffff, 0.64));
+    var sun = new T.DirectionalLight(0xfff3e0, 0.6); sun.position.set(30, 50, 60); scene.add(sun);
+    var fillBack = new T.DirectionalLight(0xe4ecff, 0.42); fillBack.position.set(-30, 30, -60); scene.add(fillBack);
+    var fillLow = new T.DirectionalLight(0xffffff, 0.2); fillLow.position.set(20, -40, 20); scene.add(fillLow);
+
+    /* ---------- textures ---------- */
+    var seed = 11;
+    function rnd() { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }
+    function mk(w, h) { var c = document.createElement('canvas'); c.width = w; c.height = h; return c; }
+    function tex(c) { var t = new T.CanvasTexture(c); t.anisotropy = 4; return t; }
+    function grain(base, dark, dir) {
+      var c = mk(256, 256), g = c.getContext('2d');
+      g.fillStyle = base; g.fillRect(0, 0, 256, 256);
+      for (var i = 0; i < 70; i++) {
+        var p = rnd() * 256, th = 0.5 + rnd() * 2.2;
+        g.globalAlpha = 0.05 + rnd() * 0.14; g.fillStyle = dark;
+        if (dir === 'h') g.fillRect(0, p, 256, th); else g.fillRect(p, 0, th, 256);
+      }
+      g.globalAlpha = 1; return tex(c);
+    }
+    function rings(base, dark) {
+      var c = mk(256, 256), g = c.getContext('2d');
+      g.fillStyle = base; g.fillRect(0, 0, 256, 256);
+      var cx = -80 + rnd() * 416, cy = -80 + rnd() * 416;
+      g.strokeStyle = dark;
+      for (var r = 6; r < 520; r += 6 + rnd() * 7) {
+        g.globalAlpha = 0.22 + rnd() * 0.32; g.lineWidth = 0.8 + rnd() * 2.2;
+        g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.stroke();
+      }
+      g.globalAlpha = 1; return tex(c);
+    }
+    var HOLES = [3.25, 6.75, 10.25, 13.75, 17.25, 20.75, 24.25];
+    function plywood() {
+      var S = 32, N = 27.5 * S, c = mk(N, N), g = c.getContext('2d');
+      g.fillStyle = '#b08d5e'; g.fillRect(0, 0, N, N);
+      for (var i = 0; i < 160; i++) {
+        g.globalAlpha = 0.05 + rnd() * 0.12; g.fillStyle = '#6e5230';
+        g.fillRect(0, rnd() * N, N, 0.6 + rnd() * 2.4);
+      }
+      g.globalAlpha = 1;
+      HOLES.forEach(function (hx) { HOLES.forEach(function (hy) {
+        var x = hx * S, y = N - hy * S;
+        g.fillStyle = '#2b1f12'; g.beginPath(); g.arc(x, y, 0.13 * S, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = 'rgba(255,240,210,0.45)'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, 0.16 * S, 0, Math.PI * 2); g.stroke();
+      }); });
+      return tex(c);
+    }
+    function lam(o) { return new T.MeshLambertMaterial(o); }
+
+    /* ---------- groups ---------- */
+    var groups = {}, pieces = [];
+    function mkGroup(name) {
+      var g = { name: name, obj: new T.Group(), mats: [], ex: 0, exT: 0, op: 1, opT: 1 };
+      scene.add(g.obj); groups[name] = g; return g;
+    }
+    function track(g, m, base) { m.transparent = false; g.mats.push({ m: m, base: base === undefined ? 1 : base }); return m; }
+    function edgeMat(g) { return track(g, new T.LineBasicMaterial({ color: 0x3d2f1a, transparent: true, opacity: 0.55 }), 0.55); }
+    function piece(g, geo, edges, mats, x, y, z, dir, flag) {
+      var holder = new T.Group();
+      holder.add(new T.Mesh(geo, mats));
+      holder.add(edges);
+      g.obj.add(holder);
+      pieces.push({ g: g.name, holder: holder, base: new T.Vector3(x, y, z), dir: dir, flag: flag || '' });
+    }
+
+    ['back', 'frame', 'blocks', 'screws', 'strap'].forEach(mkGroup);
+
+    /* backboard */
+    var gB = groups.back, plyTex = plywood();
+    var plyEdge = track(gB, lam({ color: 0x9c7a4c }));
+    var plyFace = track(gB, lam({ map: plyTex }));
+    var backGeo = new T.BoxGeometry(27.5, 27.5, 0.75);
+    piece(gB, backGeo, new T.LineSegments(new T.EdgesGeometry(backGeo), edgeMat(gB)),
+      [plyEdge, plyEdge, plyEdge, plyEdge, plyFace, plyFace], 0, 0, 0.375, new T.Vector3(0, 0, -10));
+
+    /* frame */
+    var gF = groups.frame;
+    var fH = track(gF, lam({ map: grain('#cfa468', '#7a5628', 'h') }));
+    var fV = track(gF, lam({ map: grain('#cfa468', '#7a5628', 'v') }));
+    var fR1 = track(gF, lam({ map: rings('#d8b27a', '#9a6f34') }));
+    var fR2 = track(gF, lam({ map: rings('#d8b27a', '#9a6f34') }));
+    var horizGeo = new T.BoxGeometry(27.5, 1.5, 5.5), vertGeo = new T.BoxGeometry(1.5, 24.5, 5.5);
+    var horizMats = [fR1, fR2, fH, fH, fH, fH], vertMats = [fV, fV, fR1, fR2, fV, fV];
+    var fEdgeMat = edgeMat(gF);
+    piece(gF, horizGeo, new T.LineSegments(new T.EdgesGeometry(horizGeo), fEdgeMat), horizMats, 0, -13, 3.5, new T.Vector3(0, -9, 0));
+    piece(gF, horizGeo, new T.LineSegments(new T.EdgesGeometry(horizGeo), fEdgeMat), horizMats, 0, 13, 3.5, new T.Vector3(0, 9, 0), 'top');
+    piece(gF, vertGeo, new T.LineSegments(new T.EdgesGeometry(vertGeo), fEdgeMat), vertMats, -13, 0, 3.5, new T.Vector3(-9, 0, 0));
+    piece(gF, vertGeo, new T.LineSegments(new T.EdgesGeometry(vertGeo), fEdgeMat), vertMats, 13, 0, 3.5, new T.Vector3(9, 0, 0));
+
+    /* blocks */
+    var gK = groups.blocks;
+    var bSH = track(gK, lam({ map: grain('#e3cf9f', '#a98348', 'h') }));
+    var bSV = track(gK, lam({ map: grain('#e3cf9f', '#a98348', 'v') }));
+    var bFront = [], bBack = [];
+    for (var v = 0; v < 5; v++) {
+      bFront.push(track(gK, lam({ map: rings('#ecdcb0', '#b08a4c') })));
+      bBack.push(track(gK, lam({ map: rings('#ecdcb0', '#b08a4c') })));
+    }
+    var blockGeo = new T.BoxGeometry(3.5, 3.5, 6), blockEdgeGeo = new T.EdgesGeometry(blockGeo), bEdgeMat = edgeMat(gK);
+    for (var i = 0; i < 7; i++) {
+      for (var j = 0; j < 7; j++) {
+        var k = (i * 3 + j * 5) % 5;
+        piece(gK, blockGeo, new T.LineSegments(blockEdgeGeo, bEdgeMat), [bSH, bSH, bSV, bSV, bFront[k], bBack[(k + 2) % 5]],
+          (i - 3) * 3.5, (j - 3) * 3.5, 3.75, new T.Vector3((i - 3) * 1.1, (j - 3) * 1.1, 8 + j * 0.25));
+      }
+    }
+
+    /* screws */
+    var gS = groups.screws;
+    var steel = track(gS, lam({ color: 0xc3c9ce })), orange = track(gS, lam({ color: 0xe2731f }));
+    var headGeo = new T.CylinderGeometry(0.22, 0.22, 0.14, 14); headGeo.rotateX(Math.PI / 2);
+    var shaftGeo = new T.CylinderGeometry(0.1, 0.1, 3.5, 10); shaftGeo.rotateX(Math.PI / 2);
+    var tipGeo = new T.ConeGeometry(0.1, 0.45, 10); tipGeo.rotateX(Math.PI / 2);
+    for (var a = 0; a < 7; a++) {
+      for (var b = 0; b < 7; b++) {
+        var holder = new T.Group();
+        var head = new T.Mesh(headGeo, orange); holder.add(head);
+        var shaft = new T.Mesh(shaftGeo, steel); shaft.position.z = 1.82; holder.add(shaft);
+        var tip = new T.Mesh(tipGeo, steel); tip.position.z = 3.795; holder.add(tip);
+        gS.obj.add(holder);
+        pieces.push({ g: 'screws', holder: holder, base: new T.Vector3((a - 3) * 3.5, (b - 3) * 3.5, 0.05), dir: new T.Vector3(0, 0, -(20 + (a + b) * 0.7)), flag: '' });
+      }
+    }
+
+    /* ratchet strap (step 6) */
+    var gT = groups.strap;
+    var strapM = track(gT, lam({ color: 0x2f6fb0 })), buckleM = track(gT, lam({ color: 0xaab0b5 }));
+    [[28.1, 0.3, 1.6, 0, 13.9], [28.1, 0.3, 1.6, 0, -13.9], [0.3, 27.5, 1.6, -13.9, 0], [0.3, 27.5, 1.6, 13.9, 0]].forEach(function (s) {
+      var m = new T.Mesh(new T.BoxGeometry(s[0], s[1], s[2]), strapM); m.position.set(s[3], s[4], 3.5); gT.obj.add(m);
+    });
+    var buckle = new T.Mesh(new T.BoxGeometry(1.4, 1.1, 2), buckleM); buckle.position.set(13.9, 3, 3.5); gT.obj.add(buckle);
+
+    /* ---------- state ---------- */
+    var visSet = {}, focusSet = null, topT = 0, topL = 0, timer = null;
+    function setVis(list) { visSet = {}; list.forEach(function (n) { visSet[n] = true; }); Object.keys(groups).forEach(function (n) { groups[n].obj.visible = !!visSet[n]; }); }
+    function setFocus(list) { focusSet = null; if (list) { focusSet = {}; list.forEach(function (n) { focusSet[n] = true; }); } Object.keys(groups).forEach(function (n) { groups[n].opT = (!focusSet || n === 'strap' || focusSet[n]) ? 1 : 0.2; }); }
+    function setEx(v, list) { Object.keys(groups).forEach(function (n) { groups[n].exT = (!list || list.indexOf(n) >= 0) ? v : 0; }); }
+    function focusName() { if (!focusSet) return null; var ks = Object.keys(focusSet); return ks.length === 1 ? ks[0] : null; }
+
+    function setStep(step) {
+      clearTimeout(timer);
+      setVis(step.vis); setFocus(step.focus); setEx(step.ex, step.exG); topT = step.top || 0;
+      syncChips(focusName());
+      if (step.cam) setView(step.cam);
+      if (step.then) {
+        var t = step.then;
+        var apply = function () {
+          if (t.ex !== undefined) { setEx(t.ex, step.exG); syncSlider(t.ex); }
+          if (t.top !== undefined) topT = t.top;
+          if (t.vis) setVis(t.vis);
+        };
+        if (reduce) apply(); else timer = setTimeout(apply, t.delay || 0);
+      }
+    }
+    function manualEx(v) { clearTimeout(timer); setEx(v, null); Object.keys(groups).forEach(function (n) { if (n !== 'strap' && !visSet[n]) { visSet[n] = true; groups[n].obj.visible = true; } }); }
+    function toggleFocus(name) {
+      clearTimeout(timer);
+      if (focusName() === name) setFocus(null); else { setFocus([name]); if (!visSet[name]) { visSet[name] = true; groups[name].obj.visible = true; } }
+      syncChips(focusName());
+    }
+    function intro() {
+      if (reduce) return;
+      Object.keys(groups).forEach(function (n) { groups[n].ex = 0.9; });
+      setEx(0, null);
+    }
+
+    /* ---------- camera ---------- */
+    var PRESETS = { corner: { az: 0.62, el: 0.3 }, front: { az: 0, el: 0.04 }, side: { az: Math.PI / 2, el: 0.08 }, back: { az: Math.PI, el: 0.14 } };
+    var orbit = { az: 0.62, el: 0.3, dist: 70 }, tgt = new T.Vector3(0, -2, 3), tween = null;
+    function setView(name) {
+      var p = PRESETS[name]; if (!p) return;
+      var d = ((p.az - orbit.az + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+      tween = { t: 0, az0: orbit.az, el0: orbit.el, az1: orbit.az + d, el1: p.el };
+      if (reduce) { orbit.az = tween.az1; orbit.el = tween.el1; tween = null; }
+    }
+    var pointers = {}, lastPinch = 0;
+    canvas.addEventListener('pointerdown', function (e) {
+      canvas.setPointerCapture(e.pointerId);
+      pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+      tween = null; lastPinch = 0;
+      if (autoInput.checked) autoInput.checked = false;
+    });
+    canvas.addEventListener('pointermove', function (e) {
+      var p = pointers[e.pointerId]; if (!p) return;
+      var ids = Object.keys(pointers);
+      if (ids.length === 1) {
+        orbit.az -= (e.clientX - p.x) * 0.006;
+        orbit.el = Math.max(-1.5, Math.min(1.5, orbit.el + (e.clientY - p.y) * 0.006));
+      }
+      p.x = e.clientX; p.y = e.clientY;
+      if (ids.length === 2) {
+        var a = pointers[ids[0]], b = pointers[ids[1]];
+        var d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (lastPinch) orbit.dist = Math.max(32, Math.min(150, orbit.dist * (lastPinch / d)));
+        lastPinch = d;
+      }
+    });
+    function endPtr(e) { delete pointers[e.pointerId]; lastPinch = 0; }
+    canvas.addEventListener('pointerup', endPtr);
+    canvas.addEventListener('pointercancel', endPtr);
+    canvas.addEventListener('wheel', function (e) {
+      e.preventDefault();
+      orbit.dist = Math.max(32, Math.min(150, orbit.dist * Math.exp(e.deltaY * 0.001)));
+    }, { passive: false });
+
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight; if (!w || !h) return;
+      renderer.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix();
+    }
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage); else window.addEventListener('resize', resize);
+    resize();
+
+    if (reduce) autoInput.checked = false; else autoInput.checked = true;
+
+    /* ---------- loop ---------- */
+    var last = performance.now();
+    function frame(now) {
+      var dt = Math.max(0, Math.min(0.05, (now - last) / 1000)); last = now;
+      var k = reduce ? 1 : 1 - Math.exp(-dt * 5);
+      var maxEx = 0;
+      Object.keys(groups).forEach(function (n) {
+        var g = groups[n];
+        g.ex += (g.exT - g.ex) * k; g.op += (g.opT - g.op) * k;
+        if (g.obj.visible && g.ex > maxEx) maxEx = g.ex;
+        g.mats.forEach(function (e) {
+          var o = g.op * e.base; e.m.opacity = o; e.m.transparent = o < 0.995 || e.base < 1;
+        });
+      });
+      topL += (topT - topL) * k;
+      pieces.forEach(function (p) {
+        var g = groups[p.g];
+        p.holder.position.set(p.base.x + p.dir.x * g.ex, p.base.y + p.dir.y * g.ex + (p.flag === 'top' ? 11 * topL : 0), p.base.z + p.dir.z * g.ex);
+      });
+
+      if (tween) {
+        tween.t = Math.min(1, tween.t + dt / 0.9);
+        var t = tween.t, e2 = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        orbit.az = tween.az0 + (tween.az1 - tween.az0) * e2; orbit.el = tween.el0 + (tween.el1 - tween.el0) * e2;
+        if (t >= 1) tween = null;
+      } else if (autoInput.checked && Object.keys(pointers).length === 0) { orbit.az += dt * 0.12; }
+
+      var aspect = cam.aspect, fit = Math.max(1, 0.95 / aspect);
+      var D = orbit.dist * fit * (1 + 0.5 * maxEx);
+      cam.position.set(tgt.x + D * Math.cos(orbit.el) * Math.sin(orbit.az), tgt.y + D * Math.sin(orbit.el), tgt.z + D * Math.cos(orbit.el) * Math.cos(orbit.az));
+      cam.lookAt(tgt);
+      renderer.render(scene, cam);
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+
+    return { setStep: setStep, manualEx: manualEx, toggleFocus: toggleFocus, setView: setView, intro: intro };
+  }
+})();
+</script>
+
+</body>
+</html>
