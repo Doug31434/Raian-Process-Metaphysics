@@ -1245,11 +1245,14 @@ window.addEventListener("error", function(e){
   });
 
   // ---------- camera (orbit around a target height on the trunk axis) ----------
-  const orbit = { az:0.6, el:0.1, dist:24, ty:4.6, h:0 };
+  // the opening view (Doug's choice, Nov 9): eye level with the ground, so the ground reads as a line, the crown at the middle and the canopy filling the width of a phone
+  const PF0 = (()=>{ const a = stage.clientWidth/Math.max(1, stage.clientHeight); return a < 1 ? Math.min(2.3, 1.05/a) : 1; })();
+  const DEF_D = PF0 > 1 ? 21.5 : 28, DEF_EL = -Math.asin(4.0/DEF_D);   // a wide screen stands a little farther back so the whole canopy fits above the controls
+  const orbit = { az:0.6, el:DEF_EL, dist:DEF_D/PF0, ty:4.0, h:0 };
   window.__orbit = orbit;
   let tween = null;
   const PRESETS = {
-    whole:{ az:0.6, el:0.1, dist:24, ty:4.6 },
+    whole:{ az:0.6, el:DEF_EL, dist:DEF_D/PF0, ty:4.0 },
     eye:{ az:0.2, el:0.0, dist:22, ty:4.4 },
     below:{ az:0.9, el:-0.3, dist:23, ty:3.8 },
     canopy:{ az:0.4, el:1.25, dist:13, ty:5.0 },
@@ -1329,6 +1332,7 @@ window.addEventListener("error", function(e){
     resize();
   });
   if (window.ResizeObserver) new ResizeObserver(()=> resize()).observe(pbar);
+  if (window.innerWidth < 640) colBtn.click();   // on a phone, open with the controls folded away
   resize();
 
   let last = performance.now();
