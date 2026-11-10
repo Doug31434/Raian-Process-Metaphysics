@@ -160,6 +160,8 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
     <p>The tree as first drawn is the tree before the veil. After the veil, the ground becomes a broad, shimmering silver veil, so what lies below it can no longer be seen from above. The trunk stays red on the outside, but the flow rising inside it turns orange. In the branches, orange and yellow bubbles travel in pairs. Through the lower branches they push at each other, clashing and shaking; in the last third, nearer the blue facets, they settle and circle one another in a coordinated dance.</p>
     <p>Roots grow down from the base of the trunk into the ground: orange before the veil, indigo after it. After the veil the silver hides them from above; you have to go below it to see them (the camera preset "Roots · time/space"). Each root ends the way a nerve ending does: a glowing bulb, a narrow gap, and on the far side a pale receiving cup that belongs to the roots of the racial mind. Pulses run down the roots and spark across each gap, and pale pulses rise from the racial mind toward the cups. Below, the racial mind's roots weave into one field, and its deeper roots go on down a short way to touch a much larger silver sphere of many facets lying just beneath: the racial mind. Superimposed on it is a larger, transparent Earth, the planetary mind, around it a golden sphere ten times larger still, the mind of the Solar Logos, and around everything a vastly larger violet sphere dusted with stars, the galactic mind. All four touch at one shared point at the top, where the racial mind's roots reach them. Draw back (pinch out, or scroll) to see them whole; as you draw far back the view sinks toward them, and the Camera drawer has a preset for each.</p>
     <p>Before the veil the spheres of mind lie open and luminous. After the veil they are shrouded, seen only as dark shadows. Each still has a heart at its center, a point of light flowing outward. The switch <em>Light the hearts</em> lights them, and each becomes a bright golden sphere radiating in every direction. The switch <em>Roots to the hearts</em> grows indigo roots down to the center of each heart, the racial mind's first, then the planetary, the Solar Logos and the galactic.</p>
+    <p>On the harvestable service-to-self path the hearts stay dark and the indigo roots do not grow down to them. Ra says that "the negative path is one of separation. What is the first separation? The self from the self." <span class="cite">36.14</span></p>
+    <blockquote>"There is a center to infinity. From this center all spreads. Therefore, there are centers to the creation, to the galaxies, to star systems, to planetary systems, and to consciousness. In each case you may see growth from the center outward." <span class="cite">82.7</span></blockquote>
     <p>My proposal: the veil hides the deeper minds, so after it they are known only as shadows. Yet their hearts remain, and the indigo roots of will and faith can grow down and meet each one at its center.</p>
     <p>My proposal: these minds are nested rather than stacked, and they meet at a single point. The racial mind lies within the planetary mind, that within the mind of the Solar Logos, and all within the galactic mind, every one touching at the top, so the place where a root reaches the racial mind is also where it reaches the greater spheres.</p>
     <blockquote>"Not only did each race add to the planetary mind, but also each race possesses a racial mind." <span class="cite">91.7</span></blockquote>
@@ -1159,8 +1161,9 @@ window.addEventListener("error", function(e){
     updaters.push((dt, rdt)=>{
       const step = rdt || dt, e = Math.min(1, step*2.0);
       SHROUD.value += ((VEIL.post ? 1 : 0) - SHROUD.value)*e;
-      LIT.value += ((VEIL.post && HEARTS.lit ? 1 : 0) - LIT.value)*e;
-      const gt = (VEIL.post && HEARTS.roots) ? SPHERES.length : 0;
+      // the path of separation does not reach the hearts (Doug, Nov 10): on Harvestable STS they stay dark and the roots don't grow to them
+      LIT.value += ((VEIL.post && PATH.sto && HEARTS.lit ? 1 : 0) - LIT.value)*e;
+      const gt = (VEIL.post && PATH.sto && HEARTS.roots) ? SPHERES.length : 0;
       GROW.value = gt > GROW.value ? Math.min(gt, GROW.value + step*0.7) : Math.max(gt, GROW.value - step*2.5);
       shroudGrp.visible = heartsGrp.visible = SHROUD.value > 0.005;
       hrGrp.visible = GROW.value > 0.001;
@@ -1220,7 +1223,7 @@ window.addEventListener("error", function(e){
     applyVisibility();
   }
   const ps = document.getElementById("path-sto"), pt = document.getElementById("path-sts"), pseg = document.getElementById("path-seg");
-  function setPath(sto){ PATH.sto = sto; ps.setAttribute("aria-pressed", String(sto)); pt.setAttribute("aria-pressed", String(!sto)); }
+  function setPath(sto){ PATH.sto = sto; ps.setAttribute("aria-pressed", String(sto)); pt.setAttribute("aria-pressed", String(!sto)); updHeartSeg(); }
   ps.addEventListener("click", ()=> setPath(true));
   pt.addEventListener("click", ()=> setPath(false));
   veilHooks.push(post=> pseg.classList.toggle("inactive", !post));
@@ -1228,7 +1231,8 @@ window.addEventListener("error", function(e){
   const bh = document.getElementById("btn-hearts"), bhr = document.getElementById("btn-h-roots"), hseg = document.getElementById("heart-seg");
   bh.addEventListener("click", ()=>{ HEARTS.lit = !HEARTS.lit; bh.setAttribute("aria-pressed", String(HEARTS.lit)); });
   bhr.addEventListener("click", ()=>{ HEARTS.roots = !HEARTS.roots; bhr.setAttribute("aria-pressed", String(HEARTS.roots)); });
-  veilHooks.push(post=> hseg.classList.toggle("inactive", !post));
+  function updHeartSeg(){ const hs = document.getElementById("heart-seg"); if (hs) hs.classList.toggle("inactive", !VEIL.post || !PATH.sto); }
+  veilHooks.push(()=> updHeartSeg());
   hseg.classList.add("inactive");
   vb.addEventListener("click", ()=> setVeil(false));
   va.addEventListener("click", ()=> setVeil(true));
