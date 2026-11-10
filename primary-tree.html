@@ -158,10 +158,12 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
   <details>
     <summary>Before and after the veil</summary>
     <p>The tree as first drawn is the tree before the veil. After the veil, the ground becomes a broad, shimmering silver veil, so what lies below it can no longer be seen from above. The trunk stays red on the outside, but the flow rising inside it turns orange. In the branches, orange and yellow bubbles travel in pairs. Through the lower branches they push at each other, clashing and shaking; in the last third, nearer the blue facets, they settle and circle one another in a coordinated dance.</p>
-    <p>Roots grow down from the base of the trunk into the ground: orange before the veil, indigo after it. After the veil the silver hides them from above; you have to go below it to see them (the camera preset "Roots · time/space"). Each root ends the way a nerve ending does: a glowing bulb, a narrow gap, and on the far side a pale receiving cup that belongs to the roots of the racial mind. Pulses run down the roots and spark across each gap, and pale pulses rise from the racial mind toward the cups. Below, the racial mind's roots weave into one field, and its deeper roots go on down a short way to touch a much larger silver sphere of many facets lying just beneath: the racial mind. Superimposed on it is a larger, transparent Earth, the planetary mind, around it a golden sphere ten times larger still, the mind of the Solar Logos, and around everything a vastly larger violet sphere dusted with stars, the galactic mind. All four touch at one shared point at the top, where the racial mind's roots reach them. Draw back (pinch out, or scroll) to see them whole; as you draw far back the view sinks toward them, and the Camera drawer has a preset for each.</p>
-    <p>Before the veil the spheres of mind lie open and luminous. After the veil they are shrouded, seen only as dark shadows. Each still has a heart at its center, a point of light flowing outward. The switch <em>Light the hearts</em> lights them, and each becomes a bright golden sphere radiating in every direction. The switch <em>Roots to the hearts</em> grows indigo roots down to the center of each heart, the racial mind's first, then the planetary, the Solar Logos and the galactic.</p>
+    <p>Roots grow down from the base of the trunk into the ground: orange before the veil, indigo after it. After the veil the silver hides them from above; you have to go below it to see them (the camera preset "Roots · time/space"). Each root ends the way a nerve ending does: a glowing bulb, a narrow gap, and on the far side a pale receiving cup that belongs to the roots of the racial mind. Pulses run down the roots and spark across each gap, and pale pulses rise from the racial mind toward the cups. Below, the racial mind's roots weave into one field, and its deeper roots go on down a short way to touch a much larger silver sphere of many facets lying just beneath: the racial mind. Inside it, half its size and touching at the same point, is an indigo sphere, the mind of the Higher Self. Superimposed on it is a larger, transparent Earth, the planetary mind, around it a golden sphere ten times larger still, the mind of the Solar Logos, and around everything a vastly larger violet sphere dusted with stars, the galactic mind. All four touch at one shared point at the top, where the racial mind's roots reach them. Draw back (pinch out, or scroll) to see them whole; as you draw far back the view sinks toward them, and the Camera drawer has a preset for each.</p>
+    <p>Before the veil the spheres of mind lie open and luminous. After the veil they are shrouded, seen only as dark shadows. Each still has a heart at its center, a point of light flowing outward. The switch <em>Light the hearts</em> lights them, and each becomes a bright golden sphere radiating in every direction. The switch <em>Roots to the hearts</em> grows indigo roots down to the center of each heart, the Higher Self's first, then the racial mind's, the planetary, the Solar Logos and the galactic.</p>
     <p>On the harvestable service-to-self path the hearts stay dark and the indigo roots do not grow down to them. Ra says that "the negative path is one of separation. What is the first separation? The self from the self." <span class="cite">36.14</span></p>
     <blockquote>"There is a center to infinity. From this center all spreads. Therefore, there are centers to the creation, to the galaxies, to star systems, to planetary systems, and to consciousness. In each case you may see growth from the center outward." <span class="cite">82.7</span></blockquote>
+    <blockquote>"...the oversoul, as you call it, or higher self, seems to exist simultaneously with the mind/body/spirit complex which it aids." <span class="cite">36.5</span></blockquote>
+    <p>My proposal: the Higher Self belongs to the realm of indigo, so its sphere is indigo and its heart is the nearest of the hearts to the roots.</p>
     <p>My proposal: the veil hides the deeper minds, so after it they are known only as shadows. Yet their hearts remain, and the indigo roots of will and faith can grow down and meet each one at its center.</p>
     <p>My proposal: these minds are nested rather than stacked, and they meet at a single point. The racial mind lies within the planetary mind, that within the mind of the Solar Logos, and all within the galactic mind, every one touching at the top, so the place where a root reaches the racial mind is also where it reaches the greater spheres.</p>
     <blockquote>"Not only did each race add to the planetary mind, but also each race possesses a racial mind." <span class="cite">91.7</span></blockquote>
@@ -948,6 +950,19 @@ window.addEventListener("error", function(e){
       updaters.push((dt)=>{ sg.rotation.y += dt*0.06; });            // each mind turns on the vertical through the shared top point: racial fastest
       addLabel(grp, "Racial mind · the silver sphere", SC.clone().add(new THREE.Vector3(SR*0.55, -SR*0.2, SR*0.5)), "#e6ecf6", 0.5);
     }
+    // inside the racial mind, half its size and touching at the same top point: the mind of the Higher Self, indigo (Doug, Nov 10)
+    const RH = SR/2, HC = new THREE.Vector3(0, SC.y + SR - RH, 0);
+    {
+      const hs = new THREE.Group(), geo = new THREE.IcosahedronGeometry(RH, 2), cnt = geo.attributes.position.count, fc = new Float32Array(cnt*3), hr = mulberry32(9);
+      for (let i=0;i<cnt;i+=3){ const r = hr(), k = r > 0.9 ? 0.3 : 0.03 + 0.08*r; for (let j=0;j<3;j++){ fc[(i+j)*3] = 0.42*k; fc[(i+j)*3+1] = 0.3*k; fc[(i+j)*3+2] = 1.0*k; } }
+      geo.setAttribute("color", new THREE.BufferAttribute(fc, 3));
+      hs.add(new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending })));
+      hs.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 1), new THREE.LineBasicMaterial({ color:0x8f7bff, transparent:true, opacity:0.45, depthWrite:false, blending:THREE.AdditiveBlending })));
+      const mem = membrane(new THREE.Color(0x7a5cff), 48, 0.9); mem.scale.setScalar(RH*1.04/1.42); hs.add(mem);
+      hs.position.copy(HC); grp.add(hs); hs.userData.sphere = true;
+      updaters.push((dt)=>{ hs.rotation.y += dt*0.09; });       // the smallest turns fastest
+      addLabel(grp, "Higher Self mind", HC.clone().add(new THREE.Vector3(-RH*0.9, -RH*0.3, RH*0.5)), "#b9a8ff", 0.4);
+    }
     // superimposed on it, a larger transparent Earth (the planetary mind), and around both an even larger sphere, the Solar Logos mind
     // a glowing shell for the great spheres; its glow fades where the surface passes close to the camera, so nearby parts don't pile up into glare
     function bigShell(R, color, k, pw, base){
@@ -1091,7 +1106,7 @@ window.addEventListener("error", function(e){
     veilHooks.push(setRootColor); setRootColor(false);
 
     // ---------- after the veil: the minds are shrouded as dark shadows; each keeps a heart at its center, flowing outward ----------
-    const SPHERES = [{ C:SC, R:SR, name:"racial mind" }, { C:EC, R:RE, name:"planetary mind" }, { C:SCs, R:RS, name:"Solar Logos mind" }, { C:GC, R:RG, name:"galactic mind" }];
+    const SPHERES = [{ C:HC, R:RH, name:"Higher Self" }, { C:SC, R:SR, name:"racial mind" }, { C:EC, R:RE, name:"planetary mind" }, { C:SCs, R:RS, name:"Solar Logos mind" }, { C:GC, R:RG, name:"galactic mind" }];
     const SHROUD = { value:0 }, LIT = { value:0 }, GROW = { value:0 };
     const shroudGrp = new THREE.Group(); shroudGrp.userData.keep = true; shroudGrp.visible = false; grp.add(shroudGrp);
     SPHERES.forEach((S, i)=>{
@@ -1126,7 +1141,7 @@ window.addEventListener("error", function(e){
       const pmat = new THREE.PointsMaterial({ size:R*0.03, map:DOT, vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
       const pts = new THREE.Points(pgeo, pmat); pts.frustumCulled = false; hg.add(pts);
       hg.traverse(o=> o.renderOrder = 20);
-      addLabel(hg, "Heart of the " + S.name, new THREE.Vector3(R*0.15, R*0.09, 0), "#ffd98a", [0.45, 3.5, 35, 850][i]);
+      addLabel(hg, "Heart of the " + S.name, new THREE.Vector3(R*0.15, R*0.09, 0), "#ffd98a", [0.3, 0.45, 3.5, 35, 850][i]);
       hearts.push({ R, core, glow, rays, meta, pos, col, pgeo, pmat });
     });
     // indigo roots that grow down from the root system to the center of each heart, the racial mind's first
