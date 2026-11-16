@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Green Ray in Five Stages</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#07080c;--panel:rgba(13,14,20,.88);--panel-solid:#0f1017;--line:#2b2a33;--text:#ebe4d2;--muted:#a0977f;--gold:#d8a648;--gold-dim:#8a6a2c;--green:#3fbf84;
+  --gut:16px;--sl:max(var(--gut),env(safe-area-inset-left));--sr:max(var(--gut),env(safe-area-inset-right));--st:max(var(--gut),env(safe-area-inset-top));--sb:max(var(--gut),env(safe-area-inset-bottom))}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--ink);color:var(--text);font-family:'Alegreya Sans',system-ui,sans-serif;overflow:hidden}
+canvas{display:block;touch-action:none}
+.title{position:fixed;top:var(--st);left:var(--sl);max-width:min(440px,calc(100vw - 2*var(--gut)));pointer-events:none}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)}
+h1{font-family:'Marcellus',serif;font-weight:400;font-size:clamp(22px,3.4vw,32px);margin:6px 0 4px;line-height:1.15}
+.thesis{color:var(--muted);font-size:15px;margin:0;line-height:1.35}
+.topbar{position:fixed;top:var(--st);right:var(--sr);display:flex;gap:8px}
+button{font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--gold-dim)}
+.drawer{position:fixed;top:calc(var(--st) + 44px);right:var(--sr);width:min(420px,calc(100vw - 2*var(--gut)));max-height:calc(100vh - 220px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:none;backdrop-filter:blur(6px);font-size:15px;line-height:1.45}
+.drawer.open{display:block}
+.drawer h3{font-family:'Marcellus',serif;font-weight:400;margin:14px 0 4px;font-size:17px;color:var(--gold)}
+.drawer h3:first-child{margin-top:0}
+.drawer p{margin:0 0 8px}
+.cams{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.hint{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)}
+.stagebar{position:fixed;left:50%;transform:translateX(-50%);bottom:var(--sb);width:min(720px,calc(100vw - 2*var(--gut)));background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px 12px;backdrop-filter:blur(6px)}
+.stages{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.stages button.stage{flex:1 1 0;min-width:84px;text-align:left;padding:7px 10px}
+.stages button.stage b{display:block;font-family:'JetBrains Mono',monospace;font-weight:400;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.stages button.stage span{font-size:14px}
+.stages button.stage.on{border-color:var(--green);box-shadow:0 0 0 1px var(--green) inset}
+.stages button.stage.on b{color:var(--green)}
+.stages button.stage.pending{opacity:.5}
+.caption{margin:10px 2px 6px;font-size:15.5px;line-height:1.45;min-height:3em}
+.caption h2{font-family:'Marcellus',serif;font-weight:400;font-size:18px;margin:0 0 4px;color:var(--gold)}
+.controls{display:flex;gap:14px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px}
+.controls label{display:flex;gap:6px;align-items:center}
+.controls button{padding:4px 10px;font-size:13px}
+input[type=range]{width:110px;accent-color:var(--gold)}
+
+.paneltoggle{position:fixed;right:var(--sr);bottom:var(--sb);z-index:5;font-size:12px;padding:5px 10px;opacity:.85}
+.stagebar.hidden{display:none}
+@media (max-width:640px){.stagebar{bottom:calc(var(--sb) + 34px)}}
+#err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--ink);padding:24px;text-align:center;font-size:17px;color:var(--text)}
+@media (max-width:640px){.thesis{display:none}.caption{font-size:14.5px;max-height:34vh;overflow:auto}.stages button.stage{min-width:70px}}
+</style>
+</head>
+<body>
+<div class="title">
+  <div class="eyebrow">Raian Process · Field Studies</div>
+  <h1>The Green Ray in Five Stages</h1>
+  <p class="thesis">From a heart that only glimpses opening, to the heart where humanity and the Solar Logos meet, and the Living Ankh that arises above it and settles as the Christic Complex.</p>
+</div>
+<div class="topbar">
+  <button id="bCam" aria-expanded="false">Camera ▾</button>
+  <button id="bAbout" aria-expanded="false">About</button>
+</div>
+<div class="drawer" id="dCam">
+  <div class="cams">
+    <button data-cam="whole">Whole column</button>
+    <button data-cam="heart">The heart</button>
+    <button data-cam="below">From below</button>
+    <button data-cam="above">From above</button>
+    <button data-cam="kc">King's Chamber</button>
+  </div>
+  <div class="hint">Drag to orbit · scroll or pinch to zoom</div>
+</div>
+<div class="drawer" id="dAbout">
+  <h3>What You're Seeing</h3>
+  <p>The column holds the lower triad (red, orange and yellow) and, above them, the green energy center drawn as our renders draw it: an onion-shaped field graded yellow-green at the root to green-blue at the neck, a pearly center, and the lotus around it. Moving points carry the flow; there are no arrows.</p>
+  <h3>What Ra Says</h3>
+  <p>Yellow ray "concerns the entity in relation to… groups, societies," and "is at the heart of bellicose actions" (32.2). Ra speaks of the energy centers' "lotus-shape" (51.8) and of green as "the great turning point," after which it "may then be turned outward, the entity then giving rather than receiving" (32.5). Invoking the higher self makes "a bridge betwixt space/time and time/space" (75.36).</p>
+  <h3>What I Propose</h3>
+  <p>My proposal: the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility) works as a vortex enmeshed with the lower triad, and Yehoshua (Ra's edition spells it Jehoshua, 33.11), by will and faith, became the collective human green-ray center, where humanity's field and the Solar Logos's field interpenetrate. In Stage 4 the light spreading into its spectrum at the King's Chamber draws the Living Ankh on the blue center's axis. In Stage 5 the ankh settles as the Christic Complex: its nexus on the yellow center, its circle around the heart.</p>
+  <h3>Where the Picture Bends</h3>
+  <p>Ra doesn't describe the energy centers' fields, their colors of flow, or any vortex shape for the Great BASH. The tori, the onion and the vortex are my way of making a reading visible. The proportions are chosen for clarity, and the two fields at the heart are drawn as two shapes so that each stays legible. The heart sits at the Queen's Chamber position and the blue center at the King's Chamber position, spaced by their heights in the Great Pyramid. One more honest limit: when Don asked about a book linking the ankh shape to resonance in the pyramid, Ra called it "working with crayons" and said such shapes code mathematical relationships (55.14). The ankh here draws on Ra's other reading of it, as "an image of the eternal in and through manifestation" (93.24), and is my proposal.</p>
+  <p>I'm offering these thoughts for what they are worth.</p>
+</div>
+<button id="bPanel" class="paneltoggle" aria-expanded="true">Hide controls ▾</button>
+<div class="stagebar" id="stagebar">
+  <div class="stages">
+    <button class="stage on" data-stage="1"><b>Stage 1</b><span>Blockage</span></button>
+    <button class="stage" data-stage="2"><b>Stage 2</b><span>The heart</span></button>
+    <button class="stage" data-stage="3"><b>Stage 3</b><span>The union</span></button>
+    <button class="stage" data-stage="4"><b>Stage 4</b><span>The Living Ankh</span></button>
+    <button class="stage" data-stage="5"><b>Stage 5</b><span>The Christic Complex</span></button>
+  </div>
+  <div class="caption" id="cap"></div>
+  <div class="controls">
+    <button id="bPlay">Pause</button>
+    <button id="bArrive" style="display:none" title="Watch the Solar Logos arrive again">Replay the arrival</button>
+    <label>Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+    <label><input type="checkbox" id="auto"> Auto-orbit</label>
+    <label><input type="checkbox" id="capOn" checked> Caption</label>
+  </div>
+</div>
+<div id="err"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const errBox = document.getElementById('err');
+const fail = (m) => { errBox.textContent = m; errBox.style.display = 'flex'; };
+window.addEventListener('error', (e) => { if (e.target && e.target !== window && (e.target.tagName === 'LINK' || e.target.tagName === 'IMG')) return;
+  if (e.message) fail('The visualization hit a problem and could not continue. Try reloading the page.'); }, true);
+if (typeof THREE === 'undefined') { fail('The 3-D library could not load. Check your connection and reload.'); return; }
+let renderer;
+try { renderer = new THREE.WebGLRenderer({antialias:true, preserveDrawingBuffer:true}); } catch (e) { fail('This browser could not start WebGL, which the 3-D view needs.'); return; }
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1));
+renderer.setClearColor(0x07080c);
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+const sun = new THREE.DirectionalLight(0xfff4e0, 1.15); sun.position.set(4, 6, 5); scene.add(sun);
+
+// ---------- helpers ----------
+const updaters = [];
+const dotTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+  const g = x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.35,'rgba(255,255,255,0.5)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle = g; x.fillRect(0,0,64,64); return new THREE.CanvasTexture(c); })();
+const glowSprite = (color, size, op) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex, color, transparent:true, opacity:op, depthWrite:false, blending:THREE.AdditiveBlending})); s.scale.setScalar(size); s.userData.op = op; return s; };
+const pointsMat = (size) => new THREE.PointsMaterial({size, map:dotTex, vertexColors:true, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true});
+const lerp = THREE.MathUtils.lerp, smooth = THREE.MathUtils.smoothstep, clamp = THREE.MathUtils.clamp;
+
+// ---------- layout ----------
+const GY = 0.6;                      // the green center
+const CENTERS = [ {name:'red', y:-2.6, col:0xd2382c}, {name:'orange', y:-1.8, col:0xe8802a}, {name:'yellow', y:-1.0, col:0xe2c830} ];
+const HH = 0.55, HW = 0.82, ONION_H = HH*1.3, RMAX = HW + 0.05;
+const yRootG = GY - 1.12*ONION_H;    // where the green field receives from below
+
+// ---------- weights per stage (what each layer eases toward) ----------
+const STAGES = {
+  1: {five:0, orbO:1, orbY:0, union:0, bash:1, stall:1, rise:0, memb:0.2, ytor:0, wtor:0, pearl:0.45, open:0, triad:0.7, pyr:0, blue:0, fan:0, ankh:0},
+  2: {five:0, orbO:0, orbY:1, union:0, bash:0.05, stall:0, rise:1, memb:0.7, ytor:1, wtor:0, pearl:0.7, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
+  3: {five:0, orbO:0, orbY:0, union:1, bash:0.05, stall:0, rise:1, memb:0.85, ytor:1, wtor:1, pearl:1, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
+  4: {five:0, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
+  5: {five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1}
+};
+const W = Object.assign({}, STAGES[1]);
+let stage = 1;
+
+// ---------- the lower triad ----------
+// The lower triad in the forms ruled in our renders (bwtc_3d_centers_render.html, Nov 3; red's 72 spokes, Nov 7),
+// drawn as light on the dark ground and scaled to fit the column.
+const lmat = (c, o) => { const m = new THREE.LineBasicMaterial({color:c, transparent:true, opacity:o, depthWrite:false, blending:THREE.AdditiveBlending}); m.userData.op = o; return m; };
+const fres = (c, h, a0, a1) => { const m = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{c:{value:c}, h:{value:h}, k:{value:1}},
+  vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+  fragmentShader:`uniform vec3 c; uniform vec3 h; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); gl_FragColor = vec4(mix(h, c, f)*k, (${a0.toFixed(2)} + pow(f,1.4)*${a1.toFixed(2)})*k); }`}); m.userData.fres = true; return m; };
+const segLines = (G, segs, c, o) => { const m = lmat(c, o); G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segs), m)); return m; };
+const sprAt = (G, mats, pos, size, c, o) => { const sp = glowSprite(c, size, o); sp.position.copy(pos); sp.material.userData.op = o; mats.push(sp.material); G.add(sp); };
+const sphereOf = (G, mats, glow, r, ring) => {
+  const hm = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{c:{value:new THREE.Color(glow)}, k:{value:1}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); gl_FragColor = vec4(c*k, (pow(f, 2.2)*0.6 + 0.03)*k); }`});
+  hm.userData.fres = true; mats.push(hm); G.add(new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), hm));
+  const ticks = []; fibDirs(90).forEach(d => ticks.push(d.clone().multiplyScalar(r*1.3/1.42), d.clone().multiplyScalar(r*1.41/1.42)));
+  mats.push(segLines(G, ticks, new THREE.Color(glow), 0.4));
+  if (ring) { const pts = []; for (let k=0;k<=128;k++){ const a = k/128*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a), 0, r*Math.sin(a))); }
+    const m = lmat(new THREE.Color(glow), 0.5); G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m)); mats.push(m); } };
+const fibDirs = (n) => { const d = []; for (let i=0;i<n;i++){ const y = 1 - (i+0.5)/n*2, r = Math.sqrt(1-y*y), th = i*Math.PI*(3-Math.sqrt(5)); d.push(new THREE.Vector3(Math.cos(th)*r, y, Math.sin(th)*r)); } return d; };
+const buildRed = () => { const G = new THREE.Group(), mats = [], col = new THREE.Color('#C8352B'), hot = col.clone().lerp(new THREE.Color('#ff5a3c'), 0.45);
+  const dirs = fibDirs(72), R0 = 0.30, Rin = 0.33, Rout = 0.94, spokes = [], tips = [], inner = [];
+  dirs.forEach(d => spokes.push(d.clone().multiplyScalar(R0*0.92), d.clone().multiplyScalar(Rout)));
+  const edges = new Set(); for (let i=0;i<dirs.length;i++){ const near = dirs.map((d,j) => [d.distanceTo(dirs[i]), j]).filter(x => x[1] !== i).sort((a,b) => a[0]-b[0]).slice(0, 5);
+    near.forEach(([d,j]) => { if (d < near[0][0]*1.45) edges.add(i < j ? i+'-'+j : j+'-'+i); }); }
+  edges.forEach(e => { const [a,b] = e.split('-').map(Number); tips.push(dirs[a].clone().multiplyScalar(Rout), dirs[b].clone().multiplyScalar(Rout)); inner.push(dirs[a].clone().multiplyScalar(Rin), dirs[b].clone().multiplyScalar(Rin)); });
+  mats.push(segLines(G, spokes, hot, 0.75), segLines(G, tips, hot, 0.6), segLines(G, inner, hot, 0.35));
+  dirs.forEach(d => sprAt(G, mats, d.clone().multiplyScalar(Rout), 0.09, hot, 0.8));
+  const sh = fres(col, hot, 0.10, 0.75); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(R0, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 1.2, col, 0.35); sprAt(G, mats, new THREE.Vector3(), 0.6, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.24, hot, 0.9);
+  sphereOf(G, mats, '#E2574C', 1.42/1.45, true);
+  G.rotation.set(0.35, 0.5, 0.1); G.scale.setScalar(1.45*0.24); return {G, mats}; };
+const buildOrange = () => { const G = new THREE.Group(), mats = [], col = new THREE.Color('#D2721E'), hot = col.clone().lerp(new THREE.Color('#ffb04a'), 0.5);
+  // the triquetra: three half-circle arcs (radius 1.1775, centers 0.6798 out) meeting in pointed tips, over and under at each crossing
+  const pts = []; for (let k=0;k<3;k++){ const ca = THREE.MathUtils.degToRad(-90 + 240*k), cx = 0.6798*Math.cos(ca), cy = 0.6798*Math.sin(ca), a0 = THREE.MathUtils.degToRad(-120*k);
+    for (let n=0;n<200;n++){ const u = n/200, a = a0 + Math.PI*u; pts.push(new THREE.Vector3(cx + 1.1775*Math.cos(a), cy + 1.1775*Math.sin(a), 0.62*Math.sin(2*Math.PI*u))); } }
+  const NEST = [[0.30, -0.66, 0.50], [0.47, -0.44, 0.64], [0.68, -0.22, 0.80], [1.0, 0.0, 1.0]];
+  for (const [sc, turn, str] of NEST) { const cs = Math.cos(turn), sn = Math.sin(turn), w = Math.pow(sc, 0.6);
+    const cv = new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3((q.x*cs - q.y*sn)*sc, (q.x*sn + q.y*cs)*sc, q.z*sc)), true, 'centripetal');
+    for (const [r, c, o] of [[0.03, hot, 0.9], [0.08, col, 0.22]]) { const m = new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o*str, depthWrite:false, blending:THREE.AdditiveBlending}); m.userData.op = o*str; mats.push(m);
+      G.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 400, r*w, 8, true), m)); } }
+  const sh = fres(col, hot, 0.10, 0.75); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.24, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 1.0, col, 0.35); sprAt(G, mats, new THREE.Vector3(), 0.5, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.2, hot, 0.9);
+  sphereOf(G, mats, '#EE9447', 1.42, false);
+  for (const [R0, b, n, o] of [[0.69, 0.69, 16, 0.3], [0.66, 0.42, 10, 0.18]]) { const segs = [];
+    for (let i=0;i<n;i++){ const phi0 = i*2*Math.PI/n; let prev = null;
+      for (let k=0;k<=180;k++){ const t = k/180*2*Math.PI, phi = phi0 + t, rr = R0 + b*Math.cos(t), v = new THREE.Vector3(rr*Math.cos(phi), rr*Math.sin(phi), b*Math.sin(t)); if (prev) segs.push(prev, v); prev = v; } }
+    mats.push(segLines(G, segs, new THREE.Color('#FFD0A0'), o)); }
+  G.rotation.set(-0.42, 0, 0); G.scale.setScalar(0.25); return {G, mats}; };
+const buildYellow = () => { const G = new THREE.Group(), mats = [], line = new THREE.Color('#C9900A'), hot = new THREE.Color('#F2B514'), glw = new THREE.Color('#F5CF5A');
+  const uniq = g => { const a = g.attributes.position, out = []; for (let i=0;i<a.count;i++){ const v = new THREE.Vector3().fromBufferAttribute(a, i).normalize(); if (!out.some(w => w.distanceTo(v) < 1e-4)) out.push(v); } return out; };
+  const V = uniq(new THREE.IcosahedronGeometry(1, 1)), P12 = uniq(new THREE.IcosahedronGeometry(1, 0));
+  let dmin = Infinity; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) dmin = Math.min(dmin, V[i].distanceTo(V[j]));
+  const E = []; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) if (V[i].distanceTo(V[j]) < dmin*1.05) E.push([i,j]);
+  const RL = 0.86, RT = 1.38, axis = new THREE.Vector3(0.3, 1, 0.2).normalize();
+  for (const [sc, turn, st] of [[0.34, -0.9, 0.5], [0.6, -0.45, 0.72], [1.0, 0.0, 1.0]]) { const T = v => v.clone().applyAxisAngle(axis, turn).multiplyScalar(sc), k = Math.pow(sc, 0.55);
+    const net = [], rays = [];
+    for (const [i,j] of E) net.push(T(V[i].clone().multiplyScalar(RL)), T(V[j].clone().multiplyScalar(RL)));
+    for (const d of P12) { const base = T(d.clone().multiplyScalar(RL)), tip = T(d.clone().multiplyScalar(RT)); rays.push(base, tip);
+      for (const v of V.filter(v => v.distanceTo(d) > 1e-4 && v.distanceTo(d) < dmin*1.05)) rays.push(T(v.clone().multiplyScalar(RL)), T(d.clone().multiplyScalar(RL + (RT-RL)*0.34)));
+      sprAt(G, mats, tip, 0.14*k, hot, 0.9*st); sprAt(G, mats, tip, 0.3*k, glw, 0.4*st); }
+    mats.push(segLines(G, net, hot, 0.55*st), segLines(G, rays, hot, 0.8*st)); }
+  const sh = fres(line, hot, 0.03, 0.35); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 2.1, glw, 0.4); sprAt(G, mats, new THREE.Vector3(), 1.1, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.5, hot, 0.8); sprAt(G, mats, new THREE.Vector3(), 0.22, new THREE.Color('#FFF1B8'), 1.0);
+  sphereOf(G, mats, '#E9C850', 1.42, true);
+  G.rotation.set(0.32, 0.55, 0.08); G.scale.setScalar(0.24); return {G, mats}; };
+const triad = [buildRed(), buildOrange(), buildYellow()].map((o, i) => { const holder = new THREE.Group(); holder.position.y = CENTERS[i].y; holder.add(o.G); scene.add(holder); return Object.assign(o, {holder}); });
+updaters.push((dt, t) => triad.forEach((o, i) => { const f = W.triad*(0.85 + 0.15*Math.sin(t*1.3 + i*1.7))*(1 - 0.35*W.bash*(0.5 + 0.5*Math.sin(t*2.1 + i)));
+  o.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = f; else m.opacity = m.userData.op*f; }); o.holder.rotation.y += dt*0.1; }));
+// a faint axis
+{ const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-3.1,0), new THREE.Vector3(0,GY+1.4,0)]);
+  scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:0x8a6a2c, transparent:true, opacity:0.18}))); }
+
+const colAtY = (y) => { // red→orange→yellow by height in the triad, then yellow-green at green's root
+  const stops = [[-2.6,0xd2382c],[-1.8,0xe8802a],[-1.0,0xe2c830],[yRootG,0xa8d838],[GY,0x2fb45e]], c = new THREE.Color();
+  if (y <= stops[0][0]) return c.setHex(stops[0][1]); if (y >= stops[4][0]) return c.setHex(stops[4][1]);
+  for (let i=0;i<4;i++) if (y <= stops[i+1][0]) return c.setHex(stops[i][1]).lerp(new THREE.Color(stops[i+1][1]), (y-stops[i][0])/(stops[i+1][0]-stops[i][0]));
+  return c; };
+
+// ---------- Stage 1: the stalled stream, recirculating below green ----------
+const stall = (() => { const N = 1100, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({th:Math.random()*Math.PI*2, ph:Math.random()*Math.PI*2, j:0.7 + 0.6*Math.random(), sp:0.35 + 0.25*Math.random(), w:Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const m = pointsMat(0.07), pts = new THREE.Points(g, m); scene.add(pts);
+  const rC = 0.42, a = 0.38, yC = -1.75, b = 1.0;   // the loop tops out just under green's root and falls back
+  updaters.push((dt) => { m.opacity = W.stall; pts.visible = W.stall > 0.01; if (!pts.visible) return;
+    const c = new THREE.Color();
+    for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th + dt*p.sp) % (Math.PI*2); p.ph += dt*0.12;
+      const r = (rC - a*Math.cos(p.th))*p.j, y = yC + b*Math.sin(p.th)*(0.9 + 0.1*p.j);
+      pos[i*3] = r*Math.cos(p.ph); pos[i*3+1] = y; pos[i*3+2] = r*Math.sin(p.ph);
+      c.copy(colAtY(y)).multiplyScalar(0.55 + 0.45*p.w); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return pts; })();
+
+// ---------- Stage 1: the Great BASH, a vortex enmeshed with the lower triad ----------
+const bash = (() => { const G = new THREE.Group(); scene.add(G);
+  const NS = 9, NP = 160, strands = [];
+  const tilt = new THREE.Euler(0.16, 0, -0.12);
+  const at = (s, t) => { // t: 0 at the wide upper mouth, 1 at the narrow root
+    const y = -0.45 - 2.85*t, r = 0.18 + 1.35*Math.pow(1 - t, 1.25), ang = s*Math.PI*2/NS + 7.5*Math.PI*t;
+    const wob = 0.12*Math.sin(t*9 + s); const v = new THREE.Vector3((r + wob)*Math.cos(ang) + 0.18*Math.sin(t*4), y, (r + wob)*Math.sin(ang));
+    return v.applyEuler(tilt); };
+  const lineMat = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0.7, depthWrite:false});
+  for (let s=0;s<NS;s++){ const pts = [], cols = []; for (let k=0;k<NP;k++){ const t = k/(NP-1), v = at(s, t); pts.push(v);
+      const c = new THREE.Color(0x9a3a2c).lerp(new THREE.Color(0x6e5468), 0.5 + 0.5*Math.sin(t*6 + s)); cols.push(c.r, c.g, c.b); }
+    const g = new THREE.BufferGeometry().setFromPoints(pts); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); G.add(new THREE.Line(g, lineMat)); strands.push(s); }
+  // a dull haze at its heart, among the triad
+  const haze = glowSprite(0x6a2a24, 3.2, 0.22); haze.position.set(0, -1.7, 0); haze.scale.set(2.6, 3.6, 1); G.add(haze);
+  // the feeding: particles drawn down and inward along the strands, tinted by the centers they pass
+  const N = 700, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({s:Math.floor(Math.random()*NS), t:Math.random(), sp:0.05 + 0.05*Math.random(), o:(Math.random()-0.5)*0.1});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const m = pointsMat(0.08), pp = new THREE.Points(g, m); G.add(pp);
+  updaters.push((dt, tt) => { G.visible = W.bash > 0.01; if (!G.visible) return; lineMat.opacity = 0.7*W.bash; haze.material.opacity = 0.22*W.bash; m.opacity = W.bash;
+    G.rotation.y -= dt*0.12;
+    const c = new THREE.Color(), dull = new THREE.Color(0x8a3c30);
+    for (let i=0;i<N;i++){ const p = P[i]; p.t = (p.t + dt*p.sp) % 1; const v = at(p.s, p.t);
+      pos[i*3] = v.x + p.o; pos[i*3+1] = v.y; pos[i*3+2] = v.z + p.o;
+      c.copy(colAtY(v.y)).lerp(dull, 0.55); c.multiplyScalar(0.8); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return G; })();
+
+// ---------- Stage 2: the stream rises freely into the heart ----------
+const rise = (() => { const N = 900, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({u:Math.random(), ph:Math.random()*Math.PI*2, r:0.04 + 0.12*Math.random(), sp:0.09 + 0.05*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const m = pointsMat(0.05), pts = new THREE.Points(g, m); scene.add(pts);
+  updaters.push((dt) => { m.opacity = W.rise; pts.visible = W.rise > 0.01; if (!pts.visible) return; const c = new THREE.Color();
+    for (let i=0;i<N;i++){ const p = P[i]; p.u = (p.u + dt*p.sp) % 1; p.ph += dt*0.5;
+      const y = -2.85 + (GY - 0.1 + 2.85)*p.u, r = p.r*(1 + 0.5*Math.sin(p.u*12 + p.ph));
+      pos[i*3] = r*Math.cos(p.ph); pos[i*3+1] = y; pos[i*3+2] = r*Math.sin(p.ph);
+      const fade = smooth(p.u, 0, 0.06)*(1 - smooth(p.u, 0.88, 1));
+      c.copy(colAtY(y)).multiplyScalar(fade); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return pts; })();
+
+// ---------- the green energy center: onion membrane, lotus, pearl ----------
+const green = new THREE.Group(); green.position.y = GY; scene.add(green);
+updaters.push((dt) => { green.rotation.y += dt*0.1; });   // the heart turns slowly
+const PROF = [[-1.60,0.10],[-1.34,0.105],[-1.17,0.16],[-1.03,0.36],[-0.86,0.62],[-0.62,0.84],[-0.32,0.97],[0.0,1.0],[0.30,0.965],[0.56,0.84],[0.78,0.63],[0.97,0.38],[1.12,0.20],[1.27,0.12],[1.45,0.10],[1.62,0.10]];
+const pchip = (() => { const xs = PROF.map(p => p[0]), ys = PROF.map(p => p[1]), n = xs.length, h = [], d = [], m = new Array(n);
+  for (let i=0;i<n-1;i++){ h.push(xs[i+1]-xs[i]); d.push((ys[i+1]-ys[i])/h[i]); } m[0] = d[0]; m[n-1] = d[n-2];
+  for (let i=1;i<n-1;i++){ if (d[i-1]*d[i] <= 0) m[i] = 0; else { const w1 = 2*h[i]+h[i-1], w2 = h[i]+2*h[i-1]; m[i] = (w1+w2)/(w1/d[i-1] + w2/d[i]); } }
+  return (x) => { if (x <= xs[0]) return ys[0]; if (x >= xs[n-1]) return ys[n-1]; let i = 0; while (x > xs[i+1]) i++;
+    const t = (x - xs[i])/h[i], t2 = t*t, t3 = t2*t; return (2*t3-3*t2+1)*ys[i] + (t3-2*t2+t)*h[i]*m[i] + (-2*t3+3*t2)*ys[i+1] + (t3-t2)*h[i]*m[i+1]; }; })();
+const onionR = (yl) => RMAX*pchip(yl/ONION_H);           // yl: height relative to the green center
+const MSTOPS = [[-1.5,0xe2d830],[-0.8,0xa8d838],[0.0,0x2fb45e],[0.8,0x1fa8b0],[1.6,0x3a7fe8]];
+const membColor = (yl) => { const u = yl/ONION_H, c = new THREE.Color();
+  if (u <= MSTOPS[0][0]) return c.setHex(MSTOPS[0][1]); if (u >= MSTOPS[4][0]) return c.setHex(MSTOPS[4][1]);
+  for (let i=0;i<4;i++) if (u <= MSTOPS[i+1][0]) return c.setHex(MSTOPS[i][1]).lerp(new THREE.Color(MSTOPS[i+1][1]), (u-MSTOPS[i][0])/(MSTOPS[i+1][0]-MSTOPS[i][0]));
+  return c; };
+const memb = (() => { const G = new THREE.Group(); green.add(G); const mat = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0.4, depthWrite:false, blending:THREE.AdditiveBlending});
+  const yb = -1.60*ONION_H, yt = 1.62*ONION_H;
+  for (let i=0;i<96;i++){ const phi = i/96*Math.PI*2, pts = [], cols = [];
+    for (let k=0;k<=90;k++){ const t = k/90, y = yb + (yt - yb)*t, r = onionR(y), tw = phi + 0.5*smooth(t, 0.12, 0.88);
+      pts.push(new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)));
+      const fade = Math.min(smooth(y, yb, -1.12*ONION_H), 1 - smooth(y, 1.12*ONION_H, yt)); const c = membColor(y).multiplyScalar(0.25 + 0.75*fade); cols.push(c.r, c.g, c.b); }
+    const g = new THREE.BufferGeometry().setFromPoints(pts); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); G.add(new THREE.Line(g, mat)); }
+  // the membrane's flow: points rising south to north along the lines
+  const N = 500, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, t:Math.random(), sp:0.05 + 0.03*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const pm = pointsMat(0.04), pp = new THREE.Points(g, pm); G.add(pp);
+  updaters.push((dt) => { mat.opacity = 0.42*W.memb; pm.opacity = smooth(W.memb, 0.45, 0.85); pp.visible = pm.opacity > 0.01; G.rotation.y += dt*0.05; if (!pp.visible) return; const c = new THREE.Color();
+    for (let i=0;i<N;i++){ const p = P[i]; p.t = (p.t + dt*p.sp) % 1; const y = yb + (yt - yb)*p.t, r = onionR(y), tw = p.phi + 0.5*smooth(p.t, 0.12, 0.88);
+      pos[i*3] = r*Math.cos(tw); pos[i*3+1] = y; pos[i*3+2] = r*Math.sin(tw);
+      const fade = Math.min(smooth(y, yb, -1.12*ONION_H), 1 - smooth(y, 1.12*ONION_H, yt)); c.copy(membColor(y)).multiplyScalar(fade); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return G; })();
+
+// the lotus: two rings of petals around the pearl that part (open) and close
+const lotus = (() => { const G = new THREE.Group(); green.add(G); const petals = [];
+  const shape = (L, Wd) => { const s = new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(Wd, L*0.25, Wd*0.9, L*0.7, 0, L); s.bezierCurveTo(-Wd*0.9, L*0.7, -Wd, L*0.25, 0, 0); return new THREE.ShapeGeometry(s, 16); };
+  const ring = (n, L, Wd, off, colA, colB, r0) => { for (let i=0;i<n;i++){ const az = off + i/n*Math.PI*2;
+      const geo = shape(L, Wd), cols = [], pa = geo.attributes.position, c = new THREE.Color();
+      for (let j=0;j<pa.count;j++){ c.copy(new THREE.Color(colA)).lerp(new THREE.Color(colB), pa.getY(j)/L); cols.push(c.r, c.g, c.b); }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0.62, depthWrite:false});
+      const pivot = new THREE.Group(); pivot.rotation.y = -az; const hinge = new THREE.Group(); hinge.position.x = r0; pivot.add(hinge);
+      const mesh = new THREE.Mesh(geo, mat); mesh.position.y = -0.02; hinge.add(mesh); G.add(pivot); petals.push({hinge, mat, L}); } };
+  ring(8, 0.40, 0.13, 0, 0x12804b, 0x6fd3a2, 0.15);
+  ring(8, 0.48, 0.16, Math.PI/8, 0x1f8f58, 0x9ae6c0, 0.18);
+  G.position.y = -0.1;
+  let openNow = 0;
+  updaters.push((dt, t) => {
+    // Stage 1: a brief parting every ~10 s, never held. Stage 2: open and steady.
+    const cyc = (t % 10.5)/10.5, pulse = Math.pow(Math.max(0, Math.sin(Math.PI*clamp((cyc - 0.55)/0.3, 0, 1))), 1.6)*0.75;
+    openNow = lerp(pulse, 1, W.open);
+    petals.forEach((p, i) => { p.hinge.rotation.z = -lerp(0.12, 1.12, openNow) - (i >= 8 ? 0.12*openNow : 0) - 0.03*Math.sin(t*0.8 + i); p.mat.opacity = 0.42 + 0.3*openNow; });
+  });
+  return {G, get open(){ return openNow; }}; })();
+
+// the pearl
+const pearl = (() => {
+  // Doug (Nov 16): a larger yellow orb, translucent, with a smaller radiant white orb centered inside it
+  const sv = `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`;
+  const yMat = new THREE.ShaderMaterial({ uniforms:{k:{value:1}}, transparent:true, depthWrite:false, vertexShader:sv,
+    fragmentShader:`uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float ndv = max(dot(vN, vV), 0.0), rim = pow(1.0 - ndv, 1.8);
+      vec3 col = mix(vec3(1.0, 0.86, 0.38), vec3(0.96, 0.66, 0.10), rim);
+      col += vec3(1.0, 0.95, 0.8)*pow(max(dot(vN, normalize(vec3(-0.4, 0.6, 0.7))), 0.0), 20.0)*0.3;
+      gl_FragColor = vec4(col*(0.6 + 0.4*k), 0.32 + 0.6*smoothstep(0.1, 0.95, rim)); }` });
+  const wMat = new THREE.ShaderMaterial({ uniforms:{k:{value:1}}, transparent:true, vertexShader:sv,
+    fragmentShader:`uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float ndv = max(dot(vN, vV), 0.0);
+      vec3 col = mix(vec3(0.86, 0.90, 0.96), vec3(1.0), pow(ndv, 0.8)); gl_FragColor = vec4(col*(0.7 + 0.3*k), 1.0); }` });
+  // before the union (Doug, Nov 16): a small orb at the lotus's center. Stage 1: dull, smoky orange, humanity under
+  // the orange-ray overlay before the heart's activation through Jesus. Stage 2: a bright, beautiful yellow.
+  const sMat = new THREE.ShaderMaterial({ uniforms:{c:{value:new THREE.Color()}, a:{value:1}}, transparent:true, depthWrite:false, vertexShader:sv,
+    fragmentShader:`uniform vec3 c; uniform float a; varying vec3 vN; varying vec3 vV; void main(){ float ndv = max(dot(vN, vV), 0.0);
+      vec3 col = mix(c*0.55, c, pow(ndv, 0.9)); gl_FragColor = vec4(col, a); }` });
+  const sOrb = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), sMat); green.add(sOrb);
+  const smoke = glowSprite(0x5e4a40, 0.5, 0.5); smoke.material.blending = THREE.NormalBlending; green.add(smoke);   // the smoky haze around the dull orange
+  const sGlow = glowSprite(0xffffff, 0.55, 0.6); green.add(sGlow);
+  const DULL = new THREE.Color(0x9a5a2c), BRIGHT = new THREE.Color(0xffd23a);
+  updaters.push((dt, t) => { const pre = W.orbO + W.orbY, f = pre > 1e-3 ? W.orbY/pre : 1;
+    sMat.uniforms.c.value.copy(DULL).lerp(BRIGHT, f); sMat.uniforms.a.value = Math.min(1, pre); sOrb.visible = pre > 0.01;
+    sOrb.scale.setScalar(0.85 + 0.15*Math.sin(t*1.1)*f);
+    smoke.material.opacity = 0.5*W.orbO*(0.8 + 0.2*Math.sin(t*0.7)); smoke.scale.setScalar(0.5 + 0.05*Math.sin(t*0.5));
+    sGlow.material.color.copy(DULL).lerp(BRIGHT, f); sGlow.material.opacity = (0.15*W.orbO + 0.75*W.orbY)*(0.9 + 0.1*Math.sin(t*1.7)); sGlow.scale.setScalar(0.4 + 0.35*f); });
+  const wOrb = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), wMat); wOrb.renderOrder = 1; green.add(wOrb);
+  const wGlow1 = glowSprite(0xffffff, 0.3, 1.0), wGlow2 = glowSprite(0xf4f7ff, 0.6, 0.5); wGlow1.renderOrder = wGlow2.renderOrder = 4; wGlow1.material.depthTest = wGlow2.material.depthTest = false; green.add(wGlow1, wGlow2);   // radiates through the yellow
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.21, 64, 48), yMat); orb.renderOrder = 3; green.add(orb);
+  const s1 = glowSprite(0xf6d26a, 1.1, 0.45), s2 = glowSprite(0xf2e2b0, 2.2, 0.22); green.add(s1, s2);
+  updaters.push((dt, t) => { const k = W.pearl*(0.92 + 0.08*Math.sin(t*1.1)) + 0.25*lotus.open*(1 - W.open), rad = 0.9 + 0.1*Math.sin(t*1.7);
+    const un = W.union, g = 0.25 + 0.75*un; orb.visible = wOrb.visible = un > 0.02; orb.scale.setScalar(g); wOrb.scale.setScalar(g);
+    yMat.uniforms.k.value = k; wMat.uniforms.k.value = k; wGlow1.material.opacity = 1.0*k*rad*un; wGlow2.material.opacity = 0.5*k*rad*un;
+    s1.material.opacity = 0.45*k*un; s2.material.opacity = 0.22*k*un; });
+  return orb; })();
+
+// ---------- Stage 2: two toroidal fields at the heart, interpenetrating without merging ----------
+const torus = (o) => { const G = new THREE.Group(); green.add(G);
+  const loopPt = (phi, th) => new THREE.Vector3((o.R + o.rr*Math.cos(th))*Math.cos(phi), o.rv*Math.sin(th), (o.R + o.rr*Math.cos(th))*Math.sin(phi));
+  const lmat = new THREE.LineBasicMaterial({color:o.col, transparent:true, opacity:o.lop, depthWrite:false, blending:THREE.AdditiveBlending});
+  for (let i=0;i<o.nl;i++){ const phi = o.off + i/o.nl*Math.PI*2, pts = []; for (let k=0;k<=96;k++) pts.push(loopPt(phi, k/96*Math.PI*2));
+    G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lmat)); }
+  // poloidal flow: up the inside, out over the top, down the outside, in at the bottom; toroidal drift in its own direction
+  const N = o.np, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, th:Math.random()*Math.PI*2, j:0.85 + 0.3*Math.random(), sp:0.45 + 0.3*Math.random(), b:0.6 + 0.4*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  const pm = pointsMat(o.ps), pp = new THREE.Points(g, pm); G.add(pp); const base = new THREE.Color(o.pcol);
+  updaters.push((dt) => { const w = W[o.key]; G.visible = w > 0.01; if (!G.visible) return; lmat.opacity = o.lop*w; pm.opacity = w;
+    const s = (0.7 + 0.3*w)*(G.userData.extra || 1);  // the field gathers as it arrives
+    G.scale.set(s, s, s);
+    for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th - dt*p.sp + Math.PI*2) % (Math.PI*2); p.phi += dt*o.drift;
+      const v = loopPt(p.phi, p.th).multiplyScalar(p.j); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
+      col[i*3] = base.r*p.b; col[i*3+1] = base.g*p.b; col[i*3+2] = base.b*p.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return G; };
+// humanity's field (veiled third density): yellow, broad
+torus({key:'ytor', R:0.50, rr:0.36, rv:0.48, nl:30, off:0, col:0xe2c030, lop:0.34, np:900, ps:0.045, pcol:0xf2d250, drift:0.16});
+// the Solar Logos's field: white, tall, passing through the yellow
+const wTor = torus({key:'wtor', R:0.26, rr:0.30, rv:0.64, nl:24, off:Math.PI/24, col:0xf4f2ec, lop:0.30, np:800, ps:0.045, pcol:0xfdfcf6, drift:-0.16});
+
+// the arrival (Doug, Nov 16): the Solar Logos's field begins centered behind the heart, much larger than it,
+// and slowly comes forward and draws in until it takes up its place inside the heart (Stage 2 into Stage 3)
+const arrival = {on:false, t:0, dur:16, dir:new THREE.Vector3(), from:3.6, s0:5.0};
+const startArrival = () => { const gp = new THREE.Vector3(); green.getWorldPosition(gp);
+  arrival.dir.copy(gp).sub(camera.position); arrival.dir.y = 0; arrival.dir.normalize();
+  arrival.on = true; arrival.t = 0; W.wtor = 0; setStage(3); goCam('arrive'); };
+updaters.push((dt) => { if (!arrival.on) return; arrival.t += dt;
+  const u = clamp(arrival.t/arrival.dur, 0, 1), e = u*u*(3 - 2*u);
+  const gp = new THREE.Vector3(); green.getWorldPosition(gp); green.updateMatrixWorld();
+  wTor.position.copy(green.worldToLocal(gp.add(arrival.dir.clone().multiplyScalar(arrival.from*(1 - e)))));
+  wTor.userData.extra = lerp(arrival.s0, 1, Math.pow(e, 0.8));
+  if (u >= 1) { arrival.on = false; wTor.position.set(0, 0, 0); wTor.userData.extra = 1; } });
+const stopArrival = () => { arrival.on = false; wTor.position.set(0, 0, 0); wTor.userData.extra = 1; };
+
+
+// ---------- Stage 4: the pyramid, the King's Chamber, the blue center and the Living Ankh ----------
+// Scale: the green center sits at the Queen's Chamber level (about 52 cubits) and the blue center at the King's Chamber
+// belt (about 104 cubits), per the poloidal-core mapping; the pyramid keeps Giza's true proportions (440 by 280 cubits).
+const CUB = 2.2/52, BY = GY + 52*CUB, BASE_Y = GY - 52*CUB;
+const pyr = (() => { const G = new THREE.Group(); scene.add(G); const hb = 220*CUB, top = BASE_Y + 280*CUB;
+  const c = [[-hb,-hb],[hb,-hb],[hb,hb],[-hb,hb]].map(([x,z]) => new THREE.Vector3(x, BASE_Y, z)), apex = new THREE.Vector3(0, top, 0), segs = [];
+  for (let i=0;i<4;i++){ segs.push(c[i], c[(i+1)%4], c[i], apex); }
+  const lm = new THREE.LineBasicMaterial({color:0xd8a648, transparent:true, opacity:0.5, depthWrite:false});
+  G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segs), lm));
+  const box = (w, h, d, y, col) => { const e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(w, h, d)), new THREE.LineBasicMaterial({color:col, transparent:true, opacity:0.6, depthWrite:false})); e.position.y = y; G.add(e); return e.material; };
+  const kc = box(20*CUB, 11.2*CUB, 10*CUB, BY, 0xc9b27a);          // King's Chamber: 20 by 10 cubits, about 11 high
+  const qc = box(10.5*CUB, 9*CUB, 11.5*CUB, GY, 0xa8987a);         // Queen's Chamber
+  updaters.push(() => { G.visible = false;   // removed at Doug's direction (Nov 16)
+  if (false) { lm.opacity = 0.5*W.pyr; kc.visible = false; qc.visible = false; } });
+  return G; })();
+
+// the blue center: the same onion field, graded green at the root, blue at the equator, indigo at the neck
+const blue = (() => { const G = new THREE.Group(); G.position.y = BY; scene.add(G);
+  const ST = [[-1.5,0x2fb45e],[-0.8,0x2f9ca0],[0.0,0x2f78d8],[0.8,0x4560d0],[1.6,0x5a48c8]];
+  const colB = (yl) => { const u = yl/ONION_H, c = new THREE.Color(); if (u <= ST[0][0]) return c.setHex(ST[0][1]); if (u >= ST[4][0]) return c.setHex(ST[4][1]);
+    for (let i=0;i<4;i++) if (u <= ST[i+1][0]) return c.setHex(ST[i][1]).lerp(new THREE.Color(ST[i+1][1]), (u-ST[i][0])/(ST[i+1][0]-ST[i][0])); return c; };
+  const mat = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0.4, depthWrite:false, blending:THREE.AdditiveBlending});
+  const yb = -1.60*ONION_H, yt = 1.62*ONION_H;
+  for (let i=0;i<96;i++){ const phi = i/96*Math.PI*2, pts = [], cols = [];
+    for (let k=0;k<=90;k++){ const t = k/90, y = yb + (yt - yb)*t, r = onionR(y), tw = phi + 0.5*smooth(t, 0.12, 0.88); pts.push(new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)));
+      const fade = Math.min(smooth(y, yb, -1.12*ONION_H), 1 - smooth(y, 1.12*ONION_H, yt)); const c = colB(y).multiplyScalar(0.25 + 0.75*fade); cols.push(c.r, c.g, c.b); }
+    const g = new THREE.BufferGeometry().setFromPoints(pts); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); G.add(new THREE.Line(g, mat)); }
+  mat.visible = false;   // Doug (Nov 16): only the diffuse spectrum at the blue center
+  updaters.push((dt) => { G.visible = W.blue > 0.01; });
+  return G; })();
+
+// the sweeping spectrum: from the heart the light opens into red through violet (56.6), a fan about 40 degrees wide
+// (56.7 gives 33 to 54), turning around the axis [superseded: now Zone 5's helix, below]; in the fan's own plane, on the blue center's axis, it draws the ankh
+const SPEC = [0xd2382c, 0xe8802a, 0xe2c830, 0x2fb45e, 0x2f78d8, 0x5a48c8, 0x9050c0].map(h => new THREE.Color(h));
+const specAt = (f) => { f = clamp(f, 0, 1)*6; const i = Math.min(5, Math.floor(f)); return SPEC[i].clone().lerp(SPEC[i+1], f - i); };
+const sweep = new THREE.Group(); sweep.position.y = GY - 0.15; scene.add(sweep);
+const ORIG_TO_BLUE = BY - sweep.position.y, HALF = THREE.MathUtils.degToRad(20), FAN_L = ORIG_TO_BLUE + 0.75;
+// Zone 5's first helix, after the poloidal-core model: 24 strands at radii spread across the column, hue running red
+// to violet across them (most of the band blue), one full turn as the cone widens upward; each ray holds its own angular
+// place, the spectrum "beginning to be diffused" at the King's Chamber (56.6). Six pale blue ambient strands outside.
+const fan = (() => { const G = new THREE.Group(); sweep.add(G); const OY = sweep.position.y;
+  const Y0 = BY - 1.0, Y1 = BY + 0.8, CR = 0.6, N = 24, TURNS = 1.0;
+  const env = (y) => { const t = clamp((y - Y0)/(Y1 - Y0), 0, 1); return 0.35 + 2.0*Math.pow(t, 1.1); };     // the cone opens upward as the spectrum diffuses
+  const hue = (i) => { if (i < 4) return (i/4)*0.17; if (i < 7) return 0.17 + ((i-4)/3)*0.16; if (i < 19) return 0.50 + ((i-7)/12)*0.20; return 0.70 + ((i-19)/5)*0.13; };
+  const strands = [], mats = [];
+  for (let s2=0; s2<N; s2++){ const h = hue(s2), blueBand = h >= 0.5 && h <= 0.72, col = new THREE.Color().setHSL(h, blueBand ? 0.95 : 0.82, blueBand ? 0.58 : 0.52);
+    const sr = CR*(0.25 + 0.40*s2/(N-1)), phi0 = s2*Math.PI*2/N, pts = [];
+    for (let k=0;k<90;k++){ const t = k/89, y = Y0 + t*(Y1 - Y0), phi = phi0 + TURNS*Math.PI*2*t, r = sr*env(y); pts.push(new THREE.Vector3(r*Math.cos(phi), y - OY, r*Math.sin(phi))); }
+    const curve = new THREE.CatmullRomCurve3(pts), geo = new THREE.TubeGeometry(curve, 160, 0.013, 8, false), pa = geo.attributes.position, al = [], cl = [];
+    for (let j=0;j<pa.count;j++){ const t = (pa.getY(j) + OY - Y0)/(Y1 - Y0), f = 0.4 + 0.6*smooth(t, 0, 0.15)*(1 - 0.3*smooth(t, 0.88, 1)); cl.push(col.r*f, col.g*f, col.b*f); }
+    geo.setAttribute('color', new THREE.Float32BufferAttribute(cl, 3));
+    const m = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0.8, depthWrite:false}); m.userData.op = 0.8; mats.push(m); G.add(new THREE.Mesh(geo, m));
+    strands.push({curve, col}); }
+  // light moving up each strand, so the turning reads without arrows
+  const NP = 14, total = strands.length*NP, pp = new Float32Array(total*3), pc = new Float32Array(total*3), P = [];
+  strands.forEach((st, si) => { for (let k=0;k<NP;k++) P.push({si, t:(k + Math.random()*0.6)/NP, sp:0.07 + 0.03*Math.random()}); });
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp, 3)); pg.setAttribute('color', new THREE.BufferAttribute(pc, 3));
+  const pm = pointsMat(0.06); G.add(new THREE.Points(pg, pm)); const v = new THREE.Vector3();
+  updaters.push((dt) => { G.visible = W.fan > 0.01; if (!G.visible) return; mats.forEach(m => m.opacity = m.userData.op*W.fan); pm.opacity = W.fan;
+    for (let i=0;i<total;i++){ const p = P[i]; p.t = (p.t + dt*p.sp) % 1; strands[p.si].curve.getPointAt(p.t, v); const f = smooth(p.t, 0, 0.1)*(1 - smooth(p.t, 0.88, 1));
+      pp[i*3] = v.x; pp[i*3+1] = v.y; pp[i*3+2] = v.z; const c = strands[p.si].col; pc[i*3] = Math.min(1, c.r*1.2)*f; pc[i*3+1] = Math.min(1, c.g*1.2)*f; pc[i*3+2] = Math.min(1, c.b*1.2)*f; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; });
+  return G; })();
+
+// the Living Ankh (Doug, Nov 16, from his drawing): two toroidal fields crossing at the center. The stem and the circle
+// are the two lobes of one vertical field, a figure-eight whose flow rises from the heart's apex up the stem, through the
+// center and around the circle, and back down; that field gives rise to a horizontal one, its two lobes the arms.
+// Each lobe is a bundle of yellow and white streamlines at several tilts, so each pair reads as a field in 3-D.
+const ankh = (() => { const G = new THREE.Group(); G.position.y = ORIG_TO_BLUE; sweep.add(G);
+  const TOP = {L:1.05, W:0.5, p:0.75}, STEM = {L:(BY - (GY + 0.62)), W:0.17, p:0.35}, ARMS = {L:0.9, W:0.32, p:0.85};
+  const UP = new THREE.Vector3(0,1,0), DOWN = new THREE.Vector3(0,-1,0), RIGHT = new THREE.Vector3(1,0,0), LEFT = new THREE.Vector3(-1,0,0), Z = new THREE.Vector3(0,0,1);
+  // one lobe, out from the center and back: t in [0,1]
+  const lobe = (t, d, n, P, k, beta) => { const along = P.L*Math.pow(Math.sin(Math.PI*t), 2), across = P.W*Math.sin(2*Math.PI*t)*Math.pow(Math.sin(Math.PI*t), P.p);
+    const nb = n.clone().multiplyScalar(Math.cos(beta)).add(d.clone().cross(n).multiplyScalar(Math.sin(beta)));
+    return d.clone().multiplyScalar(along*k).add(nb.multiplyScalar(across*k)); };
+  const strands = [];
+  const build = (kind, k, beta, white) => { const pts = [], M = 140;
+    if (kind === 'v') {   // from the stem's tip, up to the center, around the circle, back down the stem's other side
+      for (let n=M/2;n<=M;n++) pts.push(lobe(n/M, DOWN, RIGHT, STEM, k, beta));
+      for (let n=1;n<=M;n++) pts.push(lobe(n/M, UP, RIGHT, TOP, k, beta));
+      for (let n=1;n<=M/2;n++) pts.push(lobe(n/M, DOWN, RIGHT, STEM, k, beta));
+    } else {              // from the center, around the right lobe, through the center, around the left
+      for (let n=0;n<=M;n++) pts.push(lobe(n/M, RIGHT, UP, ARMS, k, beta));
+      for (let n=1;n<=M;n++) pts.push(lobe(n/M, LEFT, UP, ARMS, k, beta)); }
+    const len = [0]; for (let n=1;n<pts.length;n++) len.push(len[n-1] + pts[n].distanceTo(pts[n-1]));
+    const m = new THREE.MeshBasicMaterial({color: white ? 0xe8eeff : 0xffbe1e, transparent:true, opacity:0.8, depthWrite:false, depthTest:false, blending:THREE.AdditiveBlending});
+    const seg = pts.length, geo = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), seg, 0.009, 6, false);   // thicker flow lines (Nov 16)
+    const line = new THREE.Mesh(geo, m); line.renderOrder = 30; G.add(line);
+    // the violet aura (Stage 5): a broad soft sheath along the outer streamlines
+    let aura = null; if (k === 1.0 && Math.abs(beta) < 0.65 && Math.round(beta*10) % 3 === 0) { const am = new THREE.MeshBasicMaterial({color:0x9a5cff, transparent:true, opacity:0, depthWrite:false, depthTest:false, blending:THREE.AdditiveBlending});
+      aura = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), seg, 0.07, 8, false), am); aura.renderOrder = 28; G.add(aura); }
+    strands.push({kind, pts, len, total: len[len.length-1], line, m, white, seg, aura}); };
+  const TILTS = [-0.6, -0.3, 0, 0.3, 0.6], SCALES = [0.62, 0.81, 1.0];
+  let c = 0; for (const kind of ['v', 'h']) for (const b of TILTS) for (const k of SCALES) build(kind, k, b, (c++) % 2 === 0);
+  // light circulating along every streamline
+  const PER = 12, N = strands.length*PER, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({s:Math.floor(i/PER), u:((i%PER) + Math.random()*0.7)/PER});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp, 3)); pg.setAttribute('color', new THREE.BufferAttribute(pc, 3));
+  const pm = pointsMat(0.075); pm.depthTest = false; const bp = new THREE.Points(pg, pm); bp.renderOrder = 32; G.add(bp);
+  const core = glowSprite(0xf4f0d8, 0.7, 0.55); core.renderOrder = 31; G.add(core);
+  const auraGlow = glowSprite(0x8a4cf0, 2.4, 0); auraGlow.position.y = 0.35; auraGlow.scale.set(2.6, 3.4, 1); auraGlow.renderOrder = 27; G.add(auraGlow);
+  const at = (st, d, out) => { let n = 1; while (n < st.len.length - 1 && st.len[n] < d) n++; const a = st.len[n-1], b = st.len[n], f = b > a ? (d - a)/(b - a) : 0; return out.copy(st.pts[n-1]).lerp(st.pts[n], clamp(f, 0, 1)); };
+  let grow = 0; const v = new THREE.Vector3();
+  updaters.push((dt, t) => { G.visible = W.ankh > 0.01; if (!G.visible) { grow = 0; return; }
+    grow = stage >= 4 ? Math.min(1, grow + dt/12) : Math.max(0, grow - dt/2);
+    const gV = smooth(grow, 0, 0.6), gH = smooth(grow, 0.55, 1), op = W.ankh;   // the vertical field first, then the horizontal it gives rise to
+    strands.forEach(st => { const g = st.kind === 'v' ? gV : gH; st.reach = g*st.total; const nIdx = Math.max(0, Math.floor(g*st.seg))*6*6; st.line.geometry.setDrawRange(0, nIdx);
+      if (st.aura) { st.aura.geometry.setDrawRange(0, Math.max(0, Math.floor(g*st.seg))*8*6); st.aura.material.opacity = 0.06*op*W.five; st.aura.visible = W.five > 0.01; }
+      st.m.opacity = (st.white ? 0.5 : 0.95)*op*(1 - 0.4*W.five); });
+    core.material.opacity = 0.55*op*gH; pm.opacity = op;
+    const f5 = W.five*W.five*(3 - 2*W.five); G.position.y = lerp(ORIG_TO_BLUE, CENTERS[2].y - sweep.position.y, f5); G.scale.setScalar(lerp(1, 2.75, f5));
+    core.scale.setScalar(0.7 + 0.5*f5); auraGlow.material.opacity = 0.28*op*W.five*(0.9 + 0.1*Math.sin(t*0.9));
+    for (let i=0;i<N;i++){ const p = P[i], st = strands[p.s]; p.u = (p.u + dt*0.3/st.total) % 1; const d = p.u*st.total;
+      if (d > st.reach) { pc[i*3] = pc[i*3+1] = pc[i*3+2] = 0; continue; }
+      at(st, d, v); pp[i*3] = v.x; pp[i*3+1] = v.y; pp[i*3+2] = v.z;
+      if (st.white) { pc[i*3] = 1; pc[i*3+1] = 1; pc[i*3+2] = 0.97; } else { pc[i*3] = 1; pc[i*3+1] = 0.76; pc[i*3+2] = 0.12; } }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; });
+  return G; })();
+updaters.push((dt) => { sweep.rotation.y += dt*0.12; sweep.visible = W.fan > 0.01 || W.ankh > 0.01; });
+
+// ---------- captions ----------
+const CAPS = {
+  1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (34.17).`,
+  2: `<h2>Stage 2 · The Heart</h2>Now the stream from below rises all the way into green, and the lotus opens. At the heart is humanity's own toroidal field, yellow: veiled third density, the field we share as a people. It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.`,
+  3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
+  4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
+  5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (27.8).`
+};
+const capEl = document.getElementById('cap');
+const setStage = (n) => { if (n !== 3 && arrival.on) stopArrival(); stage = n; const ba = document.getElementById('bArrive'); if (ba) ba.style.display = n === 3 ? '' : 'none'; capEl.innerHTML = CAPS[n]; document.querySelectorAll('.stage').forEach(b => b.classList.toggle('on', +b.dataset.stage === n)); };
+document.querySelectorAll('.stage').forEach(b => b.addEventListener('click', () => { const n = +b.dataset.stage, was = stage; setStage(n);
+  if (n === 3 && was !== 3) { startArrival(); return; }   // Stage 3 opens with the arrival (Doug, Nov 16)
+  if (n === 5) goCam('five'); else if (n === 4 && was !== 4) goCam('kc'); else if (was >= 4 && n < 4) goCam('whole'); }));
+setStage(1);
+window.__setStage = setStage;
+window.__snapStage = (n) => { setStage(n); Object.assign(W, STAGES[n]); };
+
+// ---------- camera: spherical orbit around a moving target ----------
+const orbit = {az:0.75, el:0.12, dist:11.6, ty:-1.2};
+const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
+window.__orbit = orbit;
+let tween = null;
+const goCam = (k) => { const p = PRESETS[k]; tween = {from:Object.assign({}, orbit), to:Object.assign({}, p), t:0}; };
+document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => goCam(b.dataset.cam)));
+document.getElementById('bArrive').addEventListener('click', () => startArrival());
+{ const bp = document.getElementById('bPanel'), sb = document.getElementById('stagebar');
+  bp.addEventListener('click', () => { const hide = !sb.classList.contains('hidden'); sb.classList.toggle('hidden', hide);
+    bp.textContent = hide ? 'Show controls ▴' : 'Hide controls ▾'; bp.setAttribute('aria-expanded', !hide); }); }
+window.__arrive = startArrival;
+const cv = renderer.domElement, ptrs = new Map(); let pinch0 = 0, dist0 = 0;
+cv.addEventListener('pointerdown', e => { cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); tween = null;
+  if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); dist0 = orbit.dist; } });
+cv.addEventListener('pointermove', e => { if (!ptrs.has(e.pointerId)) return; const prev = ptrs.get(e.pointerId), cur = {x:e.clientX, y:e.clientY}; ptrs.set(e.pointerId, cur);
+  if (ptrs.size === 1) { orbit.az -= (cur.x - prev.x)*0.006; orbit.el = clamp(orbit.el + (cur.y - prev.y)*0.006, -1.54, 1.54); }
+  else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()], d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) orbit.dist = clamp(dist0*pinch0/d, 2.2, 40); } });
+const up = e => { ptrs.delete(e.pointerId); pinch0 = 0; };
+cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+cv.addEventListener('wheel', e => { e.preventDefault(); orbit.dist = clamp(orbit.dist*Math.exp(e.deltaY*0.001), 2.2, 40); }, {passive:false});
+
+// ---------- drawers and play bar ----------
+const drawers = {bCam:'dCam', bAbout:'dAbout'};
+Object.keys(drawers).forEach(id => document.getElementById(id).addEventListener('click', () => {
+  Object.entries(drawers).forEach(([b, d]) => { const el = document.getElementById(d), btn = document.getElementById(b), open = b === id && !el.classList.contains('open');
+    el.classList.toggle('open', open); btn.setAttribute('aria-expanded', open); }); }));
+let playing = true; const bPlay = document.getElementById('bPlay');
+bPlay.addEventListener('click', () => { playing = !playing; bPlay.textContent = playing ? 'Pause' : 'Play'; });
+document.getElementById('capOn').addEventListener('change', e => { capEl.style.display = e.target.checked ? '' : 'none'; });
+const speedEl = document.getElementById('speed'), autoEl = document.getElementById('auto');
+if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { autoEl.checked = false; speedEl.value = 0.4; }
+
+const resize = () => { const w = innerWidth, h = innerHeight; renderer.setSize(w, h); camera.aspect = w/h;
+  camera.fov = w < 640 ? 52 : 40; camera.updateProjectionMatrix(); };
+addEventListener('resize', resize); resize();
+
+// ---------- frame loop ----------
+let last = performance.now(), simT = 0;
+const ease = x => x < 0.5 ? 2*x*x : 1 - Math.pow(-2*x + 2, 2)/2;
+const frame = (now) => {
+  const rdt = Math.max(0, Math.min(0.05, (now - last)/1000)); last = now;
+  const dt = playing ? rdt*(+speedEl.value) : 0; simT += dt;
+  const target = STAGES[stage], k = 1 - Math.exp(-rdt*1.6);   // smooth transitions, independent of speed
+  for (const key in target) W[key] += (target[key] - W[key])*k;
+  updaters.forEach(f => f(dt, simT));
+  if (tween) { tween.t = Math.min(1, tween.t + rdt/1.1); const e = ease(tween.t); for (const key in tween.to) orbit[key] = lerp(tween.from[key], tween.to[key], e); if (tween.t >= 1) tween = null; }
+  else if (autoEl.checked && playing && ptrs.size === 0) orbit.az += rdt*0.045;
+  camera.position.set(orbit.dist*Math.cos(orbit.el)*Math.sin(orbit.az), orbit.ty + orbit.dist*Math.sin(orbit.el), orbit.dist*Math.cos(orbit.el)*Math.cos(orbit.az));
+  camera.lookAt(0, orbit.ty, 0);
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame); };
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
