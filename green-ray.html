@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Green Ray in Five Stages</title>
+<title>The Green Ray in Six Stages</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -51,7 +51,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
 <body>
 <div class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
-  <h1>The Green Ray in Five Stages</h1>
+  <h1>The Green Ray in Six Stages</h1>
   <p class="thesis">From a heart that only glimpses opening, to the heart where humanity and the Solar Logos meet, and the Living Ankh that arises above it and settles as the Christic Complex.</p>
 </div>
 <div class="topbar">
@@ -74,7 +74,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   <h3>What Ra Says</h3>
   <p>Yellow ray "concerns the entity in relation to… groups, societies," and "is at the heart of bellicose actions" (32.2). Ra speaks of the energy centers' "lotus-shape" (51.8) and of green as "the great turning point," after which it "may then be turned outward, the entity then giving rather than receiving" (32.5). Invoking the higher self makes "a bridge betwixt space/time and time/space" (75.36).</p>
   <h3>What I Propose</h3>
-  <p>My proposal: the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility) works as a vortex enmeshed with the lower triad, and Yehoshua (Ra's edition spells it Jehoshua, 33.11), by will and faith, became the collective human green-ray center, where humanity's field and the Solar Logos's field interpenetrate. In Stage 4 the light spreading into its spectrum at the King's Chamber draws the Living Ankh on the blue center's axis. In Stage 5 the ankh settles as the Christic Complex: its nexus on the yellow center, its circle around the heart.</p>
+  <p>My proposal: the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility) works as a vortex enmeshed with the lower triad, and Yehoshua (Ra's edition spells it Jehoshua, 33.11), by will and faith, became the collective human green-ray center, where humanity's field and the Solar Logos's field interpenetrate. In Stage 4 the light spreading into its spectrum at the King's Chamber draws the Living Ankh on the blue center's axis. In Stage 5 the ankh settles as the Christic Complex: its nexus on the yellow center, its circle around the heart. Stage 6 comes close to that nexus: a golden Star of David with the Sacred Heart of Jesus at its center, sculpted from the traditional iconography.</p>
   <h3>Where the Picture Bends</h3>
   <p>Ra doesn't describe the energy centers' fields, their colors of flow, or any vortex shape for the Great BASH. The tori, the onion and the vortex are my way of making a reading visible. The proportions are chosen for clarity, and the two fields at the heart are drawn as two shapes so that each stays legible. The heart sits at the Queen's Chamber position and the blue center at the King's Chamber position, spaced by their heights in the Great Pyramid. One more honest limit: when Don asked about a book linking the ankh shape to resonance in the pyramid, Ra called it "working with crayons" and said such shapes code mathematical relationships (55.14). The ankh here draws on Ra's other reading of it, as "an image of the eternal in and through manifestation" (93.24), and is my proposal.</p>
   <p>I'm offering these thoughts for what they are worth.</p>
@@ -87,6 +87,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
     <button class="stage" data-stage="3"><b>Stage 3</b><span>The union</span></button>
     <button class="stage" data-stage="4"><b>Stage 4</b><span>The Living Ankh</span></button>
     <button class="stage" data-stage="5"><b>Stage 5</b><span>The Christic Complex</span></button>
+    <button class="stage" data-stage="6"><b>Stage 6</b><span>The Sacred Heart</span></button>
   </div>
   <div class="caption" id="cap"></div>
   <div class="controls">
@@ -133,11 +134,12 @@ const yRootG = GY - 1.12*ONION_H;    // where the green field receives from belo
 
 // ---------- weights per stage (what each layer eases toward) ----------
 const STAGES = {
-  1: {five:0, orbO:1, orbY:0, union:0, bash:1, stall:1, rise:0, memb:0.2, ytor:0, wtor:0, pearl:0.45, open:0, triad:0.7, pyr:0, blue:0, fan:0, ankh:0},
-  2: {five:0, orbO:0, orbY:1, union:0, bash:0.05, stall:0, rise:1, memb:0.7, ytor:1, wtor:0, pearl:0.7, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
-  3: {five:0, orbO:0, orbY:0, union:1, bash:0.05, stall:0, rise:1, memb:0.85, ytor:1, wtor:1, pearl:1, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
-  4: {five:0, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
-  5: {five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1}
+  1: {six:0, five:0, orbO:1, orbY:0, union:0, bash:1, stall:1, rise:0, memb:0.2, ytor:0, wtor:0, pearl:0.45, open:0, triad:0.7, pyr:0, blue:0, fan:0, ankh:0},
+  2: {six:0, five:0, orbO:0, orbY:1, union:0, bash:0.05, stall:0, rise:1, memb:0.7, ytor:1, wtor:0, pearl:0.7, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
+  3: {six:0, five:0, orbO:0, orbY:0, union:1, bash:0.05, stall:0, rise:1, memb:0.85, ytor:1, wtor:1, pearl:1, open:1, triad:1, pyr:0, blue:0, fan:0, ankh:0},
+  4: {six:0, five:0, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
+  5: {six:0, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
+  6: {six:1, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:0.18}
 };
 const W = Object.assign({}, STAGES[1]);
 let stage = 1;
@@ -528,26 +530,84 @@ const ankh = (() => { const G = new THREE.Group(); G.position.y = ORIG_TO_BLUE; 
   return G; })();
 updaters.push((dt) => { sweep.rotation.y += dt*0.12; sweep.visible = W.fan > 0.01 || W.ankh > 0.01; });
 
+
+// ---------- Stage 6 (Doug, Nov 16): close up at the nexus on the yellow center: a golden Star of David, and at its
+// center the Sacred Heart of Jesus, sculpted from the traditional iconography (heart, crown of thorns, flames, cross,
+// wound, rays of light). The group turns to face the viewer.
+const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y, 0); scene.add(G); const mats = [];
+  const reg = (m, op) => { m.transparent = true; m.userData.op = op; mats.push(m); return m; };
+  const gold = () => reg(new THREE.MeshStandardMaterial({color:0xd8a648, emissive:0x9a6f22, emissiveIntensity:0.55, metalness:0.85, roughness:0.28}), 1);
+  // the star: two interlaced triangles, ascending and descending
+  const R6 = 0.52;
+  for (const [rot, dz] of [[Math.PI/2, 0.012], [-Math.PI/2, -0.012]]) { const pts = [];
+    for (let k=0;k<3;k++){ const a = rot + k*2*Math.PI/3; pts.push(new THREE.Vector3(R6*Math.cos(a), R6*Math.sin(a), 0)); }
+    const path = new THREE.CurvePath(); for (let k=0;k<3;k++) path.add(new THREE.LineCurve3(pts[k], pts[(k+1)%3]));
+    const sp = []; for (let n=0;n<=300;n++){ const v = path.getPoint(n/300); v.z = dz*Math.sin(n/300*Math.PI*6); sp.push(v); }   // over and under, interlaced
+    G.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sp, true, 'catmullrom', 0.01), 300, 0.028, 10, true), gold())); }
+  // rays of light behind the heart
+  { const rays = []; for (let k=0;k<72;k++){ const a = k*Math.PI*2/72, r1 = 0.18, r2 = (k%3 === 0 ? 0.5 : k%3 === 1 ? 0.42 : 0.36); rays.push(new THREE.Vector3(r1*Math.cos(a), r1*Math.sin(a), -0.05), new THREE.Vector3(r2*Math.cos(a), r2*Math.sin(a), -0.05)); }
+    const m = reg(new THREE.LineBasicMaterial({color:0xffe9a0, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending}), 0.7); G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(rays), m)); }
+  const halo = glowSprite(0xffd88a, 1.1, 0); halo.position.z = -0.06; reg(halo.material, 0.3); G.add(halo);
+  // the heart
+  const H = new THREE.Group(); H.position.y = -0.06; G.add(H);
+  { const sh = new THREE.Shape(), s2 = 0.0011;
+    sh.moveTo(0, -95*s2); sh.bezierCurveTo(-30*s2, -60*s2, -95*s2, -25*s2, -95*s2, 25*s2); sh.bezierCurveTo(-95*s2, 70*s2, -55*s2, 95*s2, -25*s2, 95*s2);
+    sh.bezierCurveTo(-8*s2, 95*s2, 0, 82*s2, 0, 70*s2); sh.bezierCurveTo(0, 82*s2, 8*s2, 95*s2, 25*s2, 95*s2); sh.bezierCurveTo(55*s2, 95*s2, 95*s2, 70*s2, 95*s2, 25*s2);
+    sh.bezierCurveTo(95*s2, -25*s2, 30*s2, -60*s2, 0, -95*s2);
+    const geo = new THREE.ExtrudeGeometry(sh, {depth:0.05, bevelEnabled:true, bevelThickness:0.045, bevelSize:0.035, bevelSegments:8, curveSegments:40}); geo.center();
+    H.add(new THREE.Mesh(geo, reg(new THREE.MeshStandardMaterial({color:0xa8321f, emissive:0x4a0e06, emissiveIntensity:0.55, metalness:0.05, roughness:0.6}), 1))); }
+  // the wound, with light pouring from it
+  { const w = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 12), reg(new THREE.MeshBasicMaterial({color:0xfff2d0}), 1)); w.material.color.setHex(0x4a0606); w.scale.set(0.6, 2.0, 0.5); w.rotation.z = 1.1; w.position.set(-0.045, -0.035, 0.078); H.add(w);
+    const bm = reg(new THREE.MeshStandardMaterial({color:0x8a0a0a, emissive:0x3a0000, emissiveIntensity:0.5, roughness:0.3}), 1);
+    for (const [dx, len] of [[-0.05, 0.035], [-0.04, 0.05], [-0.03, 0.03]]) { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, len, 6), bm); d.position.set(dx, -0.045 - len/2, 0.08); H.add(d);
+      const dr = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 8, 6), bm); dr.position.set(dx, -0.045 - len, 0.08); H.add(dr); }
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.008, 10, 8), bm); tip.scale.set(1, 1.5, 1); tip.position.set(0, -0.165, 0.03); H.add(tip);
+    const wg = glowSprite(0xfff0c8, 0.1, 0); wg.position.copy(w.position); reg(wg.material, 0.5); H.add(wg); }
+  // the crown of thorns, encircling the heart
+  { const ring = new THREE.Group(); ring.rotation.x = 0.14; ring.position.y = 0.03; ring.scale.set(1, 1, 0.58); H.add(ring);
+    const tm = reg(new THREE.MeshStandardMaterial({color:0x8a6a3a, emissive:0x3a2a12, emissiveIntensity:0.45, roughness:0.75}), 1);
+    for (const ph of [0, 1.3, 2.6]) { const pts = []; for (let k=0;k<=80;k++){ const a = k/80*Math.PI*2; pts.push(new THREE.Vector3((0.158 + 0.008*Math.sin(a*5 + ph))*Math.cos(a), 0.014*Math.sin(a*7 + ph), (0.158 + 0.008*Math.sin(a*5 + ph))*Math.sin(a))); }
+      ring.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 80, 0.008, 6, true), tm)); }
+    for (let k=0;k<30;k++){ const a = k/30*Math.PI*2, th = new THREE.Mesh(new THREE.ConeGeometry(0.008, 0.045, 5), tm);
+      th.position.set(0.165*Math.cos(a), 0, 0.165*Math.sin(a)); th.lookAt(th.position.clone().multiplyScalar(2)); th.rotateX(Math.PI/2); ring.add(th); } }
+  // the flames above, and the cross
+  const flames = [];
+  { for (let k=0;k<7;k++){ const fm = reg(new THREE.MeshBasicMaterial({color: [0xe85a0c,0xf59a1e,0xffc840][k%3], depthWrite:false}), 0.92);
+      const f = new THREE.Mesh(new THREE.ConeGeometry(0.03 - 0.004*Math.abs(k-3), 0.22 - 0.035*Math.abs(k-3), 12), fm); f.position.set((k-3)*0.02, 0.19 - 0.018*Math.abs(k-3), 0.0); H.add(f); flames.push(f); }
+    const fg = glowSprite(0xffa040, 0.3, 0); fg.position.set(0, 0.17, -0.03); reg(fg.material, 0.35); H.add(fg);
+    const cg = reg(new THREE.MeshStandardMaterial({color:0x6b4423, emissive:0x2a160a, emissiveIntensity:0.5, roughness:0.85}), 1); const v = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.14, 0.016), cg); v.position.set(0, 0.29, 0.02); H.add(v);
+    const h = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.018, 0.016), cg); h.position.set(0, 0.315, 0.02); H.add(h); }
+  G.traverse(o => { o.renderOrder = 40; });   // drawn after the ankh's flow, so the star and heart sit in front
+  updaters.push((dt, t) => { const w = W.six; G.visible = w > 0.01; if (!G.visible) return;
+    mats.forEach(m => m.opacity = m.userData.op*w);
+    G.scale.setScalar(0.6 + 0.4*w);
+    const cx = camera.position.x, cz = camera.position.z; G.rotation.y = Math.atan2(cx, cz);   // face the viewer
+    G.position.z = 0; H.position.z = 0.09;
+    flames.forEach((f, i) => { const s3 = 1 + 0.18*Math.sin(t*6 + i*1.7); f.scale.set(1 - 0.1*Math.sin(t*5 + i), s3, 1); f.rotation.z = 0.12*Math.sin(t*3 + i*2.1); });
+    H.scale.setScalar(1.15*(1 + 0.03*Math.sin(t*1.6))); });   // a slow heartbeat
+  return G; })();
+
 // ---------- captions ----------
 const CAPS = {
   1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (34.17).`,
   2: `<h2>Stage 2 · The Heart</h2>Now the stream from below rises all the way into green, and the lotus opens. At the heart is humanity's own toroidal field, yellow: veiled third density, the field we share as a people. It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.`,
   3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
   4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
-  5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (27.8).`
+  5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (27.8).`,
+  6: `<h2>Stage 6 · The Sacred Heart at the Nexus</h2>Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross. A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced. At its center is the Sacred Heart of Jesus, crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding. The heart is sculpted from the shared iconography of the traditional Sacred Heart paintings. This is the coincidence of opposites at the heart of it all: "Meanwhile the Creator lies within" (49.6).`
 };
 const capEl = document.getElementById('cap');
 const setStage = (n) => { if (n !== 3 && arrival.on) stopArrival(); stage = n; const ba = document.getElementById('bArrive'); if (ba) ba.style.display = n === 3 ? '' : 'none'; capEl.innerHTML = CAPS[n]; document.querySelectorAll('.stage').forEach(b => b.classList.toggle('on', +b.dataset.stage === n)); };
 document.querySelectorAll('.stage').forEach(b => b.addEventListener('click', () => { const n = +b.dataset.stage, was = stage; setStage(n);
   if (n === 3 && was !== 3) { startArrival(); return; }   // Stage 3 opens with the arrival (Doug, Nov 16)
-  if (n === 5) goCam('five'); else if (n === 4 && was !== 4) goCam('kc'); else if (was >= 4 && n < 4) goCam('whole'); }));
+  if (n === 6) goCam('six'); else if (n === 5) goCam('five'); else if (n === 4 && was !== 4) goCam('kc'); else if (was >= 4 && n < 4) goCam('whole'); }));
 setStage(1);
 window.__setStage = setStage;
 window.__snapStage = (n) => { setStage(n); Object.assign(W, STAGES[n]); };
 
 // ---------- camera: spherical orbit around a moving target ----------
 const orbit = {az:0.75, el:0.12, dist:11.6, ty:-1.2};
-const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
+const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, six:{az:0.75, el:0.06, dist:2.3, ty:-1.0}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
 window.__orbit = orbit;
 let tween = null;
 const goCam = (k) => { const p = PRESETS[k]; tween = {from:Object.assign({}, orbit), to:Object.assign({}, p), t:0}; };
