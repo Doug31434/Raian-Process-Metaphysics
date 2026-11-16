@@ -211,7 +211,9 @@ const buildYellow = () => { const G = new THREE.Group(), mats = [], line = new T
   G.rotation.set(0.32, 0.55, 0.08); G.scale.setScalar(0.24); return {G, mats}; };
 const triad = [buildRed(), buildOrange(), buildYellow()].map((o, i) => { const holder = new THREE.Group(); holder.position.y = CENTERS[i].y; holder.add(o.G); scene.add(holder); return Object.assign(o, {holder}); });
 updaters.push((dt, t) => triad.forEach((o, i) => { const f = W.triad*(0.85 + 0.15*Math.sin(t*1.3 + i*1.7))*(1 - 0.35*W.bash*(0.5 + 0.5*Math.sin(t*2.1 + i)));
-  o.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = f; else m.opacity = m.userData.op*f; }); o.holder.rotation.y += dt*0.1; }));
+  o.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = f; else m.opacity = m.userData.op*f; });
+  if (i === 2 && W.six > 0.02) { o.holder.rotation.y = sweep.rotation.y; o.holder.scale.setScalar(1 + 0.95*W.six); }   // Stage 6: the yellow sphere holds the star and heart, turning with the ankh
+  else { o.holder.rotation.y += dt*0.1; o.holder.scale.setScalar(1); } }));
 // a faint axis
 { const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-3.1,0), new THREE.Vector3(0,GY+1.4,0)]);
   scene.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:0x8a6a2c, transparent:true, opacity:0.18}))); }
@@ -581,7 +583,7 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
   updaters.push((dt, t) => { const w = W.six; G.visible = w > 0.01; if (!G.visible) return;
     mats.forEach(m => m.opacity = m.userData.op*w);
     G.scale.setScalar(0.6 + 0.4*w);
-    const cx = camera.position.x, cz = camera.position.z; G.rotation.y = Math.atan2(cx, cz);   // face the viewer
+    G.rotation.y = sweep.rotation.y;   // embedded in the yellow sphere, turning with the ankh
     G.position.z = 0; H.position.z = 0.09;
     flames.forEach((f, i) => { const s3 = 1 + 0.18*Math.sin(t*6 + i*1.7); f.scale.set(1 - 0.1*Math.sin(t*5 + i), s3, 1); f.rotation.z = 0.12*Math.sin(t*3 + i*2.1); });
     H.scale.setScalar(1.15*(1 + 0.03*Math.sin(t*1.6))); });   // a slow heartbeat
