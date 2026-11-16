@@ -210,7 +210,7 @@ const buildYellow = () => { const G = new THREE.Group(), mats = [], line = new T
   sphereOf(G, mats, '#E9C850', 1.42, true);
   G.rotation.set(0.32, 0.55, 0.08); G.scale.setScalar(0.24); return {G, mats}; };
 const triad = [buildRed(), buildOrange(), buildYellow()].map((o, i) => { const holder = new THREE.Group(); holder.position.y = CENTERS[i].y; holder.add(o.G); scene.add(holder); return Object.assign(o, {holder}); });
-updaters.push((dt, t) => triad.forEach((o, i) => { const f = W.triad*(0.85 + 0.15*Math.sin(t*1.3 + i*1.7))*(1 - 0.35*W.bash*(0.5 + 0.5*Math.sin(t*2.1 + i)));
+updaters.push((dt, t) => triad.forEach((o, i) => { const f = (i === 2 ? 1 - 0.45*W.six : 1)*W.triad*(0.85 + 0.15*Math.sin(t*1.3 + i*1.7))*(1 - 0.35*W.bash*(0.5 + 0.5*Math.sin(t*2.1 + i)));
   o.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = f; else m.opacity = m.userData.op*f; });
   if (i === 2 && W.six > 0.02) { o.holder.rotation.y = sweep.rotation.y; o.holder.scale.setScalar(1 + 0.95*W.six); }   // Stage 6: the yellow sphere holds the star and heart, turning with the ankh
   else { o.holder.rotation.y += dt*0.1; o.holder.scale.setScalar(1); } }));
@@ -537,55 +537,68 @@ updaters.push((dt) => { sweep.rotation.y += dt*0.12; sweep.visible = W.fan > 0.0
 // center the Sacred Heart of Jesus, sculpted from the traditional iconography (heart, crown of thorns, flames, cross,
 // wound, rays of light). The group turns to face the viewer.
 const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y, 0); scene.add(G); const mats = [];
-  const reg = (m, op) => { m.transparent = true; m.userData.op = op; mats.push(m); return m; };
-  const gold = () => reg(new THREE.MeshStandardMaterial({color:0xd8a648, emissive:0x9a6f22, emissiveIntensity:0.55, metalness:0.85, roughness:0.28}), 1);
-  // the star: two interlaced triangles, ascending and descending
+  // Doug (Nov 16): energy, not objects. Every part is light: glowing cores with soft halos, light flowing along them.
+  const reg = (m, op) => { m.transparent = true; m.depthWrite = false; m.userData.op = op; mats.push(m); return m; };
+  const glow = (hex, op) => reg(new THREE.MeshBasicMaterial({color:hex, blending:THREE.AdditiveBlending, side:THREE.DoubleSide}), op);
+  const energyTube = (parent, curve, closed, r, hex, seg, st = 1) => { for (const [k, op] of [[1, 0.9], [2.4, 0.22], [4.5, 0.07]]) parent.add(new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r*k, 10, closed), glow(hex, op*st))); };
+  const flows = [];   // light running along a curve
+  const flowOn = (parent, curve, n, hex, size, speed) => { const pos = new Float32Array(n*3), g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+    const m = reg(new THREE.PointsMaterial({color:hex, size, map:dotTex, blending:THREE.AdditiveBlending, sizeAttenuation:true}), 1); parent.add(new THREE.Points(g, m));
+    flows.push({curve, pos, g, n, speed, u:Array.from({length:n}, (_, i) => i/n)}); };
+  // the star: two interlaced triangles of golden light
   const R6 = 0.52;
   for (const [rot, dz] of [[Math.PI/2, 0.012], [-Math.PI/2, -0.012]]) { const pts = [];
     for (let k=0;k<3;k++){ const a = rot + k*2*Math.PI/3; pts.push(new THREE.Vector3(R6*Math.cos(a), R6*Math.sin(a), 0)); }
     const path = new THREE.CurvePath(); for (let k=0;k<3;k++) path.add(new THREE.LineCurve3(pts[k], pts[(k+1)%3]));
-    const sp = []; for (let n=0;n<=300;n++){ const v = path.getPoint(n/300); v.z = dz*Math.sin(n/300*Math.PI*6); sp.push(v); }   // over and under, interlaced
-    G.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(sp, true, 'catmullrom', 0.01), 300, 0.028, 10, true), gold())); }
-  // rays of light behind the heart
-  { const rays = []; for (let k=0;k<72;k++){ const a = k*Math.PI*2/72, r1 = 0.18, r2 = (k%3 === 0 ? 0.5 : k%3 === 1 ? 0.42 : 0.36); rays.push(new THREE.Vector3(r1*Math.cos(a), r1*Math.sin(a), -0.05), new THREE.Vector3(r2*Math.cos(a), r2*Math.sin(a), -0.05)); }
-    const m = reg(new THREE.LineBasicMaterial({color:0xffe9a0, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending}), 0.7); G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(rays), m)); }
-  const halo = glowSprite(0xffd88a, 1.1, 0); halo.position.z = -0.06; reg(halo.material, 0.3); G.add(halo);
-  // the heart
-  const H = new THREE.Group(); H.position.y = -0.06; G.add(H);
-  { const sh = new THREE.Shape(), s2 = 0.0011;
-    sh.moveTo(0, -95*s2); sh.bezierCurveTo(-30*s2, -60*s2, -95*s2, -25*s2, -95*s2, 25*s2); sh.bezierCurveTo(-95*s2, 70*s2, -55*s2, 95*s2, -25*s2, 95*s2);
-    sh.bezierCurveTo(-8*s2, 95*s2, 0, 82*s2, 0, 70*s2); sh.bezierCurveTo(0, 82*s2, 8*s2, 95*s2, 25*s2, 95*s2); sh.bezierCurveTo(55*s2, 95*s2, 95*s2, 70*s2, 95*s2, 25*s2);
-    sh.bezierCurveTo(95*s2, -25*s2, 30*s2, -60*s2, 0, -95*s2);
-    const geo = new THREE.ExtrudeGeometry(sh, {depth:0.05, bevelEnabled:true, bevelThickness:0.045, bevelSize:0.035, bevelSegments:8, curveSegments:40}); geo.center();
-    H.add(new THREE.Mesh(geo, reg(new THREE.MeshStandardMaterial({color:0xa8321f, emissive:0x4a0e06, emissiveIntensity:0.55, metalness:0.05, roughness:0.6}), 1))); }
-  // the wound, with light pouring from it
-  { const w = new THREE.Mesh(new THREE.SphereGeometry(0.018, 16, 12), reg(new THREE.MeshBasicMaterial({color:0xfff2d0}), 1)); w.material.color.setHex(0x4a0606); w.scale.set(0.6, 2.0, 0.5); w.rotation.z = 1.1; w.position.set(-0.045, -0.035, 0.078); H.add(w);
-    const bm = reg(new THREE.MeshStandardMaterial({color:0x8a0a0a, emissive:0x3a0000, emissiveIntensity:0.5, roughness:0.3}), 1);
-    for (const [dx, len] of [[-0.05, 0.035], [-0.04, 0.05], [-0.03, 0.03]]) { const d = new THREE.Mesh(new THREE.CylinderGeometry(0.0035, 0.0035, len, 6), bm); d.position.set(dx, -0.045 - len/2, 0.08); H.add(d);
-      const dr = new THREE.Mesh(new THREE.SphereGeometry(0.0055, 8, 6), bm); dr.position.set(dx, -0.045 - len, 0.08); H.add(dr); }
-    const tip = new THREE.Mesh(new THREE.SphereGeometry(0.008, 10, 8), bm); tip.scale.set(1, 1.5, 1); tip.position.set(0, -0.165, 0.03); H.add(tip);
-    const wg = glowSprite(0xfff0c8, 0.1, 0); wg.position.copy(w.position); reg(wg.material, 0.5); H.add(wg); }
-  // the crown of thorns, encircling the heart
+    const sp = []; for (let n=0;n<=300;n++){ const v = path.getPoint(n/300); v.z = dz*Math.sin(n/300*Math.PI*6); sp.push(v); }
+    const cv = new THREE.CatmullRomCurve3(sp, true, 'catmullrom', 0.01); energyTube(G, cv, true, 0.007, 0xe8a83a, 300, 0.55); flowOn(G, cv, 60, 0xfff2c0, 0.035, rot > 0 ? 0.06 : -0.06); }
+  // rays of light
+  { const rays = []; for (let k=0;k<72;k++){ const a = k*Math.PI*2/72, r1 = 0.16, r2 = (k%3 === 0 ? 0.48 : k%3 === 1 ? 0.4 : 0.33); rays.push(new THREE.Vector3(r1*Math.cos(a), r1*Math.sin(a), -0.02), new THREE.Vector3(r2*Math.cos(a), r2*Math.sin(a), -0.02)); }
+    G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(rays), reg(new THREE.LineBasicMaterial({color:0xffe9a0, blending:THREE.AdditiveBlending}), 0.3))); }
+  // the Sacred Heart as an energy nexus, the whole figure (heart, flames, cross) centered on the sphere's center
+  const H = new THREE.Group(); G.add(H);
+  const s2 = 0.0011, sh = new THREE.Shape();
+  sh.moveTo(0, -95*s2); sh.bezierCurveTo(-30*s2, -60*s2, -95*s2, -25*s2, -95*s2, 25*s2); sh.bezierCurveTo(-95*s2, 70*s2, -55*s2, 95*s2, -25*s2, 95*s2);
+  sh.bezierCurveTo(-8*s2, 95*s2, 0, 82*s2, 0, 70*s2); sh.bezierCurveTo(0, 82*s2, 8*s2, 95*s2, 25*s2, 95*s2); sh.bezierCurveTo(55*s2, 95*s2, 95*s2, 70*s2, 95*s2, 25*s2);
+  sh.bezierCurveTo(95*s2, -25*s2, 30*s2, -60*s2, 0, -95*s2);
+  { const geo = new THREE.ExtrudeGeometry(sh, {depth:0.05, bevelEnabled:true, bevelThickness:0.045, bevelSize:0.035, bevelSegments:8, curveSegments:40}); geo.translate(0, 0, -0.025);
+    const hm = reg(new THREE.ShaderMaterial({ uniforms:{k:{value:1}}, blending:THREE.AdditiveBlending,
+      vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+      fragmentShader:`uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - abs(dot(vN, vV)); vec3 c = mix(vec3(0.62,0.06,0.04), vec3(1.0,0.38,0.18), pow(f,1.4)); gl_FragColor = vec4(c, (0.45 + 0.5*pow(f, 1.4))*k); }` }), 1);
+    hm.blending = THREE.NormalBlending;
+    hm.side = THREE.DoubleSide; H.add(new THREE.Mesh(geo, hm));
+    const outline = sh.getSpacedPoints(160).map(p => new THREE.Vector3(p.x*1.08, p.y*1.08, 0));
+    const oc = new THREE.CatmullRomCurve3(outline, true); energyTube(H, oc, true, 0.004, 0xff4a1a, 200, 0.8); flowOn(H, oc, 50, 0xffb070, 0.03, 0.05);
+    // inner currents: smaller outlines circulating within
+    for (const sc of [0.7, 0.45]) { const ic = new THREE.CatmullRomCurve3(sh.getSpacedPoints(120).map(p => new THREE.Vector3(p.x*sc, p.y*sc + 0.01*(1-sc), 0.03)), true); flowOn(H, ic, 30, 0xff7a40, 0.025, sc > 0.5 ? -0.07 : 0.09); }
+    const core = glowSprite(0xff4a2a, 0.3, 0); reg(core.material, 0.35); H.add(core); }
+  // the wound and the flowing blood, as deep red light
+  { const wg = glowSprite(0xff2a1a, 0.08, 0); wg.position.set(-0.045, -0.035, 0.05); reg(wg.material, 0.95); H.add(wg);
+    const bc = new THREE.CatmullRomCurve3([new THREE.Vector3(-0.045, -0.04, 0.05), new THREE.Vector3(-0.04, -0.09, 0.05), new THREE.Vector3(-0.02, -0.14, 0.04), new THREE.Vector3(0, -0.17, 0.02), new THREE.Vector3(0, -0.2, 0.02)]);
+    flowOn(H, bc, 12, 0xff2010, 0.022, 0.12); }
+  // the crown of thorns: a band of amber light around the heart
   { const ring = new THREE.Group(); ring.rotation.x = 0.14; ring.position.y = 0.03; ring.scale.set(1, 1, 0.58); H.add(ring);
-    const tm = reg(new THREE.MeshStandardMaterial({color:0x8a6a3a, emissive:0x3a2a12, emissiveIntensity:0.45, roughness:0.75}), 1);
     for (const ph of [0, 1.3, 2.6]) { const pts = []; for (let k=0;k<=80;k++){ const a = k/80*Math.PI*2; pts.push(new THREE.Vector3((0.158 + 0.008*Math.sin(a*5 + ph))*Math.cos(a), 0.014*Math.sin(a*7 + ph), (0.158 + 0.008*Math.sin(a*5 + ph))*Math.sin(a))); }
-      ring.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true), 80, 0.008, 6, true), tm)); }
-    for (let k=0;k<30;k++){ const a = k/30*Math.PI*2, th = new THREE.Mesh(new THREE.ConeGeometry(0.008, 0.045, 5), tm);
-      th.position.set(0.165*Math.cos(a), 0, 0.165*Math.sin(a)); th.lookAt(th.position.clone().multiplyScalar(2)); th.rotateX(Math.PI/2); ring.add(th); } }
-  // the flames above, and the cross
+      energyTube(ring, new THREE.CatmullRomCurve3(pts, true), true, 0.0035, 0xd8a050, 120); }
+    const thorns = []; for (let k=0;k<30;k++){ const a = k/30*Math.PI*2, d = new THREE.Vector3(Math.cos(a), 0.3*Math.sin(k*2.3), Math.sin(a)).normalize(); thorns.push(new THREE.Vector3(0.158*Math.cos(a), 0, 0.158*Math.sin(a)), new THREE.Vector3(0.158*Math.cos(a), 0, 0.158*Math.sin(a)).addScaledVector(d, 0.035)); }
+    ring.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(thorns), reg(new THREE.LineBasicMaterial({color:0xe8b060, blending:THREE.AdditiveBlending}), 0.9))); }
+  // the flames: rising tongues of light
   const flames = [];
-  { for (let k=0;k<7;k++){ const fm = reg(new THREE.MeshBasicMaterial({color: [0xe85a0c,0xf59a1e,0xffc840][k%3], depthWrite:false}), 0.92);
-      const f = new THREE.Mesh(new THREE.ConeGeometry(0.03 - 0.004*Math.abs(k-3), 0.22 - 0.035*Math.abs(k-3), 12), fm); f.position.set((k-3)*0.02, 0.19 - 0.018*Math.abs(k-3), 0.0); H.add(f); flames.push(f); }
-    const fg = glowSprite(0xffa040, 0.3, 0); fg.position.set(0, 0.17, -0.03); reg(fg.material, 0.35); H.add(fg);
-    const cg = reg(new THREE.MeshStandardMaterial({color:0x6b4423, emissive:0x2a160a, emissiveIntensity:0.5, roughness:0.85}), 1); const v = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.14, 0.016), cg); v.position.set(0, 0.29, 0.02); H.add(v);
-    const h = new THREE.Mesh(new THREE.BoxGeometry(0.075, 0.018, 0.016), cg); h.position.set(0, 0.315, 0.02); H.add(h); }
-  G.traverse(o => { o.renderOrder = 40; });   // drawn after the ankh's flow, so the star and heart sit in front
+  for (let k=0;k<9;k++){ const x0 = (k-4)*0.016, hgt = 0.2 - 0.025*Math.abs(k-4), pts = []; for (let n=0;n<=20;n++){ const u = n/20; pts.push(new THREE.Vector3(x0*(1 - 0.6*u), 0.1 + hgt*u, 0)); }
+    const fc = new THREE.CatmullRomCurve3(pts); const col = [0xff5a10, 0xff9a20, 0xffd060][k%3]; energyTube(H, fc, false, 0.006, col, 30); flowOn(H, fc, 8, 0xffe0a0, 0.025, 0.4 + 0.1*(k%3)); flames.push(H.children[H.children.length - 4]); }
+  { const fg = glowSprite(0xffa040, 0.25, 0); fg.position.set(0, 0.2, 0); reg(fg.material, 0.25); H.add(fg); }
+  // the cross, as light rising from the flames
+  { const v = new THREE.LineCurve3(new THREE.Vector3(0, 0.22, 0), new THREE.Vector3(0, 0.36, 0)), h = new THREE.LineCurve3(new THREE.Vector3(-0.038, 0.315, 0), new THREE.Vector3(0.038, 0.315, 0));
+    energyTube(H, v, false, 0.006, 0xffd890, 8, 0.8); energyTube(H, h, false, 0.006, 0xffd890, 8, 0.8); }
+  // the figure spans y = -0.2 (the drop) to 0.36 (the cross); center it on the sphere's center
+  H.position.y = -0.08*1.15;
+  G.traverse(o => { o.renderOrder = 40; });
   updaters.push((dt, t) => { const w = W.six; G.visible = w > 0.01; if (!G.visible) return;
-    mats.forEach(m => m.opacity = m.userData.op*w);
+    mats.forEach(m => { if (m.uniforms && m.uniforms.k) m.uniforms.k.value = w; m.opacity = m.userData.op*w; });
     G.scale.setScalar(0.6 + 0.4*w);
     G.rotation.y = sweep.rotation.y;   // embedded in the yellow sphere, turning with the ankh
-    G.position.z = 0; H.position.z = 0.09;
-    flames.forEach((f, i) => { const s3 = 1 + 0.18*Math.sin(t*6 + i*1.7); f.scale.set(1 - 0.1*Math.sin(t*5 + i), s3, 1); f.rotation.z = 0.12*Math.sin(t*3 + i*2.1); });
+    const v = new THREE.Vector3();
+    flows.forEach(f => { for (let i=0;i<f.n;i++){ f.u[i] = ((f.u[i] + dt*f.speed) % 1 + 1) % 1; f.curve.getPointAt(f.u[i], v); f.pos[i*3] = v.x; f.pos[i*3+1] = v.y; f.pos[i*3+2] = v.z; } f.g.attributes.position.needsUpdate = true; });
     H.scale.setScalar(1.15*(1 + 0.03*Math.sin(t*1.6))); });   // a slow heartbeat
   return G; })();
 
