@@ -1,0 +1,333 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;background:transparent}canvas{display:block}</style>
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+</head><body>
+<script type="module">
+import * as THREE from 'three';
+const P = new URLSearchParams(location.search);
+const form = P.get('form') || 'red';
+const SIZE = +(P.get('size') || 1000);
+const COLORS = {
+  red:    {c:'#C8352B', g:'#E2574C'},
+  orange: {c:'#D2721E', g:'#EE9447'},
+  yellow: {c:'#D9AE2A', g:'#E9C850'},
+  green:  {c:'#2E9A66', g:'#4DBA85'},
+  blue:   {c:'#2F74C4', g:'#5C98E0'},
+  indigo: {c:'#5546C0', g:'#7C6EE0'},
+  violet: {c:'#8E4BB5', g:'#B07AD6'}
+};
+const col = new THREE.Color(COLORS[form].c), glow = new THREE.Color(COLORS[form].g);
+
+const renderer = new THREE.WebGLRenderer({antialias:true, alpha:true, preserveDrawingBuffer:true});
+renderer.setPixelRatio(1); renderer.setSize(SIZE, SIZE);
+renderer.setClearColor(0x000000, 0);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+const ELEV = {orange:22, indigo:55, green:25, violet:30}; const elev = THREE.MathUtils.degToRad(+(P.get('elev') || ELEV[form] || 28));
+const dist = 6.2;
+camera.position.set(0, Math.sin(elev)*dist, Math.cos(elev)*dist);
+camera.lookAt(0,0,0);
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0x6a5a40, 1.1));
+const key = new THREE.DirectionalLight(0xffffff, 2.2); key.position.set(3,5,4); scene.add(key);
+const rim = new THREE.DirectionalLight(0xffffff, 1.0); rim.position.set(-4,2,-3); scene.add(rim);
+const fill = new THREE.PointLight(glow, 1.6, 5); fill.position.set(0,0.3,0); scene.add(fill);
+
+const mat = (opts={}) => new THREE.MeshPhysicalMaterial(Object.assign({color:col, roughness:0.32, metalness:0.15, clearcoat:0.6, clearcoatRoughness:0.25}, opts));
+const glowMat = new THREE.MeshBasicMaterial({color:glow.clone().lerp(new THREE.Color('#ffffff'),0.55)});
+
+// --- the radiating sphere: the center in 360 degrees ---
+const halo = new THREE.Mesh(new THREE.SphereGeometry(1.42, 96, 64), new THREE.ShaderMaterial({
+  transparent:true, depthWrite:false, side:THREE.FrontSide,
+  uniforms:{c:{value:glow}},
+  vertexShader:`varying vec3 vN; varying vec3 vV;
+    void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+  fragmentShader:`uniform vec3 c; varying vec3 vN; varying vec3 vV;
+    void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); float a = pow(f, 2.2)*0.85 + 0.06; gl_FragColor = vec4(c, a); }`
+}));
+halo.renderOrder = 10; scene.add(halo);
+// equator ring
+const ring = new THREE.Mesh(new THREE.TorusGeometry(1.42, 0.008, 8, 200), new THREE.MeshBasicMaterial({color:glow, transparent:true, opacity:0.55}));
+ring.rotation.x = Math.PI/2; scene.add(ring);
+// radiating lines in all directions (fibonacci sphere)
+{
+  const N = 90, pos = [];
+  for (let i=0;i<N;i++){
+    const y = 1 - (i+0.5)/N*2, r = Math.sqrt(1-y*y), th = i*Math.PI*(3-Math.sqrt(5));
+    const d = new THREE.Vector3(Math.cos(th)*r, y, Math.sin(th)*r);
+    pos.push(...d.clone().multiplyScalar(1.3).toArray(), ...d.clone().multiplyScalar(1.41).toArray());
+  }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3));
+  scene.add(new THREE.LineSegments(g, new THREE.LineBasicMaterial({color:glow, transparent:true, opacity:0.45})));
+}
+// soft glowing core
+scene.add(new THREE.Mesh(new THREE.SphereGeometry(0.09, 32, 16), glowMat));
+
+const G = new THREE.Group(); scene.add(G);
+const petal = (len, wid, thick) => { const g = new THREE.SphereGeometry(1, 48, 24); g.scale(wid, thick, len); g.translate(0,0,len); return g; };
+
+if (form === 'red') { // Doug's reading: center sphere, 24 spokes in all directions, tips joined; rendered as energy
+  const q = 1 + Math.SQRT2, dirs = [];
+  for (const sx of [-1,1]) for (const sy of [-1,1]) for (const sz of [-1,1])
+    dirs.push(new THREE.Vector3(sx, sy, sz*q), new THREE.Vector3(sx, sy*q, sz), new THREE.Vector3(sx*q, sy, sz));
+  dirs.forEach(d => d.normalize());
+  let dmin = Infinity; for (let i=0;i<24;i++) for (let j=i+1;j<24;j++) dmin = Math.min(dmin, dirs[i].distanceTo(dirs[j]));
+  const edges = []; for (let i=0;i<24;i++) for (let j=i+1;j<24;j++) if (dirs[i].distanceTo(dirs[j]) < dmin*1.01) edges.push([i,j]);
+  const hot = col.clone().lerp(new THREE.Color('#ff5a3c'), 0.45);
+  const soft = (c, o) => new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o, depthWrite:false});
+  const layers = [[0.0055, hot, 0.95], [0.010, hot, 0.38], [0.016, col, 0.22], [0.024, col, 0.13], [0.034, col, 0.075], [0.048, glow, 0.04]];
+  const beam = (a, b, k=1) => { const len = a.distanceTo(b), mid = a.clone().add(b).multiplyScalar(0.5), q2 = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0), b.clone().sub(a).normalize());
+    for (const [r,c,o] of layers) { const m = new THREE.Mesh(new THREE.CylinderGeometry(r*k, r*k, len, 10, 1, true), soft(c, o)); m.position.copy(mid); m.quaternion.copy(q2); G.add(m); } };
+  // spoke with a trunk: wide at the root on the core, flaring down quickly into the ray
+  const trunk = (a, b) => {
+    const len = a.distanceTo(b), grp = new THREE.Group();
+    grp.position.copy(a.clone().add(b).multiplyScalar(0.5));
+    grp.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), b.clone().sub(a).normalize());
+    for (const [r,c,o] of layers) {
+      const pts = []; const N = 40;
+      for (let i=0;i<=N;i++){ const u = i/N, y = u*len; const rr = r + 0.05*Math.exp(-u*9) + 0.012*Math.exp(-u*3.5); pts.push(new THREE.Vector2(rr, y - len/2)); }
+      grp.add(new THREE.Mesh(new THREE.LatheGeometry(pts, 20), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o, depthWrite:false, side:THREE.DoubleSide})));
+    }
+    G.add(grp);
+  };
+  // soft glow sprite
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d');
+  const gr = cx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.25,'rgba(255,255,255,0.55)'); gr.addColorStop(0.6,'rgba(255,255,255,0.12)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  cx.fillStyle = gr; cx.fillRect(0,0,128,128); const tex = new THREE.CanvasTexture(cv);
+  const spr = (pos, size, c, o) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, color:c, transparent:true, opacity:o, depthWrite:false})); sp.position.copy(pos); sp.scale.setScalar(size); G.add(sp); };
+  const R0 = 0.30, Rin = 0.33, Rout = 0.94;
+  for (const d of dirs) { trunk(d.clone().multiplyScalar(R0*0.92), d.clone().multiplyScalar(Rout)); spr(d.clone().multiplyScalar(Rout), 0.13, hot, 1.0); spr(d.clone().multiplyScalar(Rout), 0.3, col, 0.5); spr(d.clone().multiplyScalar(Rin), 0.08, hot, 0.9); }
+  for (const [i,j] of edges) { beam(dirs[i].clone().multiplyScalar(Rout), dirs[j].clone().multiplyScalar(Rout)); beam(dirs[i].clone().multiplyScalar(Rin), dirs[j].clone().multiplyScalar(Rin), 0.45); }
+  // ethereal center: fresnel shell, inner haze, bright heart
+  const shell = new THREE.Mesh(new THREE.SphereGeometry(R0, 64, 48), new THREE.ShaderMaterial({ transparent:true, depthWrite:false, uniforms:{c:{value:col}, h:{value:hot}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform vec3 h; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); vec3 col = mix(h, c, f); gl_FragColor = vec4(col, 0.10 + pow(f,1.4)*0.75); }`}));
+  G.add(shell);
+  spr(new THREE.Vector3(), 1.2, col, 0.35); spr(new THREE.Vector3(), 0.6, hot, 0.55); spr(new THREE.Vector3(), 0.24, hot, 0.9);
+  G.rotation.set(0.35, 0.5, 0.1);
+}
+if (form === 'orange') { // three petals as a trefoil streamline: one continuous thread of energy, looping over and under itself
+  const hot = col.clone().lerp(new THREE.Color('#ffb04a'), 0.5);
+  const layerMode = ({all:0, back:1, front:2})[P.get('layer') || 'all'] || 0;
+  // trefoil as the (2,3) torus knot: three petals around an open center
+  // the triquetra: three circular arcs meeting in pointed tips, over and under at each crossing (after Doug's 'Holy, Holy, Holy' image)
+  const TRIQ = [[1.1775,-0.6798,0.0],[1.1773,-0.6613,0.0195],[1.1769,-0.6428,0.0389],[1.1762,-0.6244,0.0583],[1.1752,-0.6059,0.0777],[1.1739,-0.5874,0.097],[1.1723,-0.569,0.1162],[1.1704,-0.5506,0.1352],[1.1682,-0.5322,0.1542],[1.1657,-0.5139,0.173],[1.163,-0.4956,0.1916],[1.16,-0.4774,0.21],[1.1566,-0.4592,0.2282],[1.153,-0.441,0.2462],[1.1491,-0.423,0.264],[1.145,-0.4049,0.2815],[1.1405,-0.387,0.2987],[1.1358,-0.3691,0.3156],[1.1307,-0.3513,0.3322],[1.1254,-0.3336,0.3485],[1.1199,-0.316,0.3644],[1.114,-0.2984,0.38],[1.1079,-0.281,0.3952],[1.1015,-0.2636,0.41],[1.0948,-0.2464,0.4244],[1.0879,-0.2292,0.4384],[1.0806,-0.2122,0.452],[1.0732,-0.1953,0.4651],[1.0654,-0.1785,0.4777],[1.0574,-0.1618,0.4899],[1.0492,-0.1453,0.5016],[1.0406,-0.1288,0.5128],[1.0318,-0.1126,0.5235],[1.0228,-0.0964,0.5337],[1.0135,-0.0804,0.5433],[1.004,-0.0646,0.5524],[0.9942,-0.0489,0.561],[0.9842,-0.0334,0.569],[0.9739,-0.018,0.5765],[0.9634,-0.0028,0.5833],[0.9526,0.0123,0.5897],[0.9416,0.0272,0.5954],[0.9304,0.0419,0.6005],[0.9189,0.0564,0.6051],[0.9073,0.0707,0.609],[0.8954,0.0849,0.6124],[0.8832,0.0989,0.6151],[0.8709,0.1126,0.6172],[0.8584,0.1262,0.6188],[0.8456,0.1396,0.6197],[0.8326,0.1528,0.62],[0.8194,0.1658,0.6197],[0.806,0.1785,0.6188],[0.7925,0.1911,0.6172],[0.7787,0.2034,0.6151],[0.7647,0.2155,0.6124],[0.7506,0.2274,0.609],[0.7362,0.2391,0.6051],[0.7217,0.2506,0.6005],[0.707,0.2618,0.5954],[0.6921,0.2728,0.5897],[0.6771,0.2835,0.5833],[0.6618,0.2941,0.5765],[0.6465,0.3043,0.569],[0.6309,0.3144,0.561],[0.6152,0.3242,0.5524],[0.5994,0.3337,0.5433],[0.5834,0.343,0.5337],[0.5673,0.352,0.5235],[0.551,0.3608,0.5128],[0.5346,0.3693,0.5016],[0.518,0.3776,0.4899],[0.5014,0.3856,0.4777],[0.4846,0.3933,0.4651],[0.4676,0.4008,0.452],[0.4506,0.408,0.4384],[0.4335,0.415,0.4244],[0.4162,0.4217,0.41],[0.3989,0.4281,0.3952],[0.3814,0.4342,0.38],[0.3639,0.44,0.3644],[0.3462,0.4456,0.3485],[0.3285,0.4509,0.3322],[0.3107,0.4559,0.3156],[0.2928,0.4607,0.2987],[0.2749,0.4651,0.2815],[0.2569,0.4693,0.264],[0.2388,0.4732,0.2462],[0.2206,0.4768,0.2282],[0.2024,0.4801,0.21],[0.1842,0.4832,0.1916],[0.1659,0.4859,0.173],[0.1476,0.4884,0.1542],[0.1292,0.4906,0.1352],[0.1108,0.4924,0.1162],[0.0924,0.494,0.097],[0.0739,0.4953,0.0777],[0.0555,0.4964,0.0583],[0.037,0.4971,0.0389],[0.0185,0.4975,0.0195],[0.0,0.4977,0.0],[-0.0185,0.4975,-0.0195],[-0.037,0.4971,-0.0389],[-0.0555,0.4964,-0.0583],[-0.0739,0.4953,-0.0777],[-0.0924,0.494,-0.097],[-0.1108,0.4924,-0.1162],[-0.1292,0.4906,-0.1352],[-0.1476,0.4884,-0.1542],[-0.1659,0.4859,-0.173],[-0.1842,0.4832,-0.1916],[-0.2024,0.4801,-0.21],[-0.2206,0.4768,-0.2282],[-0.2388,0.4732,-0.2462],[-0.2569,0.4693,-0.264],[-0.2749,0.4651,-0.2815],[-0.2928,0.4607,-0.2987],[-0.3107,0.4559,-0.3156],[-0.3285,0.4509,-0.3322],[-0.3462,0.4456,-0.3485],[-0.3639,0.44,-0.3644],[-0.3814,0.4342,-0.38],[-0.3989,0.4281,-0.3952],[-0.4162,0.4217,-0.41],[-0.4335,0.415,-0.4244],[-0.4506,0.408,-0.4384],[-0.4676,0.4008,-0.452],[-0.4846,0.3933,-0.4651],[-0.5014,0.3856,-0.4777],[-0.518,0.3776,-0.4899],[-0.5346,0.3693,-0.5016],[-0.551,0.3608,-0.5128],[-0.5673,0.352,-0.5235],[-0.5834,0.343,-0.5337],[-0.5994,0.3337,-0.5433],[-0.6152,0.3242,-0.5524],[-0.6309,0.3144,-0.561],[-0.6465,0.3043,-0.569],[-0.6618,0.2941,-0.5765],[-0.6771,0.2835,-0.5833],[-0.6921,0.2728,-0.5897],[-0.707,0.2618,-0.5954],[-0.7217,0.2506,-0.6005],[-0.7362,0.2391,-0.6051],[-0.7506,0.2274,-0.609],[-0.7647,0.2155,-0.6124],[-0.7787,0.2034,-0.6151],[-0.7925,0.1911,-0.6172],[-0.806,0.1785,-0.6188],[-0.8194,0.1658,-0.6197],[-0.8326,0.1528,-0.62],[-0.8456,0.1396,-0.6197],[-0.8584,0.1262,-0.6188],[-0.8709,0.1126,-0.6172],[-0.8832,0.0989,-0.6151],[-0.8954,0.0849,-0.6124],[-0.9073,0.0707,-0.609],[-0.9189,0.0564,-0.6051],[-0.9304,0.0419,-0.6005],[-0.9416,0.0272,-0.5954],[-0.9526,0.0123,-0.5897],[-0.9634,-0.0028,-0.5833],[-0.9739,-0.018,-0.5765],[-0.9842,-0.0334,-0.569],[-0.9942,-0.0489,-0.561],[-1.004,-0.0646,-0.5524],[-1.0135,-0.0804,-0.5433],[-1.0228,-0.0964,-0.5337],[-1.0318,-0.1126,-0.5235],[-1.0406,-0.1288,-0.5128],[-1.0492,-0.1453,-0.5016],[-1.0574,-0.1618,-0.4899],[-1.0654,-0.1785,-0.4777],[-1.0732,-0.1953,-0.4651],[-1.0806,-0.2122,-0.452],[-1.0879,-0.2292,-0.4384],[-1.0948,-0.2464,-0.4244],[-1.1015,-0.2636,-0.41],[-1.1079,-0.281,-0.3952],[-1.114,-0.2984,-0.38],[-1.1199,-0.316,-0.3644],[-1.1254,-0.3336,-0.3485],[-1.1307,-0.3513,-0.3322],[-1.1358,-0.3691,-0.3156],[-1.1405,-0.387,-0.2987],[-1.145,-0.4049,-0.2815],[-1.1491,-0.423,-0.264],[-1.153,-0.441,-0.2462],[-1.1566,-0.4592,-0.2282],[-1.16,-0.4774,-0.21],[-1.163,-0.4956,-0.1916],[-1.1657,-0.5139,-0.173],[-1.1682,-0.5322,-0.1542],[-1.1704,-0.5506,-0.1352],[-1.1723,-0.569,-0.1162],[-1.1739,-0.5874,-0.097],[-1.1752,-0.6059,-0.0777],[-1.1762,-0.6244,-0.0583],[-1.1769,-0.6428,-0.0389],[-1.1773,-0.6613,-0.0195],[-1.1775,-0.6798,0.0],[-1.1614,-0.6889,0.0195],[-1.1452,-0.6978,0.0389],[-1.1288,-0.7064,0.0583],[-1.1123,-0.7148,0.0777],[-1.0957,-0.7229,0.097],[-1.0789,-0.7307,0.1162],[-1.062,-0.7383,0.1352],[-1.045,-0.7456,0.1542],[-1.0279,-0.7526,0.173],[-1.0107,-0.7594,0.1916],[-0.9934,-0.7659,0.21],[-0.976,-0.7721,0.2282],[-0.9585,-0.778,0.2462],[-0.9409,-0.7837,0.264],[-0.9232,-0.7891,0.2815],[-0.9054,-0.7942,0.2987],[-0.8875,-0.799,0.3156],[-0.8696,-0.8036,0.3322],[-0.8516,-0.8079,0.3485],[-0.8336,-0.8118,0.3644],[-0.8154,-0.8155,0.38],[-0.7973,-0.819,0.3952],[-0.779,-0.8221,0.41],[-0.7608,-0.8249,0.4244],[-0.7424,-0.8275,0.4384],[-0.7241,-0.8298,0.452],[-0.7057,-0.8318,0.4651],[-0.6873,-0.8334,0.4777],[-0.6688,-0.8349,0.4899],[-0.6504,-0.836,0.5016],[-0.6319,-0.8368,0.5128],[-0.6134,-0.8373,0.5235],[-0.5949,-0.8376,0.5337],[-0.5764,-0.8375,0.5433],[-0.5579,-0.8372,0.5524],[-0.5394,-0.8365,0.561],[-0.521,-0.8356,0.569],[-0.5025,-0.8344,0.5765],[-0.4841,-0.8329,0.5833],[-0.4657,-0.8311,0.5897],[-0.4473,-0.829,0.5954],[-0.4289,-0.8267,0.6005],[-0.4106,-0.824,0.6051],[-0.3924,-0.8211,0.609],[-0.3742,-0.8179,0.6124],[-0.356,-0.8143,0.6151],[-0.3379,-0.8105,0.6172],[-0.3199,-0.8065,0.6188],[-0.3019,-0.8021,0.6197],[-0.284,-0.7975,0.62],[-0.2662,-0.7925,0.6197],[-0.2484,-0.7873,0.6188],[-0.2307,-0.7818,0.6172],[-0.2132,-0.7761,0.6151],[-0.1957,-0.77,0.6124],[-0.1783,-0.7637,0.609],[-0.161,-0.7571,0.6051],[-0.1438,-0.7503,0.6005],[-0.1268,-0.7432,0.5954],[-0.1098,-0.7358,0.5897],[-0.093,-0.7281,0.5833],[-0.0763,-0.7202,0.5765],[-0.0597,-0.712,0.569],[-0.0432,-0.7036,0.561],[-0.0269,-0.6949,0.5524],[-0.0107,-0.6859,0.5433],[0.0053,-0.6767,0.5337],[0.0212,-0.6673,0.5235],[0.037,-0.6576,0.5128],[0.0526,-0.6476,0.5016],[0.068,-0.6374,0.4899],[0.0833,-0.627,0.4777],[0.0984,-0.6163,0.4651],[0.1133,-0.6054,0.452],[0.1281,-0.5943,0.4384],[0.1427,-0.5829,0.4244],[0.1571,-0.5713,0.41],[0.1713,-0.5594,0.3952],[0.1853,-0.5474,0.38],[0.1991,-0.5351,0.3644],[0.2128,-0.5226,0.3485],[0.2262,-0.51,0.3322],[0.2395,-0.497,0.3156],[0.2525,-0.4839,0.2987],[0.2654,-0.4706,0.2815],[0.278,-0.4571,0.264],[0.2904,-0.4434,0.2462],[0.3026,-0.4295,0.2282],[0.3146,-0.4154,0.21],[0.3263,-0.4011,0.1916],[0.3379,-0.3866,0.173],[0.3492,-0.372,0.1542],[0.3602,-0.3572,0.1352],[0.3711,-0.3422,0.1162],[0.3817,-0.327,0.097],[0.392,-0.3117,0.0777],[0.4021,-0.2962,0.0583],[0.412,-0.2806,0.0389],[0.4216,-0.2648,0.0195],[0.431,-0.2488,0.0],[0.4401,-0.2327,-0.0195],[0.449,-0.2165,-0.0389],[0.4576,-0.2001,-0.0583],[0.4659,-0.1836,-0.0777],[0.474,-0.167,-0.097],[0.4819,-0.1503,-0.1162],[0.4894,-0.1334,-0.1352],[0.4967,-0.1164,-0.1542],[0.5038,-0.0993,-0.173],[0.5105,-0.0821,-0.1916],[0.517,-0.0647,-0.21],[0.5232,-0.0473,-0.2282],[0.5292,-0.0298,-0.2462],[0.5349,-0.0122,-0.264],[0.5403,0.0055,-0.2815],[0.5454,0.0233,-0.2987],[0.5502,0.0411,-0.3156],[0.5548,0.059,-0.3322],[0.559,0.077,-0.3485],[0.563,0.0951,-0.3644],[0.5667,0.1132,-0.38],[0.5701,0.1314,-0.3952],[0.5733,0.1496,-0.41],[0.5761,0.1679,-0.4244],[0.5787,0.1862,-0.4384],[0.5809,0.2046,-0.452],[0.5829,0.223,-0.4651],[0.5846,0.2414,-0.4777],[0.586,0.2598,-0.4899],[0.5871,0.2783,-0.5016],[0.588,0.2968,-0.5128],[0.5885,0.3153,-0.5235],[0.5887,0.3337,-0.5337],[0.5887,0.3522,-0.5433],[0.5883,0.3707,-0.5524],[0.5877,0.3892,-0.561],[0.5868,0.4077,-0.569],[0.5856,0.4261,-0.5765],[0.5841,0.4446,-0.5833],[0.5823,0.463,-0.5897],[0.5802,0.4814,-0.5954],[0.5779,0.4997,-0.6005],[0.5752,0.518,-0.6051],[0.5723,0.5363,-0.609],[0.569,0.5545,-0.6124],[0.5655,0.5727,-0.6151],[0.5617,0.5908,-0.6172],[0.5576,0.6088,-0.6188],[0.5533,0.6268,-0.6197],[0.5486,0.6447,-0.62],[0.5437,0.6625,-0.6197],[0.5385,0.6802,-0.6188],[0.533,0.6979,-0.6172],[0.5272,0.7155,-0.6151],[0.5212,0.733,-0.6124],[0.5149,0.7504,-0.609],[0.5083,0.7676,-0.6051],[0.5015,0.7848,-0.6005],[0.4943,0.8019,-0.5954],[0.4869,0.8188,-0.5897],[0.4793,0.8357,-0.5833],[0.4714,0.8524,-0.5765],[0.4632,0.869,-0.569],[0.4548,0.8854,-0.561],[0.4461,0.9018,-0.5524],[0.4371,0.9179,-0.5433],[0.4279,0.934,-0.5337],[0.4184,0.9499,-0.5235],[0.4087,0.9656,-0.5128],[0.3988,0.9812,-0.5016],[0.3886,0.9967,-0.4899],[0.3781,1.0119,-0.4777],[0.3675,1.027,-0.4651],[0.3566,1.042,-0.452],[0.3454,1.0567,-0.4384],[0.334,1.0713,-0.4244],[0.3224,1.0857,-0.41],[0.3106,1.0999,-0.3952],[0.2986,1.114,-0.38],[0.2863,1.1278,-0.3644],[0.2738,1.1415,-0.3485],[0.2611,1.1549,-0.3322],[0.2482,1.1682,-0.3156],[0.2351,1.1812,-0.2987],[0.2218,1.194,-0.2815],[0.2083,1.2067,-0.264],[0.1946,1.2191,-0.2462],[0.1807,1.2313,-0.2282],[0.1666,1.2432,-0.21],[0.1523,1.255,-0.1916],[0.1378,1.2665,-0.173],[0.1232,1.2778,-0.1542],[0.1083,1.2889,-0.1352],[0.0934,1.2997,-0.1162],[0.0782,1.3103,-0.097],[0.0629,1.3207,-0.0777],[0.0474,1.3308,-0.0583],[0.0317,1.3407,-0.0389],[0.0159,1.3503,-0.0195],[-0.0,1.3596,0.0],[-0.0159,1.3503,0.0195],[-0.0317,1.3407,0.0389],[-0.0474,1.3308,0.0583],[-0.0629,1.3207,0.0777],[-0.0782,1.3103,0.097],[-0.0934,1.2997,0.1162],[-0.1083,1.2889,0.1352],[-0.1232,1.2778,0.1542],[-0.1378,1.2665,0.173],[-0.1523,1.255,0.1916],[-0.1666,1.2432,0.21],[-0.1807,1.2313,0.2282],[-0.1946,1.2191,0.2462],[-0.2083,1.2067,0.264],[-0.2218,1.194,0.2815],[-0.2351,1.1812,0.2987],[-0.2482,1.1682,0.3156],[-0.2611,1.1549,0.3322],[-0.2738,1.1415,0.3485],[-0.2863,1.1278,0.3644],[-0.2986,1.114,0.38],[-0.3106,1.0999,0.3952],[-0.3224,1.0857,0.41],[-0.334,1.0713,0.4244],[-0.3454,1.0567,0.4384],[-0.3566,1.042,0.452],[-0.3675,1.027,0.4651],[-0.3781,1.0119,0.4777],[-0.3886,0.9967,0.4899],[-0.3988,0.9812,0.5016],[-0.4087,0.9656,0.5128],[-0.4184,0.9499,0.5235],[-0.4279,0.934,0.5337],[-0.4371,0.9179,0.5433],[-0.4461,0.9018,0.5524],[-0.4548,0.8854,0.561],[-0.4632,0.869,0.569],[-0.4714,0.8524,0.5765],[-0.4793,0.8357,0.5833],[-0.4869,0.8188,0.5897],[-0.4943,0.8019,0.5954],[-0.5015,0.7848,0.6005],[-0.5083,0.7676,0.6051],[-0.5149,0.7504,0.609],[-0.5212,0.733,0.6124],[-0.5272,0.7155,0.6151],[-0.533,0.6979,0.6172],[-0.5385,0.6802,0.6188],[-0.5437,0.6625,0.6197],[-0.5486,0.6447,0.62],[-0.5533,0.6268,0.6197],[-0.5576,0.6088,0.6188],[-0.5617,0.5908,0.6172],[-0.5655,0.5727,0.6151],[-0.569,0.5545,0.6124],[-0.5723,0.5363,0.609],[-0.5752,0.518,0.6051],[-0.5779,0.4997,0.6005],[-0.5802,0.4814,0.5954],[-0.5823,0.463,0.5897],[-0.5841,0.4446,0.5833],[-0.5856,0.4261,0.5765],[-0.5868,0.4077,0.569],[-0.5877,0.3892,0.561],[-0.5883,0.3707,0.5524],[-0.5887,0.3522,0.5433],[-0.5887,0.3337,0.5337],[-0.5885,0.3153,0.5235],[-0.588,0.2968,0.5128],[-0.5871,0.2783,0.5016],[-0.586,0.2598,0.4899],[-0.5846,0.2414,0.4777],[-0.5829,0.223,0.4651],[-0.5809,0.2046,0.452],[-0.5787,0.1862,0.4384],[-0.5761,0.1679,0.4244],[-0.5733,0.1496,0.41],[-0.5701,0.1314,0.3952],[-0.5667,0.1132,0.38],[-0.563,0.0951,0.3644],[-0.559,0.077,0.3485],[-0.5548,0.059,0.3322],[-0.5502,0.0411,0.3156],[-0.5454,0.0233,0.2987],[-0.5403,0.0055,0.2815],[-0.5349,-0.0122,0.264],[-0.5292,-0.0298,0.2462],[-0.5232,-0.0473,0.2282],[-0.517,-0.0647,0.21],[-0.5105,-0.0821,0.1916],[-0.5038,-0.0993,0.173],[-0.4967,-0.1164,0.1542],[-0.4894,-0.1334,0.1352],[-0.4819,-0.1503,0.1162],[-0.474,-0.167,0.097],[-0.4659,-0.1836,0.0777],[-0.4576,-0.2001,0.0583],[-0.449,-0.2165,0.0389],[-0.4401,-0.2327,0.0195],[-0.431,-0.2488,0.0],[-0.4216,-0.2648,-0.0195],[-0.412,-0.2806,-0.0389],[-0.4021,-0.2962,-0.0583],[-0.392,-0.3117,-0.0777],[-0.3817,-0.327,-0.097],[-0.3711,-0.3422,-0.1162],[-0.3602,-0.3572,-0.1352],[-0.3492,-0.372,-0.1542],[-0.3379,-0.3866,-0.173],[-0.3263,-0.4011,-0.1916],[-0.3146,-0.4154,-0.21],[-0.3026,-0.4295,-0.2282],[-0.2904,-0.4434,-0.2462],[-0.278,-0.4571,-0.264],[-0.2654,-0.4706,-0.2815],[-0.2525,-0.4839,-0.2987],[-0.2395,-0.497,-0.3156],[-0.2262,-0.51,-0.3322],[-0.2128,-0.5226,-0.3485],[-0.1991,-0.5351,-0.3644],[-0.1853,-0.5474,-0.38],[-0.1713,-0.5594,-0.3952],[-0.1571,-0.5713,-0.41],[-0.1427,-0.5829,-0.4244],[-0.1281,-0.5943,-0.4384],[-0.1133,-0.6054,-0.452],[-0.0984,-0.6163,-0.4651],[-0.0833,-0.627,-0.4777],[-0.068,-0.6374,-0.4899],[-0.0526,-0.6476,-0.5016],[-0.037,-0.6576,-0.5128],[-0.0212,-0.6673,-0.5235],[-0.0053,-0.6767,-0.5337],[0.0107,-0.6859,-0.5433],[0.0269,-0.6949,-0.5524],[0.0432,-0.7036,-0.561],[0.0597,-0.712,-0.569],[0.0763,-0.7202,-0.5765],[0.093,-0.7281,-0.5833],[0.1098,-0.7358,-0.5897],[0.1268,-0.7432,-0.5954],[0.1438,-0.7503,-0.6005],[0.161,-0.7571,-0.6051],[0.1783,-0.7637,-0.609],[0.1957,-0.77,-0.6124],[0.2132,-0.7761,-0.6151],[0.2307,-0.7818,-0.6172],[0.2484,-0.7873,-0.6188],[0.2662,-0.7925,-0.6197],[0.284,-0.7975,-0.62],[0.3019,-0.8021,-0.6197],[0.3199,-0.8065,-0.6188],[0.3379,-0.8105,-0.6172],[0.356,-0.8143,-0.6151],[0.3742,-0.8179,-0.6124],[0.3924,-0.8211,-0.609],[0.4106,-0.824,-0.6051],[0.4289,-0.8267,-0.6005],[0.4473,-0.829,-0.5954],[0.4657,-0.8311,-0.5897],[0.4841,-0.8329,-0.5833],[0.5025,-0.8344,-0.5765],[0.521,-0.8356,-0.569],[0.5394,-0.8365,-0.561],[0.5579,-0.8372,-0.5524],[0.5764,-0.8375,-0.5433],[0.5949,-0.8376,-0.5337],[0.6134,-0.8373,-0.5235],[0.6319,-0.8368,-0.5128],[0.6504,-0.836,-0.5016],[0.6688,-0.8349,-0.4899],[0.6873,-0.8334,-0.4777],[0.7057,-0.8318,-0.4651],[0.7241,-0.8298,-0.452],[0.7424,-0.8275,-0.4384],[0.7608,-0.8249,-0.4244],[0.779,-0.8221,-0.41],[0.7973,-0.819,-0.3952],[0.8154,-0.8155,-0.38],[0.8336,-0.8118,-0.3644],[0.8516,-0.8079,-0.3485],[0.8696,-0.8036,-0.3322],[0.8875,-0.799,-0.3156],[0.9054,-0.7942,-0.2987],[0.9232,-0.7891,-0.2815],[0.9409,-0.7837,-0.264],[0.9585,-0.778,-0.2462],[0.976,-0.7721,-0.2282],[0.9934,-0.7659,-0.21],[1.0107,-0.7594,-0.1916],[1.0279,-0.7526,-0.173],[1.045,-0.7456,-0.1542],[1.062,-0.7383,-0.1352],[1.0789,-0.7307,-0.1162],[1.0957,-0.7229,-0.097],[1.1123,-0.7148,-0.0777],[1.1288,-0.7064,-0.0583],[1.1452,-0.6978,-0.0389],[1.1614,-0.6889,-0.0195]];
+  const pts = TRIQ.map(q => new THREE.Vector3(q[0], q[1], q[2]));
+  const curve = new THREE.CatmullRomCurve3(pts, true, 'centripetal');
+  const streamMat = (r, c, o, pulse) => new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, side:THREE.DoubleSide,
+    uniforms:{ c:{value:c}, o:{value:o}, r:{value:r}, pulse:{value:pulse}, camD:{value:camera.position.length()}, mode:{value:layerMode} },
+    vertexShader:`uniform float r; uniform float camD; varying float vF; varying float vU; varying float vT;
+      void main(){
+        vec3 ctr = position - normal * r;                       // the thread's centre line
+        vec4 mvc = modelViewMatrix * vec4(ctr, 1.0);
+        float t = clamp((mvc.z + camD) / 0.9, -1.0, 1.0);      // +1 near, -1 far
+        float f = (t + 1.0) * 0.5;
+        vec3 p = ctr + normal * r * (0.72 + 0.5 * smoothstep(0.0, 1.0, f));   // near fuller, far finer, changing smoothly
+        vF = f; vT = t; vU = uv.x;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0);
+      }`,
+    fragmentShader:`uniform vec3 c; uniform float o; uniform float pulse; uniform float mode; varying float vF; varying float vU; varying float vT;
+      void main(){
+        if (mode > 0.5 && mode < 1.5 && vT >= 0.0) discard;
+        if (mode > 1.5 && vT < 0.0) discard;
+        float s = fract(vU * 21.0);                              // comet-shaped pulses: bright head, trailing tail
+        float comet = smoothstep(0.0, 0.08, s) * (1.0 - smoothstep(0.08, 0.85, s));
+        float b = mix(1.0, 0.62 + 0.55 * comet, pulse);
+        float a = o * (0.24 + 0.76 * smoothstep(0.0, 1.0, vF)) * b;
+        vec3 haze = vec3(0.91, 0.85, 0.74);                     // the far side melts toward the cream ground
+        vec3 col = mix(haze, c, 0.58 + 0.42 * smoothstep(0.0, 1.0, vF));
+        gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
+        #include <colorspace_fragment>
+      }`
+  });
+  const layers = [[0.017, hot, 1.0, 1.0], [0.03, hot, 0.45, 0.8], [0.05, col, 0.24, 0.5], [0.075, col, 0.13, 0.3], [0.105, col, 0.07, 0.0], [0.14, glow, 0.035, 0.0]];
+  // nested knots spiralling out of the core: each smaller one turned further, the smallest born at the sphere's surface
+  const NEST = [[0.30, -0.66, 0.50], [0.47, -0.44, 0.64], [0.68, -0.22, 0.80], [1.0, 0.0, 1.0]];   // [scale, turn, strength]
+  for (const [sc, turn, str] of NEST) {
+    const cs = Math.cos(turn), sn = Math.sin(turn);
+    const p2 = pts.map(q => new THREE.Vector3((q.x*cs - q.y*sn)*sc, (q.x*sn + q.y*cs)*sc, q.z*sc));
+    const cv2 = new THREE.CatmullRomCurve3(p2, true, 'centripetal'), w = Math.pow(sc, 0.6);
+    for (const [r, c, o, pl] of layers) { const m = new THREE.Mesh(new THREE.TubeGeometry(cv2, 900, r*w, 20, true), streamMat(r*w, c, o*str, pl)); m.userData.shaderDepth = true; G.add(m); }
+  }
+  // ethereal center
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d');
+  const gr = cx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.25,'rgba(255,255,255,0.55)'); gr.addColorStop(0.6,'rgba(255,255,255,0.12)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  cx.fillStyle = gr; cx.fillRect(0,0,128,128); const tex = new THREE.CanvasTexture(cv);
+  const spr = (pos, size, c, o) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, color:c, transparent:true, opacity:o, depthWrite:false})); sp.position.copy(pos); sp.scale.setScalar(size); G.add(sp); };
+  G.add(new THREE.Mesh(new THREE.SphereGeometry(0.24, 64, 48), new THREE.ShaderMaterial({ transparent:true, depthWrite:false, uniforms:{c:{value:col}, h:{value:hot}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform vec3 h; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); gl_FragColor = vec4(mix(h, c, f), 0.10 + pow(f,1.4)*0.75); }`})));
+  spr(new THREE.Vector3(), 1.0, col, 0.35); spr(new THREE.Vector3(), 0.5, hot, 0.55); spr(new THREE.Vector3(), 0.2, hot, 0.9);
+  G.rotation.set(-0.42, 0.0, 0);
+}
+if (form === 'yellow') { // "again in a rounded shape, many faceted, as a star" (51.8): the wheel awakened; inner radiance; emergences from the center
+  const line = new THREE.Color('#C9900A'), hot = new THREE.Color('#F2B514'), glw = new THREE.Color('#F5CF5A');
+  const soft = (c, o) => new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o, depthWrite:false});
+  const layersThin = [[0.005, hot, 0.95], [0.010, hot, 0.38], [0.016, line, 0.22], [0.024, line, 0.12], [0.034, glw, 0.06]];
+  const beam = (a, b, k=1, st=1) => { const len = a.distanceTo(b), grp = new THREE.Group();
+    grp.position.copy(a.clone().add(b).multiplyScalar(0.5)); grp.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), b.clone().sub(a).normalize());
+    for (const [r,c,o] of layersThin) grp.add(new THREE.Mesh(new THREE.CylinderGeometry(r*k, r*k, len, 10, 1, true), soft(c, o*st)));
+    G.add(grp); };
+  const ray = (a, b, k=1, st=1) => { const len = a.distanceTo(b), grp = new THREE.Group();
+    grp.position.copy(a.clone().add(b).multiplyScalar(0.5)); grp.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), b.clone().sub(a).normalize());
+    for (const [r,c,o] of [[0.006, hot, 1.0], [0.012, hot, 0.45], [0.02, line, 0.25], [0.03, line, 0.13], [0.045, glw, 0.06]]) {
+      const pts = []; for (let i=0;i<=30;i++){ const u = i/30; pts.push(new THREE.Vector2((r + 0.028*Math.pow(1-u, 2.2))*k, u*len - len/2)); }
+      grp.add(new THREE.Mesh(new THREE.LatheGeometry(pts, 18), new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o*st, depthWrite:false, side:THREE.DoubleSide})));
+    }
+    G.add(grp); };
+  const cv = document.createElement('canvas'); cv.width = cv.height = 128; const cx = cv.getContext('2d');
+  const gr = cx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.25,'rgba(255,255,255,0.55)'); gr.addColorStop(0.6,'rgba(255,255,255,0.12)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  cx.fillStyle = gr; cx.fillRect(0,0,128,128); const tex = new THREE.CanvasTexture(cv);
+  const spr = (pos, size, c, o) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, color:c, transparent:true, opacity:o, depthWrite:false})); sp.position.copy(pos); sp.scale.setScalar(size); G.add(sp); };
+  const uniq = g => { const a = g.attributes.position, out = []; for (let i=0;i<a.count;i++){ const v = new THREE.Vector3().fromBufferAttribute(a, i).normalize(); if (!out.some(w => w.distanceTo(v) < 1e-4)) out.push(v); } return out; };
+  const V = uniq(new THREE.IcosahedronGeometry(1, 1)), P12 = uniq(new THREE.IcosahedronGeometry(1, 0));
+  let dmin = Infinity; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) dmin = Math.min(dmin, V[i].distanceTo(V[j]));
+  const E = []; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) if (V[i].distanceTo(V[j]) < dmin*1.05) E.push([i,j]);
+  const RL = 0.86, RT = 1.38, axis = new THREE.Vector3(0.3, 1, 0.2).normalize();
+  // nested stars: the smallest born at the core's surface, each larger one turned further, out to the full star at the membrane
+  const NEST = [[0.34, -0.9, 0.5], [0.6, -0.45, 0.72], [1.0, 0.0, 1.0]];   // [scale, turn, strength]
+  for (const [sc, turn, st] of NEST) {
+    const T = v => v.clone().applyAxisAngle(axis, turn).multiplyScalar(sc), k = Math.pow(sc, 0.55);
+    for (const [i,j] of E) beam(T(V[i].clone().multiplyScalar(RL)), T(V[j].clone().multiplyScalar(RL)), k, st);
+    for (const v of V) spr(T(v.clone().multiplyScalar(RL)), 0.07*k, hot, 0.85*st);
+    for (const d of P12) {
+      const base = T(d.clone().multiplyScalar(RL)), tipP = T(d.clone().multiplyScalar(RT));
+      ray(base, tipP, k, st);
+      for (const v of V.filter(v => v.distanceTo(d) > 1e-4 && v.distanceTo(d) < dmin*1.05)) beam(T(v.clone().multiplyScalar(RL)), T(d.clone().multiplyScalar(RL + (RT-RL)*0.34)), 0.75*k, st);
+      spr(tipP, 0.12*k, hot, 1.0*st); spr(tipP, 0.28*k, glw, 0.5*st);
+    }
+  }
+  // inner radiance: a luminous core whose light seems to come from within
+  G.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 64, 48), new THREE.ShaderMaterial({ transparent:true, depthWrite:false, uniforms:{c:{value:line}, h:{value:hot}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform vec3 h; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); gl_FragColor = vec4(mix(h, c, f), 0.03 + pow(f,1.6)*0.35);
+#include <colorspace_fragment>
+}`})));
+  spr(new THREE.Vector3(), 2.1, glw, 0.5); spr(new THREE.Vector3(), 1.1, hot, 0.65); spr(new THREE.Vector3(), 0.5, hot, 0.85); spr(new THREE.Vector3(), 0.22, new THREE.Color('#FFF1B8'), 1.0);
+  G.rotation.set(0.32, 0.55, 0.08);
+}
+if (form === 'green') { // "the lotus-shape, the number of points of crystalline structure dependent upon the strength of this center" (51.8)
+  const line = new THREE.Color('#1F8F5C'), hot = new THREE.Color('#3CC486'), glw = new THREE.Color('#7FD9AE');
+  const streamMat = (r, c, o) => new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, side:THREE.DoubleSide,
+    uniforms:{ c:{value:c}, o:{value:o}, r:{value:r}, camD:{value:camera.position.length()} },
+    vertexShader:`uniform float r; uniform float camD; varying float vF;
+      void main(){ vec3 ctr = position - normal * r; vec4 mvc = modelViewMatrix * vec4(ctr, 1.0);
+        float t = clamp((mvc.z + camD) / 1.1, -1.0, 1.0); float f = (t + 1.0) * 0.5; vF = f;
+        vec3 p = ctr + normal * r * (0.72 + 0.5 * smoothstep(0.0, 1.0, f));
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 1.0); }`,
+    fragmentShader:`uniform vec3 c; uniform float o; varying float vF;
+      void main(){ float a = o * (0.24 + 0.76 * smoothstep(0.0, 1.0, vF));
+        vec3 haze = vec3(0.91, 0.85, 0.74); vec3 col = mix(haze, c, 0.58 + 0.42 * smoothstep(0.0, 1.0, vF));
+        gl_FragColor = vec4(col, clamp(a, 0.0, 1.0));
+        #include <colorspace_fragment>
+      }` });
+  const layers = [[0.008, hot, 1.0], [0.015, hot, 0.42], [0.024, line, 0.24], [0.036, line, 0.13], [0.052, glw, 0.06]];
+  const tube = (pts, k=1, st=1, closed=true) => { const cv = new THREE.CatmullRomCurve3(pts, closed, 'centripetal');
+    for (const [r,c,o] of layers) { const m = new THREE.Mesh(new THREE.TubeGeometry(cv, Math.max(60, pts.length*3), r*k, 14, closed), streamMat(r*k, c, o*st)); m.userData.shaderDepth = true; G.add(m); } };
+  const cvs = document.createElement('canvas'); cvs.width = cvs.height = 128; const cx = cvs.getContext('2d');
+  const gr = cx.createRadialGradient(64,64,0,64,64,64); gr.addColorStop(0,'rgba(255,255,255,1)'); gr.addColorStop(0.25,'rgba(255,255,255,0.55)'); gr.addColorStop(0.6,'rgba(255,255,255,0.12)'); gr.addColorStop(1,'rgba(255,255,255,0)');
+  cx.fillStyle = gr; cx.fillRect(0,0,128,128); const tex = new THREE.CanvasTexture(cvs);
+  const spr = (pos, size, c, o) => { const sp = new THREE.Sprite(new THREE.SpriteMaterial({map:tex, color:c, transparent:true, opacity:o, depthWrite:false})); sp.position.copy(pos); sp.scale.setScalar(size); G.add(sp); };
+  // a petal outline: from the center outward, cupped upward, pointed at the tip
+  const petal = (phi, r0, L, w, cup) => { const d = new THREE.Vector3(Math.cos(phi), 0, Math.sin(phi)), q = new THREE.Vector3(-Math.sin(phi), 0, Math.cos(phi)), up = new THREE.Vector3(0,1,0), pts = [];
+    const at = (u, side) => d.clone().multiplyScalar(r0 + L*Math.pow(Math.sin(Math.PI*u/2), 1.25)).add(q.clone().multiplyScalar(side * w * Math.pow(Math.sin(Math.PI*u), 0.85) * (1 - 0.25*u))).add(up.clone().multiplyScalar(cup * Math.pow(u, 1.7)));   // spreads outward first, then curves up toward the tip (a cupped bowl)
+    for (let i=0;i<=40;i++) pts.push(at(i/40, 1)); for (let i=39;i>=1;i--) pts.push(at(i/40, -1));
+    return { pts, tip: at(1, 0) }; };
+  // three rings, opening outward from the center: 6, 8, then 12 petals whose tips are the crystalline points
+  const RINGS = [[6, 0.24, 0.46, 0.12, 1.17, 0.0, 0.55], [8, 0.26, 0.72, 0.16, 1.17, Math.PI/8, 0.75], [12, 0.28, 1.0, 0.19, 1.17, Math.PI/12, 1.0]];   // every tip lifted to the equator (G-local y = 1.17)   // cupped to line the bowl of the lower sphere
+  for (const [n, r0, L, w, cup, off, st] of RINGS) {
+    for (let i=0;i<n;i++) { const P = petal(off + i*2*Math.PI/n, r0, L, w, cup); tube(P.pts, Math.pow(L/1.04, 0.5), st); spr(P.tip, 0.4, glw, 0.45*st); spr(P.tip, 0.16, line, 0.95*st); spr(P.tip, 0.07, new THREE.Color('#E8FFF2'), 0.9*st); }
+  }
+  // the lotus closed: six petals rising from the open lotus at the equator, swelling outward, then drawing in to meet at the apex (a bud seen from the side)
+  { const LIFT = 0.18;   // G sits 0.18 below the sphere's centre; the equator is G-local y = 0.18
+    const B = (u, a, b, c, d) => { const m = 1-u; return m*m*m*a + 3*m*m*u*b + 3*m*u*u*c + u*u*u*d; }; const GY = -1.17, APEX = 1.31 - GY;
+    for (let i=0;i<6;i++) {
+      const phi = Math.PI/12 + i*2*Math.PI/6, rad = new THREE.Vector3(Math.cos(phi), 0, Math.sin(phi)), az = new THREE.Vector3(-Math.sin(phi), 0, Math.cos(phi));
+      const at = (u, side) => {
+        const r = B(u, 0.24, 1.42, 1.06, 0.0), y = B(u, 0.04, 0.55, APEX*0.86, APEX);
+        const w = 0.4 * Math.pow(Math.sin(Math.PI*u), 0.85) * (1 - 0.3*u);
+        return rad.clone().multiplyScalar(r).add(az.clone().multiplyScalar(side*w)).add(new THREE.Vector3(0, y, 0));
+      };
+      const pts = []; for (let k=0;k<=60;k++) pts.push(at(k/60, 1)); for (let k=59;k>=1;k--) pts.push(at(k/60, -1));
+      tube(pts, 0.7, 0.55);
+    }
+    spr(new THREE.Vector3(0, APEX, 0), 0.34, glw, 0.45); spr(new THREE.Vector3(0, APEX, 0), 0.13, line, 0.9);
+  }
+  // the still center, held in its own small torus (Zone 4's micro-torus)
+  const RC = 0.48;
+  for (let i=0;i<8;i++) { const a = i*2*Math.PI/8 + 0.2, pts = []; for (let j=0;j<40;j++){ const t = j/40*2*Math.PI; const rr = RC + 0.13*Math.cos(t); pts.push(new THREE.Vector3(rr*Math.cos(a), 0.36 + 0.16*Math.sin(t), rr*Math.sin(a))); } tube(pts, 0.32, 0.32); }
+  G.add(new THREE.Mesh(new THREE.SphereGeometry(0.33, 64, 48), new THREE.ShaderMaterial({ transparent:true, depthWrite:false, uniforms:{c:{value:new THREE.Color('#16784C')}, h:{value:hot}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform vec3 h; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); gl_FragColor = vec4(mix(h, c, f), 0.22 + pow(f,1.2)*0.72);
+#include <colorspace_fragment>
+}`})).translateY(0.36));
+  spr(new THREE.Vector3(0,0.36,0), 1.5, glw, 0.5); spr(new THREE.Vector3(0,0.36,0), 0.7, hot, 0.6); spr(new THREE.Vector3(0,0.36,0), 0.24, new THREE.Color('#E8FFF2'), 1.0);
+  G.position.y = -1.17; G.rotation.set(0.0, 0.2, 0);
+}
+if (form === 'blue') { // perhaps one hundred facets, great flashing brilliance
+  const gem = new THREE.Mesh(new THREE.IcosahedronGeometry(0.9, 1), mat({flatShading:true, roughness:0.08, metalness:0.35, clearcoat:1, iridescence:0.6}));
+  G.add(gem); G.rotation.set(0.25, 0.5, 0);
+  const sp = new THREE.PointLight(0xffffff, 18, 8); sp.position.set(1.6, 1.8, 2.2); scene.add(sp);
+  const sp2 = new THREE.PointLight(0xffffff, 10, 8); sp2.position.set(-1.8, 0.4, 2.0); scene.add(sp2);
+}
+if (form === 'indigo') { // basic triangular, or three-petaled
+  const T = new THREE.Group(); const R = 0.95, corners = [0,1,2].map(i => { const a = -Math.PI/2 + i*2*Math.PI/3; return new THREE.Vector3(Math.cos(a)*R, 0, Math.sin(a)*R); });
+  for (let i=0;i<3;i++){
+    const a = corners[i], b = corners[(i+1)%3], mid = a.clone().add(b).multiplyScalar(0.5), len = a.distanceTo(b);
+    const e = new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,len,24), mat()); e.position.copy(mid);
+    e.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), b.clone().sub(a).normalize()); T.add(e);
+    const s = new THREE.Mesh(new THREE.SphereGeometry(0.09, 24, 16), mat()); s.position.copy(a); T.add(s);
+  }
+  for (let i=0;i<3;i++){ const m = new THREE.Mesh(petal(0.42, 0.2, 0.06), mat()); m.rotation.x = -0.18; const p = new THREE.Group(); p.add(m); p.rotation.y = -(-Math.PI/2 + i*2*Math.PI/3) + Math.PI/2; T.add(p); }
+  T.add(new THREE.Mesh(new THREE.SphereGeometry(0.11, 32, 16), mat({roughness:0.2})));
+  G.add(T);
+}
+if (form === 'violet') { // thousand-petaled: the sum
+  const geo = petal(0.17, 0.045, 0.018); const N = 520;
+  const inst = new THREE.InstancedMesh(geo, mat({roughness:0.4}), N); const dummy = new THREE.Object3D();
+  for (let i=0;i<N;i++){
+    const t = (i+0.5)/N, y = 1 - t*1.15, r = Math.sqrt(Math.max(0,1-y*y)), th = i*Math.PI*(3-Math.sqrt(5));
+    const d = new THREE.Vector3(Math.cos(th)*r, y, Math.sin(th)*r).normalize();
+    dummy.position.copy(d.clone().multiplyScalar(0.52));
+    dummy.lookAt(d.clone().multiplyScalar(2)); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix);
+    inst.setColorAt(i, col.clone().lerp(new THREE.Color('#f4e9ff'), 0.15 + 0.35*(1-t)));
+  }
+  G.add(inst);
+  G.add(new THREE.Mesh(new THREE.SphereGeometry(0.5, 48, 32), mat({color:col.clone().multiplyScalar(0.8)})));
+  G.position.y = -0.05;
+}
+
+if (form === 'green') ring.visible = false;   // no equator line on green
+if (form === 'green') scene.children.forEach(o => { if (o.isMesh && o.geometry.parameters && o.geometry.parameters.radius === 0.09) o.visible = false; });   // no faint core at the sphere's middle on green
+const SCALE = {red:1.45, orange:1.0, yellow:1.0, green:1.0, blue:1.52, indigo:1.48, violet:1.62};
+G.scale.multiplyScalar(SCALE[form]);
+if (form === 'red' || form === 'orange' || form === 'yellow' || form === 'green') {
+  // depth cues: near = brighter and fuller; far = dimmer and thinner
+  G.updateMatrixWorld(true);
+  const cdir = camera.position.clone().normalize(), layer = P.get('layer') || 'all', wp = new THREE.Vector3();
+  const R = 1.45 * 0.94;
+  for (const ch of [...G.children]) {
+    if (ch.userData.shaderDepth) continue;
+    ch.getWorldPosition(wp); const t = THREE.MathUtils.clamp(wp.dot(cdir) / R, -1, 1), f = (t + 1) / 2;
+    const isCenter = wp.length() < 0.05;
+    if (!isCenter) {
+      ch.traverse(o => { if (o.material && o.material.opacity !== undefined) o.material.opacity *= (0.12 + 0.88 * Math.pow(f, 1.7)); });
+      if (ch.isSprite) ch.scale.multiplyScalar(0.45 + 0.95 * f);
+      else if (!ch.userData.noScale) ch.scale.x = ch.scale.z = 0.4 + 1.3 * f;
+    }
+    if (layer === 'back' && (t >= 0 || isCenter)) ch.visible = false;
+    if (layer === 'front' && t < 0 && !isCenter) ch.visible = false;
+  }
+  if (layer === 'front' || layer === 'back') scene.children.forEach(o => { if (o !== G && !o.isLight) o.visible = false; });
+  if (layer === 'shell') G.visible = false;
+}
+renderer.render(scene, camera);
+document.body.dataset.done = '1';
+</script>
+</body></html>

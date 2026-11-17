@@ -1,0 +1,127 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1320 1480" width="1320" height="1480">
+<rect width="1320" height="1480" fill="#fbf8f2"/>
+<text x="660.0" y="52" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="34" fill="#2b2420" font-weight="bold">The Name on the Tree</text>
+<text x="660.0" y="84" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#7a6e64" font-style="italic">How the letters of YHWH span the ten sefirot, and where YHWH and Elohim are named</text>
+<rect x="328" y="500" width="664" height="560" rx="60" fill="#f6efe0" stroke="#b8860b" stroke-width="2" stroke-dasharray="8 6"/>
+<rect x="328" y="105" width="664" height="290" rx="60" fill="none" stroke="#7a6e64" stroke-width="1.5" stroke-dasharray="3 5"/>
+<text x="40" y="150" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64" font-style="italic">The upper three (GAR), dotted box:</text>
+<text x="40" y="168" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64" font-style="italic">Abba and Imma, “never separated”</text>
+<text x="40" y="184" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64" font-style="italic">(Zohar, Acharei Mot)</text>
+<text x="390" y="1262" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64" letter-spacing="1">PILLAR OF JUDGMENT</text>
+<text x="660" y="1262" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64" letter-spacing="1">MIDDLE PILLAR</text>
+<text x="930" y="1262" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64" letter-spacing="1">PILLAR OF MERCY</text>
+<line x1="660" y1="170" x2="930" y2="320" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="170" x2="390" y2="320" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="170" x2="660" y2="700" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="320" x2="390" y2="320" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="320" x2="660" y2="700" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="320" x2="930" y2="570" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="320" x2="660" y2="700" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="320" x2="390" y2="570" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="570" x2="390" y2="570" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="570" x2="660" y2="700" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="570" x2="930" y2="870" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="570" x2="660" y2="700" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="570" x2="390" y2="870" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="700" x2="930" y2="870" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="700" x2="660" y2="1000" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="700" x2="390" y2="870" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="870" x2="390" y2="870" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="870" x2="660" y2="1000" stroke="#c9bba8" stroke-width="3"/>
+<line x1="930" y1="870" x2="660" y2="1170" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="870" x2="660" y2="1000" stroke="#c9bba8" stroke-width="3"/>
+<line x1="390" y1="870" x2="660" y2="1170" stroke="#c9bba8" stroke-width="3"/>
+<line x1="660" y1="1000" x2="660" y2="1170" stroke="#c9bba8" stroke-width="3"/>
+<circle cx="660" cy="170" r="50" fill="#ffffff" stroke="#2b2420" stroke-width="2"/>
+<text x="660" y="166" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Keter</text>
+<text x="660" y="190" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">כתר</text>
+<circle cx="930" cy="320" r="50" fill="#ffffff" stroke="#2b2420" stroke-width="2"/>
+<text x="930" y="316" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Chokhmah</text>
+<text x="930" y="340" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">חכמה</text>
+<circle cx="390" cy="320" r="50" fill="#dcefef" stroke="#1f6f78" stroke-width="4"/>
+<circle cx="390" cy="320" r="57" fill="none" stroke="#b8860b" stroke-width="2.5"/>
+<text x="390" y="316" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Binah</text>
+<text x="390" y="340" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">בינה</text>
+<circle cx="660" cy="440" r="34" fill="#fbf8f2" stroke="#7a6e64" stroke-width="1.5" stroke-dasharray="4 4"/>
+<text x="660" y="438" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="16" fill="#7a6e64">Da'at</text>
+<text x="660" y="458" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="16" fill="#7a6e64">דעת</text>
+<circle cx="930" cy="570" r="50" fill="#ffffff" stroke="#2b2420" stroke-width="2"/>
+<text x="930" y="566" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Chesed</text>
+<text x="930" y="590" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">חסד</text>
+<circle cx="390" cy="570" r="50" fill="#dcefef" stroke="#1f6f78" stroke-width="4"/>
+<text x="390" y="566" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Gevurah</text>
+<text x="390" y="590" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">גבורה</text>
+<circle cx="660" cy="700" r="50" fill="#fbf1d3" stroke="#b8860b" stroke-width="5"/>
+<text x="660" y="696" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Tiferet</text>
+<text x="660" y="720" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">תפארת</text>
+<circle cx="930" cy="870" r="50" fill="#ffffff" stroke="#b8860b" stroke-width="2.5"/>
+<text x="930" y="866" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Netzach</text>
+<text x="930" y="890" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">נצח</text>
+<circle cx="390" cy="870" r="50" fill="#ffffff" stroke="#1f6f78" stroke-width="2.5"/>
+<text x="390" y="866" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Hod</text>
+<text x="390" y="890" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">הוד</text>
+<circle cx="660" cy="1000" r="50" fill="#ffffff" stroke="#2b2420" stroke-width="2"/>
+<text x="660" y="996" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Yesod</text>
+<text x="660" y="1020" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">יסוד</text>
+<circle cx="660" cy="1170" r="50" fill="#ffffff" stroke="#2b2420" stroke-width="2"/>
+<text x="660" y="1166" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="18" fill="#2b2420" font-weight="bold">Malkhut</text>
+<text x="660" y="1190" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="19" fill="#2b2420">מלכות</text>
+<text x="728" y="136" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#2b2420">אהיה</text>
+<text x="728" y="158" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-style="italic">Ehyeh</text>
+<text x="998" y="314" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#2b2420">יה</text>
+<text x="998" y="336" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-style="italic">Yah</text>
+<text x="998" y="356" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Abba · the Father</text>
+<text x="322" y="314" text-anchor="end" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#b8860b">יהוה</text>
+<text x="322" y="336" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#b8860b" font-style="italic">YHWH voweled as Elohim</text>
+<text x="322" y="356" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#1f6f78" font-style="italic">Elohim (Zohar 1:15a)</text>
+<text x="322" y="374" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Imma · the Mother</text>
+<text x="998" y="564" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#2b2420">אל</text>
+<text x="998" y="586" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-style="italic">El</text>
+<text x="998" y="606" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">mercy</text>
+<text x="322" y="564" text-anchor="end" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#1f6f78">אלהים</text>
+<text x="322" y="586" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#1f6f78" font-style="italic">Elohim</text>
+<text x="322" y="606" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">judgment</text>
+<text x="732" y="686" font-family="'FreeSerif','DejaVu Sans',serif" font-size="26" fill="#b8860b" font-weight="bold">יהוה</text>
+<text x="732" y="710" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="17" fill="#b8860b" font-weight="bold">YHWH · the heart</text>
+<text x="732" y="729" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">the Holy One, blessed be He</text>
+<text x="732" y="745" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">mercy and judgment reconciled</text>
+<text x="998" y="864" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#b8860b">יהוה צבאות</text>
+<text x="998" y="886" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#b8860b" font-style="italic">YHWH Tzeva'ot</text>
+<text x="322" y="864" text-anchor="end" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#1f6f78">אלהים צבאות</text>
+<text x="322" y="886" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#1f6f78" font-style="italic">Elohim Tzeva'ot</text>
+<text x="728" y="994" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#2b2420">שדי</text>
+<text x="728" y="1016" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-style="italic">Shaddai</text>
+<text x="728" y="1164" text-anchor="start" font-family="'FreeSerif','DejaVu Sans',serif" font-size="21" fill="#2b2420">אדני</text>
+<text x="728" y="1186" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-style="italic">Adonai</text>
+<text x="728" y="1206" text-anchor="start" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Shekhinah · the Daughter, the Bride</text>
+<text x="540" y="175" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="70" fill="#b8860b" font-weight="bold">׳</text>
+<text x="540" y="205" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-weight="bold">tip of Yod</text>
+<text x="540" y="223" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Keter</text>
+<text x="1260" y="330" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="78" fill="#b8860b" font-weight="bold">י</text>
+<text x="1260" y="360" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-weight="bold">Yod</text>
+<text x="1260" y="378" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Chokhmah</text>
+<text x="60" y="330" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="78" fill="#b8860b" font-weight="bold">ה</text>
+<text x="60" y="360" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-weight="bold">Heh</text>
+<text x="60" y="378" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Binah</text>
+<text x="70" y="800" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="96" fill="#b8860b" font-weight="bold">ו</text>
+<text x="70" y="830" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-weight="bold">Vav = 6</text>
+<text x="70" y="848" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">the six of</text>
+<text x="70" y="866" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Zeir Anpin,</text>
+<text x="70" y="884" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Chesed–Yesod</text>
+<text x="70" y="902" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">(the Son)</text>
+<text x="520" y="1185" text-anchor="middle" font-family="'FreeSerif','DejaVu Sans',serif" font-size="78" fill="#b8860b" font-weight="bold">ה</text>
+<text x="520" y="1215" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420" font-weight="bold">final Heh</text>
+<text x="520" y="1233" text-anchor="middle" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#7a6e64">Malkhut</text>
+<text x="970" y="1040" text-anchor="end" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="13" fill="#b8860b" font-style="italic">Zeir Anpin · the Vav</text>
+<line x1="80" y1="1286" x2="1240" y2="1286" stroke="#c9bba8"/>
+<circle cx="102" cy="1312" r="11" fill="#fbf1d3" stroke="#b8860b" stroke-width="3"/>
+<text x="122" y="1317" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420">YHWH names (Tiferet is the name's own seat)</text>
+<circle cx="532" cy="1312" r="11" fill="#dcefef" stroke="#1f6f78" stroke-width="3"/>
+<text x="552" y="1317" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420">Elohim names</text>
+<circle cx="962" cy="1312" r="11" fill="#dcefef" stroke="#1f6f78" stroke-width="3"/><circle cx="962" cy="1312" r="16" fill="none" stroke="#b8860b" stroke-width="2"/>
+<text x="986" y="1317" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="15" fill="#2b2420">both (Binah)</text>
+<text x="80" y="1360" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64">Letters: tip of Yod = Keter · Yod = Chokhmah (Abba) · Heh = Binah (Imma) · Vav = the six of Zeir Anpin (the Son) · final Heh = Malkhut (the Shekhinah).</text>
+<text x="80" y="1382" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64">Divine names by sefirah follow the standard list (Hod's Elohim Tzeva'ot is the common later assignment). The Zohar (1:15a) names Binah Elohim, and builds</text>
+<text x="80" y="1404" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64">Elohim from Mi (“who,” the hidden Keter–Chokhmah held in Binah) + Eleh (“these,” what goes out from her) — Isaiah 40:26, read in the Zohar's Introduction.</text>
+<text x="80" y="1426" font-family="'Liberation Serif','FreeSerif',Georgia,serif" font-size="14" fill="#7a6e64">YHWH is Elohim (Deut. 4:35): the yichud, the union of the Holy One (Tiferet, Vav) with the Shekhinah (Malkhut, final Heh), makes the name whole.</text>
+</svg>
