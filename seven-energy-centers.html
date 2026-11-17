@@ -1,0 +1,201 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Seven Energy Centers</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ledger of seven bands, crown at the top and root at the bottom. Each band opens with its rendered form, then reads down Ra's eight categories. */
+:root{
+  --bg:#e6dcc4; --panel:#f3ecdb; --fg:#24212c; --muted:#5e5768; --rule:#cfc1a0; --accent:#5b4a8c; --doug:#e4d8bb; --lens:#14121c;
+  --red:#b3261e; --orange:#b85a0d; --yellow:#8a6a00; --green:#1b7a50; --blue:#1f5fa8; --indigo:#4636a8; --violet:#7a3a9e;
+  --display:"Marcellus",Georgia,serif; --body:"Spectral",Georgia,serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#16141c; --panel:#1e1b26; --fg:#ece9f2; --muted:#aaa3ba; --rule:#35303f; --accent:#b4a3ec; --doug:#26222f; --lens:#0e0d14;
+  --red:#ef6b6b; --orange:#f39446; --yellow:#e8c440; --green:#5cc77a; --blue:#6aa3f0; --indigo:#9a8cf0; --violet:#c48cf0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#16141c; --panel:#1e1b26; --fg:#ece9f2; --muted:#aaa3ba; --rule:#35303f; --accent:#b4a3ec; --doug:#26222f; --lens:#0e0d14;
+  --red:#ef6b6b; --orange:#f39446; --yellow:#e8c440; --green:#5cc77a; --blue:#6aa3f0; --indigo:#9a8cf0; --violet:#c48cf0; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1200px;margin:0 auto;padding-block:36px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header{display:grid;gap:10px;max-width:80ch}
+.eyebrow,.lbl,.cite,.code,.tag,.who{font-family:var(--mono)}
+.eyebrow{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.08;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-weight:400;font-size:30px;line-height:1.1;margin:0;color:var(--c)}
+.lede{margin:0;color:var(--muted);font-size:17px}
+.def{background:var(--panel);border:1px solid var(--rule);padding:14px 18px;max-width:92ch;display:grid;gap:4px}
+.def p{margin:0}
+.prim{gap:10px}
+.prim q{font-style:italic;quotes:"\201C" "\201D"}
+.tagline{font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:6px}
+.who{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+/* the seven forms at a glance */
+.strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:10px}
+.strip a{display:grid;justify-items:center;gap:2px;text-decoration:none;color:var(--c);border-radius:8px;padding:6px 2px}
+.strip a:hover,.strip a:focus-visible{background:var(--panel);outline:none;box-shadow:0 0 0 2px var(--c)}
+.strip img{width:100%;max-width:130px;aspect-ratio:1;height:auto;border-radius:14px;background:var(--lens);box-shadow:0 1px 0 rgba(0,0,0,.08),0 6px 16px -8px rgba(40,30,10,.45)}
+.strip .code{font-size:11.5px}
+.strip .nm{font-family:var(--display);font-size:17px}
+.strip .fm{font-size:13px;color:var(--muted);text-align:center;line-height:1.25}
+/* each band */
+.band{background:var(--panel);border:1px solid var(--rule);border-top:5px solid var(--c);padding:22px 22px 24px;display:grid;grid-template-columns:300px minmax(0,1fr);gap:8px 32px;scroll-margin-top:16px}
+.side{display:grid;align-content:start;gap:8px}
+.side img{width:100%;max-width:300px;aspect-ratio:1;height:auto;border-radius:18px;background:var(--lens);box-shadow:0 1px 0 rgba(0,0,0,.08),0 10px 24px -12px rgba(40,30,10,.55)}
+.code{font-size:13px;font-weight:500;color:var(--c)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.tag{font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid var(--c);color:var(--c)}
+.render{font-size:14px;color:var(--muted);margin:0}
+.cats{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px 18px;align-content:start}
+.lbl{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);padding-top:4px}
+.val{margin:0;min-width:0}
+.val q{font-style:italic;quotes:"\201C" "\201D"}
+.cite{font-size:11.5px;color:var(--muted);white-space:nowrap}
+.wit{display:block;margin-top:6px;font-size:14px;color:var(--muted)}
+.wit a{color:var(--c);text-underline-offset:2px}
+.wit a:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.dl{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--c)}
+.arch{grid-column:1 / -1;background:var(--doug);padding:14px 16px;border-radius:10px;display:grid;gap:6px;margin-top:4px}
+.arch p{margin:0}
+.arch .main{font-family:var(--display);font-size:21px;line-height:1.3}
+footer{display:grid;gap:8px;font-size:14.5px;color:var(--muted);max-width:92ch;border-top:1px solid var(--rule);padding-top:16px}
+footer p{margin:0}
+@media (max-width:860px){
+  .strip{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .band{grid-template-columns:1fr}
+  .side{grid-template-columns:120px minmax(0,1fr);align-items:center;column-gap:14px}
+  .side img{grid-row:span 4}
+}
+@media (max-width:520px){
+  .cats{grid-template-columns:1fr;gap:2px}
+  .cats .lbl{padding-top:12px}
+  .strip .fm{display:none}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Working chart · Ra's words, verified in the volumes</div>
+    <h1>The Seven Energy Centers</h1>
+    <p class="lede">The seven energy centers, read from the bottom up: red at the root, rising through to violet at the crown. Each is read under the eight categories. Each opens with its form rendered in three dimensions, held in its own toroidal flow: a membrane of fine lines rising from the color below, through its own, to the color above.</p>
+  </header>
+
+  <div class="def">
+    <div class="who">Doug's definition</div>
+    <p>An energy center is the unique crystalline energetic shape the vortex creates, given frequency, laminarity and balance. The centers build on one another and are distinct at quantized intervals of angular velocity. Imaginally, they are seven chambers of one heart.</p>
+  </div>
+
+  <div class="def prim">
+    <div class="who">The three primary activities</div>
+    <p class="ra"><span class="tagline">Ra</span> Asked why the red, yellow and blue centers are called primary, and whether they can be traced back to intelligent infinity: <q>The red, yellow, and blue rays are primary because they signify activity of a primary nature.</q> Ra closes the same answer: <q>…if you consider the function of the Logos as representative of the Infinite Creator in effectuating the knowing of the Creator by the Creator, you may perhaps see the steps by which this may be accomplished</q> <span class="cite">(41.25)</span>.</p>
+    <p><span class="tagline">Doug</span> I read these three primary activities as universal and cosmological. They exist as one unified dynamic, and without them no experience would be possible. They build upon one another, and together they act as a metaphysical skeleton, a framework, on which the other processes act as flesh, ligaments and muscle.</p>
+  </div>
+
+  <nav class="strip" id="strip" aria-label="The seven centers"></nav>
+
+  <div id="bands" style="display:grid;gap:18px"></div>
+
+  <footer>
+    <p><b>The eight categories.</b> 1 Place in the count · 2 Relation to the other rays · 3 Activity · 4 Body · 5 Way of meeting experience · 6 Blockage · 7a Archetype (purview) · 7b Form, the room · 8 Density. Category 1 follows <q>Our difficulty lies in our perception of red ray and violet ray as fixed; thus the inner rays are those which are varying</q> (34.15) and, of violet, <q>it cannot be manipulated as can the others</q> (15.12).</p>
+    <p><b>Layers.</b> Words in quotation marks with a session.question number are Ra's, from <i>The Ra Contact</i>, Vol. 1 and 2, checked against the text. The archetype panels are Doug's working definitions. Witnesses outside Ra, such as Richard Rohr, are labeled as witnesses. Calling all seven centers basic is Doug's; Ra names red and green basic (39.10) and red, yellow and blue primary (41.25). The three-dimensional forms are renderings of Ra's 51.8 words. The onion-shaped membrane of flow around each, and its gradient from the ray below to the ray above, are Doug's direction (November 7, 2026), not Ra's: some follow Doug's own reading, others are Claude's drafts made at Doug's direction, as each caption says. Nothing here is yet ruled into the governing working assumptions.</p>
+  </footer>
+</div>
+
+<script>
+const IMG = {"red": "img/red.webp", "orange": "img/orange.webp", "yellow": "img/yellow.webp", "green": "img/green.webp", "blue": "img/blue.webp", "indigo": "img/indigo.webp", "violet": "img/violet.webp"};
+const B = [
+ {k:"red", n:1, ray:"Red", tags:["fixed","primary"], render:"Doug's reading, in its flow: a center sphere with 72 spokes, their tips joined. Below, intelligent energy rises as white light from everywhere, unfocused yet moving upward (59.11), drawn in at the root.",
+  cats:[
+   ["1 · Count", "1st of seven · fixed <span class=cite>(34.15)</span>. Red is <q>the basis for all that occurs in vibratory levels, the sum of this being violet-ray energy</q> <span class=cite>(34.16)</span>"],
+   ["2 · Relation", "<q>The basic strengthening ray for each density. It shall never be condescended to as less important or productive of spiritual evolution, for it is the foundation ray</q> <span class=cite>(39.10)</span>"],
+   ["3 · Activity", "Basic and primary. <q>Red ray is the foundation</q> <span class=cite>(41.25)</span>"],
+   ["4 · Body", "<q>The unconstructed material of the body, the elemental body without form</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of survival</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>The first balancing is of the Malkuth, or Earth, vibratory energy complex, called the red-ray complex. An understanding and acceptance of this energy is fundamental</q> <span class=cite>(15.12)</span>"],
+   ["7b · Form", "<q>The red energy center often is in the shape of the spoked wheel</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "First. <q>In first density the red ray is the foundation for all that is to come</q> <span class=cite>(40.3)</span>"]],
+  arch:"To be. Undifferentiated singularity, oneness; the ground of space/time being.", purview:"Strengthening."},
+ {k:"orange", n:2, ray:"Orange", tags:["varying","1st of five"], render:"Doug's reading: the triquetra, one continuous thread of light forming three petals, middle petal up, inside the membrane of flow running red below to yellow above.",
+  cats:[
+   ["1 · Count", "2nd of seven · 1st of the five varying and manipulatable <span class=cite>(34.15, 15.12)</span>"],
+   ["2 · Relation", "<q>Orange ray the movement towards yellow ray</q> <span class=cite>(41.25)</span>. Its work is <q>activation and balancing of the self in relation to the self</q> <span class=cite>(41.14)</span>"],
+   ["3 · Activity", "Basic, not primary"],
+   ["4 · Body", "<q>The body formed without self-awareness, the body in the womb before the spirit/mind complex enters</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of personal identity</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>Personal eccentricities or distortions with regard to self-conscious understanding, or acceptance, of self</q> <span class=cite>(15.12)</span>"],
+   ["7b · Form", "<q>The orange energy center in the flower shape containing three petals</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Second. <q>In second density the orange ray is that of movement and growth of the individual, this ray striving towards the yellow ray</q> <span class=cite>(40.3)</span>"]],
+  arch:"Emergence from the red ground of space/time being, and awakening towards self-awareness. The middle petal, negotiating between the One and the many.", purview:"Striving, growth, motivation, motility, change, balance."},
+ {k:"yellow", n:3, ray:"Yellow", tags:["varying","primary"], render:"Claude's draft, refined at Doug's direction: a many-faceted star of light at the core, inside the membrane of flow running orange below to green above.",
+  cats:[
+   ["1 · Count", "3rd of seven · 2nd of the five varying and manipulatable"],
+   ["2 · Relation", "<q>The next foundation ray is yellow. This is the great stepping stone ray. At this ray the mind/body potentiates to its fullest balance</q> <span class=cite>(39.10)</span>"],
+   ["3 · Activity", "Basic and primary. <q>The ray of self-awareness and interaction</q> <span class=cite>(41.25)</span>"],
+   ["4 · Body", "<q>Your physical vehicle which you know of at this time and in which you experience catalyst</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of social relations</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>The third blockage resembles most closely that which you have called ego</q> <span class=cite>(15.12)</span>, and Richard Rohr’s description of the False Self. <span class=wit>Witness, not Ra: Richard Rohr, <a href=\"https://cac.org/daily-meditations/what-is-the-false-self-2023-08-08/\" target=\"_blank\" rel=\"noopener\">“What Is the False Self?”</a>, Daily Meditation, Center for Action and Contemplation, August 8, 2023 (adapted from Rohr’s <i>Immortal Diamond</i>).</span>"],
+   ["7b · Form", "<q>The yellow center again in a rounded shape, many faceted, as a star</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Third. <q>The yellow ray of self-conscious manifestations of a social nature as well as individual</q> <span class=cite>(40.3)</span>"]],
+  arch:"Awakening to self-awareness, and self-awareness making the choice of polarity. Diversity.", purview:"The inner radiance of self-awareness."},
+ {k:"green", n:4, ray:"Green", tags:["varying","the center"], render:"Doug's direction, after Zone 4: a pearly silver center whose glow lights a continuous inner circulation of lotus green, inside an onion-shaped membrane rising yellow-green at the base, true green at the equator, green-blue at the apex.",
+  cats:[
+   ["1 · Count", "4th of seven · 3rd of the five varying and manipulatable: the middle both ways"],
+   ["2 · Relation", "<q>The center ray of green. This is again a basic ray but not a primary ray. This is the resource for spiritual work</q> <span class=cite>(39.10)</span>. <q>The great transitional ray</q> <span class=cite>(54.31)</span>"],
+   ["3 · Activity", "Basic, not primary <span class=cite>(39.10)</span>"],
+   ["4 · Body", "<q>This is a lighter body packed more densely with life. You may call this the astral body</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of universal love</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>Blockages in this area may manifest as difficulties in expressing what you may call universal love, or compassion</q> <span class=cite>(15.12)</span>"],
+   ["7b · Form", "<q>The green energy center sometimes called the lotus-shape, the number of points of crystalline structure dependent upon the strength of this center</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Fourth. <q>The density of love</q> <span class=cite>(25.8)</span>"]],
+  arch:"The compassionate witness. Acceptance and understanding: understanding as <q>efficiency of perception</q> <span class=cite>(47.6)</span>.", purview:"Absorption, turning, exchange, witnessing observation, perception, interplay, kenosis, protection.", note:"The primaries are activities; green is the movement between them, <q>the movement through various experiences of energy exchanges having to do with compassion and all-forgiving love to the primary blue ray</q> <span class=cite>(41.25)</span>. The six-pointed star, the merkaba, sits here: rising and descending meeting and passing into each other (Doug; Ra does not name the merkaba)."},
+ {k:"blue", n:5, ray:"Blue", tags:["varying","primary"], render:"Claude's draft, at Doug's direction: a gem of light with many facets and flashing glints, inside the membrane of flow running green below to indigo above.",
+  cats:[
+   ["1 · Count", "5th of seven · 4th of the five varying and manipulatable"],
+   ["2 · Relation", "<q>The blue ray seats the learning/teachings of the spirit in each density within the mind/body complex, animating the whole, communicating to others this entirety of beingness</q> <span class=cite>(39.10)</span>"],
+   ["3 · Activity", "Basic and primary. <q>The first ray of radiation of self regardless of any actions from another… The blue-ray entity is a co-Creator</q> <span class=cite>(41.25)</span>"],
+   ["4 · Body", "<q>The light body, or blue-ray body, may be called the devachanic body</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of how the experience may beget free communication</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>Difficulties in accepting communication from other mind/body/spirit complexes</q> <span class=cite>(15.12)</span>. Blue requires <q>honesty</q> <span class=cite>(48.7)</span>"],
+   ["7b · Form", "<q>The blue energy center capable of having perhaps one hundred facets and capable of great flashing brilliance</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Fifth. <q>The fifth density is the density of light, or wisdom</q> <span class=cite>(25.11)</span>"]],
+  arch:"To be a person who acts, co-creating. The unified intelligent whole.", purview:"Outer expression, truth, the phenomenon of form, outward radiance, efficacy of perception, wisdom."},
+ {k:"indigo", n:6, ray:"Indigo", tags:["varying","gateway"], render:"Doug's direction: the triquetra mirrored, middle petal pointing down at six o'clock and the side petals at three and nine (the ajna), inside the membrane of flow running blue below to violet above.",
+  cats:[
+   ["1 · Count", "6th of seven · 5th of the five varying and manipulatable"],
+   ["2 · Relation", "<q>The indigo ray, though precious, is that ray worked upon only by the adept… It is the gateway to intelligent infinity bringing intelligent energy through</q> <span class=cite>(39.10)</span>. <q>The energy ingress ends with indigo</q> <span class=cite>(54.30)</span>"],
+   ["3 · Activity", "Basic, not primary"],
+   ["4 · Body", "<q>The gateway body. In this body form is substance</q> <span class=cite>(47.8)</span>. <q>It is, in microcosm, the Logos</q> <span class=cite>(51.10)</span>"],
+   ["5 · Experience", "<q>In terms of how the experience may be linked to universal energies</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "<q>A lessening of the influx of intelligent energy due to manifestations which appear as unworthiness</q> <span class=cite>(15.12)</span>"],
+   ["7b · Form", "<q>The indigo center a more quiet center which has the basic triangular, or three-petaled, shape in many, although some adepts who have balanced the lower energies may create more faceted forms</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Sixth. The higher self is <q>of a certain advancement within sixth density going into the seventh</q> <span class=cite>(36.8)</span>"]],
+  arch:"The co-creator awakening into time/space. The form-maker (open).", purview:"Wholeness-making, unity maintained, memory."},
+ {k:"violet", n:7, ray:"Violet", tags:["fixed","the sum"], render:"Claude's draft, from Ra's words: a thousand petals of light pointing outward from a radiant core. Above, a white-gold column (Claude's recommendation, not yet ruled).",
+  cats:[
+   ["1 · Count", "7th of seven · fixed <span class=cite>(34.15)</span>. <q>It cannot be manipulated as can the others</q> <span class=cite>(15.12)</span>"],
+   ["2 · Relation", "<q>The violet ray is constant and does not figure into a discussion of the functions of ray activation in that it is the mark, the register, the identity, the true vibration of an entity</q> <span class=cite>(39.10)</span>. <q>A thermometer, or indicator, of the whole</q> <span class=cite>(54.30)</span>"],
+   ["3 · Activity", "Basic, not primary"],
+   ["4 · Body", "<q>The Buddha body, or that body which is complete</q> <span class=cite>(47.8)</span>"],
+   ["5 · Experience", "<q>In terms of the sacramental nature of each experience</q> <span class=cite>(49.6)</span>"],
+   ["6 · Blockage", "None in the usual sense. <q>It is as it will be. ‘Balanced’ or ‘imbalanced’ has no meaning at this energy level, for it gives and takes in its own balance</q> <span class=cite>(15.12)</span>"],
+   ["7b · Form", "<q>The violet energy center is the least variable and is sometimes described in your philosophy as thousand-petaled, as it is the sum of the mind/body/spirit complex distortion totality</q> <span class=cite>(51.8)</span>"],
+   ["8 · Density", "Seventh. <q>The seventh density is a density of completion and the turning towards timelessness, or foreverness</q> <span class=cite>(41.16)</span>"]],
+  arch:"The joy of being.", purview:"Each experience taken as sacrament. Ra: the experience <q>of a sacramental, or violet, ray</q> … <q>may then yield not only the experience of joy but the comprehension of intelligent infinity which accompanies it</q> <span class=cite>(49.2)</span>."}
+];
+const FORM = {red:"spoked wheel",orange:"three petals",yellow:"many-faceted star",green:"lotus",blue:"one hundred facets",indigo:"triangular, three petals",violet:"thousand petals"};
+const strip = document.getElementById("strip"), bands = document.getElementById("bands");
+for (const b of B) {
+  const c = `var(--${b.k})`;
+  const a = document.createElement("a"); a.href = "#" + b.k; a.style.setProperty("--c", c);
+  a.innerHTML = `<img src="${IMG[b.k]}" alt="" width="130" height="130"><span class="code">Energy center ${b.n}</span><span class="nm">${b.ray}</span><span class="fm">${FORM[b.k]}</span>`;
+  strip.appendChild(a);
+  const s = document.createElement("section"); s.className = "band"; s.id = b.k; s.style.setProperty("--c", c);
+  s.innerHTML = `<div class="side"><img src="${IMG[b.k]}" alt="The ${b.ray.toLowerCase()} center, rendered in three dimensions" width="300" height="300"><span class="code">Energy center ${b.n}</span><h2>${b.ray}</h2><div class="tags">${b.tags.map(t=>`<span class="tag">${t}</span>`).join("")}</div><p class="render">${b.render}</p></div>
+  <div class="cats">${b.cats.map(([l,v])=>`<div class="lbl">${l}</div><p class="val">${v}</p>`).join("")}
+  <div class="arch"><span class="dl">7a · Archetype (purview) · Doug</span><p class="main">${b.arch}</p><p>In every ray: ${b.purview}</p>${b.note?`<p>${b.note}</p>`:""}</div></div>`;
+  bands.prepend(s);   // crown at the top, root at the bottom: read upward from red
+}
+</script>
+
+
+</body></html>

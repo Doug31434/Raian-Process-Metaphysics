@@ -1,0 +1,121 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>The Twenty-Four</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: one stage — title block above a full-width rotatable sphere, a short key below. Single dark (night-sky) theme by choice. */
+:root{
+  --ground:#0d1022; --ground-2:#151a35; --ink:#e9e6f2; --ink-soft:#a9a8c4;
+  --gold:#e8b85a; --silver:#b9c6ea; --rule:#2a3058;
+  --display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--ground);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:28px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2.1rem,6vw,3.2rem);line-height:1.05;margin:0;text-wrap:balance}
+.lede{margin:0;color:var(--ink-soft);max-width:60ch}
+.stage{position:relative;width:100%;aspect-ratio:1/1;max-width:100%;border-radius:14px;background:radial-gradient(circle at 50% 50%, var(--ground-2) 0%, var(--ground) 70%);border:1px solid var(--rule);overflow:hidden;touch-action:none;cursor:grab}
+.stage:active{cursor:grabbing}
+canvas{display:block;width:100%;height:100%}
+.tag{position:absolute;left:0;top:0;pointer-events:none;font-family:var(--display);font-style:italic;font-size:1.15rem;color:var(--gold);transform:translate(-50%,-160%);white-space:nowrap;text-shadow:0 0 12px rgba(13,16,34,.9)}
+.hint{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink-soft);pointer-events:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px}
+button{font:600 14px var(--body);color:var(--ink);background:var(--ground-2);border:1px solid var(--rule);border-radius:999px;padding:7px 14px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.key{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 24px;margin:0;padding:0;list-style:none;color:var(--ink-soft);font-size:15px}
+.key li{display:flex;gap:10px;align-items:baseline;min-width:0}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;transform:translateY(1px)}
+.dot.g{background:var(--gold);box-shadow:0 0 10px var(--gold)}
+.dot.s{background:var(--silver)}
+.line{flex:none;width:16px;height:2px;background:var(--rule);transform:translateY(-3px)}
+.key b{color:var(--ink);font-weight:600}
+.note{font-size:14px;color:var(--ink-soft);margin:0;max-width:62ch}
+</style>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Raian Process Metaphysics · Guardians of the heliosphere</span>
+    <h1>The Twenty-Four</h1>
+    <p class="lede">Yahweh at the center as one of the twenty-four, with the other twenty-three spread as evenly as a sphere allows. Drag to turn it.</p>
+  </header>
+  <div class="stage" id="stage">
+    <span class="tag" id="tag">Yahweh</span>
+    <span class="hint">drag to rotate</span>
+  </div>
+  <div class="controls">
+    <button id="spin" type="button" aria-pressed="true">Slow turning</button>
+    <button id="spokes" type="button" aria-pressed="true">Lines to center</button>
+    <button id="mesh" type="button" aria-pressed="true">Lattice</button>
+  </div>
+  <ul class="key">
+    <li><span class="dot g"></span><span><b>Yahweh</b>, the central node</span></li>
+    <li><span class="dot s"></span><span><b>23 Guardians</b> on the sphere</span></li>
+    <li><span class="line"></span><span><b>63 edges</b> joining each Guardian to its nearest neighbors</span></li>
+  </ul>
+  <p class="note">Twenty-three cannot form a regular solid, so the outer points follow the most even spacing possible on a sphere (the arrangement 23 mutually repelling points settle into). Every Guardian sits at the same distance from the center; neighbors sit nearly the same distance from one another.</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const P=[[0.563, 0.4321, 0.7045], [-0.7367, 0.0028, 0.6763], [0.9914, 0.1309, -0.0016], [-0.1242, 0.9372, -0.3259], [0.7114, -0.7012, -0.0465], [0.0197, 0.9298, 0.3676], [-0.9914, -0.1309, 0.0016], [-0.5299, -0.6679, 0.5225], [0.5505, 0.51, -0.6609], [0.7708, -0.2457, 0.5878], [-0.6421, -0.7245, -0.2505], [-0.7058, 0.6614, 0.2536], [-0.5892, -0.2344, -0.7732], [0.768, -0.2394, -0.594], [0.6355, 0.7721, 0.0027], [0.0265, -0.1887, 0.9817], [-0.0099, -0.9999, -0.0025], [0.1564, -0.1217, -0.9802], [-0.7954, 0.4347, -0.4223], [-0.2026, 0.4702, 0.859], [-0.2059, 0.4745, -0.8558], [0.2422, -0.7529, 0.6119], [0.0977, -0.7486, -0.6558]], E=[[0, 2], [0, 5], [0, 9], [0, 14], [0, 15], [0, 19], [1, 6], [1, 7], [1, 11], [1, 15], [1, 19], [2, 4], [2, 8], [2, 9], [2, 13], [2, 14], [3, 5], [3, 8], [3, 11], [3, 14], [3, 18], [3, 20], [4, 9], [4, 13], [4, 16], [4, 21], [4, 22], [5, 11], [5, 14], [5, 19], [6, 7], [6, 10], [6, 11], [6, 12], [6, 18], [7, 10], [7, 15], [7, 16], [7, 21], [8, 13], [8, 14], [8, 17], [8, 20], [9, 15], [9, 21], [10, 12], [10, 16], [10, 22], [11, 18], [11, 19], [12, 17], [12, 18], [12, 20], [12, 22], [13, 17], [13, 22], [15, 19], [15, 21], [16, 21], [16, 22], [17, 20], [17, 22], [18, 20]];
+const stage=document.getElementById('stage'), tag=document.getElementById('tag');
+const css=getComputedStyle(document.documentElement);
+const GOLD=new THREE.Color(css.getPropertyValue('--gold').trim()), SILVER=new THREE.Color(css.getPropertyValue('--silver').trim()), RULE=new THREE.Color(css.getPropertyValue('--rule').trim());
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,1,0.1,100); camera.position.set(0,0,4.4);
+const group=new THREE.Group(); scene.add(group);
+// faint sphere shell
+group.add(new THREE.Mesh(new THREE.SphereGeometry(1,48,32),new THREE.MeshBasicMaterial({color:SILVER,transparent:true,opacity:0.04,depthWrite:false})));
+const ring=new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(Array.from({length:128},(_,i)=>{const a=i/128*Math.PI*2;return new THREE.Vector3(Math.cos(a),0,Math.sin(a));})),new THREE.LineBasicMaterial({color:RULE,transparent:true,opacity:0.6}));
+group.add(ring);
+// guardians
+const gGeo=new THREE.SphereGeometry(0.045,20,14), gMat=new THREE.MeshBasicMaterial({color:SILVER});
+P.forEach(p=>{const m=new THREE.Mesh(gGeo,gMat);m.position.set(p[0],p[1],p[2]);group.add(m);});
+// glow sprite helper
+function glow(color,size){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(0.25,'rgba(255,255,255,.55)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),color:color,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.set(size,size,1);return s;}
+P.forEach(p=>{const s=glow(SILVER,0.22);s.position.set(p[0],p[1],p[2]);s.material.opacity=0.5;group.add(s);});
+// Yahweh
+const core=new THREE.Mesh(new THREE.SphereGeometry(0.085,28,20),new THREE.MeshBasicMaterial({color:GOLD}));group.add(core);
+const halo=glow(GOLD,0.75);group.add(halo);
+// spokes
+const sp=[];P.forEach(p=>{sp.push(0,0,0,p[0],p[1],p[2]);});
+const spGeo=new THREE.BufferGeometry();spGeo.setAttribute('position',new THREE.Float32BufferAttribute(sp,3));
+const spokes=new THREE.LineSegments(spGeo,new THREE.LineBasicMaterial({color:GOLD,transparent:true,opacity:0.28}));group.add(spokes);
+// lattice edges
+const ed=[];E.forEach(([a,b])=>{ed.push(...P[a],...P[b]);});
+const edGeo=new THREE.BufferGeometry();edGeo.setAttribute('position',new THREE.Float32BufferAttribute(ed,3));
+const mesh=new THREE.LineSegments(edGeo,new THREE.LineBasicMaterial({color:SILVER,transparent:true,opacity:0.35}));group.add(mesh);
+group.rotation.set(0.35,0.2,0);
+function size(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+window.addEventListener('resize',size);size();
+// drag rotation
+let drag=false,lx=0,ly=0,vx=0,vy=0;
+stage.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;vy=dx*0.006;vx=dy*0.006;rot(vx,vy);});
+const end=()=>{drag=false;};stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+const q=new THREE.Quaternion(),ax=new THREE.Vector3();
+function rot(rx,ry){ax.set(1,0,0);q.setFromAxisAngle(ax,rx);group.quaternion.premultiply(q);ax.set(0,1,0);q.setFromAxisAngle(ax,ry);group.quaternion.premultiply(q);}
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let spin=!reduce;
+const bSpin=document.getElementById('spin');bSpin.setAttribute('aria-pressed',String(spin));
+bSpin.onclick=()=>{spin=!spin;bSpin.setAttribute('aria-pressed',String(spin));};
+function toggle(id,obj){const b=document.getElementById(id);b.onclick=()=>{obj.visible=!obj.visible;b.setAttribute('aria-pressed',String(obj.visible));};}
+toggle('spokes',spokes);toggle('mesh',mesh);
+const v=new THREE.Vector3();let t=0;
+function frame(){requestAnimationFrame(frame);t+=0.016;
+  if(!drag){vx*=0.94;vy*=0.94;rot(vx,vy+(spin?0.0025:0));}
+  const s=0.75*(1+0.06*Math.sin(t*1.6));halo.scale.set(s,s,1);
+  renderer.render(scene,camera);
+  v.set(0,0,0).project(camera);tag.style.left=((v.x+1)/2*stage.clientWidth)+'px';tag.style.top=((1-v.y)/2*stage.clientHeight)+'px';}
+frame();
+})();
+</script>
+
+</body></html>

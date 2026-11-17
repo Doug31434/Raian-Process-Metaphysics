@@ -1,0 +1,536 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Triquetra in the Violet Sphere</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D stage; title upper-left, drawers upper-right, playbar lower-center. Single dark look (deep space), Saturn family. */
+:root{
+  --ink:#07080c; --panel:rgba(13,14,20,.88); --panel-solid:#0f1017; --line:#2b2a33;
+  --text:#ebe4d2; --muted:#a0977f; --gold:#d8a648; --gold-dim:#8a6a2c; --silver:#eef3fa;
+  --red:#e0463c; --yellow:#ffe11a; --blue:#3f7ff0; --orange:#ff8a2a; --indigo:#5b3fd0; --violet:#c9b3ff;
+  --f-display:"Marcellus","Cinzel",Georgia,serif;
+  --f-body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;}
+body{background:var(--ink);color:var(--text);font-family:var(--f-body);font-size:15px;overflow:hidden;}
+#stage{position:fixed;inset:0;}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
+#stage canvas:active{cursor:grabbing;}
+.title{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:max(16px,env(safe-area-inset-left,0px));max-width:min(440px,calc(100% - 32px));pointer-events:none;}
+.eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+.title h1{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.4vw,34px);line-height:1.1;margin:.25em 0 .2em;text-wrap:balance;}
+.title p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;max-width:38ch;}
+.topbar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;z-index:5;}
+button{font-family:var(--f-body);font-size:14px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 11px;cursor:pointer;}
+button:hover{border-color:var(--gold-dim);}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+button[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);}
+.drawer{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));right:max(16px,env(safe-area-inset-right,0px));width:min(340px,calc(100% - 32px));max-height:calc(100% - 140px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:4px;padding:12px 14px;z-index:6;}
+.drawer h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0 0 6px;}
+.sec{border-top:1px solid var(--line);padding-block:8px 6px;}
+.sec:first-of-type{border-top:0;}
+.sec-h{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+label.row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px;line-height:1.3;cursor:pointer;}
+label.row input{margin-top:2px;accent-color:var(--gold);}
+label.row .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px;}
+label.row small{display:block;color:var(--muted);font-size:12.5px;}
+.drawer-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+#about{width:min(460px,calc(100% - 32px));}
+#about details{border-top:1px solid var(--line);padding-block:8px;}
+#about summary{cursor:pointer;font-family:var(--f-display);font-size:15.5px;}
+#about p{margin:.55em 0;line-height:1.55;font-size:14.5px;}
+#about blockquote{margin:.6em 0;padding-left:10px;border-left:2px solid var(--silver);color:var(--silver);font-style:italic;line-height:1.5;}
+.cite{font-family:var(--f-mono);font-size:12px;color:var(--gold);font-style:normal;}
+.playbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 10px;z-index:4;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);}
+.playbar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);}
+.playbar input[type=range]{width:110px;accent-color:var(--gold);}
+.readout{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+@media (max-width:640px){
+  .title p{display:none;}
+  .drawer{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));max-height:58%;}
+  .playbar input[type=range]{width:80px;}
+}
+</style>
+
+<div id="stage"></div>
+
+<header class="title">
+  <div class="eyebrow">Raian Process · Field Studies</div>
+  <h1>Triquetra in the Violet Sphere</h1>
+  <p>The three primary rays woven as one strand, held inside the violet register, with orange and indigo arising where the petals touch.</p>
+</header>
+
+<nav class="topbar" aria-label="Controls">
+  <button id="btn-overlays" aria-expanded="false" aria-controls="overlays">Overlays ▾</button>
+  <button id="btn-camera" aria-expanded="false" aria-controls="camera">Camera ▾</button>
+  <button id="btn-about" aria-expanded="false" aria-controls="about">About</button>
+</nav>
+
+<section class="drawer" id="overlays" hidden aria-label="Overlays">
+  <h2>Overlays</h2>
+  <div class="sec">
+    <div class="sec-h">The knot</div>
+    <label class="row"><input type="checkbox" id="k-knot" data-key="knot"><span class="sw" style="background:linear-gradient(90deg,var(--red),var(--yellow),var(--blue))"></span><span>Triquetra knot<small>Red, yellow and blue petals on one continuous strand</small></span></label>
+    <label class="row"><input type="checkbox" id="k-flow" data-key="flow"><span class="sw" style="background:var(--silver)"></span><span>Flow along the strand<small>Light carried through all three petals in turn</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Petal placement</div>
+    <label class="row" for="spread" style="flex-direction:column;gap:4px;cursor:default"><span>Yellow and blue angle from red<small id="spread-out"></small></span>
+      <input type="range" id="spread" min="62" max="120" step="1" value="80" style="width:100%;accent-color:var(--gold)"></label>
+    <div class="drawer-actions" style="margin-top:4px">
+      <button data-spread="80">Touching red</button>
+      <button data-spread="120">Classic triquetra</button>
+    </div>
+    <label class="row" for="thick" style="flex-direction:column;gap:4px;cursor:default;margin-top:8px"><span>Petal thickness<small id="thick-out"></small></span>
+      <input type="range" id="thick" min="0.2" max="0.6" step="0.01" value="0.44" style="width:100%;accent-color:var(--gold)"></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Enclosing sphere</div>
+    <label class="row"><input type="checkbox" id="k-violet" data-key="violet"><span class="sw" style="background:var(--violet)"></span><span>Violet sphere<small>The register that holds the whole</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Contact zones</div>
+    <label class="row"><input type="checkbox" id="k-contacts" data-key="contacts"><span class="sw" style="background:linear-gradient(90deg,var(--orange),var(--indigo))"></span><span>Orange and indigo contacts *<small>Red meeting yellow turns orange; red meeting blue turns indigo</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Display</div>
+    <label class="row"><input type="checkbox" id="k-labels" data-key="labels"><span class="sw" style="background:var(--muted)"></span><span>Labels</span></label>
+  </div>
+  <div class="drawer-actions">
+    <button id="btn-clear">Clear all overlays</button>
+    <button id="btn-reset">Reset defaults</button>
+  </div>
+  <p style="color:var(--muted);font-size:12px;margin:.6em 0 0">* Speculative overlay — a proposed reading, not a statement from Ra.</p>
+</section>
+
+<section class="drawer" id="camera" hidden aria-label="Camera angles">
+  <h2>Camera angles</h2>
+  <div class="cam-grid">
+    <button data-cam="oblique">Oblique</button>
+    <button data-cam="front">Face of the knot</button>
+    <button data-cam="side">Edge-on</button>
+    <button data-cam="top">From above</button>
+    <button data-cam="close">Close on the weave</button>
+    <button data-cam="far">Whole sphere</button>
+  </div>
+  <p style="color:var(--muted);font-size:12.5px;margin:.7em 0 0">Drag to orbit · scroll or pinch to zoom.</p>
+</section>
+
+<section class="drawer" id="about" hidden aria-label="About">
+  <h2>About this model</h2>
+  <details open>
+    <summary>What this shows</summary>
+    <p>Three petals of one knot — red at the bottom, yellow at the upper left, blue at the upper right. It's a single strand, so following any petal outward and back brings me into the next one, and the strand crosses over and under itself at the center. The points of light traveling the strand take on each petal's color as they pass through it.</p>
+    <p>The whole knot sits inside a very faint violet sphere. For now the green sphere at the center is left out on purpose, so the weave itself can be seen. The strand is drawn as a flow of light more than a solid cord: a translucent sheath with pulses moving through it, and points of light spiraling along inside. An optional overlay (off for now) colors the places where red meets yellow orange and where red meets blue indigo.</p>
+  </details>
+  <details>
+    <summary>What Ra says</summary>
+    <blockquote>"The red, yellow, and blue rays are primary because they signify activity of a primary nature." <span class="cite">41.25</span></blockquote>
+    <p>~Ra describes red as the foundation, yellow as the ray of self-awareness and interaction, and blue as the first ray of radiation of self regardless of what another does <span class="cite">41.25</span>. Ra calls violet constant, "the mark, the register, the identity, the true vibration of an entity" <span class="cite">39.10</span>.</p>
+    <p>Ra gives orange "three petals" and indigo a form that is "triangular, or three-petaled" in many people <span class="cite">51.8</span>.</p>
+  </details>
+  <details>
+    <summary>What follows closely</summary>
+    <p>If violet is the register of the whole, it makes sense to draw it as the field everything else sits inside, and not as one more station on a vertical line. And since orange and indigo are both three-petaled in Ra's description, the triquetra's own three-fold shape may already be echoing them.</p>
+  </details>
+  <details>
+    <summary>My proposal</summary>
+    <p>My proposal: the primaries are one strand, not three separate centers stacked on a ladder. Red, yellow and blue are the framework, and the knot shows them as a single movement folding through three kinds of activity. The rays between them arise where that movement meets itself: orange where the foundation touches self-awareness, indigo where the foundation touches the radiating self.</p>
+  </details>
+  <details>
+    <summary>Open questions and limits</summary>
+    <p>Where green belongs when it returns — at the crossing in the center, as before, or somewhere else. Whether orange and indigo belong at these contacts or need forms of their own. Why indigo arises from red and blue (in the usual order, indigo sits between blue and violet) — whether that's the point of the image or a slip in it. Whether red should stay at the bottom.</p>
+    <p>Color here is a teaching image. Arguments from how light or pigment mixes don't carry weight. I'm offering these thoughts for what they are worth.</p>
+  </details>
+</section>
+
+<div class="playbar">
+  <button id="btn-play" aria-label="Pause animation">Pause</button>
+  <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+  <label><input type="checkbox" id="spin" checked> Auto-orbit</label>
+  <span class="readout" id="readout">t = 0.0</span>
+</div>
+
+<div id="err" hidden style="position:fixed;left:16px;right:16px;top:45%;padding:12px 14px;background:var(--panel-solid);border:1px solid var(--gold);border-radius:4px;color:var(--text);font-family:var(--f-mono);font-size:12.5px;z-index:9"></div>
+<script>
+window.addEventListener("error", function(e){
+  if (e.target && e.target !== window && e.target.tagName !== "SCRIPT") return;
+  var el = document.getElementById("err");
+  if (el){ el.hidden = false; el.textContent = "The 3D view could not start: " + (e.message || "a script failed to load") + ". Try reloading the page."; }
+}, true);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if (typeof THREE === "undefined"){
+    var el = document.getElementById("err"); el.hidden = false;
+    el.textContent = "The 3D library (three.js) did not load, so the scene can't be drawn. Reload the page.";
+    return;
+  }
+  try { var probe = document.createElement("canvas"); if (!(probe.getContext("webgl") || probe.getContext("experimental-webgl"))) throw 0; }
+  catch(_){ var el2 = document.getElementById("err"); el2.hidden = false; el2.textContent = "This browser or view has WebGL turned off, so the 3D scene can't be drawn. Try Chrome, Safari or Firefox."; return; }
+
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x07080c, 1);
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 600);
+  const system = new THREE.Group();
+  scene.add(system);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+  const sun = new THREE.DirectionalLight(0xfff4e0, 1.15);
+  sun.position.set(6, 8, 7);
+  scene.add(sun);
+  const fill = new THREE.DirectionalLight(0xb9a6ff, 0.35);
+  fill.position.set(-6, -3, -5);
+  scene.add(fill);
+
+  const RED = new THREE.Color(0xe0463c), YELLOW = new THREE.Color(0xffe11a), BLUE = new THREE.Color(0x3f7ff0);
+  const VIOLET = 0xc9b3ff;
+  const R_VIOLET = 3.7;
+
+  const refs = {}, labels = [], updaters = [];
+  function reg(key, obj){ refs[key] = obj; system.add(obj); return obj; }
+
+  function dotTexture(){
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d");
+    const grd = g.createRadialGradient(32,32,0,32,32,32);
+    grd.addColorStop(0,"rgba(255,255,255,1)"); grd.addColorStop(0.35,"rgba(255,255,255,0.7)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0,0,64,64);
+    return new THREE.CanvasTexture(c);
+  }
+  const DOT = dotTexture();
+  function makeLabel(text, color, height){
+    const c = document.createElement("canvas"), g = c.getContext("2d"), fs = 44;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    const w = Math.ceil(g.measureText(text).width) + 28;
+    c.width = w; c.height = 64;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    g.fillStyle = "rgba(7,8,12,0.55)"; g.fillRect(0,6,w,52);
+    g.fillStyle = color; g.textBaseline = "middle"; g.fillText(text, 14, 33);
+    const tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false, depthWrite:false }));
+    const h = 0.11 + 0.22*(height || 0.32);
+    s.scale.set(h*w/64, h, 1); s.renderOrder = 20;
+    labels.push(s);
+    return s;
+  }
+  function addLabel(group, text, pos, color, h){ const l = makeLabel(text, color, h); l.position.copy(pos); group.add(l); return l; }
+
+  // ---------- starfield ----------
+  {
+    const n = 2200, pos = new Float32Array(n*3);
+    for (let i=0;i<n;i++){
+      const u = Math.random()*2-1, th = Math.random()*Math.PI*2, r = 220, s = Math.sqrt(1-u*u);
+      pos[i*3] = r*s*Math.cos(th); pos[i*3+1] = r*u; pos[i*3+2] = r*s*Math.sin(th);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(pos,3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color:0xc9c4b8, size:0.9, sizeAttenuation:false, transparent:true, opacity:0.55, depthWrite:false })));
+  }
+
+  // ---------- the triquetra (trefoil) curve ----------
+  // x = sin t + 2 sin 2t, y = cos t - 2 cos 2t, z = -sin 3t. Lobes at t = pi/3 (upper right), pi (bottom), 5pi/3 (upper left).
+  const KS = 0.86, KZ = 1.05;
+  // SPREAD = angle (degrees) of the yellow and blue petals from the red petal. 120 = classic triquetra.
+  // Lower values swing yellow and blue down, each turned as a whole petal, until they touch red; red stays put.
+  let SPREAD = 80;
+  function sstep(a, b, x){ const t = Math.min(1, Math.max(0, (x-a)/(b-a))); return t*t*(3-2*t); }
+  function petalTurn(u){                                  // rotation (radians) applied at strand position u
+    const d = (120 - SPREAD)*Math.PI/180, w = 0.12;
+    u = ((u % 1) + 1) % 1;
+    const blue = -d, red = 0, yel = d;
+    if (u < w) return yel + (blue - yel)*sstep(-w, w, u);           // yellow -> blue crossing at u = 0
+    if (u > 1 - w) return yel + (blue - yel)*sstep(-w, w, u - 1);
+    if (Math.abs(u - 1/3) < w) return blue + (red - blue)*sstep(-w, w, u - 1/3);
+    if (Math.abs(u - 2/3) < w) return red + (yel - red)*sstep(-w, w, u - 2/3);
+    return u < 1/3 ? blue : (u < 2/3 ? red : yel);
+  }
+  class Triquetra extends THREE.Curve {
+    getPoint(u, target){
+      const t = u*Math.PI*2, v = target || new THREE.Vector3();
+      const x = (Math.sin(t) + 2*Math.sin(2*t))*KS, y = (Math.cos(t) - 2*Math.cos(2*t))*KS, z = -Math.sin(3*t)*KZ;
+      const r = petalTurn(u), c = Math.cos(r), s = Math.sin(r);
+      return v.set(x*c - y*s, x*s + y*c, z);
+    }
+  }
+  const curve = new Triquetra();
+  // petal colors along u: [0,1/3) blue (upper right), [1/3,2/3) red (bottom), [2/3,1) yellow (upper left); short blends at the crossings
+  const SEG = [BLUE, RED, YELLOW], BLEND = 0.035;
+  function colorAt(u, out){
+    u = ((u % 1) + 1) % 1;
+    const k = Math.floor(u*3) % 3, local = u*3 - Math.floor(u*3);
+    const c = out || new THREE.Color();
+    c.copy(SEG[k]);
+    const d = BLEND*3;
+    if (local < d){ const f = 0.5 + 0.5*(local/d); c.copy(SEG[(k+2)%3]).lerp(SEG[k], f); }
+    else if (local > 1-d){ const f = 0.5*((local-(1-d))/d); c.copy(SEG[k]).lerp(SEG[(k+1)%3], f); }
+    return c;
+  }
+  {
+    const grp = new THREE.Group();
+    const TUB = 900, RAD = 20, tmp = new THREE.Color();
+    const ORANGE_C = new THREE.Color(0xff8a2a), INDIGO_C = new THREE.Color(0x4b2fc8);
+    let THICK = 0.44, CONTACTS = false;
+    const contactCenters = { orange:new THREE.Vector3(), indigo:new THREE.Vector3() };
+    function segOf(u){ u = ((u%1)+1)%1; return Math.floor(u*3)%3; }   // 0 blue, 1 red, 2 yellow
+    function knotGeo(){
+      const geo = new THREE.TubeGeometry(curve, TUB, THICK, RAD, true);
+      const P = geo.attributes.position, cols = new Float32Array(P.count*3);
+      const NS = 540, samp = [];
+      for (let i=0;i<NS;i++){ const u = i/NS; samp.push({ u, k: segOf(u), p: curve.getPoint(u) }); }
+      // contact = where two petals meet as seen across the knot's face (their crossings), measured in the knot's plane
+      const ringC = [], cpt = new THREE.Vector3();
+      for (let i=0;i<=TUB;i++){
+        const u = i/TUB, k = segOf(u); curve.getPoint(u, cpt);
+        let dO = 1e9, dI = 1e9;
+        if (CONTACTS){
+          for (const sm of samp){
+            let du = Math.abs(sm.u - u); du = Math.min(du, 1-du);
+            if (du < 0.1 || sm.k === k) continue;
+            if (k !== 1 && sm.k !== 1) continue;                 // only meetings that involve red
+            const other = k === 1 ? sm.k : k;
+            const d = Math.hypot(cpt.x - sm.p.x, cpt.y - sm.p.y);
+            if (other === 2){ if (d < dO) dO = d; } else if (d < dI) dI = d;
+          }
+        }
+        ringC.push([dO, dI]);
+      }
+      const near = THICK*0.8, far = THICK*1.45;
+      const sumO = new THREE.Vector3(), sumI = new THREE.Vector3(); let nO = 0, nI = 0;
+      for (let i=0;i<=TUB;i++){
+        const u = i/TUB; colorAt(u, tmp);
+        const [dO, dI] = ringC[i];
+        const fO = 1 - Math.min(1, Math.max(0, (dO-near)/(far-near))), fI = 1 - Math.min(1, Math.max(0, (dI-near)/(far-near)));
+        const eO = fO*fO*(3-2*fO), eI = fI*fI*(3-2*fI);
+        let r = tmp.r, g = tmp.g, b = tmp.b;
+        if (eO > 0){ r += (ORANGE_C.r-r)*eO; g += (ORANGE_C.g-g)*eO; b += (ORANGE_C.b-b)*eO; if (eO > 0.8){ sumO.add(curve.getPoint(u)); nO++; } }
+        if (eI > 0){ r += (INDIGO_C.r-r)*eI; g += (INDIGO_C.g-g)*eI; b += (INDIGO_C.b-b)*eI; if (eI > 0.8){ sumI.add(curve.getPoint(u)); nI++; } }
+        for (let j=0;j<=RAD;j++){ const idx = (i*(RAD+1)+j)*3; cols[idx] = r; cols[idx+1] = g; cols[idx+2] = b; }
+      }
+      if (nO) contactCenters.orange.copy(sumO.divideScalar(nO));
+      if (nI) contactCenters.indigo.copy(sumI.divideScalar(nI));
+      geo.setAttribute("color", new THREE.BufferAttribute(cols, 3));
+      return geo;
+    }
+    // energy sheath: translucent, glowing at the edges, with pulses travelling along the strand
+    const flowUni = { uTime:{ value:0 } };
+    window.__flowUni = flowUni; window.__thick = ()=> THICK;
+    const sheathMat = new THREE.ShaderMaterial({
+      uniforms: flowUni, vertexColors:true, transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending,
+      vertexShader:`varying vec3 vC; varying float vU; varying vec3 vN; varying vec3 vV;
+        void main(){ vC = color; vU = uv.x; vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+      fragmentShader:`uniform float uTime; varying vec3 vC; varying float vU; varying vec3 vN; varying vec3 vV;
+        void main(){
+          float rim = pow(1.0 - abs(dot(normalize(vN), normalize(vV))), 2.2);
+          float s1 = pow(0.5 + 0.5*sin(vU*6.2831*18.0 - uTime*2.4), 8.0);
+          float s2 = pow(0.5 + 0.5*sin(vU*6.2831*7.0 - uTime*1.1 + 1.3), 4.0);
+          float pulse = 0.65*s1 + 0.35*s2;
+          float a = 0.035 + 0.30*rim + 0.32*pulse*(0.35 + 0.65*rim);
+          gl_FragColor = vec4(vC*(0.75 + 0.9*pulse), a);
+        }`
+    });
+    const mesh = new THREE.Mesh(knotGeo(), sheathMat);
+    mesh.renderOrder = 4;
+    grp.add(mesh);
+    const lR = addLabel(grp, "Red · foundation", new THREE.Vector3(), "#f07a70", 0.3);
+    const lY = addLabel(grp, "Yellow · self-awareness", new THREE.Vector3(), "#ffe96a", 0.3);
+    const lB = addLabel(grp, "Blue · radiation of self", new THREE.Vector3(), "#8fb4ff", 0.3);
+    const lO = addLabel(grp, "Orange · contact", new THREE.Vector3(), "#ffb070", 0.28);
+    const lI = addLabel(grp, "Indigo · contact", new THREE.Vector3(), "#a99bff", 0.28);
+    function placeLabels(){
+      lR.position.copy(curve.getPoint(0.5)).multiplyScalar(1.22);
+      lY.position.copy(curve.getPoint(5/6)).multiplyScalar(1.22).add(new THREE.Vector3(0,0.3,0));
+      lB.position.copy(curve.getPoint(1/6)).multiplyScalar(1.22).add(new THREE.Vector3(0,0.3,0));
+      lO.position.copy(contactCenters.orange).add(new THREE.Vector3(-0.9,-0.15,0.4));
+      lI.position.copy(contactCenters.indigo).add(new THREE.Vector3(0.9,-0.15,0.4));
+      lO.userData.contact = lI.userData.contact = true;
+    }
+    placeLabels();
+    reg("knot", grp);
+    const spreadEl = document.getElementById("spread"), spreadOut = document.getElementById("spread-out");
+    let pending = false;
+    function showSpread(){ spreadOut.textContent = SPREAD >= 119 ? "120° · classic triquetra" : Math.round(SPREAD) + "° from red"; }
+    spreadEl.value = SPREAD; showSpread();
+    spreadEl.addEventListener("input", ()=>{
+      SPREAD = parseFloat(spreadEl.value); showSpread();
+      rebuild();
+    });
+    function rebuild(){
+      if (pending) return; pending = true;
+      requestAnimationFrame(()=>{ pending = false; const old = mesh.geometry; mesh.geometry = knotGeo(); old.dispose(); placeLabels(); });
+    }
+    const thickEl = document.getElementById("thick"), thickOut = document.getElementById("thick-out");
+    function showThick(){ thickOut.textContent = THICK.toFixed(2) + " (strand radius)"; }
+    showThick();
+    thickEl.addEventListener("input", ()=>{ THICK = parseFloat(thickEl.value); showThick(); rebuild(); });
+    window.__setContacts = (on)=>{ if (CONTACTS !== on){ CONTACTS = on; rebuild(); } lO.visible = lI.visible = on && window.__labelsOn; };
+    document.querySelectorAll("[data-spread]").forEach(b=> b.addEventListener("click", ()=>{ spreadEl.value = b.dataset.spread; spreadEl.dispatchEvent(new Event("input")); }));
+  }
+
+  // ---------- flow along the strand: light spiraling through the sheath ----------
+  {
+    const n = 2800, pos = new Float32Array(n*3), col = new Float32Array(n*3), meta = [];
+    for (let i=0;i<n;i++) meta.push({ u: Math.random(), v: 0.014 + Math.random()*0.012, a: Math.random()*Math.PI*2, w: 1.2 + Math.random()*1.6, rr: Math.sqrt(Math.random())*0.88 });
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new THREE.BufferAttribute(pos,3));
+    geo.setAttribute("color", new THREE.BufferAttribute(col,3));
+    const mat = new THREE.PointsMaterial({ size:0.075, map:DOT, vertexColors:true, transparent:true, opacity:0.9, depthWrite:false, blending:THREE.AdditiveBlending });
+    const pts = new THREE.Points(geo, mat); pts.renderOrder = 5;
+    reg("flow", pts);
+    const p = new THREE.Vector3(), T = new THREE.Vector3(), n1 = new THREE.Vector3(), n2 = new THREE.Vector3(), up = new THREE.Vector3(0,0,1), c = new THREE.Color();
+    updaters.push((dt)=>{
+      const R = window.__thick ? window.__thick() : 0.4;
+      if (window.__flowUni) window.__flowUni.uTime.value += dt;
+      for (let i=0;i<n;i++){
+        const m = meta[i]; m.u = (m.u + dt*m.v) % 1; m.a += dt*m.w;
+        curve.getPoint(m.u, p); curve.getTangent(m.u, T);
+        n1.crossVectors(T, up); if (n1.lengthSq() < 1e-4) n1.set(1,0,0); n1.normalize(); n2.crossVectors(T, n1);
+        const r = m.rr*R, ca = Math.cos(m.a)*r, sa = Math.sin(m.a)*r;
+        pos[i*3] = p.x + n1.x*ca + n2.x*sa; pos[i*3+1] = p.y + n1.y*ca + n2.y*sa; pos[i*3+2] = p.z + n1.z*ca + n2.z*sa;
+        colorAt(m.u, c); const lift = 0.06 + 0.16*(1 - m.rr);
+        col[i*3]=Math.min(1,c.r+lift); col[i*3+1]=Math.min(1,c.g+lift); col[i*3+2]=Math.min(1,c.b+lift);
+      }
+      geo.attributes.position.needsUpdate = true; geo.attributes.color.needsUpdate = true;
+    });
+  }
+
+  // ---------- violet sphere (fresnel rim, very light) ----------
+  {
+    const grp = new THREE.Group();
+    const uni = { uColor:{ value:new THREE.Color(VIOLET) }, uBase:{ value:0.02 }, uRim:{ value:0.17 }, uPulse:{ value:0 } };
+    const mat = new THREE.ShaderMaterial({
+      uniforms: uni, transparent:true, depthWrite:false, side:THREE.DoubleSide,
+      vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+      fragmentShader:`uniform vec3 uColor; uniform float uBase; uniform float uRim; uniform float uPulse; varying vec3 vN; varying vec3 vV;
+        void main(){ float f = 1.0 - abs(dot(normalize(vN), normalize(vV))); float a = uBase + uRim*pow(f, 3.0)*(0.85 + 0.15*uPulse); gl_FragColor = vec4(uColor, a); }`
+    });
+    const sph = new THREE.Mesh(new THREE.SphereGeometry(R_VIOLET, 96, 64), mat);
+    sph.renderOrder = 10;
+    grp.add(sph);
+    const latMat = new THREE.LineBasicMaterial({ color:VIOLET, transparent:true, opacity:0.045, depthWrite:false });
+    for (let k=-2;k<=2;k++){
+      const y = R_VIOLET*Math.sin(k*Math.PI/6), r = R_VIOLET*Math.cos(k*Math.PI/6), pts = [];
+      for (let i=0;i<=128;i++){ const a = i/128*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a), y, r*Math.sin(a))); }
+      grp.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), latMat));
+    }
+    addLabel(grp, "Violet · the register", new THREE.Vector3(R_VIOLET*0.62, R_VIOLET*0.82, 0), "#d9c9ff", 0.32);
+    let tV = 0;
+    updaters.push((dt)=>{ tV += dt; uni.uPulse.value = Math.sin(tV*0.6); grp.rotation.y += dt*0.03; });
+    reg("violet", grp);
+  }
+
+  // ---------- visibility ----------
+  const DEFAULTS = { knot:true, flow:true, violet:true, contacts:false, labels:false };
+  const boxes = Array.from(document.querySelectorAll("#overlays input[data-key]"));
+  function applyVisibility(){
+    const st = {}; boxes.forEach(b=> st[b.dataset.key] = b.checked);
+    Object.keys(refs).forEach(k=>{ if (k in st) refs[k].visible = st[k]; });
+    labels.forEach(l=> l.visible = st.labels);
+    window.__labelsOn = st.labels;
+    if (window.__setContacts) window.__setContacts(st.contacts);
+  }
+  function setAll(obj){ boxes.forEach(b=> b.checked = !!obj[b.dataset.key]); applyVisibility(); }
+  boxes.forEach(b=> b.addEventListener("change", applyVisibility));
+  setAll(DEFAULTS);
+  document.getElementById("btn-clear").addEventListener("click", ()=>{ const o = {}; boxes.forEach(b=> o[b.dataset.key] = false); setAll(o); });
+  document.getElementById("btn-reset").addEventListener("click", ()=> setAll(DEFAULTS));
+
+  // ---------- drawers ----------
+  const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
+  Object.entries(drawers).forEach(([id, btnId])=>{
+    const btn = document.getElementById(btnId), el = document.getElementById(id);
+    btn.addEventListener("click", ()=>{
+      const open = el.hidden;
+      Object.entries(drawers).forEach(([oid,ob])=>{ document.getElementById(oid).hidden = true; document.getElementById(ob).setAttribute("aria-expanded","false"); });
+      if (open){ el.hidden = false; btn.setAttribute("aria-expanded","true"); }
+    });
+  });
+
+  // ---------- camera ----------
+  const orbit = { az:0.55, el:0.28, dist:12 };
+  window.__orbit = orbit;
+  let tween = null;
+  const PRESETS = {
+    oblique:{ az:0.55, el:0.28, dist:12 },
+    front:{ az:0.0, el:0.04, dist:11 },
+    side:{ az:Math.PI/2, el:0.04, dist:11 },
+    top:{ az:0.0, el:1.5, dist:11 },
+    close:{ az:0.35, el:0.18, dist:6.2 },
+    far:{ az:0.6, el:0.35, dist:17 }
+  };
+  function updateCamera(){
+    const c = Math.cos(orbit.el);
+    camera.position.set(orbit.dist*c*Math.sin(orbit.az), orbit.dist*Math.sin(orbit.el), orbit.dist*c*Math.cos(orbit.az));
+    camera.lookAt(0,0,0);
+  }
+  document.querySelectorAll("[data-cam]").forEach(b=> b.addEventListener("click", ()=>{
+    const p = PRESETS[b.dataset.cam];
+    let daz = ((p.az - orbit.az) % (Math.PI*2) + Math.PI*3) % (Math.PI*2) - Math.PI;
+    tween = { from:{...orbit}, to:{ az: orbit.az + daz, el:p.el, dist:p.dist }, t:0 };
+  }));
+  const ptrs = new Map(); let pinch0 = 0, dist0 = orbit.dist, dragging = false;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", e=>{ cv.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); dragging = true; tween = null;
+    if (ptrs.size === 2){ const [a,b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); dist0 = orbit.dist; } });
+  cv.addEventListener("pointermove", e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    const prev = ptrs.get(e.pointerId), cur = {x:e.clientX, y:e.clientY}; ptrs.set(e.pointerId, cur);
+    if (ptrs.size === 1){ orbit.az -= (cur.x-prev.x)*0.0055; orbit.el = Math.max(-1.54, Math.min(1.54, orbit.el + (cur.y-prev.y)*0.0055)); }
+    else if (ptrs.size === 2){ const [a,b] = [...ptrs.values()], d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) orbit.dist = Math.max(3, Math.min(40, dist0*pinch0/d)); }
+  });
+  const endPtr = e=>{ ptrs.delete(e.pointerId); if (ptrs.size === 0) dragging = false; pinch0 = 0; };
+  cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+  cv.addEventListener("wheel", e=>{ e.preventDefault(); tween = null; orbit.dist = Math.max(3, Math.min(40, orbit.dist*Math.exp(e.deltaY*0.0012))); }, { passive:false });
+
+  // ---------- playback ----------
+  let paused = false, speed = 1, simT = 0;
+  const playBtn = document.getElementById("btn-play");
+  playBtn.addEventListener("click", ()=>{ paused = !paused; playBtn.textContent = paused ? "Play" : "Pause"; playBtn.setAttribute("aria-label", paused ? "Play animation" : "Pause animation"); });
+  document.getElementById("speed").addEventListener("input", e=> speed = parseFloat(e.target.value));
+  const spinBox = document.getElementById("spin");
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){ spinBox.checked = false; speed = 0.4; document.getElementById("speed").value = 0.4; }
+  const readout = document.getElementById("readout");
+
+  function resize(){
+    const w = stage.clientWidth, h = stage.clientHeight;
+    renderer.setSize(w, h, false);
+    camera.aspect = w/Math.max(1,h);
+    camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let last = performance.now();
+  function frame(now){
+    const rdt = Math.max(0, Math.min(0.05, (now-last)/1000)); last = now;
+    const dt = paused ? 0 : rdt*speed;
+    simT += dt;
+    updaters.forEach(f=> f(dt));
+    if (tween){
+      tween.t = Math.min(1, tween.t + rdt/1.1);
+      const k = tween.t<.5 ? 2*tween.t*tween.t : 1-Math.pow(-2*tween.t+2,2)/2;
+      orbit.az = tween.from.az + (tween.to.az-tween.from.az)*k;
+      orbit.el = tween.from.el + (tween.to.el-tween.from.el)*k;
+      orbit.dist = tween.from.dist + (tween.to.dist-tween.from.dist)*k;
+      if (tween.t >= 1) tween = null;
+    } else if (spinBox.checked && !dragging){
+      orbit.az += rdt*0.045;
+    }
+    updateCamera();
+    readout.textContent = "t = " + simT.toFixed(1);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

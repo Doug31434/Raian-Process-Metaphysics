@@ -1,0 +1,513 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Blanket Chest Ottoman</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-screen 3-D shop model; title top-left, cut list as a side sheet (bottom sheet on phones), controls along the bottom. */
+:root{
+  --bg:#e6e9e3; --panel:#f8f9f6; --fg:#1d2320; --muted:#5b645d; --line:#c4cbc1;
+  --accent:#2c5b86; --accent-ink:#ffffff; --chip:#ffffff; --chip-fg:#1d2320;
+  --leader:#1d2320; --dim:#2c5b86; --hl:#d9931a; --shadow:rgba(20,30,25,.14);
+  --display:'Barlow Condensed','Arial Narrow',Arial,sans-serif;
+  --body:'IBM Plex Sans',system-ui,-apple-system,Segoe UI,sans-serif;
+  --mono:'IBM Plex Mono',ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#171a19; --panel:#202523; --fg:#e7eae5; --muted:#a1aaa3; --line:#3a413d;
+  --accent:#86b5e0; --accent-ink:#0f1a24; --chip:#262c29; --chip-fg:#eef1ec;
+  --leader:#e7eae5; --dim:#86b5e0; --hl:#f0b44a; --shadow:rgba(0,0,0,.45); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#171a19; --panel:#202523; --fg:#e7eae5; --muted:#a1aaa3; --line:#3a413d;
+  --accent:#86b5e0; --accent-ink:#0f1a24; --chip:#262c29; --chip-fg:#eef1ec;
+  --leader:#e7eae5; --dim:#86b5e0; --hl:#f0b44a; --shadow:rgba(0,0,0,.45); color-scheme:dark }
+
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);overflow:hidden;-webkit-tap-highlight-color:transparent}
+#stage{position:fixed;inset:0;touch-action:none}
+#stage canvas{display:block;width:100%;height:100%;cursor:grab}
+#stage canvas:active{cursor:grabbing}
+#ov{position:fixed;inset:0;pointer-events:none;width:100%;height:100%;overflow:visible}
+#labels{position:fixed;inset:0;pointer-events:none}
+
+.lbl{position:absolute;left:0;top:0;transform:translate(-50%,-50%);background:var(--chip);color:var(--chip-fg);
+  border:1px solid var(--line);border-radius:6px;padding:4px 8px 5px;white-space:nowrap;box-shadow:0 2px 8px var(--shadow);
+  transition:opacity .2s;pointer-events:auto;cursor:pointer;line-height:1.15}
+.lbl b{display:block;font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.03em;text-transform:uppercase}
+.lbl span{display:block;font-family:var(--mono);font-size:11.5px;color:var(--muted)}
+.lbl.on{border-color:var(--hl);box-shadow:0 0 0 2px var(--hl),0 2px 8px var(--shadow)}
+.dimtxt{position:absolute;left:0;top:0;transform:translate(-50%,-50%);font-family:var(--mono);font-weight:500;font-size:12.5px;
+  color:var(--dim);background:var(--bg);padding:1px 5px;border-radius:4px;white-space:nowrap}
+
+header.title{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);left:max(16px,env(safe-area-inset-left,0px));max-width:min(420px,calc(100% - 150px));pointer-events:none}
+.title small{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.title h1{margin:2px 0 4px;font-family:var(--display);font-weight:700;font-size:clamp(26px,4vw,36px);line-height:1;letter-spacing:.01em;text-wrap:balance}
+.title p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.4}
+
+.topbtn{position:fixed;top:calc(env(safe-area-inset-top,0px) + 14px);right:max(16px,env(safe-area-inset-right,0px));z-index:5}
+button,select{font:inherit}
+.btn{appearance:none;border:1px solid var(--line);background:var(--panel);color:var(--fg);border-radius:8px;padding:8px 12px;
+  font-family:var(--display);font-weight:600;font-size:15px;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;box-shadow:0 1px 4px var(--shadow)}
+.btn:hover{border-color:var(--accent)}
+.btn[aria-pressed="true"],.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+:focus-visible{outline:2px solid var(--hl);outline-offset:2px}
+
+.bar{position:fixed;left:0;right:0;bottom:0;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(10px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:center;pointer-events:none;z-index:4}
+.bar>*{pointer-events:auto}
+.grp{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:5px 6px;box-shadow:0 1px 6px var(--shadow)}
+.grp .k{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:0 4px}
+.seg{display:flex;gap:2px}
+.seg button{border:0;background:transparent;color:var(--fg);padding:6px 9px;border-radius:7px;cursor:pointer;font-family:var(--display);font-weight:600;font-size:14.5px;letter-spacing:.03em;text-transform:uppercase}
+.seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+input[type=range]{accent-color:var(--accent);width:110px}
+
+.sheet{position:fixed;z-index:6;background:var(--panel);border:1px solid var(--line);box-shadow:0 6px 30px var(--shadow);overflow:auto;-webkit-overflow-scrolling:touch}
+@media (min-width:821px){
+  .sheet{top:calc(env(safe-area-inset-top,0px) + 62px);right:max(16px,env(safe-area-inset-right,0px));width:380px;max-height:calc(100% - 150px);border-radius:12px}
+}
+@media (max-width:820px){
+  .sheet{left:0;right:0;bottom:0;max-height:62%;border-radius:14px 14px 0 0;padding-bottom:env(safe-area-inset-bottom,0px)}
+  header.title p{display:none}
+}
+@media (max-width:600px){
+  .bar{flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:8px;scrollbar-width:none}
+  .bar::-webkit-scrollbar{display:none}
+  .grp{flex:0 0 auto}
+  .seg button{padding:6px 8px;font-size:14px}
+  input[type=range]{width:90px}
+}
+.sheet .in{padding:14px max(16px,env(safe-area-inset-right,0px)) 18px max(16px,env(safe-area-inset-left,0px));display:grid;gap:16px}
+.sheet h2{margin:0;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;text-transform:uppercase;display:flex;justify-content:space-between;align-items:center}
+.sheet h3{margin:0 0 6px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:500}
+.close{border:0;background:transparent;color:var(--muted);font-size:24px;line-height:1;cursor:pointer;padding:2px 6px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-family:var(--mono);font-weight:500;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.n{font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.row{cursor:pointer}
+tr.row:hover td{background:color-mix(in srgb,var(--accent) 8%,transparent)}
+tr.row.on td{background:color-mix(in srgb,var(--hl) 18%,transparent)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:baseline;border:1px solid rgba(0,0,0,.2)}
+ul.buy{margin:0;padding-left:18px;font-size:13.5px;line-height:1.5}
+ul.buy li::marker{color:var(--accent)}
+.note{font-size:12.5px;color:var(--muted);line-height:1.45;margin:6px 0 0}
+.panelsvg{width:100%;height:auto;display:block}
+.panelsvg text{font-family:var(--mono);font-size:10px;fill:var(--fg)}
+.panelsvg .m{fill:var(--muted)}
+
+#err{position:fixed;inset:auto 16px 50% 16px;transform:translateY(50%);background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;font-size:14px;z-index:10;max-width:520px;margin:auto}
+</style>
+
+<div id="stage"></div>
+<svg id="ov" aria-hidden="true">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" style="fill:var(--leader)"/>
+    </marker>
+    <marker id="dh" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" style="fill:var(--dim)"/>
+    </marker>
+  </defs>
+  <g id="dimlines"></g>
+  <g id="leaders"></g>
+</svg>
+<div id="labels"></div>
+
+<header class="title">
+  <small>Family room · lift-top ottoman</small>
+  <h1>Blanket Chest Ottoman</h1>
+  <p>48 × 24 in, pine sides, plywood lid with a padded top, cedar-lined inside. Drag to turn it, pinch or scroll to zoom, tap any board.</p>
+</header>
+
+<div class="topbtn"><button class="btn" id="cutBtn" aria-expanded="false" aria-controls="sheet">Cut list</button></div>
+
+<aside class="sheet" id="sheet" hidden>
+  <div class="in">
+    <h2>Cut list <button class="close" id="closeSheet" aria-label="Close cut list">×</button></h2>
+    <section>
+      <h3>Boards and their sizes</h3>
+      <table>
+        <thead><tr><th>Part</th><th>Qty</th><th>Size (in)</th><th>Cut from</th></tr></thead>
+        <tbody id="cutrows"></tbody>
+      </table>
+      <p class="note">Ends are 22¼ in with rabbet joints. With plain butt joints (glue and screws), cut them 21½ in. Measure the inside of the assembled box before cutting the bottom.</p>
+    </section>
+    <section>
+      <h3>One 20 × 72 in pine panel</h3>
+      <svg class="panelsvg" viewBox="0 0 340 120" role="img" aria-label="Layout of one pine panel: a 47 inch side and a 22¼ inch end, each ripped to 15 inches wide">
+        <rect x="10" y="20" width="320" height="88.9" rx="2" style="fill:#e3c08c;stroke:#8a6a3c"/>
+        <rect x="10" y="20" width="208.9" height="66.7" style="fill:#d4a565;stroke:#7a5524"/>
+        <rect x="220.2" y="20" width="98.9" height="66.7" style="fill:#d4a565;stroke:#7a5524"/>
+        <text x="114" y="57" text-anchor="middle">Side · 47 × 15</text>
+        <text x="270" y="57" text-anchor="middle">End · 22¼ × 15</text>
+        <text x="170" y="101" text-anchor="middle" class="m">5 in offcut strip</text>
+        <text x="10" y="13" class="m">72 in</text>
+        <text x="324" y="70" text-anchor="end" class="m">≈2½</text>
+      </svg>
+      <p class="note">Buy two panels: one gives the front and one end, the other gives the back and the other end. A third panel is a cheap spare.</p>
+    </section>
+    <section>
+      <h3>Shopping list</h3>
+      <ul class="buy">
+        <li>2 edge-glued pine panels, ¾ × 20 in × 6 ft</li>
+        <li>1 plywood project panel, ¾ in × 2 × 4 ft (lid)</li>
+        <li>1 plywood project panel, ½ in × 2 × 4 ft (bottom)</li>
+        <li>2 select pine 1×2s, 8 ft (cleats)</li>
+        <li>2 boxes aromatic cedar closet liner</li>
+        <li>Piano hinge 1½ × 48 in, 2 gas struts</li>
+        <li>2 in upholstery foam, batting, 2 yd faux leather</li>
+      </ul>
+      <p class="note">The wood box stands 15¾ in. The finished height depends on the foam you pick after measuring the sofa seat.</p>
+    </section>
+  </div>
+</aside>
+
+<div class="bar" role="toolbar" aria-label="Model controls">
+  <div class="grp"><span class="k">Lid</span>
+    <div class="seg"><button id="lidClosed" aria-pressed="true">Closed</button><button id="lidOpen" aria-pressed="false">Open</button></div></div>
+  <div class="grp"><span class="k">Pull apart</span><input type="range" id="explode" min="0" max="1" step="0.01" value="0" aria-label="Pull the parts apart"></div>
+  <div class="grp"><span class="k">Top</span>
+    <div class="seg" id="topSeg"><button data-top="finished" aria-pressed="true">Leather</button><button data-top="foam" aria-pressed="false">Foam</button><button data-top="bare" aria-pressed="false">Wood</button></div></div>
+  <div class="grp"><span class="k">Labels</span>
+    <div class="seg" id="lblSeg"><button data-l="wood" aria-pressed="true">Wood</button><button data-l="all" aria-pressed="false">All</button><button data-l="off" aria-pressed="false">Off</button></div></div>
+  <div class="grp"><span class="k">View</span>
+    <div class="seg" id="camSeg"><button data-cam="three">¾</button><button data-cam="front">Front</button><button data-cam="end">End</button><button data-cam="top">Top</button></div></div>
+</div>
+
+<div id="err" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const errBox=document.getElementById('err');
+function fail(msg){errBox.textContent=msg;errBox.hidden=false;}
+window.addEventListener('error',e=>{ if(e.target&&e.target!==window&&e.target.tagName&&e.target.tagName!=='SCRIPT')return; fail('The 3-D model could not start. Try reloading the page, or open it in a current browser such as Chrome or Safari.'); },true);
+if(!window.THREE){fail('The 3-D library did not load. Check your connection and reload the page.');return;}
+const tc=document.createElement('canvas');
+if(!(tc.getContext('webgl')||tc.getContext('experimental-webgl'))){fail('This browser has 3-D graphics (WebGL) turned off, so the model cannot be shown.');return;}
+
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const stage=document.getElementById('stage');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(2,window.devicePixelRatio||1));
+renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+renderer.outputEncoding=THREE.sRGBEncoding;
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(35,1,1,3000);
+function syncBg(){renderer.setClearColor(new THREE.Color(css('--bg')||'#e6e9e3'));}
+syncBg();
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change',syncBg);
+new MutationObserver(syncBg).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+scene.add(new THREE.HemisphereLight(0xffffff,0x8a8070,0.65));
+const sun=new THREE.DirectionalLight(0xfff4e2,0.85);
+sun.position.set(40,90,60); sun.castShadow=true;
+sun.shadow.mapSize.set(2048,2048);
+Object.assign(sun.shadow.camera,{left:-60,right:60,top:60,bottom:-60,near:10,far:250});
+sun.shadow.bias=-0.0006; scene.add(sun);
+const fill=new THREE.DirectionalLight(0xdfe8ff,0.25); fill.position.set(-60,40,-40); scene.add(fill);
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,400),new THREE.ShadowMaterial({opacity:0.2}));
+ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; scene.add(ground);
+
+// ---------- textures ----------
+function rng(seed){return()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};}
+function woodTex(base,dark,light,bands,seed,vertical){
+  const c=document.createElement('canvas');c.width=512;c.height=256;const g=c.getContext('2d');const r=rng(seed);
+  g.fillStyle=base;g.fillRect(0,0,512,256);
+  const bh=256/bands;
+  for(let i=0;i<bands;i++){g.globalAlpha=0.08+r()*0.14;g.fillStyle=r()>.5?dark:light;g.fillRect(0,i*bh,512,bh);}
+  for(let i=0;i<90;i++){
+    g.globalAlpha=0.05+r()*0.16;g.strokeStyle=dark;g.lineWidth=0.6+r()*1.6;
+    const y0=r()*256,a=2+r()*6,f=0.004+r()*0.012,p=r()*6;
+    g.beginPath();for(let x=0;x<=512;x+=8){const y=y0+Math.sin(x*f+p)*a;x?g.lineTo(x,y):g.moveTo(x,y);}g.stroke();
+  }
+  g.globalAlpha=1;
+  const t=new THREE.CanvasTexture(c);t.encoding=THREE.sRGBEncoding;t.anisotropy=4;
+  if(vertical){t.center.set(.5,.5);t.rotation=Math.PI/2;}
+  return t;
+}
+const pineTex=woodTex('#d8ad73','#8f6230','#f0cf97',5,7);
+const pineTexEnd=woodTex('#d6a96e','#8f6230','#f0cf97',5,19);
+const plyTex=woodTex('#e4c99a','#a8875a','#f5e2bb',1,31);
+const cedarTex=woodTex('#a85a40','#5e2a1e','#e8c9a0',4,43);
+const cleatTex=woodTex('#e2bd85','#9a7040','#f3d8a8',1,57);
+
+function mat(o){const m=new THREE.MeshStandardMaterial(Object.assign({roughness:0.78,metalness:0},o));if(!o.map)m.color.convertSRGBToLinear();return m;}
+
+// ---------- model ----------
+const root=new THREE.Group(); scene.add(root);
+const parts={};   // key -> {mesh, base, dir}
+function box(key,sx,sy,sz,material,pos,dir,group){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(sx,sy,sz),material.clone());
+  m.position.copy(pos);m.castShadow=true;m.receiveShadow=true;m.userData.key=key;
+  (group||root).add(m);
+  parts[key]={mesh:m,base:pos.clone(),dir:dir||new THREE.Vector3()};
+  return m;
+}
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const pineM=mat({map:pineTex}), pineEM=mat({map:pineTexEnd}), plyM=mat({map:plyTex,roughness:.8}), cedarM=mat({map:cedarTex,roughness:.9}), cleatM=mat({map:cleatTex});
+const ironM=mat({color:0x2b2b2b,roughness:.55,metalness:.6}), steelM=mat({color:0x9aa1a6,roughness:.35,metalness:.85});
+const foamM=mat({color:0x5f9bd3,roughness:.95}), leatherM=mat({color:0x6e3f22,roughness:.6});
+
+// Walls: front/back 47 x 15 x 3/4; ends 22 1/4 x 15 sit in 3/8 rabbets
+box('front',47,15,.75,pineM,V(0,7.5,11.125),V(0,0,9));
+box('back',47,15,.75,pineM,V(0,7.5,-11.125),V(0,0,-9));
+box('endR',.75,15,22.25,pineEM,V(23.125,7.5,0),V(10,0,0));
+box('endL',.75,15,22.25,pineEM,V(-23.125,7.5,0),V(-10,0,0));
+// Cleats (1x2): long 45 1/2, short 20 ; top at 2 in
+box('cleatF',45.5,1.5,.75,cleatM,V(0,1.25,10.375),V(0,-2,5));
+box('cleatB',45.5,1.5,.75,cleatM,V(0,1.25,-10.375),V(0,-2,-5));
+box('cleatR',.75,1.5,20,cleatM,V(22.375,1.25,0),V(5.5,-2,0));
+box('cleatL',.75,1.5,20,cleatM,V(-22.375,1.25,0),V(-5.5,-2,0));
+// Bottom 1/2 ply 45 1/2 x 21 1/2
+box('bottom',45.5,.5,21.5,plyM,V(0,2.25,0),V(0,-4.5,0));
+// Cedar lining 1/4
+box('cedarF',45.5,12.25,.25,cedarM,V(0,8.875,10.625),V(0,1,4.5));
+box('cedarB',45.5,12.25,.25,cedarM,V(0,8.875,-10.625),V(0,1,-4.5));
+box('cedarR',.25,12.25,21,cedarM,V(22.625,8.875,0),V(5,1,0));
+box('cedarL',.25,12.25,21,cedarM,V(-22.625,8.875,0),V(-5,1,0));
+box('cedarFloor',45,.25,21,cedarM,V(0,2.625,0),V(0,1.5,0));
+// Handles on the ends
+function handle(key,sx){
+  const g=new THREE.Group();g.position.set(sx*23.5,10.5,0);root.add(g);
+  const plate=new THREE.Mesh(new THREE.BoxGeometry(.18,2.2,5),ironM.clone());plate.position.x=sx*.09;g.add(plate);
+  const bail=new THREE.Mesh(new THREE.TorusGeometry(1.7,.22,10,24,Math.PI),ironM.clone());
+  bail.rotation.set(0,sx>0?Math.PI/2:-Math.PI/2,Math.PI);bail.position.set(sx*.45,0,0);g.add(bail);
+  g.traverse(o=>{if(o.isMesh){o.castShadow=true;o.userData.key=key;}});
+  parts[key]={mesh:g,base:g.position.clone(),dir:V(sx*13,0,0)};
+}
+handle('handleR',1);handle('handleL',-1);
+
+// Lid assembly pivots on the back top edge
+const lidPivot=new THREE.Group();lidPivot.position.set(0,15,-11.5);root.add(lidPivot);
+const lidBase=lidPivot.position.clone();
+box('lid',48,.75,24,plyM,V(0,.375,11.5),V(),lidPivot);
+box('foam',47.5,2,23.5,foamM,V(0,1.75,11.5),V(0,3.5,0),lidPivot);
+(function(){ // faux-leather cover, rounded edges
+  const w=48.2,d=24.2,r=1.0;const s=new THREE.Shape();
+  s.moveTo(-w/2+r,-d/2);s.lineTo(w/2-r,-d/2);s.quadraticCurveTo(w/2,-d/2,w/2,-d/2+r);s.lineTo(w/2,d/2-r);s.quadraticCurveTo(w/2,d/2,w/2-r,d/2);
+  s.lineTo(-w/2+r,d/2);s.quadraticCurveTo(-w/2,d/2,-w/2,d/2-r);s.lineTo(-w/2,-d/2+r);s.quadraticCurveTo(-w/2,-d/2,-w/2+r,-d/2);
+  const geo=new THREE.ExtrudeGeometry(s,{depth:2.1,bevelEnabled:true,bevelThickness:.55,bevelSize:.55,bevelSegments:5,curveSegments:8});
+  geo.rotateX(-Math.PI/2);
+  const m=new THREE.Mesh(geo,leatherM.clone());m.position.set(0,.95,11.5);m.castShadow=true;m.receiveShadow=true;m.userData.key='cover';
+  lidPivot.add(m);parts.cover={mesh:m,base:m.position.clone(),dir:V(0,7,0)};
+})();
+// Piano hinge barrel
+(function(){const m=new THREE.Mesh(new THREE.CylinderGeometry(.22,.22,46,12),steelM.clone());m.rotation.z=Math.PI/2;m.position.set(0,0,-.1);m.userData.key='hinge';lidPivot.add(m);parts.hinge={mesh:m,base:m.position.clone(),dir:V()};})();
+// Gas struts (positions updated each frame)
+const struts=[];
+[1,-1].forEach(sx=>{
+  const body=new THREE.Mesh(new THREE.CylinderGeometry(.42,.42,8.5,14),ironM.clone());
+  const rod=new THREE.Mesh(new THREE.CylinderGeometry(.17,.17,1,10),steelM.clone());
+  [body,rod].forEach(m=>{m.castShadow=true;m.userData.key='strut';root.add(m);});
+  struts.push({sx,body,rod});
+});
+parts.strut={mesh:struts[0].body,base:V(),dir:V()};
+
+// ---------- part catalog (labels + cut list) ----------
+const WOOD_COLORS={pine:'#d8ad73',ply:'#e4c99a',cedar:'#a85a40',cleat:'#e2bd85',foam:'#5f9bd3',leather:'#7b4a2c',iron:'#2b2b2b'};
+const catalog=[
+  {id:'front', keys:['front'], name:'Front', size:'47 × 15', qty:1, from:'Pine panel A', sw:'pine', wood:true,
+   anchor:{key:'front',p:V(10,-2.5,.375),n:V(0,0,1)}},
+  {id:'back', keys:['back'], name:'Back', size:'47 × 15', qty:1, from:'Pine panel B', sw:'pine', wood:true,
+   anchor:{key:'back',p:V(-10,-2.5,-.375),n:V(0,0,-1)}},
+  {id:'ends', keys:['endR','endL'], name:'End (×2)', size:'22¼ × 15', qty:2, from:'Panels A and B', sw:'pine', wood:true,
+   anchor:{key:'endR',p:V(.375,-4,-6),n:V(1,0,0)}, anchor2:{key:'endL',p:V(-.375,-4,6),n:V(-1,0,0)}},
+  {id:'lid', keys:['lid'], name:'Lid', size:'48 × 24', qty:1, from:'¾ in plywood', sw:'ply', wood:true,
+   anchor:{key:'lid',p:V(-13,0,12),n:V(0,0,1)}},
+  {id:'bottom', keys:['bottom'], name:'Bottom', size:'45½ × 21½', qty:1, from:'½ in plywood', sw:'ply', wood:true, inside:true,
+   anchor:{key:'bottom',p:V(-12,.25,5),n:V(0,1,0)}},
+  {id:'cleats', keys:['cleatF','cleatB','cleatR','cleatL'], name:'Cleats', size:'2 @ 45½, 2 @ 20', qty:4, from:'1×2 pine', sw:'cleat', wood:true, inside:true,
+   anchor:{key:'cleatF',p:V(14,0,-.375),n:V(0,1,0)}},
+  {id:'cedar', keys:['cedarF','cedarB','cedarR','cedarL','cedarFloor'], name:'Cedar lining', size:'¼ T&G', qty:'2 bx', from:'Closet liner', sw:'cedar', inside:true,
+   anchor:{key:'cedarB',p:V(8,2,.125),n:V(0,0,1)}},
+  {id:'cover', keys:['cover'], name:'Faux leather', size:'2 yd, wraps under lid', qty:1, from:'Hobby Lobby', sw:'leather', top:'finished',
+   anchor:{key:'cover',p:V(12,2.6,-4),n:V(0,1,0)}},
+  {id:'foam', keys:['foam'], name:'Foam', size:'2 × 47½ × 23½', qty:1, from:'Hobby Lobby', sw:'foam', top:'foam',
+   anchor:{key:'foam',p:V(12,1,-4),n:V(0,1,0)}},
+  {id:'strut', keys:['strut'], name:'Gas strut (×2)', size:'≈10 in, 1 per end', qty:2, from:'Online', sw:'iron', inside:true, special:'strut'},
+  {id:'hinge', keys:['hinge'], name:'Piano hinge', size:'1½ × 48, cut to 46', qty:1, from:'Lowe’s', sw:'iron',
+   anchor:{key:'hinge',p:V(8,0,0),n:V(0,0,-1)}},
+  {id:'handle', keys:['handleR','handleL'], name:'Trunk handle (×2)', size:'iron', qty:2, from:'Online', sw:'iron',
+   anchor:{key:'handleR',p:V(.5,-1.6,0),n:V(1,0,0)}},
+];
+const byKey={};catalog.forEach(c=>c.keys.forEach(k=>byKey[k]=c));
+
+// cut list rows (wood + lining)
+const tbody=document.getElementById('cutrows');
+catalog.filter(c=>c.wood||c.id==='cedar').forEach(c=>{
+  const tr=document.createElement('tr');tr.className='row';tr.dataset.id=c.id;tr.tabIndex=0;
+  tr.innerHTML=`<td><span class="sw" style="background:${WOOD_COLORS[c.sw]}"></span>${c.name.replace(' (×2)','')}</td><td class="n">${c.qty}</td><td class="n">${c.size}</td><td>${c.from}</td>`;
+  tr.addEventListener('click',()=>select(c.id));tr.addEventListener('keydown',e=>{if(e.key==='Enter')select(c.id);});
+  tbody.appendChild(tr);
+});
+
+// labels DOM
+const labelsEl=document.getElementById('labels'),leadersEl=document.getElementById('leaders'),dimEl=document.getElementById('dimlines');
+const SVGNS='http://www.w3.org/2000/svg';
+const labelItems=[];
+function mkLabel(c,anchor){
+  const d=document.createElement('div');d.className='lbl';d.innerHTML=`<b>${c.name}</b><span>${c.size}${c.sw==='pine'?' · ¾ pine':''}</span>`;
+  d.addEventListener('click',()=>select(c.id));labelsEl.appendChild(d);
+  const ln=document.createElementNS(SVGNS,'line');ln.setAttribute('marker-end','url(#ah)');ln.style.stroke='var(--leader)';ln.style.strokeWidth='1.4';leadersEl.appendChild(ln);
+  labelItems.push({c,anchor,el:d,ln,x:0,y:0,w:0,h:0});
+}
+catalog.forEach(c=>{ if(c.special==='strut')mkLabel(c,{strut:true,n:V(0,1,0)}); else{ mkLabel(c,c.anchor); } });
+
+// dimension lines
+const dims=[
+  {a:V(-24,0,15.5),b:V(24,0,15.5),t:'48 in'},
+  {a:V(27.5,0,-12),b:V(27.5,0,12),t:'24 in'},
+  {a:V(26,0,-14),b:V(26,15.75,-14),t:'15¾ in to lid'},
+].map(d=>{const ln=document.createElementNS(SVGNS,'line');ln.setAttribute('marker-start','url(#dh)');ln.setAttribute('marker-end','url(#dh)');ln.style.stroke='var(--dim)';ln.style.strokeWidth='1.3';dimEl.appendChild(ln);
+  const tx=document.createElement('div');tx.className='dimtxt';tx.textContent=d.t;labelsEl.appendChild(tx);return Object.assign(d,{ln,tx});});
+
+// ---------- state ----------
+const S={lidT:0,lid:0,expT:0,exp:0,top:'finished',labels:'wood',sel:null};
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function setPressed(container,attr,val){container.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset[attr]===val)));}
+document.getElementById('lidClosed').onclick=()=>{S.lidT=0;lidBtns();};
+document.getElementById('lidOpen').onclick=()=>{S.lidT=1;lidBtns();};
+function lidBtns(){document.getElementById('lidClosed').setAttribute('aria-pressed',String(S.lidT===0));document.getElementById('lidOpen').setAttribute('aria-pressed',String(S.lidT===1));}
+document.getElementById('explode').addEventListener('input',e=>{S.expT=+e.target.value;});
+document.getElementById('topSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.top=b.dataset.top;setPressed(e.currentTarget,'top',S.top);applyTop();});
+document.getElementById('lblSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;S.labels=b.dataset.l;setPressed(e.currentTarget,'l',S.labels);});
+function applyTop(){parts.cover.mesh.visible=S.top==='finished';parts.foam.mesh.visible=S.top==='foam';}
+applyTop();
+
+const sheet=document.getElementById('sheet'),cutBtn=document.getElementById('cutBtn');
+function openSheet(v){sheet.hidden=!v;cutBtn.setAttribute('aria-expanded',String(v));cutBtn.setAttribute('aria-pressed',String(v));}
+cutBtn.onclick=()=>openSheet(sheet.hidden);
+document.getElementById('closeSheet').onclick=()=>openSheet(false);
+
+function select(id){
+  S.sel=(S.sel===id)?null:id;
+  const c=catalog.find(x=>x.id===S.sel);
+  if(c){ if(c.top&&S.top!==c.top){S.top=c.top;setPressed(document.getElementById('topSeg'),'top',S.top);applyTop();}
+         if(c.inside&&S.lidT===0&&S.expT<0.3){S.lidT=1;lidBtns();} }
+  tbody.querySelectorAll('tr').forEach(tr=>tr.classList.toggle('on',tr.dataset.id===S.sel));
+}
+
+// ---------- camera orbit ----------
+const target=V(0,7,0);function setTarget(){target.y=innerWidth<600?3:7;}
+const PRESETS={three:{az:0.62,el:0.42,f:1},front:{az:0,el:0.12,f:1},end:{az:Math.PI/2,el:0.15,f:0.85},top:{az:0,el:1.45,f:1}};
+const orbit={az:0.62,el:0.42,dist:120};let tween=null;
+function fitDist(){const a=camera.aspect,t=Math.tan(THREE.MathUtils.degToRad(17.5));return Math.max(46/t*0.62, 31/(t*a));}
+let zoom=1;
+function goPreset(n){const p=PRESETS[n];tween={from:{az:orbit.az,el:orbit.el,z:zoom},to:{az:p.az,el:p.el,z:p.f},t:0};
+  let d=tween.to.az-tween.from.az;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;tween.to.az=tween.from.az+d;}
+document.getElementById('camSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b)goPreset(b.dataset.cam);});
+
+const cv=renderer.domElement;const ptrs=new Map();let drag=null,pinch0=null,moved=0;
+cv.addEventListener('pointerdown',e=>{cv.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=0;tween=null;
+  if(ptrs.size===2){const[a,b]=[...ptrs.values()];pinch0={d:Math.hypot(a.x-b.x,a.y-b.y),z:zoom};}});
+cv.addEventListener('pointermove',e=>{const p=ptrs.get(e.pointerId);if(!p)return;const dx=e.clientX-p.x,dy=e.clientY-p.y;moved+=Math.abs(dx)+Math.abs(dy);
+  p.x=e.clientX;p.y=e.clientY;
+  if(ptrs.size===2&&pinch0){const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);zoom=THREE.MathUtils.clamp(pinch0.z*pinch0.d/d,0.4,2.2);}
+  else if(ptrs.size===1){orbit.az-=dx*0.008;orbit.el=THREE.MathUtils.clamp(orbit.el+dy*0.006,-0.05,1.52);}});
+function up(e){ if(ptrs.size===1&&moved<6)pick(e.clientX,e.clientY); ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=null;}
+cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);pinch0=null;});
+cv.addEventListener('wheel',e=>{e.preventDefault();tween=null;zoom=THREE.MathUtils.clamp(zoom*Math.exp(e.deltaY*0.0012),0.4,2.2);},{passive:false});
+
+const ray=new THREE.Raycaster();
+function pick(x,y){const r=cv.getBoundingClientRect();ray.setFromCamera({x:(x-r.left)/r.width*2-1,y:-(y-r.top)/r.height*2+1},camera);
+  const hits=ray.intersectObjects(root.children,true).filter(h=>h.object.visible&&h.object.userData.key);
+  if(hits.length){const c=byKey[hits[0].object.userData.key];if(c)select(c.id);}else select(null);}
+
+function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+  dimEl.parentNode.setAttribute('viewBox',`0 0 ${w} ${h}`);}
+addEventListener('resize',resize);resize();setTarget();addEventListener('resize',setTarget);
+
+// ---------- frame loop ----------
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const tmp=V(0,0,0),tmp2=V(0,0,0),camPos=V(0,0,0);
+let last=performance.now();
+function setStrut(s,a,b){
+  const dir=tmp.copy(b).sub(a);const L=dir.length();dir.normalize();
+  const q=new THREE.Quaternion().setFromUnitVectors(V(0,1,0),dir);
+  const bodyL=8.5;s.body.position.copy(a).addScaledVector(dir,bodyL/2);s.body.quaternion.copy(q);
+  const rodL=Math.max(.5,L-bodyL+1);s.rod.scale.set(1,rodL,1);s.rod.position.copy(b).addScaledVector(dir,-rodL/2);s.rod.quaternion.copy(q);
+}
+function project(v,w,h){const p=v.clone().project(camera);return{x:(p.x+1)/2*w,y:(1-p.y)/2*h,z:p.z};}
+
+function frame(now){
+  const dt=Math.max(0,Math.min(0.05,(now-last)/1000));last=now;
+  const k=reduce?1:1-Math.pow(0.0008,dt);
+  S.lid+=(S.lidT-S.lid)*k; S.exp+=(S.expT-S.exp)*k;
+  if(tween){tween.t=Math.min(1,tween.t+dt/1.1);const e=ease(tween.t);orbit.az=tween.from.az+(tween.to.az-tween.from.az)*e;orbit.el=tween.from.el+(tween.to.el-tween.from.el)*e;zoom=tween.from.z+(tween.to.z-tween.from.z)*e;if(tween.t>=1)tween=null;}
+
+  // explode
+  const E=S.exp;root.position.y=E*7;
+  for(const key in parts){const p=parts[key];if(key==='strut'||key==='hinge')continue;
+    if(p.mesh.parent===lidPivot)p.mesh.position.copy(p.base).addScaledVector(p.dir,E);
+    else p.mesh.position.copy(p.base).addScaledVector(p.dir,E);}
+  lidPivot.position.copy(lidBase).add(V(0,E*13,0));
+  lidPivot.rotation.x=-THREE.MathUtils.degToRad(82)*ease(Math.min(1,Math.max(0,S.lid)));
+  // struts
+  const showStruts=E<0.02;
+  lidPivot.updateMatrixWorld(true);root.updateMatrixWorld(true);
+  struts.forEach(s=>{s.body.visible=s.rod.visible=showStruts;if(!showStruts)return;
+    const a=V(s.sx*21.9,4.2,-3).add(root.position);const b=lidPivot.localToWorld(V(s.sx*21.9,-.55,7));setStrut(s,a,b);});
+
+  // highlight
+  const selC=catalog.find(c=>c.id===S.sel);const pulse=0.22+0.12*Math.sin(now*0.006);
+  root.traverse(o=>{if(o.isMesh&&o.material.emissive){const on=selC&&selC.keys.includes(o.userData.key);o.material.emissive.setRGB(on?pulse:0,on?pulse*0.62:0,0);}});
+
+  // camera
+  const dist=fitDist()*zoom;
+  camPos.set(Math.sin(orbit.az)*Math.cos(orbit.el),Math.sin(orbit.el),Math.cos(orbit.az)*Math.cos(orbit.el)).multiplyScalar(dist).add(target);
+  camera.position.copy(camPos);camera.lookAt(target);camera.updateMatrixWorld();
+  renderer.render(scene,camera);
+  overlay();
+  requestAnimationFrame(frame);
+}
+
+function overlay(){
+  const w=innerWidth,h=innerHeight;const small=w<600;
+  // dimension lines
+  const showDims=S.exp<0.05&&S.labels!=='off';
+  dims.forEach(d=>{const a=project(d.a.clone().add(root.position),w,h),b=project(d.b.clone().add(root.position),w,h);
+    const ok=showDims&&a.z<1&&b.z<1&&Math.hypot(a.x-b.x,a.y-b.y)>40;
+    d.ln.style.display=ok?'':'none';d.tx.style.display=ok?'':'none';if(!ok)return;
+    d.ln.setAttribute('x1',a.x);d.ln.setAttribute('y1',a.y);d.ln.setAttribute('x2',b.x);d.ln.setAttribute('y2',b.y);
+    d.tx.style.transform=`translate(${(a.x+b.x)/2}px,${(a.y+b.y)/2}px) translate(-50%,-50%)`;});
+
+  // labels
+  const centre=project(V(0,8+root.position.y,0),w,h);
+  const interiorVisible=S.lid>0.5||S.exp>0.3;
+  const vis=[];
+  labelItems.forEach(L=>{const c=L.c;let show=S.labels!=='off'&&(S.labels==='all'||c.wood||S.sel===c.id);
+    if(c.top&&S.top!==c.top)show=false;
+    if(c.inside&&!interiorVisible&&S.sel!==c.id)show=false;
+    if(c.id==='lid'&&S.top!=='bare'&&S.labels==='wood'&&S.sel!=='lid'){}
+    let wp,n;
+    if(L.anchor.strut){if(!struts[0].body.visible)show=false;else{wp=struts[0].body.getWorldPosition(V(0,0,0));n=V(0,1,0);}}
+    else{const m=parts[L.anchor.key].mesh;if(!m.visible)show=false;else{wp=m.localToWorld(L.anchor.p.clone());n=L.anchor.n.clone().transformDirection(m.matrixWorld);}}
+    L.el.style.display=show?'':'none';L.ln.style.display=show?'':'none';if(!show)return;
+    const a=project(wp,w,h);if(a.z>1){L.el.style.display='none';L.ln.style.display='none';return;}
+    const facing=n.dot(tmp2.copy(camera.position).sub(wp))>0;
+    L.dim=!facing&&S.sel!==c.id;
+    let dx=a.x-centre.x,dy=a.y-centre.y;const m=Math.hypot(dx,dy)||1;dx/=m;dy/=m;
+    const off=small?46:66;
+    L.ax=a.x;L.ay=a.y;L.x=a.x+dx*off;L.y=a.y+dy*off-(small?4:8);
+    L.w=L.el.offsetWidth;L.h=L.el.offsetHeight;vis.push(L);});
+  // simple de-overlap
+  for(let it=0;it<6;it++){for(let i=0;i<vis.length;i++)for(let j=i+1;j<vis.length;j++){const A=vis[i],B=vis[j];
+    const ox=(A.w+B.w)/2+4-Math.abs(A.x-B.x),oy=(A.h+B.h)/2+4-Math.abs(A.y-B.y);
+    if(ox>0&&oy>0){const s=(A.y<B.y?-1:1)*oy/2;A.y+=s;B.y-=s;}}}
+  const topPad=small?96:120,botPad=small?78:80;
+  vis.forEach(L=>{L.x=Math.min(w-L.w/2-8,Math.max(L.w/2+8,L.x));L.y=Math.min(h-botPad,Math.max(topPad,L.y));
+    L.el.style.transform=`translate(${L.x}px,${L.y}px) translate(-50%,-50%)`;
+    L.el.style.opacity=L.dim?0.45:1;L.ln.style.opacity=L.dim?0.35:1;
+    L.el.classList.toggle('on',S.sel===L.c.id);L.el.style.zIndex=S.sel===L.c.id?2:1;
+    L.ln.setAttribute('x1',L.x);L.ln.setAttribute('y1',L.y);L.ln.setAttribute('x2',L.ax);L.ln.setAttribute('y2',L.ay);});
+}
+requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>

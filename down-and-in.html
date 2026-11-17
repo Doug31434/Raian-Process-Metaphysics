@@ -1,0 +1,160 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Down and In</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Source+Sans+3:wght@400;600&display=swap">
+<style>
+/* Layout: title block, one square stage with the rotatable sphere, controls, short key. Single night-sky theme by choice. */
+:root{
+  --ground:#0d1022; --ground-2:#151a35; --ink:#e9e6f2; --ink-soft:#a9a8c4;
+  --gold:#e8b85a; --silver:#b9c6ea; --earth:#5fb3a8; --rule:#2a3058;
+  --display:"Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --body:"Source Sans 3", "Segoe UI", system-ui, sans-serif;
+  color-scheme:dark;
+}
+html,body{background:var(--ground);color:var(--ink)}
+body{font-family:var(--body);font-size:16px;line-height:1.55;padding-inline:16px;padding-block:28px 40px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft)}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(2.1rem,6vw,3.2rem);line-height:1.05;margin:0;text-wrap:balance}
+.lede{margin:0;color:var(--ink-soft);max-width:60ch}
+.stage{position:relative;width:100%;aspect-ratio:1/1;max-width:100%;border-radius:14px;background:radial-gradient(circle at 50% 50%, var(--ground-2) 0%, var(--ground) 70%);border:1px solid var(--rule);overflow:hidden;touch-action:none;cursor:grab}
+.stage:active{cursor:grabbing}
+canvas{display:block;width:100%;height:100%}
+.tag{position:absolute;left:0;top:0;pointer-events:none;white-space:nowrap;transform:translate(-50%,-50%);text-shadow:0 0 10px rgba(13,16,34,.95)}
+.tag.yahweh{font-family:var(--display);font-style:italic;font-size:1.35rem;color:var(--gold)}
+.tag.earth{font-size:13px;font-weight:600;color:var(--ink);transform:translate(-50%,90%)}
+.tag.earth span{display:block;font-weight:400;font-size:12px;color:var(--ink-soft);text-align:center}
+.tag.planet{font-size:12px;color:var(--ink-soft);transform:translate(8px,-130%)}
+.tag.planet.saturn{color:#d9c79a}
+.hint{position:absolute;right:12px;bottom:10px;font-size:12px;color:var(--ink-soft);pointer-events:none}
+.controls{display:flex;flex-wrap:wrap;gap:10px}
+button{font:600 14px var(--body);color:var(--ink);background:var(--ground-2);border:1px solid var(--rule);border-radius:999px;padding:7px 14px;cursor:pointer}
+button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.key{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px 24px;margin:0;padding:0;list-style:none;color:var(--ink-soft);font-size:15px}
+.key li{display:flex;gap:10px;align-items:baseline;min-width:0}
+.dot{flex:none;width:10px;height:10px;border-radius:50%;transform:translateY(1px)}
+.key b{color:var(--ink);font-weight:600}
+.note{font-size:14px;color:var(--ink-soft);margin:0;max-width:62ch}
+</style>
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Raian Process Metaphysics · The Solar Logos</span>
+    <h1>Down and In</h1>
+    <p class="lede">Yahweh, the Solar Logos, holds the heliosphere as its body. Its journey of development runs down and in, toward Earth at its heart. Drag to turn it.</p>
+  </header>
+  <div class="stage" id="stage">
+    <span class="tag yahweh" id="tYahweh">Yahweh · the Solar Logos</span>
+    <span class="tag earth" id="tEarth">Earth · the heart<span>third density · sub-sub-Logoi</span></span>
+    <span class="tag planet" id="tVenus">Venus</span>
+    <span class="tag planet" id="tMars">Mars</span>
+    <span class="tag planet" id="tJupiter">Jupiter</span>
+    <span class="tag planet saturn" id="tSaturn">Saturn · the Council</span>
+    <span class="hint">drag to rotate</span>
+  </div>
+  <div class="controls">
+    <button id="spin" type="button" aria-pressed="true">Slow turning</button>
+    <button id="flow" type="button" aria-pressed="true">Down and in</button>
+    <button id="orbits" type="button" aria-pressed="true">Orbits</button>
+    <button id="labels" type="button" aria-pressed="true">Labels</button>
+  </div>
+  <ul class="key">
+    <li><span class="dot" style="background:var(--gold);box-shadow:0 0 10px var(--gold)"></span><span><b>Yahweh</b>, the Solar Logos, whose body is the heliosphere</span></li>
+    <li><span class="dot" style="background:var(--earth);box-shadow:0 0 10px var(--earth)"></span><span><b>Earth</b>, the heart, where the sub-sub-Logoi choose under the veil</span></li>
+    <li><span class="dot" style="background:#d9c79a"></span><span><b>Saturn</b>, seat of the Council that tends the densities</span></li>
+  </ul>
+  <p class="note">Earth sits at the center as a picture of the Logos's inward journey, not as an astronomical map. The whole golden sphere is the Solar Logos, so the Sun is not drawn separately.</p>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+const stage=document.getElementById('stage');
+const css=getComputedStyle(document.documentElement);
+const C=n=>new THREE.Color(css.getPropertyValue(n).trim());
+const GOLD=C('--gold'), SILVER=C('--silver'), EARTH=C('--earth'), SAT=new THREE.Color('#d9c79a');
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+stage.appendChild(renderer.domElement);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(38,1,0.1,100); camera.position.set(0,0,4.6);
+const tilt=new THREE.Group(); scene.add(tilt); tilt.rotation.x=0.5; const group=new THREE.Group(); tilt.add(group);
+function glowTex(){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');const g=x.createRadialGradient(64,64,0,64,64,64);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.25,'rgba(255,255,255,.5)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,128,128);return new THREE.CanvasTexture(c);}
+const GT=glowTex();
+function glow(color,size,op){const s=new THREE.Sprite(new THREE.SpriteMaterial({map:GT,color,transparent:true,opacity:op,depthWrite:false,blending:THREE.AdditiveBlending}));s.scale.set(size,size,1);return s;}
+const R=1.25;
+// Yahweh sphere: translucent shell, inner glow, latitude/longitude lines
+group.add(new THREE.Mesh(new THREE.SphereGeometry(R,64,48),new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:0.06,depthWrite:false})));
+group.add(new THREE.Mesh(new THREE.SphereGeometry(R,64,48),new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:0.10,side:THREE.BackSide,depthWrite:false})));
+const halo=glow(GOLD,3.6,0.22); group.add(halo);
+const gridMat=new THREE.LineBasicMaterial({color:GOLD,transparent:true,opacity:0.22});
+for(let i=0;i<6;i++){const a=i/6*Math.PI;const pts=[];for(let j=0;j<=96;j++){const t=j/96*Math.PI*2;pts.push(new THREE.Vector3(R*Math.cos(t)*Math.cos(a),R*Math.sin(t),R*Math.cos(t)*Math.sin(a)));}group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+for(const lat of [-60,-30,0,30,60]){const r=R*Math.cos(lat*Math.PI/180),y=R*Math.sin(lat*Math.PI/180);const pts=[];for(let j=0;j<=96;j++){const t=j/96*Math.PI*2;pts.push(new THREE.Vector3(r*Math.cos(t),y,r*Math.sin(t)));}group.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),gridMat));}
+// rim ring facing camera is drawn by shell; add bright equator
+// orbits around Earth
+const orbitGroup=new THREE.Group(); group.add(orbitGroup);
+const planets=[{n:'Venus',r:0.32,a:5.6,s:0.035,c:SILVER},{n:'Mars',r:0.52,a:4.0,s:0.03,c:new THREE.Color('#d9a08a')},{n:'Jupiter',r:0.76,a:2.6,s:0.045,c:SILVER},{n:'Saturn',r:1.0,a:0.5,s:0.05,c:SAT}];
+const pMeshes={};
+planets.forEach(p=>{
+  const pts=[];for(let j=0;j<=128;j++){const t=j/128*Math.PI*2;pts.push(new THREE.Vector3(p.r*Math.cos(t),0,p.r*Math.sin(t)));}
+  orbitGroup.add(new THREE.LineLoop(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:SILVER,transparent:true,opacity:0.35})));
+  const m=new THREE.Mesh(new THREE.SphereGeometry(p.s,20,14),new THREE.MeshBasicMaterial({color:p.c}));
+  m.position.set(p.r*Math.cos(p.a),0,p.r*Math.sin(p.a)); group.add(m); pMeshes[p.n]=m;
+  if(p.n==='Saturn'){const ring=new THREE.Mesh(new THREE.RingGeometry(0.075,0.11,48),new THREE.MeshBasicMaterial({color:SAT,side:THREE.DoubleSide,transparent:true,opacity:0.8}));ring.rotation.x=Math.PI/2.4;m.add(ring);}
+});
+// Earth at heart
+const earth=new THREE.Mesh(new THREE.SphereGeometry(0.075,32,24),new THREE.MeshBasicMaterial({color:EARTH}));group.add(earth);
+const eg1=glow(EARTH,0.55,0.55),eg2=glow(EARTH,1.1,0.18);group.add(eg1);group.add(eg2);
+// down-and-in spirals from the shell to Earth
+const flowGroup=new THREE.Group(); group.add(flowGroup);
+const curves=[];
+const starts=[[0,0.95,0.3],[0.9,0.35,0.2],[-0.8,0.45,-0.4],[0.3,-0.9,0.3],[-0.4,-0.7,-0.6],[0.6,0.1,-0.8]];
+const axisY=new THREE.Vector3(0,1,0);
+starts.forEach((d,k)=>{
+  const dir=new THREE.Vector3(...d).normalize();
+  const pts=[];const N=160;const turns=0.55;
+  for(let i=0;i<=N;i++){const f=i/N;const ease=1-Math.pow(1-f,1.6);const rad=R*0.97+(0.11-R*0.97)*ease;
+    const p=dir.clone().applyAxisAngle(axisY,f*turns*Math.PI*2).multiplyScalar(rad); pts.push(p);}
+  const curve=new THREE.CatmullRomCurve3(pts); curves.push(curve);
+  flowGroup.add(new THREE.Mesh(new THREE.TubeGeometry(curve,160,0.008,8,false),new THREE.MeshBasicMaterial({color:GOLD,transparent:true,opacity:0.7})));
+  const tip=curve.getPoint(0.985), tan=curve.getTangent(0.985);
+  const cone=new THREE.Mesh(new THREE.ConeGeometry(0.03,0.09,12),new THREE.MeshBasicMaterial({color:GOLD}));
+  cone.position.copy(tip); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tan.normalize()); flowGroup.add(cone);
+});
+// moving motes along spirals
+const motes=[];curves.forEach((c,k)=>{for(let j=0;j<3;j++){const s=glow(GOLD,0.13,0.9);flowGroup.add(s);motes.push({s,c,t:(j/3+k*0.13)%1});}});
+group.rotation.set(0,-0.4,0);
+function size(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+window.addEventListener('resize',size);size();
+let drag=false,lx=0,ly=0,vx=0,vy=0;
+stage.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;stage.setPointerCapture(e.pointerId);});
+stage.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;vy=dx*0.006;vx=dy*0.006;rot(vx,vy);});
+const end=()=>{drag=false;};stage.addEventListener('pointerup',end);stage.addEventListener('pointercancel',end);
+const q=new THREE.Quaternion(),ax=new THREE.Vector3();
+function rot(rx,ry){ax.set(1,0,0);q.setFromAxisAngle(ax,rx);tilt.quaternion.premultiply(q);ax.set(0,1,0);q.setFromAxisAngle(ax,ry);tilt.quaternion.premultiply(q);}
+function spinStep(a){group.rotation.y+=a;}
+const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let spin=!reduce, showLabels=true;
+const bSpin=document.getElementById('spin');bSpin.setAttribute('aria-pressed',String(spin));bSpin.onclick=()=>{spin=!spin;bSpin.setAttribute('aria-pressed',String(spin));};
+function toggle(id,obj){const b=document.getElementById(id);b.onclick=()=>{obj.visible=!obj.visible;b.setAttribute('aria-pressed',String(obj.visible));};}
+toggle('flow',flowGroup);toggle('orbits',orbitGroup);
+const tags=[...document.querySelectorAll('.tag')];
+const bL=document.getElementById('labels');bL.onclick=()=>{showLabels=!showLabels;bL.setAttribute('aria-pressed',String(showLabels));tags.forEach(t=>t.hidden=!showLabels);};
+const v=new THREE.Vector3();
+function place(el,obj3,off){v.copy(off||new THREE.Vector3());if(obj3){obj3.getWorldPosition(v);}v.project(camera);el.style.left=((v.x+1)/2*stage.clientWidth)+'px';el.style.top=((1-v.y)/2*stage.clientHeight)+'px';}
+const topAnchor=new THREE.Object3D();topAnchor.position.set(0,R+0.16,0);scene.add(topAnchor);
+let t=0;
+function frame(){requestAnimationFrame(frame);t+=0.016;
+  if(!drag){vx*=0.94;vy*=0.94;rot(vx,vy);if(spin)spinStep(0.0022);}
+  if(!reduce){motes.forEach(m=>{m.t=(m.t+0.0022)%1;m.s.position.copy(m.c.getPoint(m.t));m.s.material.opacity=0.9*Math.sin(Math.PI*m.t)+0.1;});}
+  else motes.forEach(m=>m.s.position.copy(m.c.getPoint(m.t)));
+  const s=0.55*(1+0.08*Math.sin(t*1.8));eg1.scale.set(s,s,1);
+  renderer.render(scene,camera);
+  place(document.getElementById('tYahweh'),topAnchor);
+  place(document.getElementById('tEarth'),earth);
+  ['Venus','Mars','Jupiter','Saturn'].forEach(n=>place(document.getElementById('t'+n),pMeshes[n]));
+}
+frame();
+})();
+</script>
+
+</body></html>

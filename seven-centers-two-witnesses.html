@@ -1,0 +1,174 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Seven Centers, Two Witnesses</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a ledger of seven rows, root to crown; each row sets the tradition's figure beside Ra's, with a line on where they meet. */
+:root{
+  --bg:#f6f5f8; --panel:#ffffff; --fg:#22202a; --muted:#625d70; --rule:#dcd8e3; --accent:#5b4a8c;
+  --red:#c83a3a; --orange:#dd6f1f; --yellow:#c9a20f; --green:#2f9a4c; --blue:#2f6fcb; --indigo:#4b3aa8; --violet:#8c48c2;
+  --display:"Marcellus","Cormorant Garamond",Georgia,serif;
+  --body:"Spectral",Georgia,"Times New Roman",serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#15131b; --panel:#1d1a25; --fg:#ece9f2; --muted:#a8a1b8; --rule:#34303f; --accent:#b4a3ec;
+  --red:#ef6b6b; --orange:#f39446; --yellow:#e8c440; --green:#5cc77a; --blue:#6aa3f0; --indigo:#8f80ea; --violet:#c08af0; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#15131b; --panel:#1d1a25; --fg:#ece9f2; --muted:#a8a1b8; --rule:#34303f; --accent:#b4a3ec;
+  --red:#ef6b6b; --orange:#f39446; --yellow:#e8c440; --green:#5cc77a; --blue:#6aa3f0; --indigo:#8f80ea; --violet:#c08af0; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-block:40px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:28px}
+header{display:grid;gap:10px;max-width:72ch}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);line-height:1.1;margin:0;text-wrap:balance;letter-spacing:.01em}
+.lede{margin:0;color:var(--muted);font-size:17px}
+.key{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase}
+.key b{color:var(--fg);font-weight:500}
+blockquote.intro{margin:0;padding:14px 18px;border-left:3px solid var(--accent);background:var(--panel);max-width:80ch;font-style:italic}
+blockquote.intro cite{display:block;font-style:normal;font-family:var(--mono);font-size:12px;color:var(--muted);margin-top:6px}
+.colhead,.row{display:grid;grid-template-columns:150px minmax(0,1fr) minmax(0,1fr) minmax(0,.8fr);gap:0 22px}
+.colhead{font-family:var(--mono);font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:0 18px 8px;border-bottom:1px solid var(--rule)}
+.rows{display:grid;gap:10px}
+.row{background:var(--panel);border:1px solid var(--rule);border-left:6px solid var(--c);padding:16px 18px;align-items:start}
+.name{display:grid;gap:2px}
+.name .ray{font-family:var(--display);font-size:22px;color:var(--c);line-height:1.1}
+.name .loc{font-size:13.5px;color:var(--muted)}
+.cell{display:grid;grid-template-columns:76px minmax(0,1fr);gap:12px;align-items:start;min-width:0}
+.cell svg{width:76px;height:76px;display:block}
+.cell p{margin:0}
+.sk{font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.03em}
+.facts{font-size:14.5px;margin-top:4px!important}
+.facts span{white-space:nowrap}
+.q{font-style:italic}
+.meet{font-size:14.5px;color:var(--fg)}
+.pill{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px;border:1px solid currentColor;margin-bottom:6px}
+.agree{color:var(--green)} .part{color:var(--yellow)} .differ{color:var(--muted)}
+.mlabel{display:none;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+footer{display:grid;gap:8px;font-size:14px;color:var(--muted);max-width:90ch;border-top:1px solid var(--rule);padding-top:16px}
+footer p{margin:0}
+@media (max-width:860px){
+  .colhead{display:none}
+  .row{grid-template-columns:1fr;gap:14px}
+  .mlabel{display:block}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="key"><span><b>Ra</b> · verified, 51.8</span><span><b>Tradition</b> · witness, not Ra</span><span><b>Where they meet</b> · Claude's reading</span></div>
+    <h1>Seven Centers, Two Witnesses</h1>
+    <p class="lede">The forms of the energy centers as the Indian tradition draws them, set beside Ra's description of their crystalline structures. Listed from the root to the crown.</p>
+  </header>
+
+  <blockquote class="intro">"Each of the energy centers of the physical complex may be seen to have a distinctive crystalline structure in the more developed entity. Each will be somewhat different, just as in your world no two snowflakes are alike. However, each is regular."<cite>Ra, 51.8</cite></blockquote>
+
+  <div>
+    <div class="colhead"><span>Center</span><span>The tradition</span><span>Ra</span><span>Where they meet</span></div>
+    <div class="rows" id="rows"></div>
+  </div>
+
+  <footer>
+    <p><b>Sources.</b> Ra: <i>The Ra Contact</i>, Vol. 1, 51.8 (exact words). Tradition: the classical petal counts and inner figures of the six-chakra system (the <i>Ṣaṭcakra-nirūpaṇa</i>, translated in Arthur Avalon's <i>The Serpent Power</i>, 1919); modern drawings vary. The figures here are simple diagrams, not reproductions.</p>
+    <p><b>A caution.</b> The traditional petals carry the 50 letters of the Sanskrit alphabet (4 + 6 + 10 + 12 + 16 + 2 = 50), so the counts are partly linguistic. Ra hedges every form ("often," "sometimes," "in many," "perhaps") and says the first three centers express mainly through speed of rotation (51.7).</p>
+  </footer>
+</div>
+
+<script>
+const NS="http://www.w3.org/2000/svg";
+const centers=[
+ {ray:"Red",c:"--red",sk:"Mūlādhāra",loc:"Root, base of the spine",petals:4,inner:"square",
+  trad:"Four petals around a square, with a triangle pointing down.",el:"Earth",
+  ra:"“The red energy center often is in the shape of the spoked wheel.”",raG:"wheel",
+  pill:"differ",meet:"Different figures. Ra says the lower three centers activate mainly by speed of rotation (51.7), and a wheel is a turning form."},
+ {ray:"Orange",c:"--orange",sk:"Svādhiṣṭhāna",loc:"Sacral, lower abdomen",petals:6,inner:"crescent",
+  trad:"Six petals around a crescent moon.",el:"Water",
+  ra:"“The orange energy center in the flower shape containing three petals.”",raG:"three",
+  pill:"part",meet:"Both are petaled flowers. The tradition gives six petals; Ra gives three."},
+ {ray:"Yellow",c:"--yellow",sk:"Maṇipūra",loc:"Solar plexus, upper abdomen",petals:10,inner:"tridown",
+  trad:"Ten petals around a triangle pointing down.",el:"Fire",
+  ra:"“The yellow center again in a rounded shape, many faceted, as a star.”",raG:"star",
+  pill:"part",meet:"Both are rounded figures ringed with points. The tradition counts ten; Ra says “many.”"},
+ {ray:"Green",c:"--green",sk:"Anāhata",loc:"Heart, center of the chest",petals:12,inner:"hexagram",
+  trad:"Twelve petals around a six-pointed star: one triangle up, one down.",el:"Air",
+  ra:"“The green energy center sometimes called the lotus-shape, the number of points of crystalline structure dependent upon the strength of this center.”",raG:"lotus",
+  pill:"agree",meet:"Both say lotus. Ra adds that its number of points depends on strength. The heart is the only center with a triangle pointing up as well as down."},
+ {ray:"Blue",c:"--blue",sk:"Viśuddha",loc:"Throat",petals:16,inner:"tricircle",
+  trad:"Sixteen petals around a triangle pointing down, a circle inside it.",el:"Ether",
+  ra:"“The blue energy center capable of having perhaps one hundred facets and capable of great flashing brilliance.”",raG:"facets",
+  pill:"part",meet:"In both, the most points of any center below the crown: sixteen in the tradition, perhaps a hundred in Ra."},
+ {ray:"Indigo",c:"--indigo",sk:"Ājñā",loc:"Brow, between the eyebrows",petals:2,inner:"tridown",
+  trad:"Two petals, drawn as an almond-shaped eye with wings, around a triangle pointing down.",el:"Mind",
+  ra:"“The indigo center a more quiet center which has the basic triangular, or three-petaled, shape in many, although some adepts who have balanced the lower energies may create more faceted forms.”",raG:"triangle",
+  pill:"part",meet:"Both have the triangle. The tradition sets it inside two petals; Ra calls it three-petaled in many."},
+ {ray:"Violet",c:"--violet",sk:"Sahasrāra",loc:"Crown, top of the head",petals:1000,inner:"circle",
+  trad:"A thousand petals around a full-moon circle.",el:"Beyond the elements",
+  ra:"“The violet energy center is the least variable and is sometimes described in your philosophy as thousand-petaled, as it is the sum of the mind/body/spirit complex distortion totality.”",raG:"thousand",
+  pill:"agree",meet:"Both say thousand-petaled. Ra points to the tradition itself (“in your philosophy”)."}
+];
+const pillText={agree:"Agree",part:"Partly agree",differ:"Differ"};
+function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);return e}
+function petalPath(cx,cy,ang,r0,r1,w){
+  const ca=Math.cos(ang),sa=Math.sin(ang),px=-sa,py=ca;
+  const x0=cx+r0*ca,y0=cy+r0*sa,x1=cx+r1*ca,y1=cy+r1*sa,mr=(r0+r1)/2;
+  const mx=cx+mr*ca,my=cy+mr*sa;
+  return `M${x0},${y0} Q${mx+px*w},${my+py*w} ${x1},${y1} Q${mx-px*w},${my-py*w} ${x0},${y0}Z`;
+}
+function ring(svg,n,r0,r1,w,off,fill,stroke,op){
+  for(let i=0;i<n;i++){const a=off+2*Math.PI*i/n-Math.PI/2;
+    svg.appendChild(el("path",{d:petalPath(50,50,a,r0,r1,w),fill,stroke,"stroke-width":1,"fill-opacity":op}))}
+}
+function poly(svg,pts,stroke,fill){svg.appendChild(el("polygon",{points:pts.map(p=>p.join(",")).join(" "),fill:fill||"none",stroke,"stroke-width":2,"stroke-linejoin":"round"}))}
+function tri(r,up){const s=up?-1:1;return [0,1,2].map(i=>{const a=(up?-90:90)+i*120;return [50+r*Math.cos(a*Math.PI/180),50+r*Math.sin(a*Math.PI/180)]})}
+function trad(c){
+  const col=`var(${c.c})`,svg=el("svg",{viewBox:"0 0 100 100","aria-hidden":"true"});
+  if(c.petals===2){ // the eye with two wings
+    svg.appendChild(el("path",{d:"M14,50 Q30,22 50,26 Q70,22 86,50 Q70,78 50,74 Q30,78 14,50Z",fill:col,"fill-opacity":.18,stroke:col,"stroke-width":1.5}));
+    svg.appendChild(el("path",{d:"M14,50 Q4,38 2,30 M14,50 Q4,62 2,70 M86,50 Q96,38 98,30 M86,50 Q96,62 98,70",fill:"none",stroke:col,"stroke-width":1.5}));
+  } else if(c.petals===1000){
+    ring(svg,32,24,47,4.2,0,col,col,.18); ring(svg,24,18,38,4.6,Math.PI/24,col,col,.22); ring(svg,16,14,29,4.6,0,col,col,.26);
+  } else {
+    const w=Math.max(4,Math.min(20,90/c.petals));
+    ring(svg,c.petals,24,47,w,0,col,col,.2);
+  }
+  svg.appendChild(el("circle",{cx:50,cy:50,r:24,fill:"var(--panel)",stroke:col,"stroke-width":1.5}));
+  if(c.inner==="square"){poly(svg,[[33,33],[67,33],[67,67],[33,67]],col);poly(svg,tri(13,false),col)}
+  if(c.inner==="crescent"){svg.appendChild(el("path",{d:"M36,44 A15,15 0 0 0 64,44 A13,11 0 0 1 36,44Z",fill:col,stroke:col,"stroke-width":1}))}
+  if(c.inner==="tridown"){poly(svg,tri(19,false),col)}
+  if(c.inner==="hexagram"){poly(svg,tri(19,true),col);poly(svg,tri(19,false),col)}
+  if(c.inner==="tricircle"){poly(svg,tri(20,false),col);svg.appendChild(el("circle",{cx:50,cy:46,r:6.5,fill:"none",stroke:col,"stroke-width":2}))}
+  if(c.inner==="circle"){svg.appendChild(el("circle",{cx:50,cy:50,r:11,fill:col,"fill-opacity":.35,stroke:col,"stroke-width":2}))}
+  return svg;
+}
+function raG(c){
+  const col=`var(${c.c})`,svg=el("svg",{viewBox:"0 0 100 100","aria-hidden":"true"});
+  const g=c.raG;
+  if(g==="wheel"){svg.appendChild(el("circle",{cx:50,cy:50,r:42,fill:"none",stroke:col,"stroke-width":3}));
+    for(let i=0;i<8;i++){const a=i*Math.PI/4;svg.appendChild(el("line",{x1:50+8*Math.cos(a),y1:50+8*Math.sin(a),x2:50+42*Math.cos(a),y2:50+42*Math.sin(a),stroke:col,"stroke-width":2.2}))}
+    svg.appendChild(el("circle",{cx:50,cy:50,r:8,fill:col,"fill-opacity":.35,stroke:col,"stroke-width":2}))}
+  if(g==="three"){ring(svg,3,4,46,17,0,col,col,.28);svg.appendChild(el("circle",{cx:50,cy:50,r:6,fill:col}))}
+  if(g==="star"){const pts=[];for(let i=0;i<24;i++){const r=i%2?33:45,a=-Math.PI/2+i*Math.PI/12;pts.push([50+r*Math.cos(a),50+r*Math.sin(a)])}
+    poly(svg,pts,col,col);svg.lastChild.setAttribute("fill-opacity",.18);svg.appendChild(el("circle",{cx:50,cy:50,r:26,fill:"none",stroke:col,"stroke-width":1.4}))}
+  if(g==="lotus"){ring(svg,8,18,46,10,Math.PI/8,col,col,.18);ring(svg,8,10,38,10,0,col,col,.28);svg.appendChild(el("circle",{cx:50,cy:50,r:9,fill:col,"fill-opacity":.5,stroke:col}))}
+  if(g==="facets"){for(let k=0;k<4;k++){const n=12+k*6,r=14+k*9.5,pts=[];for(let i=0;i<n;i++){const a=i*2*Math.PI/n+k*.13;pts.push([50+r*Math.cos(a),50+r*Math.sin(a)])}poly(svg,pts,col);svg.lastChild.setAttribute("stroke-width",1.1)}
+    for(let i=0;i<12;i++){const a=i*Math.PI/6;svg.appendChild(el("line",{x1:50+14*Math.cos(a),y1:50+14*Math.sin(a),x2:50+42.5*Math.cos(a),y2:50+42.5*Math.sin(a),stroke:col,"stroke-width":.8}))}}
+  if(g==="triangle"){poly(svg,tri(42,true),col,col);svg.lastChild.setAttribute("fill-opacity",.15);ring(svg,3,6,24,8,0,col,col,.3)}
+  if(g==="thousand"){for(let i=0;i<120;i++){const a=i*2*Math.PI/120,r1=i%2?40:46;svg.appendChild(el("line",{x1:50+12*Math.cos(a),y1:50+12*Math.sin(a),x2:50+r1*Math.cos(a),y2:50+r1*Math.sin(a),stroke:col,"stroke-width":.7}))}
+    svg.appendChild(el("circle",{cx:50,cy:50,r:12,fill:col,"fill-opacity":.35,stroke:col,"stroke-width":1.5}))}
+  return svg;
+}
+const rows=document.getElementById("rows");
+for(const c of centers){
+  const r=document.createElement("article");r.className="row";r.style.setProperty("--c",`var(${c.c})`);
+  const pc=c.petals===1000?"1,000":c.petals;
+  r.innerHTML=`<div class="name"><span class="ray">${c.ray}</span><span class="loc">${c.loc}</span></div>
+   <div><div class="mlabel">The tradition</div><div class="cell tr"><div></div><div><p class="sk">${c.sk}</p><p>${c.trad}</p><p class="facts"><span>Petals: <b>${pc}</b></span> · <span>Element: ${c.el}</span></p></div></div></div>
+   <div><div class="mlabel">Ra, 51.8</div><div class="cell ra"><div></div><p class="q">${c.ra}</p></div></div>
+   <div class="meet"><div class="mlabel">Where they meet</div><span class="pill ${c.pill}">${pillText[c.pill]}</span><p style="margin:0">${c.meet}</p></div>`;
+  r.querySelector(".tr > div").appendChild(trad(c));
+  r.querySelector(".ra > div").appendChild(raG(c));
+  rows.appendChild(r);
+}
+</script>
+
+</body></html>
