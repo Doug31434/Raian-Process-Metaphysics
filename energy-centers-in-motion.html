@@ -178,7 +178,7 @@ const CENTERS = [
  ,{key:'polarity', name:'Violet: Two Paths', color:'#b46ae6', num:'Entrance to fourth density', sub:'The violet ray, positive and negative', dist:8.3, elev:8, toggle:true,
   html:`<div class="form"><span class="lbl">Ra · the violet ray at harvest</span><q>The violet ray of the positive fourth-density will be tinged with the green, blue, indigo triad of energies. This tinge may be seen as a portion of a rainbow or prism, as you know it, the rays being quite distinct. The violet ray of fourth-density negative has in its aura, shall we say, the tinge of red, orange, yellow, these three rays being muddied rather than distinct.</q> <span class="cite">(33.19)</span></div>
     <dl><dt>Harvest</dt><dd><q>This violet ray is the only consideration for fourth-density positive</q> <span class="cite">(34.16)</span></dd></dl>
-    <p class="render"><span class="lbl">What you're seeing</span>The whole being at the entrance to fourth density: the seven centers one upon the other as in All Seven, with intelligent energy rising through them, held within an all-encompassing violet aura, the violet ray as the sum. Use the toggle above. <b>Positive:</b> within the violet, bright green, blue and indigo, each a clear band in its own place, like a portion of a rainbow. <b>Negative:</b> within the violet, red, orange and yellow churning into one another in a smoky haze, muddied rather than distinct. Ra gives the colors and their clarity; the egg-shaped aura, the bands and the haze are an interpretation. Press P to switch.</p>`}
+    <p class="render"><span class="lbl">What you're seeing</span>The whole being at the entrance to fourth density: the seven centers one upon the other as in All Seven, with intelligent energy rising through them, held within an all-encompassing violet aura, the violet ray as the sum. Use the toggle above. <b>Positive:</b> within the violet, bright green, blue and indigo wind around the whole being, each a clear band in its own place, like a portion of a rainbow. <b>Negative:</b> within the violet, red, orange and yellow wind around the being, churning into one another in a smoky haze, muddied rather than distinct. Ra gives the colors and their clarity; the egg-shaped aura, the bands and the haze are an interpretation. Press P to switch.</p>`}
 ];
 
 const $ = id => document.getElementById(id);
@@ -662,9 +662,22 @@ function buildPolarity(){
   for (let i=0;i<N.N;i++){ const c = NCOL[Math.floor(Math.random()*3)].clone().lerp(NCOL[Math.floor(Math.random()*3)], Math.random()).lerp(MUD, 0.35 + 0.3*Math.random());
     NP.push({r:0.95 + 0.38*Math.random(), u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:(Math.random()-0.5)*0.5, ph:Math.random()*6.28, c}); }
   const smokes = []; for (let i=0;i<9;i++){ const sm = glowSprite(0x3a2a20, 1.6, 0.3); sm.material.blending = THREE.NormalBlending; root.add(sm); smokes.push({s:sm, a:i/9*Math.PI*2, y:-1.4 + 2.8*i/8}); }
+  // the aura wound around the being: helical streams on each shell, passing in front of and behind the column
+  const helixSet = (hex, r, n, turns, op, wob) => { const G = new THREE.Group(), m = new THREE.LineBasicMaterial({color:hex, transparent:true, opacity:op, depthWrite:false, depthTest:false, blending:THREE.AdditiveBlending});
+    for (let j=0;j<n;j++){ const ph0 = j/n*Math.PI*2, pts = [];
+      for (let k=0;k<=220;k++){ const u = -0.97 + 1.94*k/220, sq = Math.sqrt(1 - u*u), a = ph0 + turns*u*Math.PI*2, rr = r*(1 + (wob ? wob*Math.sin(k*0.31 + j*1.7)*Math.sin(k*0.07 + j) : 0));
+        pts.push(new THREE.Vector3(rr*sq*Math.cos(a), rr*u*EY, rr*sq*Math.sin(a))); }
+      G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m)); }
+    G.renderOrder = 50; root.add(G); return {G, m, op}; };
+  const vHel = [helixSet(0xb46ae6, VR, 6, 1.3, 0.35, 0)];
+  const pHel = [helixSet(0x00d85a, 0.98, 5, 1.6, 0.7, 0), helixSet(0x3a86ff, 1.16, 5, -1.4, 0.65, 0), helixSet(0x7258ff, 1.32, 5, 1.2, 0.6, 0)];
+  const nHel = [helixSet(0xa04a2a, 1.08, 6, 1.5, 0.32, 0.06), helixSet(0xa8702c, 1.14, 6, -1.3, 0.3, 0.07), helixSet(0x9a8834, 1.2, 6, 1.1, 0.28, 0.06), helixSet(0x5a4232, 1.12, 5, -0.9, 0.3, 0.08)];
   let w = 0, t = 0; const c = new THREE.Color();
   const onEgg = (arr, i, r, u, th) => { const sq = Math.sqrt(Math.max(0, 1 - u*u)); arr[i*3] = r*sq*Math.cos(th); arr[i*3+1] = r*u*EY; arr[i*3+2] = r*sq*Math.sin(th); };
   const tick = (dt) => { t += dt; w += (polarNeg - w)*(1 - Math.exp(-dt*2.5)); const pw = 1 - w; col7.tick(dt, t);
+    vHel.forEach(h => h.G.rotation.y += dt*0.12);
+    pHel.forEach((h, i) => { h.G.rotation.y += dt*(i === 1 ? -0.22 : 0.22); h.m.opacity = h.op*pw; h.G.visible = pw > 0.01; });
+    nHel.forEach((h, i) => { h.G.rotation.y += dt*(0.15 + 0.1*Math.sin(t*0.7 + i))*(i%2 ? -1 : 1); h.m.opacity = h.op*w; h.G.visible = w > 0.01; });
     for (let i=0;i<V.N;i++){ const q = VP[i]; q.th += dt*q.sp; onEgg(V.pos, i, q.r, q.u, q.th); V.col[i*3] = vc.r; V.col[i*3+1] = vc.g; V.col[i*3+2] = vc.b; }
     V.g.attributes.position.needsUpdate = true; V.g.attributes.color.needsUpdate = true;
     pRims.forEach(m => m.uniforms.k.value = pw); P.m.opacity = pw; P.p.visible = pw > 0.01;
