@@ -68,7 +68,7 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
 <header class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
   <h1>Seven Toroidal Centers</h1>
-  <p>Each energy center is a toroidal field, a seat of awareness, and a node where the two braided streams of light cross. At the heart of each vortex sits the form Ra names.</p>
+  <p>Each energy center is a toroidal field, a seat of awareness, and a node where the two braided streams of light cross. Each sits in its flow membrane as in All Seven, with the toroidal fields as an overlay.</p>
 </header>
 
 <nav class="topbar" aria-label="Controls">
@@ -83,7 +83,7 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
     <div class="sec-h">The centers</div>
     <label class="row"><input type="checkbox" data-key="fields"><span class="sw" style="background:#4fbf6a"></span><span>Toroidal fields *<small>Each center's own vortex: up the core, out over the top, down the outside</small></span></label>
     <label class="row"><input type="checkbox" data-key="flow"><span class="sw" style="background:#f1cf7e"></span><span>Field flow particles *</span></label>
-    <label class="row"><input type="checkbox" data-key="figures"><span class="sw" style="background:#5aa5f0"></span><span>Ra's forms (51.8)<small>Each center's form, as on The Seven Energy Centers Informed by the Ra Contact</small></span></label>
+    <label class="row"><input type="checkbox" data-key="figures"><span class="sw" style="background:#5aa5f0"></span><span>The seven, as in All Seven<small>Each form (51.8) in its flow membrane, with intelligent energy rising root to crown (59.11)</small></span></label>
     <label class="row"><input type="checkbox" data-key="seats"><span class="sw" style="background:#ffffff"></span><span>Seats of awareness *<small>The glowing core of each center</small></span></label>
     <label class="row"><input type="checkbox" data-key="axis"><span class="sw" style="background:#f6e6b8"></span><span>Central axis</span></label>
   </div>
@@ -123,7 +123,7 @@ label.row small{display:block;color:var(--muted);font-size:12.5px;}
   <details open>
     <summary>What this shows</summary>
     <p>I see each energy center as a toroidal field — a living vortex of light/love flowing up its core, out over the top, down the outside and back in, while the whole of it turns around the body's axis. And I see the centers two ways at once: as seats of conscious self-awareness, and as nodal points in a framework, the places where the larger pattern of the field crosses and gathers.</p>
-    <p>At the heart of each vortex sits that center's form, drawn as on my page <a href="https://doug31434.github.io/Raian-Process-Metaphysics/energy-centers-in-motion.html" style="color:var(--gold)">The Seven Energy Centers Informed by the Ra Contact</a>: the spoked wheel as a sphere of seventy-two spokes, orange as the three-petaled triquetra, yellow as nested faceted stars, green as the open lotus with its orb and its own toroidal field, blue as the many-faceted gem, indigo as the triquetra in the ajna arrangement, and violet as a thousand petals in four crowns. I don't think the centers literally look like these things. They are my renderings of the shapes Ra describes.</p>
+    <p>The seven are drawn as in the All Seven scene of my page <a href="https://doug31434.github.io/Raian-Process-Metaphysics/energy-centers-in-motion.html" style="color:var(--gold)">The Seven Energy Centers Informed by the Ra Contact</a>. Each center sits in its own flow membrane, which receives light from the center below and passes it to the one above, and intelligent energy rises along the axis from white below the root to white-gold above the crown (the white-gold is my proposal). The forms: the spoked wheel as a sphere of seventy-two spokes, orange as the three-petaled triquetra, yellow as nested faceted stars, green as the open lotus with its orb and its own toroidal field, blue as the many-faceted gem, indigo as the triquetra in the ajna arrangement, and violet as a thousand petals in four crowns. I don't think the centers literally look like these things. They are my renderings of the shapes Ra describes.</p>
   </details>
   <details>
     <summary>What Ra says</summary>
@@ -210,7 +210,6 @@ window.addEventListener("error", function(e){
   // ---------- the seven forms, from "The Seven Energy Centers Informed by the Ra Contact" (energy-centers-in-motion.html) ----------
   const PORT = (()=>{
   const TIME = { value: 0 };
-  const yBot = -1.60*0.55*1.3;   // where the green center's rising stream begins (as in the source page)
 const smooth = THREE.MathUtils.smoothstep;
 
 const dotTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
@@ -365,6 +364,75 @@ const buildYellow = () => { const G = new THREE.Group(), mats = [], line = new T
     inner.rotation.set(0.3, 0.45, 0.06);
     return { G, PB, bluePts, faces, cents, RL };
   }
+// ---------- the outer flow membrane every center carries : an onion of fine lines rising south to north,
+// received at the root from the center below and passed on at the neck to the center above ----------
+const HEX = { white:0xf4f2ec, red:0xd2382c, orange:0xe8802a, yellow:0xe2c830, green:0x2fb45e, blue:0x2f78d8, indigo:0x5a48c8, violet:0x9050c0, wgold:0xfff0c2 };
+const ORDER = ['white','red','orange','yellow','green','blue','indigo','violet','wgold'];
+const HH = 0.55, HW = 0.82, ONION_H = HH*1.3, RMAX = HW + 0.05;
+const PROF = [[-1.60,0.10],[-1.34,0.105],[-1.17,0.16],[-1.03,0.36],[-0.86,0.62],[-0.62,0.84],[-0.32,0.97],[0.0,1.0],[0.30,0.965],[0.56,0.84],[0.78,0.63],[0.97,0.38],[1.12,0.20],[1.27,0.12],[1.45,0.10],[1.62,0.10]];
+const pchip = (() => { const xs = PROF.map(p => p[0]), ys = PROF.map(p => p[1]), n = xs.length, h = [], d = [], m = new Array(n);
+  for (let i=0;i<n-1;i++){ h.push(xs[i+1]-xs[i]); d.push((ys[i+1]-ys[i])/h[i]); } m[0] = d[0]; m[n-1] = d[n-2];
+  for (let i=1;i<n-1;i++){ if (d[i-1]*d[i] <= 0) m[i] = 0; else { const w1 = 2*h[i]+h[i-1], w2 = h[i]+2*h[i-1]; m[i] = (w1+w2)/(w1/d[i-1] + w2/d[i]); } }
+  return (x) => { if (x <= xs[0]) return ys[0]; if (x >= xs[n-1]) return ys[n-1]; let i = 0; while (x > xs[i+1]) i++;
+    const t = (x - xs[i])/h[i], t2 = t*t, t3 = t2*t; return (2*t3-3*t2+1)*ys[i] + (t3-2*t2+t)*h[i]*m[i] + (-2*t3+3*t2)*ys[i+1] + (t3-t2)*h[i]*m[i+1]; }; })();
+const onionR = (y) => RMAX*pchip(y/ONION_H);
+const yBot = -1.60*ONION_H, yTop = 1.62*ONION_H, yRoot = -1.12*ONION_H, yNeck = 1.12*ONION_H;
+const fadeMat = (op, add) => new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending, uniforms:{ op:{ value:op } },
+  vertexShader:`attribute vec3 color; attribute float alpha; varying vec3 vC; varying float vA; void main(){ vC = color; vA = alpha; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`uniform float op; varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC, op*vA); }` });
+const endFade = (y) => Math.min(smooth(y, yBot, yRoot), 1 - smooth(y, yNeck, yTop));
+
+function flowMembrane(root, key){
+  const i0 = ORDER.indexOf(key), below = ORDER[i0-1], above = ORDER[i0+1];
+  const mixH = (a, b, t) => new THREE.Color(HEX[a]).lerp(new THREE.Color(HEX[b]), t).getHex();
+  const STOPS = key === 'green' ? [[-1.5,0xe2d830],[-0.8,0xa8d838],[0.0,0x2fb45e],[0.8,0x1fa8b0],[1.6,0x3a7fe8]]
+    : [[-1.5, HEX[below]], [-0.8, mixH(below, key, 0.6)], [0.0, HEX[key]], [0.8, mixH(key, above, 0.45)], [1.6, HEX[above]]];
+  const colAt = (y) => { const u = y/ONION_H, c = new THREE.Color();
+    if (u <= STOPS[0][0]) return c.setHex(STOPS[0][1]); if (u >= STOPS[4][0]) return c.setHex(STOPS[4][1]);
+    for (let i=0;i<4;i++) if (u <= STOPS[i+1][0]) return c.setHex(STOPS[i][1]).lerp(new THREE.Color(STOPS[i+1][1]), (u-STOPS[i][0])/(STOPS[i+1][0]-STOPS[i][0]));
+    return c; };
+  const G = new THREE.Group(); root.add(G);
+  // 96 fine lines with a half turn of twist
+  const pos = [], cols = [], al = [];
+  for (let i=0;i<96;i++){ const phi = i/96*Math.PI*2; let prev = null;
+    for (let k=0;k<=90;k++){ const t = k/90, y = yBot + (yTop - yBot)*t, r = onionR(y), tw = phi + 0.5*smooth(t, 0.12, 0.88);
+      const p = new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)), c = colAt(y), a = endFade(y);
+      if (prev){ pos.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cols.push(prev.c.r, prev.c.g, prev.c.b, c.r, c.g, c.b); al.push(prev.a, a); }
+      prev = {p, c, a}; } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); g.setAttribute('alpha', new THREE.Float32BufferAttribute(al,1));
+  G.add(new THREE.LineSegments(g, fadeMat(0.24, true)));
+  // light moving along the membrane, south to north: the one vector
+  const N = 420, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, t:Math.random(), sp:0.05 + 0.03*Math.random()});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
+  G.add(new THREE.Points(pg, pointsMat(0.035)));
+  const c = new THREE.Color();
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const q = P[i]; q.t = (q.t + dt*q.sp) % 1; const y = yBot + (yTop - yBot)*q.t, r = onionR(y), tw = q.phi + 0.5*smooth(q.t, 0.12, 0.88);
+      pp[i*3] = r*Math.cos(tw); pp[i*3+1] = y; pp[i*3+2] = r*Math.sin(tw); c.copy(colAt(y)).multiplyScalar(endFade(y)); pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; G.rotation.y += dt*0.05; };
+  // red receives intelligent energy as white light rising from everywhere below in soft waves (59.11, 54.27)
+  if (key === 'red'){ let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
+    const rootP = new THREE.Vector3(0, yBot + 0.16, 0), RS = onionR(rootP.y)*0.95, yLow = -2.0, sp = [], sc = [], sa = [], st = [], sh = [], wht = new THREE.Color(0xfbfaf6);
+    for (let i=0;i<1600;i++){ const a0 = rnd()*Math.PI*2, r0 = 0.25 + 2.2*Math.sqrt(rnd()), ys = yLow + (yBot - 0.02 - yLow)*Math.pow(rnd(), 1.1), amp = 0.03 + 0.05*rnd(), wv = 1.2 + 1.6*rnd(), ph = rnd()*Math.PI*2, sw = 0.3 + 0.4*rnd(); let prev = null;
+      for (let k=0;k<32;k++){ const t = k/31, y = ys + (rootP.y - ys)*t, gg = smooth(t, 0, 1), rr = r0 + (RS - r0)*gg, ang = a0 + sw*t, wob = amp*(1 - gg)*Math.sin(ph + t*wv*Math.PI*2);
+        const p = new THREE.Vector3(rr*Math.cos(ang) - wob*Math.sin(ang), y, rr*Math.sin(ang) + wob*Math.cos(ang)), a = 0.55 + 0.45*Math.pow(t, 2.5);
+        if (prev){ sp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); sc.push(wht.r, wht.g, wht.b, wht.r, wht.g, wht.b); sa.push(prev.a, a); st.push(prev.t, t); sh.push(ph, ph); } prev = {p, a, t}; } }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3)); sg.setAttribute('color', new THREE.Float32BufferAttribute(sc,3)); sg.setAttribute('alpha', new THREE.Float32BufferAttribute(sa,1)); sg.setAttribute('st', new THREE.Float32BufferAttribute(st,1)); sg.setAttribute('sph', new THREE.Float32BufferAttribute(sh,1));
+    // light travelling up each strand: soft pulses rising from below into the root
+    const flowM = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{ uTime:TIME },
+      vertexShader:`attribute vec3 color; attribute float alpha; attribute float st; attribute float sph; varying vec3 vC; varying float vA; varying float vT; varying float vP; void main(){ vC = color; vA = alpha; vT = st; vP = sph; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader:`uniform float uTime; varying vec3 vC; varying float vA; varying float vT; varying float vP; void main(){ float w = fract(vT*2.2 - uTime*0.45 + vP*0.159); float pulse = pow(smoothstep(0.0, 0.85, w)*(1.0 - smoothstep(0.85, 1.0, w)), 2.0); gl_FragColor = vec4(vC, vA*(0.035 + 0.22*pulse)); }` });
+    root.add(new THREE.LineSegments(sg, flowM)); const s = glowSprite(0xffffff, 0.5, 0.7); s.position.copy(rootP); root.add(s); }
+  // violet passes it on: white-gold, gathered into one column
+  if (key === 'violet'){ const cp = [], cc = [], ca = [], wg = new THREE.Color(HEX.wgold);
+    for (let i=0;i<24;i++){ const phi = i/24*Math.PI*2, r = 0.05; let prev = null;
+      for (let k=0;k<=30;k++){ const y = yNeck + (yTop + 0.5 - yNeck)*k/30, p = new THREE.Vector3(r*Math.cos(phi), y, r*Math.sin(phi)), a = 1 - smooth(y, yTop + 0.05, yTop + 0.5);
+        if (prev){ cp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cc.push(wg.r, wg.g, wg.b, wg.r, wg.g, wg.b); ca.push(prev.a, a); } prev = {p, a}; } }
+    const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(cp,3)); cg.setAttribute('color', new THREE.Float32BufferAttribute(cc,3)); cg.setAttribute('alpha', new THREE.Float32BufferAttribute(ca,1));
+    root.add(new THREE.LineSegments(cg, fadeMat(0.6, true))); const s = glowSprite(0xfff0c8, 0.5, 0.75); s.position.set(0, yTop + 0.12, 0); s.scale.set(0.35, 0.7, 1); root.add(s); }
+  return G;
+}
+
 const FS = 0.56;   // a form of radius 1.42 sits inside the bulb at this scale
 function buildIndigo(){ // the same knot as orange, lobes in the ajna arrangement : 6 o'clock, and 3 and 9
   const G = new THREE.Group(), mats = [], col = new THREE.Color('#5546C0'), hot = col.clone().lerp(new THREE.Color('#CFC8FF'), 0.5);
@@ -492,7 +560,39 @@ const FORMS = {
   indigo:() => { const o = buildIndigo(); o.G.scale.setScalar(FS); return o; },
   violet:() => { const o = buildViolet(); o.G.scale.setScalar(FS*0.98); return o; }
 };
-  return { FORMS, TIME, PT_SCALE };
+
+// ---------- scene: the seven, one upon the other, root to crown ----------
+// intelligent energy rising along the axis from below the root through the crown, colored by the center it passes
+const makeRiser = (parent, o) => { const N = o.n, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({u:Math.random(), ph:Math.random()*Math.PI*2, r:o.r0 + (o.r1 - o.r0)*Math.pow(Math.random(), 1.5), sp:o.sp*(0.8 + 0.4*Math.random()), b:0.7 + 0.3*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  parent.add(new THREE.Points(g, pointsMat(o.size)));
+  const core = []; if (o.core) for (let k=0;k<3;k++){ const sp = glowSprite(0xffffff, o.core, 0.0); parent.add(sp); core.push(sp); }
+  const c = new THREE.Color();
+  return (dt, t) => { for (let i=0;i<N;i++){ const q = P[i]; q.u = (q.u + dt*q.sp) % 1; q.ph += dt*1.2;
+      const y = o.y0 + (o.y1 - o.y0)*q.u, r = q.r*(1 + 0.35*Math.sin(q.u*14 + q.ph));
+      pos[i*3] = r*Math.cos(q.ph); pos[i*3+1] = y; pos[i*3+2] = r*Math.sin(q.ph);
+      const f = Math.min(1, q.u/0.05, (1 - q.u)/0.08); c.copy(o.col(y)).multiplyScalar(f*q.b*(o.gain || 1)); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; }; };
+const axisColor = (stops) => (y) => { const c = new THREE.Color(); if (y <= stops[0][0]) return c.setHex(stops[0][1]); const L = stops.length - 1; if (y >= stops[L][0]) return c.setHex(stops[L][1]);
+  for (let i=0;i<L;i++) if (y <= stops[i+1][0]) return c.setHex(stops[i][1]).lerp(new THREE.Color(stops[i+1][1]), (y - stops[i][0])/(stops[i+1][0] - stops[i][0])); return c; };
+const tickCenter = (sub, dt, t) => { sub.userData.memb.userData.tick(dt); sub.userData.spin.rotation.y += dt*.18;
+  const f = sub.userData.form; if (f.G.userData.tick) f.G.userData.tick(dt);
+  if (f.mats && f.mats.length){ const k = 0.88 + 0.12*Math.sin(t*1.3); f.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = k; else if (m.userData.op !== undefined) m.opacity = m.userData.op*k; }); } };
+const makeCenter = (key) => { const root = new THREE.Group(); root.userData.memb = flowMembrane(root, key);
+  const o = FORMS[key](), spin = new THREE.Group(); spin.add(o.G); root.add(spin); root.userData.spin = spin; root.userData.form = o; return root; };
+function buildColumn(SC){
+  const root = new THREE.Group(), SP = yNeck - yRoot, subs = [];
+  ['red','orange','yellow','green','blue','indigo','violet'].forEach((k, i) => { const s = makeCenter(k); s.position.y = (i - 3)*SP; root.add(s); subs.push(s); });
+  root.scale.setScalar(SC);
+  // point sprites are sized in world units and don't follow the group's scale, so scale them here
+  const scU = { get value(){ return PT_SCALE.value*SC; } };
+  root.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.uScale){ const m = o.material.clone(); m.uniforms.uScale = scU; if (m.uniforms.uTime) m.uniforms.uTime = TIME; if (o.material.uniforms.uGain) m.uniforms.uGain = o.material.uniforms.uGain; o.material = m; } });
+  const ys = subs.map(sb => sb.position.y), KEYS = ['red','orange','yellow','green','blue','indigo','violet'];
+  const stops = [[ys[0] + yBot - 0.6, HEX.white], ...KEYS.map((k, i) => [ys[i], HEX[k]]), [ys[6] + yTop + 0.9, HEX.wgold]];
+  const rise = makeRiser(root, {n:3200, y0:ys[0] + yBot - 0.6, y1:ys[6] + yTop + 0.9, r0:0.04, r1:0.45, sp:0.045, size:0.08, gain:0.55, col:axisColor(stops)});
+  return {root, tick:(dt, t) => { subs.forEach(s => tickCenter(s, dt, t)); rise(dt, t); }}; }
+  return { FORMS, TIME, PT_SCALE, buildColumn, SP: yNeck - yRoot };
   })();
 
   // ---------- the seven centers ----------
@@ -555,15 +655,9 @@ const FORMS = {
     });
     // equatorial outline of the form
     { const pts = []; for (let k=0;k<=S.n;k++) pts.push(shapePoint(i, 1, Math.PI, k/S.n*TAU, 0)); fg.add(lineFrom(pts, C.col, 0.9)); }
-    // the center's own form (51.8), sitting at the heart of its vortex
-    const form = PORT.FORMS[C.key](), formSpin = new THREE.Group();
-    formSpin.add(form.G); formSpin.position.y = yc; figG.add(formSpin);
     fg.position.y = yc;
     fieldsG.add(fg);
-    updaters.push((dt, t)=>{ fg.rotation.y += dt*spin; formSpin.rotation.y += dt*0.18;
-      if (form.G.userData.tick) form.G.userData.tick(dt);
-      if (form.mats && form.mats.length){ const k = 0.88 + 0.12*Math.sin(t*1.3); form.mats.forEach(m=>{ if (m.userData.fres) m.uniforms.k.value = k; else if (m.userData.op !== undefined) m.opacity = m.userData.op*k; }); }
-    });
+    updaters.push(dt=>{ fg.rotation.y += dt*spin; });
     // flow particles: up the core, out over the top, down the outside, back in — riding the same form
     const n = 260, pos = new Float32Array(n*3), meta = [];
     for (let p=0;p<n;p++) meta.push({ lam: LAYERS[p%3], s: Math.random()*TAU, f: Math.random()*TAU, v: 0.55 + Math.random()*0.3 });
@@ -586,6 +680,11 @@ const FORMS = {
     updaters.push((dt, t)=>{ const p = 0.5 + 0.08*Math.sin(t*1.6 + i); halo.scale.set(p,p,1); });
     addLabel(labelG, C.name + " · " + C.words, new THREE.Vector3(1.8, yc + 0.05, 0), C.hex, 0.3);
   });
+  // the seven as on "All Seven" (energy-centers-in-motion.html#column): each form in its flow membrane, light rising root to crown
+  {
+    const K = SPACING/PORT.SP, col = PORT.buildColumn(K);
+    figG.add(col.root); updaters.push((dt, t)=> col.tick(dt, t));
+  }
   reg("fields", fieldsG); reg("flow", flowG); reg("figures", figG); reg("seats", seatG);
   system.add(labelG);
 
@@ -658,7 +757,7 @@ const FORMS = {
   }
 
   // ---------- visibility ----------
-  const DEFAULTS = { fields:true, flow:true, figures:true, seats:false, axis:true, rising:true, descending:true, meet:false, labels:false };
+  const DEFAULTS = { fields:false, flow:false, figures:true, seats:false, axis:true, rising:true, descending:true, meet:false, labels:false };
   const boxes = Array.from(document.querySelectorAll("#overlays input[data-key]"));
   function applyVisibility(){
     const st = {}; boxes.forEach(b=> st[b.dataset.key] = b.checked);
