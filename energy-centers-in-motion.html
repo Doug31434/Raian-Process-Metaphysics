@@ -175,10 +175,10 @@ const CENTERS = [
     <p class="prose">Bellicosity in itself is a movement to be studied and balanced, catalyst like any other. Our Logos designed the experiment for the greatest possible opportunities for polarization, with <q>a bias towards kindness</q> <span class="cite">(90.21)</span>. Warfare of our kind wasn't planned. Used efficiently, conflict sharpens the choice. Used inefficiently, as on Earth, it neither clarifies nor resolves: it circles, compounds, and enmeshes. Ra speaks of the inefficient use of catalyst (66.34); "the inefficient use of bellicosity" names that same failure applied to bellicose catalyst. Forgiveness, <q>implicit in universal love</q> <span class="cite">(34.17)</span>, is what lets the stalled stream rise.</p>
     <p class="render"><span class="lbl">What you're seeing</span>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH, a vortex that feeds on the very energy it keeps circling. Now and then the lotus at green parts for a moment and closes again: the Patton pattern, frequent green-ray openings that never hold. At the lotus's center the small orb is dull, smoky orange: humanity under the orange-ray overlay, before the heart's activation. This is Stage 1 of <i>The Green Ray in Six Stages</i>.</p>
     <p class="layers">Words in quotation marks with a session.question number are Ra's, from <i>The Ra Contact</i>. The Great BASH, its vortex shape, and "the inefficient use of bellicosity" are interpretive terms, not Ra's.</p>`}
- ,{key:'polarity', name:'Violet: Two Paths', color:'#b46ae6', num:'Entrance to fourth density', sub:'The violet ray, positive and negative', dist:5.0, elev:12, toggle:true,
+ ,{key:'polarity', name:'Violet: Two Paths', color:'#b46ae6', num:'Entrance to fourth density', sub:'The violet ray, positive and negative', dist:8.3, elev:8, toggle:true,
   html:`<div class="form"><span class="lbl">Ra · the violet ray at harvest</span><q>The violet ray of the positive fourth-density will be tinged with the green, blue, indigo triad of energies. This tinge may be seen as a portion of a rainbow or prism, as you know it, the rays being quite distinct. The violet ray of fourth-density negative has in its aura, shall we say, the tinge of red, orange, yellow, these three rays being muddied rather than distinct.</q> <span class="cite">(33.19)</span></div>
     <dl><dt>Harvest</dt><dd><q>This violet ray is the only consideration for fourth-density positive</q> <span class="cite">(34.16)</span></dd></dl>
-    <p class="render"><span class="lbl">What you're seeing</span>The violet center, a thousand petals in four crowns, at the entrance to fourth density. Use the toggle above the form. <b>Positive:</b> the aura carries green, blue and indigo as three clear bands, each holding its own place, like a portion of a rainbow. <b>Negative:</b> the aura carries red, orange and yellow, churning into one another with a smoky haze, muddied rather than distinct. Ra gives the colors and their clarity; the bands, rings and haze are an interpretation. Press P to switch.</p>`}
+    <p class="render"><span class="lbl">What you're seeing</span>The whole being at the entrance to fourth density: the seven centers along the axis, root to crown, held within an all-encompassing violet aura, the violet ray as the sum. Use the toggle above. <b>Positive:</b> within the violet, bright green, blue and indigo, each a clear band in its own place, like a portion of a rainbow. <b>Negative:</b> within the violet, red, orange and yellow churning into one another in a smoky haze, muddied rather than distinct. Ra gives the colors and their clarity; the egg-shaped aura, the bands and the haze are an interpretation. Press P to switch.</p>`}
 ];
 
 const $ = id => document.getElementById(id);
@@ -616,44 +616,47 @@ function buildBash(){
 // ---------- scene: violet at the entrance to fourth density, positive and negative (33.19) ----------
 let polarNeg = 0;   // 0 positive, 1 negative (the toggle)
 function buildPolarity(){
-  const root = new THREE.Group(), spin = new THREE.Group(); root.add(spin);
-  const form = buildViolet(); form.G.scale.setScalar(FS*0.98); spin.add(form.G);
+  const root = new THREE.Group(), EY = 1.55;   // the aura: an egg, taller than wide, around the whole being
+  const rimShell = (hex, r, pw, a) => { const m = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+      uniforms:{c:{value:new THREE.Color(hex)}, k:{value:1}}, vertexShader:orbVS,
+      fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); gl_FragColor = vec4(c, (0.03 + pow(f, ${pw.toFixed(1)})*${a.toFixed(2)})*k); }` });
+    const me = new THREE.Mesh(new THREE.SphereGeometry(r, 72, 54), m); me.scale.y = EY; root.add(me); return m; };
+  // the seven centers along the axis, small, root to crown
+  const axisG = new THREE.Group(); root.add(axisG);
+  ['red','orange','yellow','green','blue','indigo','violet'].forEach((k, i) => { const y = -1.5 + i*0.5, c = HEX[k];
+    const m = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 16), new THREE.MeshBasicMaterial({color:c})); m.position.y = y; axisG.add(m);
+    const g = glowSprite(c, 0.45, 0.7); g.position.y = y; axisG.add(g); });
+  { const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-1.75,0), new THREE.Vector3(0,1.75,0)]); axisG.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:0xd8c8f0, transparent:true, opacity:0.25}))); }
+  // the all-encompassing violet aura, the same for both paths
+  const VR = 1.45; rimShell(0x9050c0, VR, 2.6, 0.75); rimShell(0xb46ae6, VR*1.04, 4.0, 0.5);
   const mkPts = (N, size) => { const pos = new Float32Array(N*3), col = new Float32Array(N*3), g = new THREE.BufferGeometry();
     g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
     const m = pointsMat(size), p = new THREE.Points(g, m); root.add(p); return {pos, col, g, m, p, N}; };
-  const rimShell = (hex, r, pw, a) => { const m = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.FrontSide,
-      uniforms:{c:{value:new THREE.Color(hex)}, k:{value:1}}, vertexShader:orbVS,
-      fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); gl_FragColor = vec4(c, pow(f, ${pw.toFixed(1)})*${a.toFixed(2)}*k); }` });
-    const me = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), m); root.add(me); return m; };
-  const pRims = [[0x36c47e, 0.98], [0x3d8cf0, 1.10], [0x7466f0, 1.22]].map(([c, r]) => rimShell(c, r, 7.0, 1.0));
-  const nRims = [[0x8a3a26, 1.08], [0x96582a, 1.11], [0x8a7a30, 1.14], [0x4a3628, 1.18]].map(([c, r]) => rimShell(c, r, 1.2, 0.4));
-  // positive: green, blue, indigo as three distinct bands, a portion of a rainbow or prism
-  const BANDS = [[0x36c47e, 0.98], [0x3d8cf0, 1.10], [0x7466f0, 1.22]];
-  const P = mkPts(2400, 0.05), PP = [];
-  for (let i=0;i<P.N;i++){ const b = i%3, u = Math.random()*2-1, th = Math.random()*Math.PI*2; PP.push({b, u, th, sp:0.15 + 0.1*Math.random()}); }
-  const rings = BANDS.map(([c, r], i) => { const pts = []; for (let k=0;k<=160;k++){ const a = k/160*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a), 0, r*Math.sin(a))); }
-    const m = new THREE.LineBasicMaterial({color:c, transparent:true, opacity:0.8, depthWrite:false, blending:THREE.AdditiveBlending}); const L = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m);
-    L.rotation.set(0.35 + 0.05*i, 0, -0.2); root.add(L); return {L, m}; });
-  const pGlow = glowSprite(0x7aa8ff, 3.0, 0.18); root.add(pGlow);
-  // negative: red, orange, yellow in the aura, muddied rather than distinct
-  const N = mkPts(2600, 0.06), NP = [], MUD = new THREE.Color(0x4a3628), NCOL = [0xd2382c, 0xe8802a, 0xe2c830].map(h => new THREE.Color(h));
+  const V = mkPts(1400, 0.04), VP = [], vc = new THREE.Color(0xb46ae6);
+  for (let i=0;i<V.N;i++) VP.push({u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:0.05 + 0.08*Math.random(), r:VR*(0.98 + 0.06*Math.random())});
+  // positive: within the violet, green, blue and indigo as bright, quite distinct bands, a portion of a rainbow
+  const BANDS = [[0x3fe08e, 1.02], [0x4a9cff, 1.16], [0x7c6cff, 1.30]];
+  const pRims = BANDS.map(([c, r]) => rimShell(c, r, 6.0, 1.1));
+  const P = mkPts(3000, 0.045), PP = [];
+  for (let i=0;i<P.N;i++) PP.push({b:i%3, u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:0.08 + 0.08*Math.random()});
+  // negative: within the violet, red, orange and yellow, muddied rather than distinct
+  const nRims = [[0x8a3a26, 1.06], [0x96582a, 1.12], [0x8a7a30, 1.18], [0x4a3628, 1.25]].map(([c, r]) => rimShell(c, r, 1.3, 0.45));
+  const N = mkPts(3200, 0.055), NP = [], MUD = new THREE.Color(0x4a3628), NCOL = [0xd2382c, 0xe8802a, 0xe2c830].map(h => new THREE.Color(h));
   for (let i=0;i<N.N;i++){ const c = NCOL[Math.floor(Math.random()*3)].clone().lerp(NCOL[Math.floor(Math.random()*3)], Math.random()).lerp(MUD, 0.35 + 0.3*Math.random());
-    NP.push({r:0.9 + 0.42*Math.random(), u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:(Math.random()-0.5)*0.6, ph:Math.random()*6.28, c}); }
-  const smokes = []; for (let i=0;i<7;i++){ const s = glowSprite(0x3a2a20, 1.4, 0.35); s.material.blending = THREE.NormalBlending; root.add(s); smokes.push({s, a:i/7*Math.PI*2}); }
-  const nGlow = glowSprite(0xb05a30, 3.0, 0.2); root.add(nGlow);
-  let w = 0, t = 0;
-  const tick = (dt) => { t += dt; w += (polarNeg - w)*(1 - Math.exp(-dt*2.5));
-    tickCenterForm(spin, form, dt, t);
-    const pw = 1 - w; pRims.forEach(m => m.uniforms.k.value = pw); nRims.forEach(m => m.uniforms.k.value = w*(0.85 + 0.15*Math.sin(t*1.7)));
-    P.m.opacity = pw; P.p.visible = pw > 0.01; rings.forEach((r, i) => { r.m.opacity = 0.8*pw; r.L.visible = pw > 0.01; r.L.rotation.y += dt*(0.1 + 0.05*i); }); pGlow.material.opacity = 0.18*pw;
-    if (P.p.visible){ const c = new THREE.Color(); for (let i=0;i<P.N;i++){ const q = PP[i]; q.th += dt*q.sp; const r = BANDS[q.b][1], s = Math.sqrt(1 - q.u*q.u);
-        P.pos[i*3] = r*s*Math.cos(q.th); P.pos[i*3+1] = r*q.u; P.pos[i*3+2] = r*s*Math.sin(q.th);
-        c.setHex(BANDS[q.b][0]); P.col[i*3] = c.r; P.col[i*3+1] = c.g; P.col[i*3+2] = c.b; }
+    NP.push({r:0.95 + 0.38*Math.random(), u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:(Math.random()-0.5)*0.5, ph:Math.random()*6.28, c}); }
+  const smokes = []; for (let i=0;i<9;i++){ const sm = glowSprite(0x3a2a20, 1.6, 0.3); sm.material.blending = THREE.NormalBlending; root.add(sm); smokes.push({s:sm, a:i/9*Math.PI*2, y:-1.4 + 2.8*i/8}); }
+  let w = 0, t = 0; const c = new THREE.Color();
+  const onEgg = (arr, i, r, u, th) => { const sq = Math.sqrt(Math.max(0, 1 - u*u)); arr[i*3] = r*sq*Math.cos(th); arr[i*3+1] = r*u*EY; arr[i*3+2] = r*sq*Math.sin(th); };
+  const tick = (dt) => { t += dt; w += (polarNeg - w)*(1 - Math.exp(-dt*2.5)); const pw = 1 - w;
+    axisG.rotation.y += dt*0.1;
+    for (let i=0;i<V.N;i++){ const q = VP[i]; q.th += dt*q.sp; onEgg(V.pos, i, q.r, q.u, q.th); V.col[i*3] = vc.r; V.col[i*3+1] = vc.g; V.col[i*3+2] = vc.b; }
+    V.g.attributes.position.needsUpdate = true; V.g.attributes.color.needsUpdate = true;
+    pRims.forEach(m => m.uniforms.k.value = pw); P.m.opacity = pw; P.p.visible = pw > 0.01;
+    if (P.p.visible){ for (let i=0;i<P.N;i++){ const q = PP[i]; q.th += dt*q.sp; onEgg(P.pos, i, BANDS[q.b][1], q.u, q.th); c.setHex(BANDS[q.b][0]); P.col[i*3] = c.r; P.col[i*3+1] = c.g; P.col[i*3+2] = c.b; }
       P.g.attributes.position.needsUpdate = true; P.g.attributes.color.needsUpdate = true; }
-    N.m.opacity = w; N.p.visible = w > 0.01; nGlow.material.opacity = 0.2*w;
-    smokes.forEach((o, i) => { o.a += dt*0.15; o.s.position.set(1.05*Math.cos(o.a), 0.35*Math.sin(t*0.4 + i), 1.05*Math.sin(o.a)); o.s.material.opacity = 0.35*w; o.s.visible = w > 0.01; });
-    if (N.p.visible){ for (let i=0;i<N.N;i++){ const q = NP[i]; q.th += dt*q.sp; q.ph += dt*0.7; const r = q.r + 0.08*Math.sin(q.ph + q.th*3), s = Math.sqrt(1 - q.u*q.u), y = q.u + 0.06*Math.sin(q.ph*1.3);
-        N.pos[i*3] = r*s*Math.cos(q.th); N.pos[i*3+1] = r*y; N.pos[i*3+2] = r*s*Math.sin(q.th);
+    nRims.forEach(m => m.uniforms.k.value = w*(0.85 + 0.15*Math.sin(t*1.7))); N.m.opacity = w; N.p.visible = w > 0.01;
+    smokes.forEach((o, i) => { o.a += dt*0.12; o.s.position.set(1.1*Math.cos(o.a), o.y + 0.2*Math.sin(t*0.4 + i), 1.1*Math.sin(o.a)); o.s.material.opacity = 0.3*w; o.s.visible = w > 0.01; });
+    if (N.p.visible){ for (let i=0;i<N.N;i++){ const q = NP[i]; q.th += dt*q.sp; q.ph += dt*0.7; onEgg(N.pos, i, q.r + 0.08*Math.sin(q.ph + q.th*3), Math.max(-1, Math.min(1, q.u + 0.05*Math.sin(q.ph*1.3))), q.th);
         N.col[i*3] = q.c.r; N.col[i*3+1] = q.c.g; N.col[i*3+2] = q.c.b; }
       N.g.attributes.position.needsUpdate = true; N.g.attributes.color.needsUpdate = true; } };
   return {root, tick}; }
