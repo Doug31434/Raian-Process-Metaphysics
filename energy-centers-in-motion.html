@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Energy Centers in Motion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Spectral:ital,wght@0,400;0,500;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a stage for projection. One live 3D center fills the room; its notes sit in a side panel that can be hidden; a rail of seven colors runs root to crown. */
+:root{
+  color-scheme:dark;
+  --night:#0c0a12; --panel:#15121d; --ink:#ece7f3; --muted:#a69fb6; --rule:#2c2638; --c:#c8352b;
+  --display:"Marcellus",Georgia,serif; --body:"Spectral",Georgia,serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+html,body{height:100%;margin:0}
+body{background:var(--night);color:var(--ink);font-family:var(--body);font-size:17px;line-height:1.5;overflow:hidden}
+.app{height:100%;display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:auto minmax(0,1fr) auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box}
+.app.notes-off{grid-template-columns:minmax(0,1fr) 0}
+header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 10px max(16px,env(safe-area-inset-left,0px));border-bottom:1px solid var(--rule)}
+.brand{font-family:var(--display);font-size:20px;letter-spacing:.02em}
+.brand small{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.tools{display:flex;gap:8px;flex-wrap:wrap}
+button{font:500 12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--ink);background:transparent;border:1px solid var(--rule);border-radius:999px;padding:7px 12px;cursor:pointer}
+button:hover{border-color:var(--c)}
+button:focus-visible{outline:2px solid var(--c);outline-offset:2px}
+.stage{position:relative;min-width:0;min-height:0;background:radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--c) 14%, #0c0a12) 0%, #0c0a12 62%)}
+#gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none}
+.caption{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:14px;right:16px;pointer-events:none;display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.bigname{font-family:var(--display);font-size:clamp(34px,6vw,64px);line-height:1;color:var(--c);text-shadow:0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}
+.bignum{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.hint{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
+.arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;background:rgba(12,10,18,.5)}
+.arrow.prev{left:max(12px,env(safe-area-inset-left,0px))}.arrow.next{right:12px}
+aside{background:var(--panel);border-left:1px solid var(--rule);overflow-y:auto;min-width:0;padding:22px 22px 28px max(22px,0px)}
+.app.notes-off aside{display:none}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--c)}
+h1{font-family:var(--display);font-weight:400;font-size:34px;line-height:1.1;margin:6px 0 4px;text-wrap:balance}
+.sub{font-style:italic;color:var(--muted);margin:0 0 16px}
+.form{border-left:3px solid var(--c);padding:4px 0 4px 14px;margin:0 0 18px;font-size:18.5px}
+.lbl{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+q{font-style:italic;quotes:"\201C" "\201D"}
+.cite{font-family:var(--mono);font-size:11.5px;color:var(--muted);white-space:nowrap}
+dl{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px 12px;margin:0 0 18px}
+dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding-top:5px}
+dd{margin:0;min-width:0}
+.archbox{background:color-mix(in srgb,var(--c) 12%,#1d1927);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.archbox .main{font-family:var(--display);font-size:21px;line-height:1.3;margin:2px 0 8px}
+.archbox p{margin:0}
+.render{font-size:14.5px;color:var(--muted);margin:0 0 14px}
+.layers{font-size:13px;color:var(--muted);border-top:1px solid var(--rule);padding-top:12px;margin:0}
+#notes h2.sec{font-family:var(--body);font-weight:400;font-size:19px;margin:22px 0 8px;color:var(--c)}
+#notes p.prose{font-size:15px;line-height:1.55;margin:0 0 10px}
+nav.rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border-top:1px solid var(--rule)}
+nav.rail button{border:0;border-radius:0;padding:10px 4px 12px;display:grid;gap:4px;justify-items:center;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:14px;color:var(--muted);border-top:3px solid transparent}
+nav.rail button .dot{width:12px;height:12px;border-radius:50%;background:var(--dc);box-shadow:0 0 10px var(--dc)}
+nav.rail button[aria-current="true"]{color:var(--ink);border-top-color:var(--dc);background:rgba(255,255,255,.03)}
+@media (max-width:900px){
+  body{overflow:auto}
+  .app,.app.notes-off{height:auto;min-height:100%;grid-template-columns:1fr;grid-template-rows:auto 62vh auto auto}
+  aside{border-left:0;border-top:1px solid var(--rule);padding:20px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+  nav.rail{grid-row:3}
+  aside{grid-row:4}
+  .hint{display:none}
+  nav.rail button span.nm{font-size:12px}
+}
+@media (prefers-reduced-motion:reduce){.bigname{text-shadow:none}}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="brand">Energy Centers in Motion<small>Ra's seven centers · live, rotatable forms</small></div>
+    <div class="tools">
+      <button id="notesBtn" type="button" aria-pressed="true">Hide notes</button>
+      <button id="spinBtn" type="button" aria-pressed="true">Pause</button>
+      <button id="resetBtn" type="button">Reset view</button>
+      <button id="fsBtn" type="button">Full screen</button>
+    </div>
+  </header>
+  <div class="stage" id="stage">
+    <canvas id="gl" aria-label="Interactive 3D form of the current energy center. Drag to turn it, scroll or pinch to zoom."></canvas>
+    <button class="arrow prev" id="prevBtn" type="button" aria-label="Previous center">‹</button>
+    <button class="arrow next" id="nextBtn" type="button" aria-label="Next center">›</button>
+    <div class="caption">
+      <div><div class="bignum" id="bignum"></div><div class="bigname" id="bigname"></div></div>
+      <div class="hint">Drag to turn · scroll to zoom<br>← → or 1–9 to move · N notes · F full screen</div>
+    </div>
+  </div>
+  <aside id="notes" aria-live="polite"></aside>
+  <nav class="rail" id="rail" aria-label="The seven centers, root to crown"></nav>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+const CENTERS = [
+ {key:'red', name:'Red', color:'#e0443a', glow:'#ff7a5c', num:'Energy center 1 · fixed · primary', sub:'The spoked wheel — to be',
+  form:'The red energy center often is in the shape of the spoked wheel.',
+  ra:[['Relation','<q>The basic strengthening ray for each density… the foundation ray</q> <span class="cite">(39.10)</span>'],
+      ['Body','<q>The elemental body without form</q> <span class="cite">(47.8)</span>'],
+      ['Experience','<q>In terms of survival</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>An understanding and acceptance of this energy is fundamental</q> <span class="cite">(15.12)</span>']],
+  arch:'To be. Undifferentiated singularity, oneness; the ground of space/time being.', purview:'Strengthening.',
+  render:'The wheel carried into three dimensions: 72 spokes reaching out in every direction from an ethereal core, their tips joined, the wheel again small at the core (an interpretation). Below it, white light rises from everywhere and is gathered into the root: intelligent energy entering "undifferentiated" (54.27).'},
+ {key:'orange', name:'Orange', color:'#ef8a2c', glow:'#ffb15c', num:'Energy center 2 · 1st of the five varying', sub:'Three petals — emergence',
+  form:'The orange energy center in the flower shape containing three petals.',
+  ra:[['Density','<q>Movement and growth of the individual, this ray striving towards the yellow ray</q> <span class="cite">(40.3)</span>'],
+      ['Body','<q>The body formed without self-awareness, the body in the womb before the spirit/mind complex enters</q> <span class="cite">(47.8)</span>'],
+      ['Experience','<q>In terms of personal identity</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>Personal eccentricities or distortions with regard to self-conscious understanding, or acceptance, of self</q> <span class="cite">(15.12)</span>']],
+  arch:'Emergence from the red ground, awakening towards self-awareness: the middle petal negotiating between the One and the many.', purview:'Striving, growth, motivation, motility, change, balance.',
+  render:'The Gaelic trinity knot: one continuous thread making three petals, passing over and under itself, with smaller knots spiraling out of the core and a faint toroidal flow around it (an interpretation).'},
+ {key:'yellow', name:'Yellow', color:'#f2c230', glow:'#ffe07a', num:'Energy center 3 · 2nd of the five · primary', sub:'The many-faceted star — awakening',
+  form:'The yellow center again in a rounded shape, many faceted, as a star.',
+  ra:[['Activity','<q>The ray of self-awareness and interaction</q> <span class="cite">(41.25)</span>'],
+      ['Relation','<q>The great stepping stone ray</q> <span class="cite">(39.10)</span>'],
+      ['Experience','<q>In terms of social relations</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>The third blockage resembles most closely that which you have called ego</q> <span class="cite">(15.12)</span>']],
+  arch:'Awakening to self-awareness, and the choice of polarity. Diversity.', purview:'The inner radiance of self-awareness.',
+  render:'The wheel awakened: a faceted sphere with twelve star points, three nested stars born from a core whose light comes from within (a reading of Ra\'s "again").'},
+ {key:'green', name:'Green', color:'#36c47e', glow:'#8ae6b8', num:'Energy center 4 · the center ray', sub:'The lotus — the turning',
+  form:'The green energy center sometimes called the lotus-shape, the number of points of crystalline structure dependent upon the strength of this center.',
+  ra:[['Turning','<q>The great turning point… The green ray may then be turned outward, the entity then giving rather than receiving</q> <span class="cite">(32.5)</span>'],
+      ['Relation','<q>The center ray of green</q> <span class="cite">(39.10)</span>'],
+      ['Experience','<q>In terms of universal love</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>Difficulties in expressing what you may call universal love, or compassion</q> <span class="cite">(15.12)</span>']],
+  arch:'The compassionate witness. Acceptance and understanding.', purview:'Absorption, turning, exchange, witnessing observation, perception, interplay, kenosis, protection.',
+  render:'Green as in Stage 2 of <i>The Green Ray in Six Stages</i>: the stream from below rises freely into the heart and the lotus opens. At its center the small orb shines a bright, beautiful yellow, and around it circulates humanity\'s own toroidal field, yellow: veiled third density, the field we share as a people, held at the heart and no longer stalled below it.'},
+ {key:'blue', name:'Blue', color:'#3d8cf0', glow:'#8cc2ff', num:'Energy center 5 · 4th of the five · primary', sub:'The faceted gem — radiance',
+  form:'The blue energy center capable of having perhaps one hundred facets and capable of great flashing brilliance.',
+  ra:[['Activity','<q>The first ray of radiation of self regardless of any actions from another… The blue-ray entity is a co-Creator</q> <span class="cite">(41.25)</span>'],
+      ['Truth','<q>Blue ray is the ray of free communication with self and with other-self</q> <span class="cite">(48.7)</span>'],
+      ['Experience','<q>How the experience may beget free communication</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>Difficulties in accepting communication from other mind/body/spirit complexes</q> <span class="cite">(15.12)</span>']],
+  arch:'To be a person who acts, co-creating. The unified intelligent whole.', purview:'Outer expression, truth, the phenomenon of form, outward radiance, efficacy of perception, wisdom.',
+  render:'A gem of light with ninety-two facets, nested gems within, flashing as it turns. Every facet glows as a leaf: the bloom of the tree of the primary rays, each leaf its own small field, radiating.'},
+ {key:'indigo', name:'Indigo', color:'#7466f0', glow:'#a99cff', num:'Energy center 6 · 5th of the five · the gateway', sub:'The quiet triangle — the gateway',
+  form:'The indigo center a more quiet center which has the basic triangular, or three-petaled, shape in many, although some adepts who have balanced the lower energies may create more faceted forms.',
+  ra:[['Relation','<q>The gateway to intelligent infinity bringing intelligent energy through</q> <span class="cite">(39.10)</span>'],
+      ['Body','<q>In this body form is substance</q> <span class="cite">(47.8)</span>'],
+      ['Experience','<q>How the experience may be linked to universal energies</q> <span class="cite">(49.6)</span>'],
+      ['Blockage','<q>A lessening of the influx of intelligent energy due to manifestations which appear as unworthiness</q> <span class="cite">(15.12)</span>']],
+  arch:'The co-creator awakening into time/space; the form-maker.', purview:'Wholeness-making, unity maintained, memory.',
+  render:'The same knot as orange, mirrored: one petal points straight down and two reach out to either side, as in the ajna image, inside its faint toroidal flow (an interpretation).'},
+ {key:'violet', name:'Violet', color:'#b46ae6', glow:'#e2c4ff', num:'Energy center 7 · fixed', sub:'The thousand petals — the sum',
+  form:'The violet energy center is the least variable and is sometimes described in your philosophy as thousand-petaled, as it is the sum of the mind/body/spirit complex distortion totality.',
+  ra:[['Relation','<q>The mark, the register, the identity, the true vibration of an entity</q> <span class="cite">(39.10)</span>'],
+      ['Body','<q>The Buddha body, or that body which is complete</q> <span class="cite">(47.8)</span>'],
+      ['Experience','<q>The sacramental nature of each experience</q> <span class="cite">(49.6)</span>'],
+      ['Balance','<q>‘Balanced’ or ‘imbalanced’ has no meaning at this energy level, for it gives and takes in its own balance</q> <span class="cite">(15.12)</span>']],
+  arch:'The joy of being.', purview:'Each band\'s experience taken as sacrament.',
+  render:'A thousand petals of light in four nested crowns, every one pointing outward from a radiant core: the sum, in all directions. Above it, the light passes on as a white-gold column (an interpretation).'}
+ ,{key:'column', name:'All Seven', color:'#f4f2ec', num:'The seven in their flow', sub:'One upon the other, root to crown', dist:8.2, elev:6,
+  html:`<div class="form"><span class="lbl">Ra · upward</span><q>The term “upward spiraling light” is an indication not of your up and down concept, but an indication of the concept of that which reaches towards the source of love and light.</q> <span class="cite">(59.11)</span></div>
+    <dl><dt>The meeting</dt><dd><q>As an entity grows more polarized this locus will move upwards</q> <span class="cite">(49.5)</span></dd>
+    <dt>The pull</dt><dd>Incoming energies <q>are pulled upwards according to the distortions of each energy center and the strength of will, or desire, emanating from the awareness of inner light</q> <span class="cite">(54.29)</span></dd></dl>
+    <p class="render"><span class="lbl">What you're seeing</span>All seven centers, one upon the other, beginning with red. Each membrane takes in at its root what the center below passes on at its neck, so the colors run into each other without a seam: red's neck is already orange, orange's root is still red. White light gathers into red's root from everywhere below, and above violet the light passes on as a white-gold column (an interpretation). In other words, one rising, seven ways of being shaped by it.</p>`},
+ {key:'bash', name:'The Great BASH', color:'#b0443a', num:'The flow blocked', sub:'Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility', dist:7.2, elev:8,
+  html:`<h2 class="sec">What the Great BASH is</h2>
+    <p class="prose">The Great BASH names the collective thoughtform of bellicosity that runs through human life: <b>B</b>ellicose Attitude (the world seen as threat, the other as enemy), <b>A</b>ggressive Actions (from manipulation to war, each blow confirming the expectation that called it forth), <b>S</b>carred and Scared (the unhealed wounds beneath it, so that hurt people hurt people), and <b>H</b>ope through Hostility (the old promise that peace will finally come once the right enemy is subdued). It has grown large enough to act with something like a life of its own, feeding on the fear it keeps alive. The term is not Ra's. Ra, speaking of a different class of thoughtforms, says <q>the thought-form entities feed upon fear</q> <span class="cite">(43.6)</span>, and the Great BASH can be read as fed the same way.</p>
+    <h2 class="sec">The Law of Responsibility</h2>
+    <dl><dt>Ra</dt><dd><q>By the end of the second cycle, the Law of Responsibility had begun to be effectuated by the increasing ability of entities to grasp those lessons which there are to be learned in this density. Thus, entities had discovered many ways to indicate a bellicose nature…</q> <span class="cite">(22.5)</span></dd>
+    <dt>Ra</dt><dd><q>As each lesson was understood… each lesson could be rejected in practice. Without demonstrating the fruits of such learn/teaching the life span became greatly reduced</q> <span class="cite">(22.5)</span></dd>
+    <dt>Patton</dt><dd><q>A decrease in harvestability due to the rejection of the Law or Way of Responsibility; that is, seeing universal love, yet still it fought on</q> <span class="cite">(34.17)</span></dd></dl>
+    <p class="prose">In other words, the more we understand, the more we're answerable for living it. The Law of Responsibility and humanity's bellicose turn arrive together in Ra's account (22.5). This is the knowing-without-doing gap, and the Great BASH lives in it: we glimpse universal love, the lotus parts, and still we fight on.</p>
+    <h2 class="sec">The inefficient use of bellicosity</h2>
+    <dl><dt>Ra</dt><dd><q>It is incorrect that warfare of the types specific to your experiences was planned by the Logos. This form of expression of hostility is an interesting result which is apparently concomitant with the tool-making ability</q> <span class="cite">(90.18)</span></dd>
+    <dt>Ra</dt><dd><q>In the case of your planetary sphere there is much inefficient use of catalyst</q> <span class="cite">(66.34)</span></dd>
+    <dt>Balance</dt><dd>For the Sirius entities, who have no bellicose heritage, Ra says <q>it is then necessary to investigate movements of all kinds, especially bellicosity</q> <span class="cite">(38.9)</span></dd></dl>
+    <p class="prose">Bellicosity in itself is a movement to be studied and balanced, catalyst like any other. Our Logos designed the experiment for the greatest possible opportunities for polarization, with <q>a bias towards kindness</q> <span class="cite">(90.21)</span>. Warfare of our kind wasn't planned. Used efficiently, conflict sharpens the choice. Used inefficiently, as on Earth, it neither clarifies nor resolves: it circles, compounds, and enmeshes. Ra speaks of the inefficient use of catalyst (66.34); "the inefficient use of bellicosity" names that same failure applied to bellicose catalyst. Forgiveness, <q>implicit in universal love</q> <span class="cite">(34.17)</span>, is what lets the stalled stream rise.</p>
+    <p class="render"><span class="lbl">What you're seeing</span>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH, a vortex that feeds on the very energy it keeps circling. Now and then the lotus at green parts for a moment and closes again: the Patton pattern, frequent green-ray openings that never hold. At the lotus's center the small orb is dull, smoky orange: humanity under the orange-ray overlay, before the heart's activation. This is Stage 1 of <i>The Green Ray in Six Stages</i>.</p>
+    <p class="layers">Words in quotation marks with a session.question number are Ra's, from <i>The Ra Contact</i>. The Great BASH, its vortex shape, and "the inefficient use of bellicosity" are interpretive terms, not Ra's.</p>`}
+];
+
+const $ = id => document.getElementById(id);
+const app = $('app'), notes = $('notes'), rail = $('rail');
+let idx = 0;
+
+// ---------- three.js stage ----------
+const canvas = $('gl');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setClearColor(0x0c0a12, 1);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, 1, 0.05, 100);
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+controls.minDistance = 1.2; controls.maxDistance = 14;
+scene.add(new THREE.AmbientLight(0xffffff, 0.6)); { const dl = new THREE.DirectionalLight(0xffffff, 0.5); dl.position.set(5,10,7); scene.add(dl); }
+const TIME = { value: 0 };
+const smooth = THREE.MathUtils.smoothstep;
+
+const dotTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d');
+  const g = x.createRadialGradient(32,32,0,32,32,32); g.addColorStop(0,'rgba(255,255,255,1)'); g.addColorStop(0.35,'rgba(255,255,255,0.5)'); g.addColorStop(1,'rgba(255,255,255,0)');
+  x.fillStyle = g; x.fillRect(0,0,64,64); return new THREE.CanvasTexture(c); })();
+const glowSprite = (color, size, op) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({map:dotTex, color, transparent:true, opacity:op, depthWrite:false, blending:THREE.AdditiveBlending})); s.scale.setScalar(size); s.userData.op = op; return s; };
+const pointsMat = (size) => new THREE.PointsMaterial({size, map:dotTex, vertexColors:true, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true});
+const lmat = (c, o) => { const m = new THREE.LineBasicMaterial({color:c, transparent:true, opacity:o, depthWrite:false, blending:THREE.AdditiveBlending}); m.userData.op = o; return m; };
+const fres = (c, h, a0, a1) => { const m = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{c:{value:c}, h:{value:h}, k:{value:1}},
+  vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+  fragmentShader:`uniform vec3 c; uniform vec3 h; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN,vV),0.0); gl_FragColor = vec4(mix(h, c, f)*k, (${a0.toFixed(2)} + pow(f,1.4)*${a1.toFixed(2)})*k); }`}); m.userData.fres = true; return m; };
+const segLines = (G, segs, c, o) => { const m = lmat(c, o); G.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(segs), m)); return m; };
+const sprAt = (G, mats, pos, size, c, o) => { const sp = glowSprite(c, size, o); sp.position.copy(pos); sp.material.userData.op = o; mats.push(sp.material); G.add(sp); };
+const sphereOf = (G, mats, glow, r, ring) => {
+  const hm = new THREE.ShaderMaterial({transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{c:{value:new THREE.Color(glow)}, k:{value:1}},
+    vertexShader:`varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); gl_FragColor = vec4(c*k, (pow(f, 2.2)*0.6 + 0.03)*k); }`});
+  hm.userData.fres = true; mats.push(hm); G.add(new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), hm));
+  const ticks = []; fibDirs(90).forEach(d => ticks.push(d.clone().multiplyScalar(r*1.3/1.42), d.clone().multiplyScalar(r*1.41/1.42)));
+  mats.push(segLines(G, ticks, new THREE.Color(glow), 0.4));
+  if (ring) { const pts = []; for (let k=0;k<=128;k++){ const a = k/128*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a), 0, r*Math.sin(a))); }
+    const m = lmat(new THREE.Color(glow), 0.5); G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m)); mats.push(m); } };
+const fibDirs = (n) => { const d = []; for (let i=0;i<n;i++){ const y = 1 - (i+0.5)/n*2, r = Math.sqrt(1-y*y), th = i*Math.PI*(3-Math.sqrt(5)); d.push(new THREE.Vector3(Math.cos(th)*r, y, Math.sin(th)*r)); } return d; };
+const buildRed = () => { const G = new THREE.Group(), mats = [], col = new THREE.Color('#C8352B'), hot = col.clone().lerp(new THREE.Color('#ff5a3c'), 0.45);
+  const dirs = fibDirs(72), R0 = 0.30, Rin = 0.33, Rout = 0.94, spokes = [], tips = [], inner = [];
+  dirs.forEach(d => spokes.push(d.clone().multiplyScalar(R0*0.92), d.clone().multiplyScalar(Rout)));
+  const edges = new Set(); for (let i=0;i<dirs.length;i++){ const near = dirs.map((d,j) => [d.distanceTo(dirs[i]), j]).filter(x => x[1] !== i).sort((a,b) => a[0]-b[0]).slice(0, 5);
+    near.forEach(([d,j]) => { if (d < near[0][0]*1.45) edges.add(i < j ? i+'-'+j : j+'-'+i); }); }
+  edges.forEach(e => { const [a,b] = e.split('-').map(Number); tips.push(dirs[a].clone().multiplyScalar(Rout), dirs[b].clone().multiplyScalar(Rout)); inner.push(dirs[a].clone().multiplyScalar(Rin), dirs[b].clone().multiplyScalar(Rin)); });
+  mats.push(segLines(G, spokes, hot, 0.75), segLines(G, tips, hot, 0.6), segLines(G, inner, hot, 0.35));
+  dirs.forEach(d => sprAt(G, mats, d.clone().multiplyScalar(Rout), 0.09, hot, 0.8));
+  const sh = fres(col, hot, 0.10, 0.75); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(R0, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 1.2, col, 0.35); sprAt(G, mats, new THREE.Vector3(), 0.6, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.24, hot, 0.9);
+  sphereOf(G, mats, '#E2574C', 1.42/1.45, true);
+  G.rotation.set(0.35, 0.5, 0.1); G.scale.setScalar(1.45*0.24); return {G, mats}; };
+const buildOrange = () => { const G = new THREE.Group(), mats = [], col = new THREE.Color('#D2721E'), hot = col.clone().lerp(new THREE.Color('#ffb04a'), 0.5);
+  // the triquetra: three half-circle arcs (radius 1.1775, centers 0.6798 out) meeting in pointed tips, over and under at each crossing
+  const pts = []; for (let k=0;k<3;k++){ const ca = THREE.MathUtils.degToRad(-90 + 240*k), cx = 0.6798*Math.cos(ca), cy = 0.6798*Math.sin(ca), a0 = THREE.MathUtils.degToRad(-120*k);
+    for (let n=0;n<200;n++){ const u = n/200, a = a0 + Math.PI*u; pts.push(new THREE.Vector3(cx + 1.1775*Math.cos(a), cy + 1.1775*Math.sin(a), 0.62*Math.sin(2*Math.PI*u))); } }
+  const NEST = [[0.30, -0.66, 0.50], [0.47, -0.44, 0.64], [0.68, -0.22, 0.80], [1.0, 0.0, 1.0]];
+  for (const [sc, turn, str] of NEST) { const cs = Math.cos(turn), sn = Math.sin(turn), w = Math.pow(sc, 0.6);
+    const cv = new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3((q.x*cs - q.y*sn)*sc, (q.x*sn + q.y*cs)*sc, q.z*sc)), true, 'centripetal');
+    for (const [r, c, o] of [[0.03, hot, 0.9], [0.08, col, 0.22]]) { const m = new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o*str, depthWrite:false, blending:THREE.AdditiveBlending}); m.userData.op = o*str; mats.push(m);
+      G.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 400, r*w, 8, true), m)); } }
+  const sh = fres(col, hot, 0.10, 0.75); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.24, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 1.0, col, 0.35); sprAt(G, mats, new THREE.Vector3(), 0.5, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.2, hot, 0.9);
+  sphereOf(G, mats, '#EE9447', 1.42, false);
+  for (const [R0, b, n, o] of [[0.69, 0.69, 16, 0.3], [0.66, 0.42, 10, 0.18]]) { const segs = [];
+    for (let i=0;i<n;i++){ const phi0 = i*2*Math.PI/n; let prev = null;
+      for (let k=0;k<=180;k++){ const t = k/180*2*Math.PI, phi = phi0 + t, rr = R0 + b*Math.cos(t), v = new THREE.Vector3(rr*Math.cos(phi), rr*Math.sin(phi), b*Math.sin(t)); if (prev) segs.push(prev, v); prev = v; } }
+    mats.push(segLines(G, segs, new THREE.Color('#FFD0A0'), o)); }
+  G.rotation.set(-0.42, 0, 0); G.scale.setScalar(0.25); return {G, mats}; };
+const buildYellow = () => { const G = new THREE.Group(), mats = [], line = new THREE.Color('#C9900A'), hot = new THREE.Color('#F2B514'), glw = new THREE.Color('#F5CF5A');
+  const uniq = g => { const a = g.attributes.position, out = []; for (let i=0;i<a.count;i++){ const v = new THREE.Vector3().fromBufferAttribute(a, i).normalize(); if (!out.some(w => w.distanceTo(v) < 1e-4)) out.push(v); } return out; };
+  const V = uniq(new THREE.IcosahedronGeometry(1, 1)), P12 = uniq(new THREE.IcosahedronGeometry(1, 0));
+  let dmin = Infinity; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) dmin = Math.min(dmin, V[i].distanceTo(V[j]));
+  const E = []; for (let i=0;i<V.length;i++) for (let j=i+1;j<V.length;j++) if (V[i].distanceTo(V[j]) < dmin*1.05) E.push([i,j]);
+  const RL = 0.86, RT = 1.38, axis = new THREE.Vector3(0.3, 1, 0.2).normalize();
+  for (const [sc, turn, st] of [[0.34, -0.9, 0.5], [0.6, -0.45, 0.72], [1.0, 0.0, 1.0]]) { const T = v => v.clone().applyAxisAngle(axis, turn).multiplyScalar(sc), k = Math.pow(sc, 0.55);
+    const net = [], rays = [];
+    for (const [i,j] of E) net.push(T(V[i].clone().multiplyScalar(RL)), T(V[j].clone().multiplyScalar(RL)));
+    for (const d of P12) { const base = T(d.clone().multiplyScalar(RL)), tip = T(d.clone().multiplyScalar(RT)); rays.push(base, tip);
+      for (const v of V.filter(v => v.distanceTo(d) > 1e-4 && v.distanceTo(d) < dmin*1.05)) rays.push(T(v.clone().multiplyScalar(RL)), T(d.clone().multiplyScalar(RL + (RT-RL)*0.34)));
+      sprAt(G, mats, tip, 0.14*k, hot, 0.9*st); sprAt(G, mats, tip, 0.3*k, glw, 0.4*st); }
+    mats.push(segLines(G, net, hot, 0.55*st), segLines(G, rays, hot, 0.8*st)); }
+  const sh = fres(line, hot, 0.03, 0.35); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.3, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 2.1, glw, 0.4); sprAt(G, mats, new THREE.Vector3(), 1.1, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.5, hot, 0.8); sprAt(G, mats, new THREE.Vector3(), 0.22, new THREE.Color('#FFF1B8'), 1.0);
+  sphereOf(G, mats, '#E9C850', 1.42, true);
+  G.rotation.set(0.32, 0.55, 0.08); G.scale.setScalar(0.24); return {G, mats}; };
+  const PT_SCALE = { value: 600 };
+  const ptMat = new THREE.ShaderMaterial({
+    uniforms:{ uScale:PT_SCALE, uTime:TIME, uGain:{ value:1 } },
+    vertexShader:`attribute float size; attribute vec3 pcolor; attribute float kind; uniform float uScale; uniform float uTime; uniform float uGain; varying vec3 vC; varying float vK;
+      void main(){ vec4 wp = modelMatrix*vec4(position,1.0); float tw = 1.0;
+        if (kind > 0.5) tw = 0.3 + 0.7*pow(0.5 + 0.5*sin(uTime*2.3 + wp.x*37.0 + wp.y*53.0 + wp.z*29.0), 3.0);
+        vC = pcolor*tw*uGain; vK = kind; vec4 mv = viewMatrix*wp; gl_PointSize = min(300.0, size*uScale/max(0.05, -mv.z)); gl_Position = projectionMatrix*mv; }`,
+    fragmentShader:`varying vec3 vC; varying float vK;
+      void main(){ vec2 p = gl_PointCoord*2.0 - 1.0; float d = length(p); if (d > 1.0) discard;
+        float g = d < 0.25 ? mix(1.0, 0.55, d/0.25) : (d < 0.6 ? mix(0.55, 0.12, (d-0.25)/0.35) : mix(0.12, 0.0, (d-0.6)/0.4));
+        if (vK > 0.5){ float st = max(exp(-abs(p.y)*26.0), exp(-abs(p.x)*26.0))*(1.0 - d); g = max(g*0.7, st); }
+        gl_FragColor = vec4(vC*g, 1.0); }`,
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending
+  });
+  function PtBatch(){
+    const P = [], S = [], C = [], K = [];
+    return {
+      add(p, size, color, a, kind){ P.push(p.x, p.y, p.z); S.push(size); C.push(color.r*a, color.g*a, color.b*a); K.push(kind || 0); },
+      build(sizeMul, mat){
+        const g = new THREE.BufferGeometry();
+        g.setAttribute("position", new THREE.Float32BufferAttribute(P, 3));
+        g.setAttribute("size", new THREE.Float32BufferAttribute(S.map(v=> v*sizeMul), 1));
+        g.setAttribute("pcolor", new THREE.Float32BufferAttribute(C, 3));
+        g.setAttribute("kind", new THREE.Float32BufferAttribute(K, 1));
+        return new THREE.Points(g, mat || ptMat);
+      }
+    };
+  }
+  const FRES_VS = `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`;
+  function membrane(glow, segs, strength){        // the radiating sphere: the center in 360 degrees
+    return new THREE.Mesh(new THREE.SphereGeometry(1.42, segs, Math.round(segs*0.66)), new THREE.ShaderMaterial({
+      uniforms:{ c:{ value:new THREE.Color(glow) }, k:{ value:strength } }, vertexShader:FRES_VS,
+      fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - abs(dot(normalize(vN), normalize(vV))); gl_FragColor = vec4(c*(pow(f, 2.2)*0.55 + 0.025)*k, 1.0); }`,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending }));
+  }
+  function shell(r, c, h, base, gain, pw, segs){  // ethereal core: fresnel shell
+    return new THREE.Mesh(new THREE.SphereGeometry(r, segs, Math.round(segs*0.7)), new THREE.ShaderMaterial({
+      uniforms:{ c:{ value:new THREE.Color(c) }, h:{ value:new THREE.Color(h) } }, vertexShader:FRES_VS,
+      fragmentShader:`uniform vec3 c; uniform vec3 h; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(normalize(vN), normalize(vV)), 0.0); gl_FragColor = vec4(mix(h, c, f)*(${base.toFixed(3)} + pow(f, ${pw.toFixed(2)})*${gain.toFixed(3)}), 1.0); }`,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending }));
+  }
+  function buildBlueTemplate(){
+    const G = new THREE.Group(), inner = new THREE.Group();
+    const line = new THREE.Color("#2E72C8"), hot = new THREE.Color("#4E9BEA"), glw = new THREE.Color("#9CC8F5"), white = new THREE.Color("#EAF4FF");
+    G.add(membrane(glw, 28, 0.45), inner);
+    const geo = new THREE.IcosahedronGeometry(1, 2), pa = geo.attributes.position;
+    const verts = [], key = v=> v.toArray().map(x=> x.toFixed(4)).join(","), vid = new Map(), tris = [];
+    for (let i=0;i<pa.count;i+=3){ const t = []; for (let j=0;j<3;j++){ const v = new THREE.Vector3().fromBufferAttribute(pa, i+j).normalize(), k = key(v); if (!vid.has(k)){ vid.set(k, verts.length); verts.push(v); } t.push(vid.get(k)); } tris.push(t); }
+    const cents = tris.map(t=> verts[t[0]].clone().add(verts[t[1]]).add(verts[t[2]]).normalize());
+    const edgeMap = new Map(); tris.forEach((t, ti)=>{ for (let j=0;j<3;j++){ const a = Math.min(t[j], t[(j+1)%3]), b = Math.max(t[j], t[(j+1)%3]), k = a + "_" + b; (edgeMap.get(k) || edgeMap.set(k, []).get(k)).push(ti); } });
+    const dualEdges = [...edgeMap.values()].filter(v=> v.length === 2);
+    const faces = verts.map((v, vi)=>{ const ts = []; tris.forEach((t, ti)=>{ if (t.includes(vi)) ts.push(ti); });
+      const u = new THREE.Vector3(0,1,0); if (Math.abs(v.y) > 0.9) u.set(1,0,0); const e1 = u.clone().cross(v).normalize(), e2 = v.clone().cross(e1);
+      ts.sort((a, b)=>{ const qa = cents[a].clone().sub(v), qb = cents[b].clone().sub(v); return Math.atan2(qa.dot(e2), qa.dot(e1)) - Math.atan2(qb.dot(e2), qb.dot(e1)); });
+      return { n:v, ring:ts }; });
+    let seed = 7; const rnd = ()=> (seed = (seed*16807) % 2147483647)/2147483647;
+    const RL = 1.40, axis = new THREE.Vector3(0.25, 1, 0.15).normalize();
+    const LP = [], LC = [], PB = PtBatch(), FP = [], FC = [];
+    const pushLine = (a, b, c, k)=>{ LP.push(a.x, a.y, a.z, b.x, b.y, b.z); LC.push(c.r*k, c.g*k, c.b*k, c.r*k, c.g*k, c.b*k); };
+    for (const [sc, turn, st] of [[0.34, -0.8, 0.3], [0.62, -0.4, 0.5], [1.0, 0.0, 1.0]]){
+      const T = v=> v.clone().applyAxisAngle(axis, turn).multiplyScalar(sc*RL), k = Math.pow(sc, 0.55);
+      for (const [a, b] of dualEdges) pushLine(T(cents[a]), T(cents[b]), hot, 0.7*st);
+      for (const c of cents) PB.add(T(c), 0.05*k, hot, 0.45*st);
+      if (sc === 1.0){
+        for (const f of faces){
+          const pts = f.ring.map(ti=> T(cents[ti])), ctr = T(f.n.clone().multiplyScalar(0.985)), lit = rnd();
+          const c = lit > 0.8 ? white : (lit > 0.5 ? glw : hot), a = lit > 0.8 ? 0.16 : 0.012 + 0.05*lit;
+          for (let i=0;i<pts.length;i++){ const p = pts[i], q2 = pts[(i+1)%pts.length]; FP.push(ctr.x, ctr.y, ctr.z, p.x, p.y, p.z, q2.x, q2.y, q2.z); for (let r=0;r<3;r++) FC.push(c.r*a, c.g*a, c.b*a); }
+        }
+        for (const f of faces) pushLine(T(f.n.clone().multiplyScalar(0.3)), T(f.n.clone().multiplyScalar(0.97)), line, 0.35);
+        seed = 31; for (const f of faces){ if (rnd() < 0.24){ const p = T(f.n.clone()), sz = 0.22 + 0.32*rnd(); PB.add(p, sz, white, 0.75, 1); PB.add(p, sz*0.5, hot, 0.25); PB.add(p, 0.06, white, 0.8); } }
+      }
+    }
+    const lg = new THREE.BufferGeometry(); lg.setAttribute("position", new THREE.Float32BufferAttribute(LP, 3)); lg.setAttribute("color", new THREE.Float32BufferAttribute(LC, 3));
+    const fg = new THREE.BufferGeometry(); fg.setAttribute("position", new THREE.Float32BufferAttribute(FP, 3)); fg.setAttribute("color", new THREE.Float32BufferAttribute(FC, 3));
+    PB.add(new THREE.Vector3(), 1.0, glw, 0.12); PB.add(new THREE.Vector3(), 0.55, hot, 0.3); PB.add(new THREE.Vector3(), 0.24, white, 0.65); PB.add(new THREE.Vector3(), 0.1, white, 0.9);
+    const bluePts = ptMat.clone(); bluePts.uniforms.uScale = PT_SCALE; bluePts.uniforms.uTime = TIME;
+    const lineMat = new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending });
+    const faceMat = new THREE.MeshBasicMaterial({ vertexColors:true, transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending });
+    const sh = shell(0.34, line, hot, 0.06, 0.45, 1.3, 24);
+    inner.add(new THREE.LineSegments(lg, lineMat), new THREE.Mesh(fg, faceMat), sh, PB.build(1, bluePts));
+    G.userData.setGain = (k)=>{ lineMat.opacity = k; faceMat.opacity = k; bluePts.uniforms.uGain.value = k; G.children[0].material.uniforms.k.value = 0.45*Math.min(1, k*1.5); };
+    inner.rotation.set(0.3, 0.45, 0.06);
+    return { G, PB, bluePts, faces, cents, RL };
+  }
+
+
+// ---------- the outer flow membrane every center carries : an onion of fine lines rising south to north,
+// received at the root from the center below and passed on at the neck to the center above ----------
+const HEX = { white:0xf4f2ec, red:0xd2382c, orange:0xe8802a, yellow:0xe2c830, green:0x2fb45e, blue:0x2f78d8, indigo:0x5a48c8, violet:0x9050c0, wgold:0xfff0c2 };
+const ORDER = ['white','red','orange','yellow','green','blue','indigo','violet','wgold'];
+const HH = 0.55, HW = 0.82, ONION_H = HH*1.3, RMAX = HW + 0.05;
+const PROF = [[-1.60,0.10],[-1.34,0.105],[-1.17,0.16],[-1.03,0.36],[-0.86,0.62],[-0.62,0.84],[-0.32,0.97],[0.0,1.0],[0.30,0.965],[0.56,0.84],[0.78,0.63],[0.97,0.38],[1.12,0.20],[1.27,0.12],[1.45,0.10],[1.62,0.10]];
+const pchip = (() => { const xs = PROF.map(p => p[0]), ys = PROF.map(p => p[1]), n = xs.length, h = [], d = [], m = new Array(n);
+  for (let i=0;i<n-1;i++){ h.push(xs[i+1]-xs[i]); d.push((ys[i+1]-ys[i])/h[i]); } m[0] = d[0]; m[n-1] = d[n-2];
+  for (let i=1;i<n-1;i++){ if (d[i-1]*d[i] <= 0) m[i] = 0; else { const w1 = 2*h[i]+h[i-1], w2 = h[i]+2*h[i-1]; m[i] = (w1+w2)/(w1/d[i-1] + w2/d[i]); } }
+  return (x) => { if (x <= xs[0]) return ys[0]; if (x >= xs[n-1]) return ys[n-1]; let i = 0; while (x > xs[i+1]) i++;
+    const t = (x - xs[i])/h[i], t2 = t*t, t3 = t2*t; return (2*t3-3*t2+1)*ys[i] + (t3-2*t2+t)*h[i]*m[i] + (-2*t3+3*t2)*ys[i+1] + (t3-t2)*h[i]*m[i+1]; }; })();
+const onionR = (y) => RMAX*pchip(y/ONION_H);
+const yBot = -1.60*ONION_H, yTop = 1.62*ONION_H, yRoot = -1.12*ONION_H, yNeck = 1.12*ONION_H;
+const fadeMat = (op, add) => new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending, uniforms:{ op:{ value:op } },
+  vertexShader:`attribute vec3 color; attribute float alpha; varying vec3 vC; varying float vA; void main(){ vC = color; vA = alpha; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`uniform float op; varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC, op*vA); }` });
+const endFade = (y) => Math.min(smooth(y, yBot, yRoot), 1 - smooth(y, yNeck, yTop));
+
+function flowMembrane(root, key){
+  const i0 = ORDER.indexOf(key), below = ORDER[i0-1], above = ORDER[i0+1];
+  const mixH = (a, b, t) => new THREE.Color(HEX[a]).lerp(new THREE.Color(HEX[b]), t).getHex();
+  const STOPS = key === 'green' ? [[-1.5,0xe2d830],[-0.8,0xa8d838],[0.0,0x2fb45e],[0.8,0x1fa8b0],[1.6,0x3a7fe8]]
+    : [[-1.5, HEX[below]], [-0.8, mixH(below, key, 0.6)], [0.0, HEX[key]], [0.8, mixH(key, above, 0.45)], [1.6, HEX[above]]];
+  const colAt = (y) => { const u = y/ONION_H, c = new THREE.Color();
+    if (u <= STOPS[0][0]) return c.setHex(STOPS[0][1]); if (u >= STOPS[4][0]) return c.setHex(STOPS[4][1]);
+    for (let i=0;i<4;i++) if (u <= STOPS[i+1][0]) return c.setHex(STOPS[i][1]).lerp(new THREE.Color(STOPS[i+1][1]), (u-STOPS[i][0])/(STOPS[i+1][0]-STOPS[i][0]));
+    return c; };
+  const G = new THREE.Group(); root.add(G);
+  // 96 fine lines with a half turn of twist
+  const pos = [], cols = [], al = [];
+  for (let i=0;i<96;i++){ const phi = i/96*Math.PI*2; let prev = null;
+    for (let k=0;k<=90;k++){ const t = k/90, y = yBot + (yTop - yBot)*t, r = onionR(y), tw = phi + 0.5*smooth(t, 0.12, 0.88);
+      const p = new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)), c = colAt(y), a = endFade(y);
+      if (prev){ pos.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cols.push(prev.c.r, prev.c.g, prev.c.b, c.r, c.g, c.b); al.push(prev.a, a); }
+      prev = {p, c, a}; } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); g.setAttribute('alpha', new THREE.Float32BufferAttribute(al,1));
+  G.add(new THREE.LineSegments(g, fadeMat(0.24, true)));
+  // light moving along the membrane, south to north: the one vector
+  const N = 420, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, t:Math.random(), sp:0.05 + 0.03*Math.random()});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
+  G.add(new THREE.Points(pg, pointsMat(0.035)));
+  const c = new THREE.Color();
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const q = P[i]; q.t = (q.t + dt*q.sp) % 1; const y = yBot + (yTop - yBot)*q.t, r = onionR(y), tw = q.phi + 0.5*smooth(q.t, 0.12, 0.88);
+      pp[i*3] = r*Math.cos(tw); pp[i*3+1] = y; pp[i*3+2] = r*Math.sin(tw); c.copy(colAt(y)).multiplyScalar(endFade(y)); pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; G.rotation.y += dt*0.05; };
+  // red receives intelligent energy as white light rising from everywhere below in soft waves (59.11, 54.27)
+  if (key === 'red'){ let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
+    const rootP = new THREE.Vector3(0, yBot + 0.16, 0), RS = onionR(rootP.y)*0.95, yLow = -2.0, sp = [], sc = [], sa = [], wht = new THREE.Color(0xfbfaf6);
+    for (let i=0;i<1600;i++){ const a0 = rnd()*Math.PI*2, r0 = 0.25 + 2.2*Math.sqrt(rnd()), ys = yLow + (yBot - 0.02 - yLow)*Math.pow(rnd(), 1.1), amp = 0.03 + 0.05*rnd(), wv = 1.2 + 1.6*rnd(), ph = rnd()*Math.PI*2, sw = 0.3 + 0.4*rnd(); let prev = null;
+      for (let k=0;k<32;k++){ const t = k/31, y = ys + (rootP.y - ys)*t, gg = smooth(t, 0, 1), rr = r0 + (RS - r0)*gg, ang = a0 + sw*t, wob = amp*(1 - gg)*Math.sin(ph + t*wv*Math.PI*2);
+        const p = new THREE.Vector3(rr*Math.cos(ang) - wob*Math.sin(ang), y, rr*Math.sin(ang) + wob*Math.cos(ang)), a = 0.55 + 0.45*Math.pow(t, 2.5);
+        if (prev){ sp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); sc.push(wht.r, wht.g, wht.b, wht.r, wht.g, wht.b); sa.push(prev.a, a); } prev = {p, a}; } }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3)); sg.setAttribute('color', new THREE.Float32BufferAttribute(sc,3)); sg.setAttribute('alpha', new THREE.Float32BufferAttribute(sa,1));
+    root.add(new THREE.LineSegments(sg, fadeMat(0.07, true))); const s = glowSprite(0xffffff, 0.5, 0.7); s.position.copy(rootP); root.add(s); }
+  // violet passes it on: white-gold, gathered into one column
+  if (key === 'violet'){ const cp = [], cc = [], ca = [], wg = new THREE.Color(HEX.wgold);
+    for (let i=0;i<24;i++){ const phi = i/24*Math.PI*2, r = 0.05; let prev = null;
+      for (let k=0;k<=30;k++){ const y = yNeck + (yTop + 0.5 - yNeck)*k/30, p = new THREE.Vector3(r*Math.cos(phi), y, r*Math.sin(phi)), a = 1 - smooth(y, yTop + 0.05, yTop + 0.5);
+        if (prev){ cp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cc.push(wg.r, wg.g, wg.b, wg.r, wg.g, wg.b); ca.push(prev.a, a); } prev = {p, a}; } }
+    const cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(cp,3)); cg.setAttribute('color', new THREE.Float32BufferAttribute(cc,3)); cg.setAttribute('alpha', new THREE.Float32BufferAttribute(ca,1));
+    root.add(new THREE.LineSegments(cg, fadeMat(0.6, true))); const s = glowSprite(0xfff0c8, 0.5, 0.75); s.position.set(0, yTop + 0.12, 0); s.scale.set(0.35, 0.7, 1); root.add(s); }
+  return G;
+}
+
+// ---------- the forms ----------
+const FS = 0.56;   // a form of radius 1.42 sits inside the bulb at this scale
+function buildIndigo(){ // the same knot as orange, lobes in the ajna arrangement : 6 o'clock, and 3 and 9
+  const G = new THREE.Group(), mats = [], col = new THREE.Color('#5546C0'), hot = col.clone().lerp(new THREE.Color('#CFC8FF'), 0.5);
+  const RT = 1.3596, APX = 0.4977, ZA = 0.62, T = [0, 180, 270];
+  const v2 = d => new THREE.Vector2(Math.cos(d*Math.PI/180), Math.sin(d*Math.PI/180));
+  const circ3 = (a, b, c) => { const d = 2*(a.x*(b.y-c.y) + b.x*(c.y-a.y) + c.x*(a.y-b.y));
+    return new THREE.Vector2((a.lengthSq()*(b.y-c.y) + b.lengthSq()*(c.y-a.y) + c.lengthSq()*(a.y-b.y))/d, (a.lengthSq()*(c.x-b.x) + b.lengthSq()*(a.x-c.x) + c.lengthSq()*(b.x-a.x))/d); };
+  const norm = x => ((x % (2*Math.PI)) + 2*Math.PI) % (2*Math.PI), pts = [];
+  for (let k=0;k<3;k++){ const A = v2(T[k]).multiplyScalar(RT), B = v2(T[(k+1)%3]).multiplyScalar(RT), M = v2(T[(k+2)%3]).multiplyScalar(APX), O = circ3(A, M, B), r = A.distanceTo(O);
+    const ang = p => Math.atan2(p.y - O.y, p.x - O.x); const a0 = ang(A); let sweep = norm(ang(B) - a0); if (norm(ang(M) - a0) > sweep) sweep -= 2*Math.PI;
+    for (let i=0;i<200;i++){ const s = i/200, a = a0 + sweep*s; pts.push(new THREE.Vector3(O.x + r*Math.cos(a), O.y + r*Math.sin(a), ZA*Math.sin(2*Math.PI*s))); } }
+  for (const [sc, turn, str] of [[0.30,-0.66,0.50],[0.47,-0.44,0.64],[0.68,-0.22,0.80],[1.0,0,1.0]]){ const cs = Math.cos(turn), sn = Math.sin(turn), w = Math.pow(sc, 0.6);
+    const cv = new THREE.CatmullRomCurve3(pts.map(q => new THREE.Vector3((q.x*cs - q.y*sn)*sc, (q.x*sn + q.y*cs)*sc, q.z*sc)), true, 'centripetal');
+    for (const [r, c, o] of [[0.03, hot, 0.9], [0.08, col, 0.22]]){ const m = new THREE.MeshBasicMaterial({color:c, transparent:true, opacity:o*str, depthWrite:false, blending:THREE.AdditiveBlending}); m.userData.op = o*str; mats.push(m);
+      G.add(new THREE.Mesh(new THREE.TubeGeometry(cv, 400, r*w, 8, true), m)); } }
+  const sh = fres(col, hot, 0.10, 0.75); mats.push(sh); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.24, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 1.0, col, 0.35); sprAt(G, mats, new THREE.Vector3(), 0.5, hot, 0.55); sprAt(G, mats, new THREE.Vector3(), 0.2, hot, 0.9);
+  sphereOf(G, mats, '#7C6EE0', 1.42, false);
+  for (const [R0, b, n, o] of [[0.69, 0.69, 16, 0.3], [0.66, 0.42, 10, 0.18]]){ const segs = [];
+    for (let i=0;i<n;i++){ const phi0 = i*2*Math.PI/n; let prev = null;
+      for (let k=0;k<=180;k++){ const t = k/180*2*Math.PI, phi = phi0 + t, rr = R0 + b*Math.cos(t), v = new THREE.Vector3(rr*Math.cos(phi), rr*Math.sin(phi), b*Math.sin(t)); if (prev) segs.push(prev, v); prev = v; } }
+    mats.push(segLines(G, segs, new THREE.Color('#C9C2FF'), o)); }
+  G.rotation.set(-0.42, 0, 0); return {G, mats}; }
+
+// ---------- shared pieces from The Green Ray in Six Stages ----------
+const lotusOf = (parent) => { const G = new THREE.Group(); parent.add(G); const petals = [];
+  const shape = (L, Wd) => { const s = new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(Wd, L*0.25, Wd*0.9, L*0.7, 0, L); s.bezierCurveTo(-Wd*0.9, L*0.7, -Wd, L*0.25, 0, 0); return new THREE.ShapeGeometry(s, 16); };
+  const ring = (n, L, Wd, off, colA, colB, r0) => { for (let i=0;i<n;i++){ const az = off + i/n*Math.PI*2;
+      const geo = shape(L, Wd), cols = [], pa = geo.attributes.position, c = new THREE.Color();
+      for (let j=0;j<pa.count;j++){ c.copy(new THREE.Color(colA)).lerp(new THREE.Color(colB), pa.getY(j)/L); cols.push(c.r, c.g, c.b); }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0.62, depthWrite:false});
+      const pivot = new THREE.Group(); pivot.rotation.y = -az; const hinge = new THREE.Group(); hinge.position.x = r0; pivot.add(hinge);
+      const mesh = new THREE.Mesh(geo, mat); mesh.position.y = -0.02; hinge.add(mesh); G.add(pivot); petals.push({hinge, mat}); } };
+  ring(8, 0.40, 0.13, 0, 0x12804b, 0x6fd3a2, 0.15);
+  ring(8, 0.48, 0.16, Math.PI/8, 0x1f8f58, 0x9ae6c0, 0.18);
+  G.position.y = -0.1;
+  // openW 1: open and steady (Stage 2); 0: closed, with a brief parting every ~10 s, never held (Stage 1)
+  const set = (t, openW) => { const cyc = (t % 10.5)/10.5, pulse = Math.pow(Math.max(0, Math.sin(Math.PI*THREE.MathUtils.clamp((cyc - 0.55)/0.3, 0, 1))), 1.6)*0.75;
+    const o = THREE.MathUtils.lerp(pulse, 1, openW);
+    petals.forEach((p, i) => { p.hinge.rotation.z = -THREE.MathUtils.lerp(0.12, 1.12, o) - (i >= 8 ? 0.12*o : 0) - 0.03*Math.sin(t*0.8 + i); p.mat.opacity = 0.42 + 0.3*o; }); return o; };
+  return set; };
+const orbVS = `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`;
+const smallOrb = (parent, hex) => { // the small orb at the lotus's center 
+  const m = new THREE.ShaderMaterial({ uniforms:{c:{value:new THREE.Color(hex)}}, transparent:true, depthWrite:false, vertexShader:orbVS,
+    fragmentShader:`uniform vec3 c; varying vec3 vN; varying vec3 vV; void main(){ float ndv = max(dot(vN, vV), 0.0); vec3 col = mix(c*0.55, c, pow(ndv, 0.9)); gl_FragColor = vec4(col, 1.0); }` });
+  const o = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), m); parent.add(o); return o; };
+const torusField = (parent, o) => { const G = new THREE.Group(); parent.add(G);
+  const loopPt = (phi, th) => new THREE.Vector3((o.R + o.rr*Math.cos(th))*Math.cos(phi), o.rv*Math.sin(th), (o.R + o.rr*Math.cos(th))*Math.sin(phi));
+  const lm = new THREE.LineBasicMaterial({color:o.col, transparent:true, opacity:o.lop, depthWrite:false, blending:THREE.AdditiveBlending});
+  for (let i=0;i<o.nl;i++){ const phi = o.off + i/o.nl*Math.PI*2, pts = []; for (let k=0;k<=96;k++) pts.push(loopPt(phi, k/96*Math.PI*2));
+    G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm)); }
+  const N = o.np, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, th:Math.random()*Math.PI*2, j:0.85 + 0.3*Math.random(), sp:0.45 + 0.3*Math.random(), b:0.6 + 0.4*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  G.add(new THREE.Points(g, pointsMat(o.ps))); const base = new THREE.Color(o.pcol);
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th - dt*p.sp + Math.PI*2) % (Math.PI*2); p.phi += dt*o.drift;
+      const v = loopPt(p.phi, p.th).multiplyScalar(p.j); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
+      col[i*3] = base.r*p.b; col[i*3+1] = base.g*p.b; col[i*3+2] = base.b*p.b; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; };
+  return G; };
+
+function buildGreen(){ // green as in Stage 2 of The Green Ray in Six Stages: the lotus open, the bright yellow orb, humanity's own toroidal field
+  const G = new THREE.Group(); let t = 0;
+  const setLotus = lotusOf(G);
+  const orb = smallOrb(G, 0xffd23a);
+  const glow = glowSprite(0xffd23a, 0.75, 0.75); G.add(glow);
+  const tor = torusField(G, {R:0.50, rr:0.36, rv:0.48, nl:30, off:0, col:0xe2c030, lop:0.34, np:900, ps:0.045, pcol:0xf2d250, drift:0.16});
+  // the stream from below rising freely along the axis into the heart
+  const N = 260, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({u:Math.random(), ph:Math.random()*Math.PI*2, r:0.03 + 0.09*Math.random(), sp:0.18 + 0.1*Math.random()});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
+  G.add(new THREE.Points(pg, pointsMat(0.045)));
+  const y0 = yBot, y1 = -0.1, cA = new THREE.Color(0xe2c830), cB = new THREE.Color(0xa8d838), c = new THREE.Color();
+  G.userData.tick = (dt) => { t += dt; setLotus(t, 1); tor.userData.tick(dt);
+    orb.scale.setScalar(0.85 + 0.15*Math.sin(t*1.1)); glow.material.opacity = 0.75*(0.9 + 0.1*Math.sin(t*1.7));
+    for (let i=0;i<N;i++){ const q = P[i]; q.u = (q.u + dt*q.sp) % 1; q.ph += dt*0.5; const y = y0 + (y1 - y0)*q.u, r = q.r*(1 + 0.5*Math.sin(q.u*12 + q.ph));
+      pp[i*3] = r*Math.cos(q.ph); pp[i*3+1] = y; pp[i*3+2] = r*Math.sin(q.ph);
+      const f = smooth(q.u, 0, 0.1)*(1 - smooth(q.u, 0.85, 1)); c.copy(cA).lerp(cB, q.u).multiplyScalar(f); pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; };
+  return {G, mats:[]}; }
+
+function buildBlue(){ // the gem of light (primary tree's blue center), every facet glowing as a leaf: the bloom
+  const tpl = buildBlueTemplate(), g = tpl.G, inner = g.children[1];
+  inner.children[3].geometry = tpl.PB.build(FS, tpl.bluePts).geometry;
+  const W = v => v.clone().multiplyScalar(tpl.RL), FP = [], FC = [], LP = [], LC = [], PB = PtBatch();
+  const blue = new THREE.Color('#4E9BEA'), pale = new THREE.Color('#9CC8F5'), white = new THREE.Color('#EAF4FF');
+  tpl.faces.forEach((f, i) => { const c = W(f.n.clone().multiplyScalar(0.985)), ring = f.ring.map(ti => W(tpl.cents[ti])), a = 0.07 + 0.08*((i*7) % 5)/4;
+    for (let k=0;k<ring.length;k++){ const p = ring[k], q = ring[(k+1)%ring.length]; FP.push(c.x, c.y, c.z, p.x, p.y, p.z, q.x, q.y, q.z); for (let r=0;r<3;r++) FC.push(blue.r*a, blue.g*a, blue.b*a);
+      LP.push(p.x, p.y, p.z, q.x, q.y, q.z); LC.push(pale.r*0.4, pale.g*0.4, pale.b*0.4, pale.r*0.4, pale.g*0.4, pale.b*0.4); }
+    PB.add(c, 0.9, blue, 0.3); PB.add(c, 0.28, white, 0.6, (i % 4 === 0) ? 1 : 0); });
+  const fg = new THREE.BufferGeometry(); fg.setAttribute('position', new THREE.Float32BufferAttribute(FP, 3)); fg.setAttribute('color', new THREE.Float32BufferAttribute(FC, 3));
+  const lg = new THREE.BufferGeometry(); lg.setAttribute('position', new THREE.Float32BufferAttribute(LP, 3)); lg.setAttribute('color', new THREE.Float32BufferAttribute(LC, 3));
+  inner.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending})),
+    new THREE.LineSegments(lg, new THREE.LineBasicMaterial({vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending})), PB.build(FS));
+  g.userData.setGain(1);
+  return {G:g, mats:[], fixedScale:true}; }
+
+function buildViolet(){ // "thousand-petaled… the sum" (51.8): a thousand petals of light in four nested crowns (Nov 3)
+  const G = new THREE.Group(), line = new THREE.Color('#7A3FA8'), hot = new THREE.Color('#A86BD8'), glw = new THREE.Color('#D2B2F0'), white = new THREE.Color('#F7EEFF');
+  const pc = document.createElement('canvas'); pc.width = 64; pc.height = 160; const px = pc.getContext('2d');
+  const path = () => { px.beginPath(); px.moveTo(32,156); px.bezierCurveTo(4,120,6,40,32,4); px.bezierCurveTo(58,40,60,120,32,156); px.closePath(); };
+  const body = px.createLinearGradient(0,156,0,4); body.addColorStop(0,'rgba(255,255,255,0.25)'); body.addColorStop(0.5,'rgba(255,255,255,0.5)'); body.addColorStop(1,'rgba(255,255,255,0.85)');
+  path(); px.fillStyle = body; px.fill(); px.lineWidth = 4; px.strokeStyle = 'rgba(255,255,255,0.95)'; px.stroke();
+  const ptex = new THREE.CanvasTexture(pc), pgeo = new THREE.PlaneGeometry(1, 1); pgeo.translate(0, 0.5, 0);
+  const dummy = new THREE.Object3D(), yAx = new THREE.Vector3(0,1,0);
+  [[0.40,70,0.16,0.055,white],[0.66,160,0.19,0.06,white.clone().lerp(glw,0.5)],[0.93,290,0.21,0.064,glw],[1.18,480,0.22,0.066,hot]].forEach(([R, N, L, Wd, c], ci) => {
+    const inst = new THREE.InstancedMesh(pgeo, new THREE.MeshBasicMaterial({map:ptex, transparent:true, opacity:0.85, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending}), N);
+    for (let i=0;i<N;i++){ const y = 1 - (i+0.5)/N*2, r = Math.sqrt(1-y*y), th = i*Math.PI*(3-Math.sqrt(5)) + ci*0.37, d = new THREE.Vector3(Math.cos(th)*r, y, Math.sin(th)*r);
+      dummy.position.copy(d.clone().multiplyScalar(R)); dummy.quaternion.setFromUnitVectors(yAx, d); dummy.rotateY((i*2.399) % Math.PI); dummy.scale.set(Wd, L, 1); dummy.updateMatrix(); inst.setMatrixAt(i, dummy.matrix);
+      inst.setColorAt(i, c.clone().multiplyScalar(0.75)); }
+    G.add(inst); });
+  const mats = [];
+  const sh = fres(line, white, 0.3, 0.6); G.add(new THREE.Mesh(new THREE.SphereGeometry(0.26, 48, 32), sh));
+  sprAt(G, mats, new THREE.Vector3(), 2.6, glw, 0.4); sprAt(G, mats, new THREE.Vector3(), 1.3, white, 0.5); sprAt(G, mats, new THREE.Vector3(), 0.55, white, 0.85); sprAt(G, mats, new THREE.Vector3(), 0.22, white, 1.0);
+  sphereOf(G, mats, '#B07AD6', 1.42, false);
+  return {G, mats}; }
+
+const FORMS = {
+  red:   () => { const o = buildRed(); o.G.scale.setScalar(1.45*FS); return o; },
+  orange:() => { const o = buildOrange(); o.G.scale.setScalar(FS); return o; },
+  yellow:() => { const o = buildYellow(); o.G.scale.setScalar(FS); return o; },
+  green: () => buildGreen(),
+  blue:  () => { const o = buildBlue(); o.G.scale.setScalar(FS); return o; },
+  indigo:() => { const o = buildIndigo(); o.G.scale.setScalar(FS); return o; },
+  violet:() => { const o = buildViolet(); o.G.scale.setScalar(FS*0.98); return o; }
+};
+// ---------- scene: the seven, one upon the other, root to crown ----------
+const tickCenter = (sub, dt, t) => { sub.userData.memb.userData.tick(dt); sub.userData.spin.rotation.y += dt*.18;
+  const f = sub.userData.form; if (f.G.userData.tick) f.G.userData.tick(dt);
+  if (f.mats && f.mats.length){ const k = 0.88 + 0.12*Math.sin(t*1.3); f.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = k; else if (m.userData.op !== undefined) m.opacity = m.userData.op*k; }); } };
+const makeCenter = (key) => { const root = new THREE.Group(); root.userData.memb = flowMembrane(root, key);
+  const o = FORMS[key](), spin = new THREE.Group(); spin.add(o.G); root.add(spin); root.userData.spin = spin; root.userData.form = o; return root; };
+function buildColumn(){
+  const root = new THREE.Group(), SP = yNeck - yRoot, subs = [];
+  ['red','orange','yellow','green','blue','indigo','violet'].forEach((k, i) => { const s = makeCenter(k); s.position.y = (i - 3)*SP; root.add(s); subs.push(s); });
+  const SC = 0.36; root.scale.setScalar(SC);
+  // point sprites are sized in world units and don't follow the group's scale, so scale them here
+  const scU = { get value(){ return PT_SCALE.value*SC; } };
+  root.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.uScale){ const m = o.material.clone(); m.uniforms.uScale = scU; if (m.uniforms.uTime) m.uniforms.uTime = TIME; if (o.material.uniforms.uGain) m.uniforms.uGain = o.material.uniforms.uGain; o.material = m; } });
+  return {root, tick:(dt, t) => subs.forEach(s => tickCenter(s, dt, t))}; }
+
+// ---------- scene: the Great BASH blocking the flow (Stage 1 of The Green Ray in Six Stages) ----------
+function buildBash(){
+  const root = new THREE.Group(), W = new THREE.Group(); root.add(W); W.position.y = 0.62; W.scale.setScalar(0.9);
+  const GY = 0.6, TY = [-2.6, -1.8, -1.0], yRootG = GY - 1.12*ONION_H;
+  const triad = [buildRed(), buildOrange(), buildYellow()].map((o, i) => { const h = new THREE.Group(); h.position.y = TY[i]; h.add(o.G); W.add(h); return Object.assign(o, {h}); });
+  { const g = new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,-3.1,0), new THREE.Vector3(0,GY+1.4,0)]); W.add(new THREE.Line(g, new THREE.LineBasicMaterial({color:0x8a6a2c, transparent:true, opacity:0.18}))); }
+  const colAtY = (y) => { const st = [[-2.6,0xd2382c],[-1.8,0xe8802a],[-1.0,0xe2c830],[yRootG,0xa8d838],[GY,0x2fb45e]], c = new THREE.Color();
+    if (y <= st[0][0]) return c.setHex(st[0][1]); if (y >= st[4][0]) return c.setHex(st[4][1]);
+    for (let i=0;i<4;i++) if (y <= st[i+1][0]) return c.setHex(st[i][1]).lerp(new THREE.Color(st[i+1][1]), (y-st[i][0])/(st[i+1][0]-st[i][0])); return c; };
+  // the stalled stream, recirculating below green
+  const SN = 1100, spos = new Float32Array(SN*3), scol = new Float32Array(SN*3), SP = [];
+  for (let i=0;i<SN;i++) SP.push({th:Math.random()*Math.PI*2, ph:Math.random()*Math.PI*2, j:0.7 + 0.6*Math.random(), sp:0.35 + 0.25*Math.random(), w:Math.random()});
+  const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(spos,3)); sg.setAttribute('color', new THREE.BufferAttribute(scol,3));
+  W.add(new THREE.Points(sg, pointsMat(0.07)));
+  // the Great BASH: a vortex enmeshed with the lower triad
+  const B = new THREE.Group(); W.add(B); const NS = 9, NP = 160, tilt = new THREE.Euler(0.16, 0, -0.12);
+  const at = (s, t) => { const y = -0.45 - 2.85*t, r = 0.18 + 1.35*Math.pow(1 - t, 1.25), ang = s*Math.PI*2/NS + 7.5*Math.PI*t, wob = 0.12*Math.sin(t*9 + s);
+    return new THREE.Vector3((r + wob)*Math.cos(ang) + 0.18*Math.sin(t*4), y, (r + wob)*Math.sin(ang)).applyEuler(tilt); };
+  const lineMat = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0.7, depthWrite:false});
+  for (let s=0;s<NS;s++){ const pts = [], cols = []; for (let k=0;k<NP;k++){ const t = k/(NP-1); pts.push(at(s, t));
+      const c = new THREE.Color(0x9a3a2c).lerp(new THREE.Color(0x6e5468), 0.5 + 0.5*Math.sin(t*6 + s)); cols.push(c.r, c.g, c.b); }
+    const g = new THREE.BufferGeometry().setFromPoints(pts); g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); B.add(new THREE.Line(g, lineMat)); }
+  const haze = glowSprite(0x6a2a24, 3.2, 0.22); haze.position.set(0, -1.7, 0); haze.scale.set(2.6, 3.6, 1); B.add(haze);
+  const BN = 700, bpos = new Float32Array(BN*3), bcol = new Float32Array(BN*3), BP = [];
+  for (let i=0;i<BN;i++) BP.push({s:Math.floor(Math.random()*NS), t:Math.random(), sp:0.05 + 0.05*Math.random(), o:(Math.random()-0.5)*0.1});
+  const bg = new THREE.BufferGeometry(); bg.setAttribute('position', new THREE.BufferAttribute(bpos,3)); bg.setAttribute('color', new THREE.BufferAttribute(bcol,3));
+  B.add(new THREE.Points(bg, pointsMat(0.08)));
+  // green above, its membrane faint, its lotus closed, the small orb dull and smoky orange
+  const green = new THREE.Group(); green.position.y = GY; W.add(green);
+  const gm = flowMembrane(green, 'green'); gm.children[0].material.uniforms.op.value = 0.09; gm.children[1].visible = false;
+  const setLotus = lotusOf(green);
+  smallOrb(green, 0x9a5a2c);
+  const smoke = glowSprite(0x5e4a40, 0.5, 0.5); smoke.material.blending = THREE.NormalBlending; green.add(smoke);
+  const dglow = glowSprite(0x9a5a2c, 0.4, 0.15); green.add(dglow);
+  const c = new THREE.Color(), dull = new THREE.Color(0x8a3c30);
+  const tick = (dt, t) => {
+    triad.forEach((o, i) => { const f = 0.7*(0.85 + 0.15*Math.sin(t*1.3 + i*1.7))*(1 - 0.35*(0.5 + 0.5*Math.sin(t*2.1 + i)));
+      o.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = f; else m.opacity = m.userData.op*f; }); o.h.rotation.y += dt*0.1; });
+    for (let i=0;i<SN;i++){ const p = SP[i]; p.th = (p.th + dt*p.sp) % (Math.PI*2); p.ph += dt*0.12;
+      const r = (0.42 - 0.38*Math.cos(p.th))*p.j, y = -1.75 + Math.sin(p.th)*(0.9 + 0.1*p.j);
+      spos[i*3] = r*Math.cos(p.ph); spos[i*3+1] = y; spos[i*3+2] = r*Math.sin(p.ph);
+      c.copy(colAtY(y)).multiplyScalar(0.55 + 0.45*p.w); scol[i*3] = c.r; scol[i*3+1] = c.g; scol[i*3+2] = c.b; }
+    sg.attributes.position.needsUpdate = true; sg.attributes.color.needsUpdate = true;
+    B.rotation.y -= dt*0.12;
+    for (let i=0;i<BN;i++){ const p = BP[i]; p.t = (p.t + dt*p.sp) % 1; const v = at(p.s, p.t);
+      bpos[i*3] = v.x + p.o; bpos[i*3+1] = v.y; bpos[i*3+2] = v.z + p.o;
+      c.copy(colAtY(v.y)).lerp(dull, 0.55).multiplyScalar(0.8); bcol[i*3] = c.r; bcol[i*3+1] = c.g; bcol[i*3+2] = c.b; }
+    bg.attributes.position.needsUpdate = true; bg.attributes.color.needsUpdate = true;
+    gm.userData.tick(dt); green.rotation.y += dt*0.1; setLotus(t, 0);
+    smoke.material.opacity = 0.5*(0.8 + 0.2*Math.sin(t*0.7)); };
+  return {root, tick}; }
+
+const SCENES = CENTERS.filter(ct => !ct.html).map(ct => { const root = makeCenter(ct.key); return {root, tick:(dt, t) => tickCenter(root, dt, t)}; });
+SCENES.push(buildColumn(), buildBash());
+SCENES.forEach(sc => { sc.root.visible = false; scene.add(sc.root); });
+const NSC = SCENES.length;
+
+function size(){ const st = $('stage'); const w = st.clientWidth, h = st.clientHeight; renderer.setSize(w, h, false); camera.aspect = w/h; camera.updateProjectionMatrix();
+  PT_SCALE.value = renderer.getDrawingBufferSize(new THREE.Vector2()).y/(2*Math.tan(camera.fov*Math.PI/360)); }
+window.addEventListener('resize', size);
+new ResizeObserver(size).observe($('stage'));
+
+function resetView(){ const ct = CENTERS[idx], e = (ct.elev !== undefined ? ct.elev : (ct.key === 'green' ? 9 : 14))*Math.PI/180, az = Math.PI/4, dist = ct.dist || 4.3;
+  camera.position.set(dist*Math.cos(e)*Math.sin(az), Math.sin(e)*dist, dist*Math.cos(e)*Math.cos(az)); controls.target.set(0,0,0); controls.update(); }
+
+// ---------- notes ----------
+function renderNotes(){
+  const ct = CENTERS[idx];
+  document.documentElement.style.setProperty('--c', ct.color);
+  $('bignum').textContent = ct.num; $('bigname').textContent = ct.name;
+  if (ct.html) notes.innerHTML = `<div class="eyebrow">${ct.num}</div><h1>${ct.name}</h1><p class="sub">${ct.sub}</p>${ct.html}`;
+  else notes.innerHTML = `
+    <div class="eyebrow">${ct.num}</div>
+    <h1>${ct.name}</h1>
+    <p class="sub">${ct.sub}</p>
+    <div class="form"><span class="lbl">Ra · the form</span><q>${ct.form}</q> <span class="cite">(51.8)</span></div>
+    <dl>${ct.ra.map(([k,v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+    <div class="archbox"><span class="lbl">Archetype</span><p class="main">${ct.arch}</p><p><span class="lbl" style="display:inline">In every ray</span> ${ct.purview}</p></div>
+    <p class="render"><span class="lbl">What you're seeing</span>${ct.render} Around it, the flow membrane: light rising south to north, received at the root from the center below and passed on at the neck to the center above.</p>
+    <p class="layers">Words in quotation marks with a session.question number are Ra's, from <i>The Ra Contact</i>. The archetypes are working definitions. The three-dimensional forms are renderings of Ra's brief words in 51.8, shaped by interpretation.</p>`;
+  [...rail.children].forEach((b,i) => b.setAttribute('aria-current', i===idx ? 'true' : 'false'));
+}
+CENTERS.forEach((ct,i) => { const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--dc', ct.color);
+  b.innerHTML = `<span class="dot"></span><span class="nm">${ct.name}</span>`; b.addEventListener('click', () => go(i)); rail.appendChild(b); });
+
+function go(i, fromHash){ idx = (i + NSC) % NSC; SCENES.forEach((g,k) => g.root.visible = k===idx); renderNotes(); resetView();
+  if (!fromHash){ try { history.replaceState(null, '', '#' + CENTERS[idx].key); } catch(e){ location.hash = CENTERS[idx].key; } } }
+function fromHash(){ const k = location.hash.slice(1); const i = CENTERS.findIndex(c => c.key === k); go(i >= 0 ? i : 0, true); }
+window.addEventListener('hashchange', fromHash);
+
+// ---------- controls ----------
+let spinning = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const spinBtn = $('spinBtn'); spinBtn.textContent = spinning ? 'Pause' : 'Play'; spinBtn.setAttribute('aria-pressed', String(spinning));
+spinBtn.onclick = () => { spinning = !spinning; spinBtn.textContent = spinning ? 'Pause' : 'Play'; spinBtn.setAttribute('aria-pressed', String(spinning)); };
+const notesBtn = $('notesBtn');
+function toggleNotes(){ const off = app.classList.toggle('notes-off'); notesBtn.textContent = off ? 'Show notes' : 'Hide notes'; notesBtn.setAttribute('aria-pressed', String(!off)); requestAnimationFrame(size); }
+notesBtn.onclick = toggleNotes;
+$('resetBtn').onclick = resetView;
+$('prevBtn').onclick = () => go(idx-1); $('nextBtn').onclick = () => go(idx+1);
+function fullscreen(){ const el = document.documentElement; try { if (!document.fullscreenElement) { const p = el.requestFullscreen && el.requestFullscreen(); if (p && p.catch) p.catch(()=>{}); } else document.exitFullscreen(); } catch(e){} }
+$('fsBtn').onclick = fullscreen;
+window.addEventListener('keydown', e => {
+  if (e.target.closest && e.target.closest('input,textarea')) return;
+  if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx+1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx-1); }
+  else if (/^[1-9]$/.test(e.key) && +e.key <= NSC) go(+e.key - 1);
+  else if (e.key === 'n' || e.key === 'N') toggleNotes();
+  else if (e.key === 'f' || e.key === 'F') fullscreen();
+  else if (e.key === 'r' || e.key === 'R') resetView();
+});
+
+// ---------- animation ----------
+const clock = new THREE.Clock(); let t = 0;
+function frame(){
+  const dt = Math.min(clock.getDelta(), .05);
+  if (spinning){ t += dt; TIME.value = t; SCENES[idx].tick(dt, t); }
+  controls.update(); renderer.render(scene, camera); requestAnimationFrame(frame);
+}
+size(); fromHash(); frame();
+</script>
+</body>
+</html>
