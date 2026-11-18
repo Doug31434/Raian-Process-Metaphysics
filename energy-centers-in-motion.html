@@ -29,6 +29,10 @@ button:focus-visible{outline:2px solid var(--c);outline-offset:2px}
 .bigname{font-family:var(--display);font-size:clamp(34px,6vw,64px);line-height:1;color:var(--c);text-shadow:0 0 30px color-mix(in srgb,var(--c) 40%,transparent)}
 .bignum{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
 .hint{font-family:var(--mono);font-size:11px;color:var(--muted);text-align:right}
+.polar{position:absolute;top:14px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:3}
+.polar[hidden]{display:none}
+.polar button{padding:8px 16px;font-size:13px;background:rgba(12,10,18,.6)}
+.polar button[aria-pressed="true"]{border-color:var(--c);box-shadow:0 0 0 1px var(--c) inset;color:var(--ink)}
 .arrow{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;background:rgba(12,10,18,.5)}
 .arrow.prev{left:max(12px,env(safe-area-inset-left,0px))}.arrow.next{right:12px}
 aside{background:var(--panel);border-left:1px solid var(--rule);overflow-y:auto;min-width:0;padding:22px 22px 28px max(22px,0px)}
@@ -50,7 +54,7 @@ dd{margin:0;min-width:0}
 .layers{font-size:13px;color:var(--muted);border-top:1px solid var(--rule);padding-top:12px;margin:0}
 #notes h2.sec{font-family:var(--body);font-weight:400;font-size:19px;margin:22px 0 8px;color:var(--c)}
 #notes p.prose{font-size:15px;line-height:1.55;margin:0 0 10px}
-nav.rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(9,minmax(0,1fr));border-top:1px solid var(--rule)}
+nav.rail{grid-column:1/-1;display:grid;grid-template-columns:repeat(10,minmax(0,1fr));border-top:1px solid var(--rule)}
 nav.rail button{border:0;border-radius:0;padding:10px 4px 12px;display:grid;gap:4px;justify-items:center;text-transform:none;letter-spacing:0;font-family:var(--body);font-size:14px;color:var(--muted);border-top:3px solid transparent}
 nav.rail button .dot{width:12px;height:12px;border-radius:50%;background:var(--dc);box-shadow:0 0 10px var(--dc)}
 nav.rail button[aria-current="true"]{color:var(--ink);border-top-color:var(--dc);background:rgba(255,255,255,.03)}
@@ -79,11 +83,12 @@ nav.rail button[aria-current="true"]{color:var(--ink);border-top-color:var(--dc)
   </header>
   <div class="stage" id="stage">
     <canvas id="gl" aria-label="Interactive 3D form of the current energy center. Drag to turn it, scroll or pinch to zoom."></canvas>
+    <div class="polar" id="polar" hidden><button type="button" id="polPos" aria-pressed="true">Positive</button><button type="button" id="polNeg" aria-pressed="false">Negative</button></div>
     <button class="arrow prev" id="prevBtn" type="button" aria-label="Previous center">‹</button>
     <button class="arrow next" id="nextBtn" type="button" aria-label="Next center">›</button>
     <div class="caption">
       <div><div class="bignum" id="bignum"></div><div class="bigname" id="bigname"></div></div>
-      <div class="hint">Drag to turn · scroll to zoom<br>← → or 1–9 to move · N notes · F full screen</div>
+      <div class="hint">Drag to turn · scroll to zoom<br>← → or 0–9 to move · N notes · F full screen</div>
     </div>
   </div>
   <aside id="notes" aria-live="polite"></aside>
@@ -170,6 +175,10 @@ const CENTERS = [
     <p class="prose">Bellicosity in itself is a movement to be studied and balanced, catalyst like any other. Our Logos designed the experiment for the greatest possible opportunities for polarization, with <q>a bias towards kindness</q> <span class="cite">(90.21)</span>. Warfare of our kind wasn't planned. Used efficiently, conflict sharpens the choice. Used inefficiently, as on Earth, it neither clarifies nor resolves: it circles, compounds, and enmeshes. Ra speaks of the inefficient use of catalyst (66.34); "the inefficient use of bellicosity" names that same failure applied to bellicose catalyst. Forgiveness, <q>implicit in universal love</q> <span class="cite">(34.17)</span>, is what lets the stalled stream rise.</p>
     <p class="render"><span class="lbl">What you're seeing</span>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH, a vortex that feeds on the very energy it keeps circling. Now and then the lotus at green parts for a moment and closes again: the Patton pattern, frequent green-ray openings that never hold. At the lotus's center the small orb is dull, smoky orange: humanity under the orange-ray overlay, before the heart's activation. This is Stage 1 of <i>The Green Ray in Six Stages</i>.</p>
     <p class="layers">Words in quotation marks with a session.question number are Ra's, from <i>The Ra Contact</i>. The Great BASH, its vortex shape, and "the inefficient use of bellicosity" are interpretive terms, not Ra's.</p>`}
+ ,{key:'polarity', name:'Violet: Two Paths', color:'#b46ae6', num:'Entrance to fourth density', sub:'The violet ray, positive and negative', dist:5.0, elev:12, toggle:true,
+  html:`<div class="form"><span class="lbl">Ra · the violet ray at harvest</span><q>The violet ray of the positive fourth-density will be tinged with the green, blue, indigo triad of energies. This tinge may be seen as a portion of a rainbow or prism, as you know it, the rays being quite distinct. The violet ray of fourth-density negative has in its aura, shall we say, the tinge of red, orange, yellow, these three rays being muddied rather than distinct.</q> <span class="cite">(33.19)</span></div>
+    <dl><dt>Harvest</dt><dd><q>This violet ray is the only consideration for fourth-density positive</q> <span class="cite">(34.16)</span></dd></dl>
+    <p class="render"><span class="lbl">What you're seeing</span>The violet center, a thousand petals in four crowns, at the entrance to fourth density. Use the toggle above the form. <b>Positive:</b> the aura carries green, blue and indigo as three clear bands, each holding its own place, like a portion of a rainbow. <b>Negative:</b> the aura carries red, orange and yellow, churning into one another with a smoky haze, muddied rather than distinct. Ra gives the colors and their clarity; the bands, rings and haze are an interpretation. Press P to switch.</p>`}
 ];
 
 const $ = id => document.getElementById(id);
@@ -604,8 +613,55 @@ function buildBash(){
     smoke.material.opacity = 0.5*(0.8 + 0.2*Math.sin(t*0.7)); };
   return {root, tick}; }
 
+// ---------- scene: violet at the entrance to fourth density, positive and negative (33.19) ----------
+let polarNeg = 0;   // 0 positive, 1 negative (the toggle)
+function buildPolarity(){
+  const root = new THREE.Group(), spin = new THREE.Group(); root.add(spin);
+  const form = buildViolet(); form.G.scale.setScalar(FS*0.98); spin.add(form.G);
+  const mkPts = (N, size) => { const pos = new Float32Array(N*3), col = new Float32Array(N*3), g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+    const m = pointsMat(size), p = new THREE.Points(g, m); root.add(p); return {pos, col, g, m, p, N}; };
+  const rimShell = (hex, r, pw, a) => { const m = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.FrontSide,
+      uniforms:{c:{value:new THREE.Color(hex)}, k:{value:1}}, vertexShader:orbVS,
+      fragmentShader:`uniform vec3 c; uniform float k; varying vec3 vN; varying vec3 vV; void main(){ float f = 1.0 - max(dot(vN, vV), 0.0); gl_FragColor = vec4(c, pow(f, ${pw.toFixed(1)})*${a.toFixed(2)}*k); }` });
+    const me = new THREE.Mesh(new THREE.SphereGeometry(r, 64, 48), m); root.add(me); return m; };
+  const pRims = [[0x36c47e, 0.98], [0x3d8cf0, 1.10], [0x7466f0, 1.22]].map(([c, r]) => rimShell(c, r, 7.0, 1.0));
+  const nRims = [[0x8a3a26, 1.08], [0x96582a, 1.11], [0x8a7a30, 1.14], [0x4a3628, 1.18]].map(([c, r]) => rimShell(c, r, 1.2, 0.4));
+  // positive: green, blue, indigo as three distinct bands, a portion of a rainbow or prism
+  const BANDS = [[0x36c47e, 0.98], [0x3d8cf0, 1.10], [0x7466f0, 1.22]];
+  const P = mkPts(2400, 0.05), PP = [];
+  for (let i=0;i<P.N;i++){ const b = i%3, u = Math.random()*2-1, th = Math.random()*Math.PI*2; PP.push({b, u, th, sp:0.15 + 0.1*Math.random()}); }
+  const rings = BANDS.map(([c, r], i) => { const pts = []; for (let k=0;k<=160;k++){ const a = k/160*Math.PI*2; pts.push(new THREE.Vector3(r*Math.cos(a), 0, r*Math.sin(a))); }
+    const m = new THREE.LineBasicMaterial({color:c, transparent:true, opacity:0.8, depthWrite:false, blending:THREE.AdditiveBlending}); const L = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m);
+    L.rotation.set(0.35 + 0.05*i, 0, -0.2); root.add(L); return {L, m}; });
+  const pGlow = glowSprite(0x7aa8ff, 3.0, 0.18); root.add(pGlow);
+  // negative: red, orange, yellow in the aura, muddied rather than distinct
+  const N = mkPts(2600, 0.06), NP = [], MUD = new THREE.Color(0x4a3628), NCOL = [0xd2382c, 0xe8802a, 0xe2c830].map(h => new THREE.Color(h));
+  for (let i=0;i<N.N;i++){ const c = NCOL[Math.floor(Math.random()*3)].clone().lerp(NCOL[Math.floor(Math.random()*3)], Math.random()).lerp(MUD, 0.35 + 0.3*Math.random());
+    NP.push({r:0.9 + 0.42*Math.random(), u:Math.random()*2-1, th:Math.random()*Math.PI*2, sp:(Math.random()-0.5)*0.6, ph:Math.random()*6.28, c}); }
+  const smokes = []; for (let i=0;i<7;i++){ const s = glowSprite(0x3a2a20, 1.4, 0.35); s.material.blending = THREE.NormalBlending; root.add(s); smokes.push({s, a:i/7*Math.PI*2}); }
+  const nGlow = glowSprite(0xb05a30, 3.0, 0.2); root.add(nGlow);
+  let w = 0, t = 0;
+  const tick = (dt) => { t += dt; w += (polarNeg - w)*(1 - Math.exp(-dt*2.5));
+    tickCenterForm(spin, form, dt, t);
+    const pw = 1 - w; pRims.forEach(m => m.uniforms.k.value = pw); nRims.forEach(m => m.uniforms.k.value = w*(0.85 + 0.15*Math.sin(t*1.7)));
+    P.m.opacity = pw; P.p.visible = pw > 0.01; rings.forEach((r, i) => { r.m.opacity = 0.8*pw; r.L.visible = pw > 0.01; r.L.rotation.y += dt*(0.1 + 0.05*i); }); pGlow.material.opacity = 0.18*pw;
+    if (P.p.visible){ const c = new THREE.Color(); for (let i=0;i<P.N;i++){ const q = PP[i]; q.th += dt*q.sp; const r = BANDS[q.b][1], s = Math.sqrt(1 - q.u*q.u);
+        P.pos[i*3] = r*s*Math.cos(q.th); P.pos[i*3+1] = r*q.u; P.pos[i*3+2] = r*s*Math.sin(q.th);
+        c.setHex(BANDS[q.b][0]); P.col[i*3] = c.r; P.col[i*3+1] = c.g; P.col[i*3+2] = c.b; }
+      P.g.attributes.position.needsUpdate = true; P.g.attributes.color.needsUpdate = true; }
+    N.m.opacity = w; N.p.visible = w > 0.01; nGlow.material.opacity = 0.2*w;
+    smokes.forEach((o, i) => { o.a += dt*0.15; o.s.position.set(1.05*Math.cos(o.a), 0.35*Math.sin(t*0.4 + i), 1.05*Math.sin(o.a)); o.s.material.opacity = 0.35*w; o.s.visible = w > 0.01; });
+    if (N.p.visible){ for (let i=0;i<N.N;i++){ const q = NP[i]; q.th += dt*q.sp; q.ph += dt*0.7; const r = q.r + 0.08*Math.sin(q.ph + q.th*3), s = Math.sqrt(1 - q.u*q.u), y = q.u + 0.06*Math.sin(q.ph*1.3);
+        N.pos[i*3] = r*s*Math.cos(q.th); N.pos[i*3+1] = r*y; N.pos[i*3+2] = r*s*Math.sin(q.th);
+        N.col[i*3] = q.c.r; N.col[i*3+1] = q.c.g; N.col[i*3+2] = q.c.b; }
+      N.g.attributes.position.needsUpdate = true; N.g.attributes.color.needsUpdate = true; } };
+  return {root, tick}; }
+const tickCenterForm = (spin, f, dt, t) => { spin.rotation.y += dt*.18; if (f.G.userData.tick) f.G.userData.tick(dt);
+  if (f.mats && f.mats.length){ const k = 0.88 + 0.12*Math.sin(t*1.3); f.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = k; else if (m.userData.op !== undefined) m.opacity = m.userData.op*k; }); } };
+
 const SCENES = CENTERS.filter(ct => !ct.html).map(ct => { const root = makeCenter(ct.key); return {root, tick:(dt, t) => tickCenter(root, dt, t)}; });
-SCENES.push(buildColumn(), buildBash());
+SCENES.push(buildColumn(), buildBash(), buildPolarity());
 SCENES.forEach(sc => { sc.root.visible = false; scene.add(sc.root); });
 const NSC = SCENES.length;
 
@@ -637,7 +693,8 @@ function renderNotes(){
 CENTERS.forEach((ct,i) => { const b = document.createElement('button'); b.type = 'button'; b.style.setProperty('--dc', ct.color);
   b.innerHTML = `<span class="dot"></span><span class="nm">${ct.name}</span>`; b.addEventListener('click', () => go(i)); rail.appendChild(b); });
 
-function go(i, fromHash){ idx = (i + NSC) % NSC; SCENES.forEach((g,k) => g.root.visible = k===idx); renderNotes(); resetView();
+function setPolar(n){ polarNeg = n; $('polPos').setAttribute('aria-pressed', String(!n)); $('polNeg').setAttribute('aria-pressed', String(!!n)); }
+function go(i, fromHash){ idx = (i + NSC) % NSC; $('polar').hidden = !CENTERS[idx].toggle; SCENES.forEach((g,k) => g.root.visible = k===idx); renderNotes(); resetView();
   if (!fromHash){ try { history.replaceState(null, '', '#' + CENTERS[idx].key); } catch(e){ location.hash = CENTERS[idx].key; } } }
 function fromHash(){ const k = location.hash.slice(1); const i = CENTERS.findIndex(c => c.key === k); go(i >= 0 ? i : 0, true); }
 window.addEventListener('hashchange', fromHash);
@@ -650,6 +707,7 @@ const notesBtn = $('notesBtn');
 function toggleNotes(){ const off = app.classList.toggle('notes-off'); notesBtn.textContent = off ? 'Show notes' : 'Hide notes'; notesBtn.setAttribute('aria-pressed', String(!off)); requestAnimationFrame(size); }
 notesBtn.onclick = toggleNotes;
 $('resetBtn').onclick = resetView;
+$('polPos').onclick = () => setPolar(0); $('polNeg').onclick = () => setPolar(1);
 $('prevBtn').onclick = () => go(idx-1); $('nextBtn').onclick = () => go(idx+1);
 function fullscreen(){ const el = document.documentElement; try { if (!document.fullscreenElement) { const p = el.requestFullscreen && el.requestFullscreen(); if (p && p.catch) p.catch(()=>{}); } else document.exitFullscreen(); } catch(e){} }
 $('fsBtn').onclick = fullscreen;
@@ -658,6 +716,8 @@ window.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); go(idx+1); }
   else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); go(idx-1); }
   else if (/^[1-9]$/.test(e.key) && +e.key <= NSC) go(+e.key - 1);
+  else if (e.key === '0' && NSC >= 10) go(9);
+  else if ((e.key === 'p' || e.key === 'P') && CENTERS[idx].toggle) setPolar(polarNeg ? 0 : 1);
   else if (e.key === 'n' || e.key === 'N') toggleNotes();
   else if (e.key === 'f' || e.key === 'F') fullscreen();
   else if (e.key === 'r' || e.key === 'R') resetView();
