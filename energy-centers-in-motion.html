@@ -130,7 +130,7 @@ const CENTERS = [
       ['Experience','<q>In terms of universal love</q> <span class="cite">(49.6)</span>'],
       ['Blockage','<q>Difficulties in expressing what you may call universal love, or compassion</q> <span class="cite">(15.12)</span>']],
   arch:'The compassionate witness. Acceptance and understanding.', purview:'Absorption, turning, exchange, witnessing observation, perception, interplay, kenosis, protection.',
-  render:'Green as in Stage 2 of <i>The Green Ray in Six Stages</i>: the stream from below rises freely into the heart and the lotus opens. At its center the small orb shines a bright, beautiful yellow, and around it circulates humanity\'s own toroidal field, yellow: veiled third density, the field we share as a people, held at the heart and no longer stalled below it.'},
+  render:'Green as in Stage 2 of <i>The Green Ray in Six Stages</i>: the stream from below rises freely into the heart and the lotus opens. At its center shines an emerald orb, and around it circulates the heart\'s own toroidal field in green, held at the heart and no longer stalled below it.'},
  {key:'blue', name:'Blue', color:'#3d8cf0', glow:'#8cc2ff', num:'Energy center 5 · 4th of the five · primary', sub:'The faceted gem — radiance',
   form:'The blue energy center capable of having perhaps one hundred facets and capable of great flashing brilliance.',
   ra:[['Activity','<q>The first ray of radiation of self regardless of any actions from another… The blue-ray entity is a co-Creator</q> <span class="cite">(41.25)</span>'],
@@ -488,17 +488,17 @@ const torusField = (parent, o) => { const G = new THREE.Group(); parent.add(G);
 function buildGreen(){ // green as in Stage 2 of The Green Ray in Six Stages: the lotus open, the bright yellow orb, humanity's own toroidal field
   const G = new THREE.Group(); let t = 0;
   const setLotus = lotusOf(G);
-  const orb = smallOrb(G, 0xffd23a);
-  const glow = glowSprite(0xffd23a, 0.75, 0.75); G.add(glow);
-  const tor = torusField(G, {R:0.50, rr:0.36, rv:0.48, nl:30, off:0, col:0xe2c030, lop:0.34, np:900, ps:0.045, pcol:0xf2d250, drift:0.16});
+  const orb = smallOrb(G, 0x0fb85e);
+  const glow = glowSprite(0x0ea85a, 0.6, 0.55); G.add(glow);
+  const tor = torusField(G, {R:0.50, rr:0.36, rv:0.48, nl:30, off:0, col:0x3fcf7a, lop:0.34, np:900, ps:0.045, pcol:0x7af0a8, drift:0.16});
   // the stream from below rising freely along the axis into the heart
   const N = 260, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
   for (let i=0;i<N;i++) P.push({u:Math.random(), ph:Math.random()*Math.PI*2, r:0.03 + 0.09*Math.random(), sp:0.18 + 0.1*Math.random()});
   const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
   G.add(new THREE.Points(pg, pointsMat(0.045)));
-  const y0 = yBot, y1 = -0.1, cA = new THREE.Color(0xe2c830), cB = new THREE.Color(0xa8d838), c = new THREE.Color();
+  const y0 = yBot, y1 = -0.1, cA = new THREE.Color(0xa8d838), cB = new THREE.Color(0x3fcf7a), c = new THREE.Color();
   G.userData.tick = (dt) => { t += dt; setLotus(t, 1); tor.userData.tick(dt);
-    orb.scale.setScalar(0.85 + 0.15*Math.sin(t*1.1)); glow.material.opacity = 0.75*(0.9 + 0.1*Math.sin(t*1.7));
+    orb.scale.setScalar(0.85 + 0.15*Math.sin(t*1.1)); glow.material.opacity = 0.55*(0.9 + 0.1*Math.sin(t*1.7));
     for (let i=0;i<N;i++){ const q = P[i]; q.u = (q.u + dt*q.sp) % 1; q.ph += dt*0.5; const y = y0 + (y1 - y0)*q.u, r = q.r*(1 + 0.5*Math.sin(q.u*12 + q.ph));
       pp[i*3] = r*Math.cos(q.ph); pp[i*3+1] = y; pp[i*3+2] = r*Math.sin(q.ph);
       const f = smooth(q.u, 0, 0.1)*(1 - smooth(q.u, 0.85, 1)); c.copy(cA).lerp(cB, q.u).multiplyScalar(f); pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b; }
