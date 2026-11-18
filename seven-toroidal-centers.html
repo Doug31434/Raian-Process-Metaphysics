@@ -581,8 +581,8 @@ const tickCenter = (sub, dt, t) => { sub.userData.memb.userData.tick(dt); sub.us
   if (f.mats && f.mats.length){ const k = 0.88 + 0.12*Math.sin(t*1.3); f.mats.forEach(m => { if (m.userData.fres) m.uniforms.k.value = k; else if (m.userData.op !== undefined) m.opacity = m.userData.op*k; }); } };
 const makeCenter = (key) => { const root = new THREE.Group(); root.userData.memb = flowMembrane(root, key);
   const o = FORMS[key](), spin = new THREE.Group(); spin.add(o.G); root.add(spin); root.userData.spin = spin; root.userData.form = o; return root; };
-function buildColumn(SC){
-  const root = new THREE.Group(), SP = yNeck - yRoot, subs = [];
+function buildColumn(SC, STEP){   // STEP: distance between centers in the column's own units (SP when they touch)
+  const root = new THREE.Group(), SP = STEP || (yNeck - yRoot), subs = [];
   ['red','orange','yellow','green','blue','indigo','violet'].forEach((k, i) => { const s = makeCenter(k); s.position.y = (i - 3)*SP; root.add(s); subs.push(s); });
   root.scale.setScalar(SC);
   // point sprites are sized in world units and don't follow the group's scale, so scale them here
@@ -590,13 +590,26 @@ function buildColumn(SC){
   root.traverse(o => { if (o.material && o.material.uniforms && o.material.uniforms.uScale){ const m = o.material.clone(); m.uniforms.uScale = scU; if (m.uniforms.uTime) m.uniforms.uTime = TIME; if (o.material.uniforms.uGain) m.uniforms.uGain = o.material.uniforms.uGain; o.material = m; } });
   const ys = subs.map(sb => sb.position.y), KEYS = ['red','orange','yellow','green','blue','indigo','violet'];
   const stops = [[ys[0] + yBot - 0.6, HEX.white], ...KEYS.map((k, i) => [ys[i], HEX[k]]), [ys[6] + yTop + 0.9, HEX.wgold]];
-  const rise = makeRiser(root, {n:3200, y0:ys[0] + yBot - 0.6, y1:ys[6] + yTop + 0.9, r0:0.04, r1:0.45, sp:0.045, size:0.08, gain:0.55, col:axisColor(stops)});
-  return {root, tick:(dt, t) => { subs.forEach(s => tickCenter(s, dt, t)); rise(dt, t); }}; }
+  const colAt = axisColor(stops), span = (ys[6] + yTop + 0.9) - (ys[0] + yBot - 0.6);
+  const rise = makeRiser(root, {n:Math.round(3200*span/11.5), y0:ys[0] + yBot - 0.6, y1:ys[6] + yTop + 0.9, r0:0.04, r1:0.45, sp:0.045*11.5/span, size:0.08, gain:0.55, col:colAt});
+  // the liminal space between centers: a soft sheaf of light carrying the color of one center over into the next
+  const lim = new THREE.Group(); root.add(lim);
+  { const pos = [], cols = [], al = [];
+    for (let k=0;k<6;k++){ const ya = ys[k] + yNeck - 0.1, yb = ys[k+1] + yRoot + 0.1;
+      for (let i=0;i<40;i++){ const phi = i/40*Math.PI*2; let prev = null;
+        for (let j=0;j<=40;j++){ const u = j/40, y = ya + (yb - ya)*u, bell = Math.sin(Math.PI*u), r = 0.12 + 0.34*bell, tw = phi + 0.6*u;
+          const p = new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)), c = colAt(y), a = 0.25 + 0.75*bell;
+          if (prev){ pos.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cols.push(prev.c.r, prev.c.g, prev.c.b, c.r, c.g, c.b); al.push(prev.a, a); }
+          prev = {p, c, a}; } } }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); g.setAttribute('alpha', new THREE.Float32BufferAttribute(al,1));
+    lim.add(new THREE.LineSegments(g, fadeMat(0.32, true)));
+    for (let k=0;k<6;k++){ const ym = (ys[k] + ys[k+1])/2, sp = glowSprite(colAt(ym).getHex(), 1.1, 0.22); sp.position.y = ym; lim.add(sp); } }
+  return {root, tick:(dt, t) => { subs.forEach(s => tickCenter(s, dt, t)); rise(dt, t); lim.rotation.y += dt*0.05; }}; }
   return { FORMS, TIME, PT_SCALE, buildColumn, SP: yNeck - yRoot };
   })();
 
   // ---------- the seven centers ----------
-  const SPACING = 1.95, N = 7, Y0 = -SPACING*3;
+  const SPACING = 3.1, N = 7, Y0 = -SPACING*3;
   const centerY = i => Y0 + i*SPACING;
   const CENTERS = [
     { key:"red", name:"Red",    hex:"#e0453a", col:0xe0453a, words:"the spoked wheel" },
@@ -682,7 +695,7 @@ function buildColumn(SC){
   });
   // the seven as on "All Seven" (energy-centers-in-motion.html#column): each form in its flow membrane, light rising root to crown
   {
-    const K = SPACING/PORT.SP, col = PORT.buildColumn(K);
+    const K = 1.95/PORT.SP, col = PORT.buildColumn(K, SPACING/K);   // centers keep their size; the gaps between them open
     figG.add(col.root); updaters.push((dt, t)=> col.tick(dt, t));
   }
   reg("fields", fieldsG); reg("flow", flowG); reg("figures", figG); reg("seats", seatG);
@@ -783,16 +796,16 @@ function buildColumn(SC){
   });
 
   // ---------- camera ----------
-  const orbit = { az:0.5, el:0.5, dist:21 }, target = new THREE.Vector3(0,0,0), targetGoal = new THREE.Vector3(0,0,0);
+  const orbit = { az:0.5, el:0.42, dist:37 }, target = new THREE.Vector3(0,0,0), targetGoal = new THREE.Vector3(0,0,0);
   window.__orbit = orbit; window.__target = targetGoal;
   let tween = null;
   const PRESETS = {
-    oblique:{ az:0.5, el:0.5, dist:21, ty:0 },
-    side:{ az:0.2, el:0.04, dist:21, ty:0 },
+    oblique:{ az:0.5, el:0.42, dist:37, ty:0 },
+    side:{ az:0.2, el:0.04, dist:37, ty:0 },
     axis:{ az:0.0, el:1.54, dist:12, ty:0 },
     heart:{ az:0.6, el:0.55, dist:5.5, ty:centerY(3) },
-    lower:{ az:0.5, el:0.45, dist:8.5, ty:centerY(1) },
-    upper:{ az:0.5, el:0.45, dist:8.5, ty:centerY(5) }
+    lower:{ az:0.5, el:0.45, dist:11, ty:centerY(1) },
+    upper:{ az:0.5, el:0.45, dist:11, ty:centerY(5) }
   };
   function updateCamera(){
     target.lerp(targetGoal, 0.08);
