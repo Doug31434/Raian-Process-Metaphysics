@@ -401,13 +401,17 @@ function flowMembrane(root, key){
     pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; G.rotation.y += dt*0.05; };
   // red receives intelligent energy as white light rising from everywhere below in soft waves (59.11, 54.27)
   if (key === 'red'){ let seed = 7; const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
-    const rootP = new THREE.Vector3(0, yBot + 0.16, 0), RS = onionR(rootP.y)*0.95, yLow = -2.0, sp = [], sc = [], sa = [], wht = new THREE.Color(0xfbfaf6);
+    const rootP = new THREE.Vector3(0, yBot + 0.16, 0), RS = onionR(rootP.y)*0.95, yLow = -2.0, sp = [], sc = [], sa = [], st = [], sh = [], wht = new THREE.Color(0xfbfaf6);
     for (let i=0;i<1600;i++){ const a0 = rnd()*Math.PI*2, r0 = 0.25 + 2.2*Math.sqrt(rnd()), ys = yLow + (yBot - 0.02 - yLow)*Math.pow(rnd(), 1.1), amp = 0.03 + 0.05*rnd(), wv = 1.2 + 1.6*rnd(), ph = rnd()*Math.PI*2, sw = 0.3 + 0.4*rnd(); let prev = null;
       for (let k=0;k<32;k++){ const t = k/31, y = ys + (rootP.y - ys)*t, gg = smooth(t, 0, 1), rr = r0 + (RS - r0)*gg, ang = a0 + sw*t, wob = amp*(1 - gg)*Math.sin(ph + t*wv*Math.PI*2);
         const p = new THREE.Vector3(rr*Math.cos(ang) - wob*Math.sin(ang), y, rr*Math.sin(ang) + wob*Math.cos(ang)), a = 0.55 + 0.45*Math.pow(t, 2.5);
-        if (prev){ sp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); sc.push(wht.r, wht.g, wht.b, wht.r, wht.g, wht.b); sa.push(prev.a, a); } prev = {p, a}; } }
-    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3)); sg.setAttribute('color', new THREE.Float32BufferAttribute(sc,3)); sg.setAttribute('alpha', new THREE.Float32BufferAttribute(sa,1));
-    root.add(new THREE.LineSegments(sg, fadeMat(0.07, true))); const s = glowSprite(0xffffff, 0.5, 0.7); s.position.copy(rootP); root.add(s); }
+        if (prev){ sp.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); sc.push(wht.r, wht.g, wht.b, wht.r, wht.g, wht.b); sa.push(prev.a, a); st.push(prev.t, t); sh.push(ph, ph); } prev = {p, a, t}; } }
+    const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(sp,3)); sg.setAttribute('color', new THREE.Float32BufferAttribute(sc,3)); sg.setAttribute('alpha', new THREE.Float32BufferAttribute(sa,1)); sg.setAttribute('st', new THREE.Float32BufferAttribute(st,1)); sg.setAttribute('sph', new THREE.Float32BufferAttribute(sh,1));
+    // light travelling up each strand: soft pulses rising from below into the root
+    const flowM = new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, uniforms:{ uTime:TIME },
+      vertexShader:`attribute vec3 color; attribute float alpha; attribute float st; attribute float sph; varying vec3 vC; varying float vA; varying float vT; varying float vP; void main(){ vC = color; vA = alpha; vT = st; vP = sph; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+      fragmentShader:`uniform float uTime; varying vec3 vC; varying float vA; varying float vT; varying float vP; void main(){ float w = fract(vT*2.2 - uTime*0.45 + vP*0.159); float pulse = pow(smoothstep(0.0, 0.85, w)*(1.0 - smoothstep(0.85, 1.0, w)), 2.0); gl_FragColor = vec4(vC, vA*(0.035 + 0.22*pulse)); }` });
+    root.add(new THREE.LineSegments(sg, flowM)); const s = glowSprite(0xffffff, 0.5, 0.7); s.position.copy(rootP); root.add(s); }
   // violet passes it on: white-gold, gathered into one column
   if (key === 'violet'){ const cp = [], cc = [], ca = [], wg = new THREE.Color(HEX.wgold);
     for (let i=0;i<24;i++){ const phi = i/24*Math.PI*2, r = 0.05; let prev = null;
