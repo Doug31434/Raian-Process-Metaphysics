@@ -312,7 +312,7 @@ const memb = (() => { const G = new THREE.Group(); green.add(G); const mat = new
   for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, t:Math.random(), sp:0.05 + 0.03*Math.random()});
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
   const pm = pointsMat(0.04), pp = new THREE.Points(g, pm); G.add(pp);
-  updaters.push((dt) => { mat.opacity = 0.42*W.memb; pm.opacity = smooth(W.memb, 0.45, 0.85); pp.visible = pm.opacity > 0.01; G.rotation.y += dt*0.05; if (!pp.visible) return; const c = new THREE.Color();
+  updaters.push((dt) => { mat.opacity = 0.42*W.memb; pm.opacity = smooth(W.memb, 0.45, 0.85)*(1 - W.mrise); pp.visible = pm.opacity > 0.01; G.rotation.y += dt*0.05; if (!pp.visible) return; const c = new THREE.Color();
     for (let i=0;i<N;i++){ const p = P[i]; p.t = (p.t + dt*p.sp) % 1; const y = yb + (yt - yb)*p.t, r = onionR(y), tw = p.phi + 0.5*smooth(p.t, 0.12, 0.88);
       pos[i*3] = r*Math.cos(tw); pos[i*3+1] = y; pos[i*3+2] = r*Math.sin(tw);
       const fade = Math.min(smooth(y, yb, -1.12*ONION_H), 1 - smooth(y, 1.12*ONION_H, yt)); c.copy(membColor(y)).multiplyScalar(fade); col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b; }
@@ -365,7 +365,7 @@ const pearl = (() => {
   const DULL = new THREE.Color(0x9a5a2c), BRIGHT = new THREE.Color(0xffd23a);
   updaters.push((dt, t) => { const pre = W.orbO + W.orbY, f = pre > 1e-3 ? W.orbY/pre : 1;
     sMat.uniforms.c.value.copy(DULL).lerp(BRIGHT, f); sMat.uniforms.a.value = Math.min(1, pre); sOrb.visible = pre > 0.01;
-    sOrb.scale.setScalar(0.85 + 0.15*Math.sin(t*1.1)*f);
+    sOrb.scale.setScalar((0.85 + 0.15*Math.sin(t*1.1)*f)*(1 + 0.9*W.mrise));
     smoke.material.opacity = 0.5*W.orbO*(0.8 + 0.2*Math.sin(t*0.7)); smoke.scale.setScalar(0.5 + 0.05*Math.sin(t*0.5));
     sGlow.material.color.copy(DULL).lerp(BRIGHT, f); sGlow.material.opacity = (0.15*W.orbO + 0.75*W.orbY)*(0.9 + 0.1*Math.sin(t*1.7)); sGlow.scale.setScalar(0.4 + 0.35*f); });
   const wOrb = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), wMat); wOrb.renderOrder = 1; green.add(wOrb);
@@ -622,7 +622,7 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
     orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
-    memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22), pearl:0.45 + 0.55*ph(9, 13),
+    memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22)*(1 - ph(40, 46)), pearl:0.45 + 0.55*ph(9, 13),
     triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(34, 41)),
     lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
@@ -650,7 +650,7 @@ const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = 
   updaters.push((dt, t) => { G.visible = W.lot7 > 0.01; if (!G.visible) return;
     const vis = [W.lay0, 1, W.lay2, W.lay3], ang = [lerp(0.3, 1.32, W.lay0), lerp(0.12, 1.05, W.yes), lerp(0.1, 0.95, W.lay2), lerp(0.08, 0.72, W.lay3)];
     rings.forEach((R, k) => R.petals.forEach((p, i) => { p.hinge.rotation.z = -ang[k] - 0.03*Math.sin(t*0.8 + i + k);
-      p.mat.opacity = W.lot7*vis[k]*(k === 1 ? 0.5 + 0.25*W.yes : k >= 2 ? 0.85 : 0.68); }));
+      p.mat.opacity = W.lot7*vis[k]*(k === 1 ? 0.5 + 0.25*W.yes : k >= 2 ? 0.85 : 0.68)*(1 - 0.68*W.mrise); }));   // Doug (Nov 18): more transparent at the end, so the ankh and the yellow sphere show
     if (Math.abs(W.blu7 - lastBlu) > 0.004) { lastBlu = W.blu7; rings[1].petals.forEach(p => { const at = p.geo.attributes.color;
       for (let j=0;j<at.count*3;j++) at.array[j] = lerp(p.a[j], p.b[j], W.blu7); at.needsUpdate = true; }); }
     G.scale.setScalar(1 + 0.3*W.lay0); });   // the heart enlarges as the layers unfold
@@ -673,7 +673,7 @@ const cc7 = (() => { const G = new THREE.Group(); scene.add(G); const mats = [];
     const e = W.ccIn, op = w*(0.26 + 0.74*e);   // faint while it waits
     mats.forEach(m => m.opacity = m.userData.op*op);
     const az = PRESETS.whole.az; from.set(-Math.sin(az)*3.4, -0.9, -Math.cos(az)*3.4);   // behind the column, as seen from the opening view
-    const sc = lerp(3.9, 0.42, e); to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);
+    const sc = lerp(3.9, 0.42, e)*(1 + 0.55*W.mrise);   // larger at the end, so the ankh reads clearly to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);
     G.scale.setScalar(sc); G.rotation.y = lerp(az, az + 0.6*t, e*e);   // faces us while waiting; turns through the sphere once settled
     for (let i=0;i<N;i++){ U[i] = (U[i] + dt*0.08) % 1; loop.getPointAt(U[i], v); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z; } g.attributes.position.needsUpdate = true; });
   return G; })();
@@ -700,8 +700,8 @@ const aura7 = (() => { const a1 = glowSprite(0xf4c650, 1, 0), a2 = glowSprite(0x
   updaters.push((dt, t) => { const w = W.aura, r = W.mrise, e = r*r*(3 - 2*r), pulse = 0.78 + 0.22*Math.sin(t*1.5); a1.visible = a2.visible = a3.visible = w > 0.005;
     const y = lerp(-0.9, GY - 0.4, e); a1.position.y = a2.position.y = y; a3.position.y = GY - 0.3;   // gathers around the heart and the risen moon
     a1.scale.set(lerp(4.4, 3.4, e), lerp(8.6, 4.4, e), 1); a2.scale.set(lerp(7.4, 6.0, e), lerp(11.6, 7.2, e), 1); a3.scale.set(2.6, 2.9, 1);
-    a1.material.opacity = lerp(0.34, 0.62, e)*w*pulse; a2.material.opacity = lerp(0.17, 0.32, e)*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6));
-    a3.material.opacity = 0.3*e*w*(0.8 + 0.2*Math.sin(t*1.5 + 0.4)); }); })();
+    a1.material.opacity = lerp(0.34, 0.85, e)*w*pulse; a2.material.opacity = lerp(0.17, 0.48, e)*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6));
+    a3.material.opacity = 0.42*e*w*(0.8 + 0.2*Math.sin(t*1.5 + 0.4)); }); })();
 
 // the lower centers gather into a crescent moon beneath, a cradle of red, orange and yellow
 const moon7 = (() => { const G = new THREE.Group(); G.position.y = -3.05; scene.add(G);
