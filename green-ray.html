@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>The Green Ray in Six Stages</title>
+<title>The Green Ray in Seven Stages</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -51,8 +51,8 @@ input[type=range]{width:110px;accent-color:var(--gold)}
 <body>
 <div class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
-  <h1>The Green Ray in Six Stages</h1>
-  <p class="thesis">From a heart that only glimpses opening, to the heart where humanity and the Solar Logos meet, and the Living Ankh that arises above it and settles as the Christic Complex.</p>
+  <h1>The Green Ray in Seven Stages</h1>
+  <p class="thesis">From a heart that only glimpses opening, to the heart where humanity and the Solar Logos meet, and the Living Ankh that arises above it and settles as the Christic Complex, to our own yes that receives it.</p>
 </div>
 <div class="topbar">
   <button id="bCam" aria-expanded="false">Camera ▾</button>
@@ -74,7 +74,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   <h3>What Ra Says</h3>
   <p>Yellow ray "concerns the entity in relation to… groups, societies," and "is at the heart of bellicose actions" (32.2). Ra speaks of the energy centers' "lotus-shape" (51.8) and of green as "the great turning point," after which it "may then be turned outward, the entity then giving rather than receiving" (32.5). Invoking the higher self makes "a bridge betwixt space/time and time/space" (75.36).</p>
   <h3>What I Propose</h3>
-  <p>My proposal: the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility) works as a vortex enmeshed with the lower triad, and Yehoshua (Ra's edition spells it Jehoshua, 33.11), by will and faith, became the collective human green-ray center, where humanity's field and the Solar Logos's field interpenetrate. In Stage 4 the light spreading into its spectrum at the King's Chamber draws the Living Ankh on the blue center's axis. In Stage 5 the ankh settles as the Christic Complex: its nexus on the yellow center, its circle around the heart. Stage 6 comes close to that nexus: a golden Star of David with the Sacred Heart of Jesus at its center, sculpted from the traditional iconography.</p>
+  <p>My proposal: the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility) works as a vortex enmeshed with the lower triad, and Yehoshua (Ra's edition spells it Jehoshua, 33.11), by will and faith, became the collective human green-ray center, where humanity's field and the Solar Logos's field interpenetrate. In Stage 4 the light spreading into its spectrum at the King's Chamber draws the Living Ankh on the blue center's axis. In Stage 5 the ankh settles as the Christic Complex: its nexus on the yellow center, its circle around the heart. Stage 6 comes close to that nexus: a golden Star of David with the Sacred Heart of Jesus at its center, sculpted from the traditional iconography. Stage 7 turns to us, the veiled third-density human: the lotus becomes blue and opens in our yes, the grace of forgiveness falls like golden dew and dissolves the Great BASH, the Christic Complex comes into the heart, the lotus unfolds in green, blue, indigo and violet, and a golden aura (the clothing with the sun) gathers around the whole while the lower centers become the crescent moon beneath, a cradle (Rev. 12:1).</p>
   <h3>Where the Picture Bends</h3>
   <p>Ra doesn't describe the energy centers' fields, their colors of flow, or any vortex shape for the Great BASH. The tori, the onion and the vortex are my way of making a reading visible. The proportions are chosen for clarity, and the two fields at the heart are drawn as two shapes so that each stays legible. The heart sits at the Queen's Chamber position and the blue center at the King's Chamber position, spaced by their heights in the Great Pyramid. One more honest limit: when Don asked about a book linking the ankh shape to resonance in the pyramid, Ra called it "working with crayons" and said such shapes code mathematical relationships (55.14). The ankh here draws on Ra's other reading of it, as "an image of the eternal in and through manifestation" (93.24), and is my proposal.</p>
   <p>I'm offering these thoughts for what they are worth.</p>
@@ -88,6 +88,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
     <button class="stage" data-stage="4"><b>Stage 4</b><span>The Living Ankh</span></button>
     <button class="stage" data-stage="5"><b>Stage 5</b><span>The Christic Complex</span></button>
     <button class="stage" data-stage="6"><b>Stage 6</b><span>The Sacred Heart</span></button>
+    <button class="stage" data-stage="7"><b>Stage 7</b><span>The Marian Archetype</span></button>
   </div>
   <div class="caption" id="cap"></div>
   <div class="controls">
@@ -141,6 +142,9 @@ const STAGES = {
   5: {six:0, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
   6: {six:1, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:0.18}
 };
+const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon'];
+for (const n in STAGES) S7KEYS.forEach(k => { if (!(k in STAGES[n])) STAGES[n][k] = 0; });
+STAGES[7] = Object.assign({}, STAGES[1]);   // Stage 7 (Doug, Nov 18): filled frame by frame from its timeline
 const W = Object.assign({}, STAGES[1]);
 let stage = 1;
 
@@ -333,7 +337,8 @@ const lotus = (() => { const G = new THREE.Group(); green.add(G); const petals =
     // Stage 1: a brief parting every ~10 s, never held. Stage 2: open and steady.
     const cyc = (t % 10.5)/10.5, pulse = Math.pow(Math.max(0, Math.sin(Math.PI*clamp((cyc - 0.55)/0.3, 0, 1))), 1.6)*0.75;
     openNow = lerp(pulse, 1, W.open);
-    petals.forEach((p, i) => { p.hinge.rotation.z = -lerp(0.12, 1.12, openNow) - (i >= 8 ? 0.12*openNow : 0) - 0.03*Math.sin(t*0.8 + i); p.mat.opacity = 0.42 + 0.3*openNow; });
+    petals.forEach((p, i) => { p.hinge.rotation.z = -lerp(0.12, 1.12, openNow) - (i >= 8 ? 0.12*openNow : 0) - 0.03*Math.sin(t*0.8 + i); p.mat.opacity = (0.42 + 0.3*openNow)*(1 - W.lot7); });
+    G.visible = W.lot7 < 0.99;
   });
   return {G, get open(){ return openNow; }}; })();
 
@@ -520,14 +525,14 @@ const ankh = (() => { const G = new THREE.Group(); G.position.y = ORIG_TO_BLUE; 
     const gV = smooth(grow, 0, 0.6), gH = smooth(grow, 0.55, 1), op = W.ankh;   // the vertical field first, then the horizontal it gives rise to
     strands.forEach(st => { const g = st.kind === 'v' ? gV : gH; st.reach = g*st.total; const nIdx = Math.max(0, Math.floor(g*st.seg))*6*6; st.line.geometry.setDrawRange(0, nIdx);
       if (st.aura) { st.aura.geometry.setDrawRange(0, Math.max(0, Math.floor(g*st.seg))*8*6); st.aura.material.opacity = 0.06*op*W.five; st.aura.visible = W.five > 0.01; }
-      st.m.opacity = (st.white ? 0.5 : 0.95)*op*(1 - 0.4*W.five); });
-    core.material.opacity = 0.55*op*gH; pm.opacity = op;
+      st.m.opacity = (st.white ? 0.5*(1 - 0.7*W.six) : 0.95*(1 - 0.35*W.six))*op*(1 - 0.4*W.five); });   // Doug (Nov 18): Stage 6's white light toned down
+    core.material.opacity = 0.55*op*gH*(1 - 0.6*W.six); pm.opacity = op*(1 - 0.4*W.six);
     const f5 = W.five*W.five*(3 - 2*W.five); G.position.y = lerp(ORIG_TO_BLUE, CENTERS[2].y - sweep.position.y, f5); G.scale.setScalar(lerp(1, 2.75, f5));
     core.scale.setScalar(0.7 + 0.5*f5); auraGlow.material.opacity = 0.28*op*W.five*(0.9 + 0.1*Math.sin(t*0.9));
     for (let i=0;i<N;i++){ const p = P[i], st = strands[p.s]; p.u = (p.u + dt*0.3/st.total) % 1; const d = p.u*st.total;
       if (d > st.reach) { pc[i*3] = pc[i*3+1] = pc[i*3+2] = 0; continue; }
       at(st, d, v); pp[i*3] = v.x; pp[i*3+1] = v.y; pp[i*3+2] = v.z;
-      if (st.white) { pc[i*3] = 1; pc[i*3+1] = 1; pc[i*3+2] = 0.97; } else { pc[i*3] = 1; pc[i*3+1] = 0.76; pc[i*3+2] = 0.12; } }
+      if (st.white) { const wd = 1 - 0.6*W.six; pc[i*3] = wd; pc[i*3+1] = wd; pc[i*3+2] = 0.97*wd; } else { pc[i*3] = 1; pc[i*3+1] = 0.76; pc[i*3+2] = 0.12; } }
     pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; });
   return G; })();
 updaters.push((dt) => { sweep.rotation.y += dt*0.12; sweep.visible = W.fan > 0.01 || W.ankh > 0.01; });
@@ -540,10 +545,10 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
   // Doug (Nov 16): energy, not objects. Every part is light: glowing cores with soft halos, light flowing along them.
   const reg = (m, op) => { m.transparent = true; m.depthWrite = false; m.userData.op = op; mats.push(m); return m; };
   const glow = (hex, op) => reg(new THREE.MeshBasicMaterial({color:hex, blending:THREE.AdditiveBlending, side:THREE.DoubleSide}), op);
-  const energyTube = (parent, curve, closed, r, hex, seg, st = 1) => { for (const [k, op] of [[1, 0.9], [2.4, 0.22], [4.5, 0.07]]) parent.add(new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r*k, 10, closed), glow(hex, op*st))); };
+  const energyTube = (parent, curve, closed, r, hex, seg, st = 1) => { for (const [k, op] of [[1, 0.8], [2.4, 0.14], [4.5, 0.04]]) parent.add(new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r*k, 10, closed), glow(hex, op*st))); };
   const flows = [];   // light running along a curve
   const flowOn = (parent, curve, n, hex, size, speed) => { const pos = new Float32Array(n*3), g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-    const m = reg(new THREE.PointsMaterial({color:hex, size, map:dotTex, blending:THREE.AdditiveBlending, sizeAttenuation:true}), 1); parent.add(new THREE.Points(g, m));
+    const m = reg(new THREE.PointsMaterial({color:hex, size, map:dotTex, blending:THREE.AdditiveBlending, sizeAttenuation:true}), 0.7); parent.add(new THREE.Points(g, m));
     flows.push({curve, pos, g, n, speed, u:Array.from({length:n}, (_, i) => i/n)}); };
   // the star: two interlaced triangles of golden light
   const R6 = 0.52;
@@ -579,9 +584,9 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
   // the crown of thorns: a band of amber light around the heart
   { const ring = new THREE.Group(); ring.rotation.x = 0.14; ring.position.y = 0.03; ring.scale.set(1, 1, 0.58); H.add(ring);
     for (const ph of [0, 1.3, 2.6]) { const pts = []; for (let k=0;k<=80;k++){ const a = k/80*Math.PI*2; pts.push(new THREE.Vector3((0.158 + 0.008*Math.sin(a*5 + ph))*Math.cos(a), 0.014*Math.sin(a*7 + ph), (0.158 + 0.008*Math.sin(a*5 + ph))*Math.sin(a))); }
-      energyTube(ring, new THREE.CatmullRomCurve3(pts, true), true, 0.0035, 0xd8a050, 120); }
+      energyTube(ring, new THREE.CatmullRomCurve3(pts, true), true, 0.0035, 0xd8a050, 120, 0.6); }
     const thorns = []; for (let k=0;k<30;k++){ const a = k/30*Math.PI*2, d = new THREE.Vector3(Math.cos(a), 0.3*Math.sin(k*2.3), Math.sin(a)).normalize(); thorns.push(new THREE.Vector3(0.158*Math.cos(a), 0, 0.158*Math.sin(a)), new THREE.Vector3(0.158*Math.cos(a), 0, 0.158*Math.sin(a)).addScaledVector(d, 0.035)); }
-    ring.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(thorns), reg(new THREE.LineBasicMaterial({color:0xe8b060, blending:THREE.AdditiveBlending}), 0.9))); }
+    ring.add(new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(thorns), reg(new THREE.LineBasicMaterial({color:0xe8b060, blending:THREE.AdditiveBlending}), 0.6))); }
   // the flames: rising tongues of light
   const flames = [];
   for (let k=0;k<9;k++){ const x0 = (k-4)*0.016, hgt = 0.2 - 0.025*Math.abs(k-4), pts = []; for (let n=0;n<=20;n++){ const u = n/20; pts.push(new THREE.Vector3(x0*(1 - 0.6*u), 0.1 + hgt*u, 0)); }
@@ -589,7 +594,7 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
   { const fg = glowSprite(0xffa040, 0.25, 0); fg.position.set(0, 0.2, 0); reg(fg.material, 0.25); H.add(fg); }
   // the cross, as light rising from the flames
   { const v = new THREE.LineCurve3(new THREE.Vector3(0, 0.22, 0), new THREE.Vector3(0, 0.36, 0)), h = new THREE.LineCurve3(new THREE.Vector3(-0.038, 0.315, 0), new THREE.Vector3(0.038, 0.315, 0));
-    energyTube(H, v, false, 0.006, 0xffd890, 8, 0.8); energyTube(H, h, false, 0.006, 0xffd890, 8, 0.8); }
+    energyTube(H, v, false, 0.006, 0xffd890, 8, 0.5); energyTube(H, h, false, 0.006, 0xffd890, 8, 0.5); }
   // the figure spans y = -0.2 (the drop) to 0.36 (the cross); center it on the sphere's center
   H.position.y = -0.08*1.15;
   G.traverse(o => { o.renderOrder = 40; });
@@ -602,6 +607,125 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
     H.scale.setScalar(1.15*(1 + 0.03*Math.sin(t*1.6))); });   // a slow heartbeat
   return G; })();
 
+
+// ---------- Stage 7 (Doug, Nov 18): the Marian Archetype, our side of the veil ----------
+// Sequence (spec: claude/Green Ray Stage 7 Animation Spec Nov18 2026.md): the Great BASH and the closed lotus, the
+// Christic Complex waiting behind the column and larger than it; the lotus turns blue and opens (the yes), and at once
+// the grace of forgiveness falls like golden dew and dissolves the Great BASH; the Christic Complex, called, comes into
+// the heart and meets the yellow third-density sphere; the lotus unfolds in layers, green outermost, then blue, indigo,
+// violet innermost, the golden aura growing with each; last, the aura (the clothing with the sun) is strong and the
+// lower centers gather into a crescent moon beneath, a cradle. White light is kept restrained throughout.
+const s7 = {t:0, on:false, cams:{}};
+window.__s7t = () => s7.t;
+const startS7 = () => { s7.t = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGES[1]); W.lot7 = 1; goCam('whole', 1.6); };
+updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.t += dt;
+  const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
+  Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
+    orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18),
+    memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22), pearl:0.45 + 0.55*ph(9, 13),
+    triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(34, 41)),
+    lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
+    lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
+    aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.61*ph(32, 39), merge:ph(34, 41), moon:ph(34.5, 41)});
+  if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
+  if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); } });
+
+// the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
+const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
+  const shape = (L, Wd) => { const sh = new THREE.Shape(); sh.moveTo(0,0); sh.bezierCurveTo(Wd, L*0.25, Wd*0.9, L*0.7, 0, L); sh.bezierCurveTo(-Wd*0.9, L*0.7, -Wd, L*0.25, 0, 0); return new THREE.ShapeGeometry(sh, 16); };
+  const ring = (n, L, Wd, off, r0, cA, cB, cA2, cB2) => { const R = {petals:[], cols:[]};
+    for (let i=0;i<n;i++){ const az = off + i/n*Math.PI*2, geo = shape(L, Wd), pa = geo.attributes.position, a = [], b = [], c = new THREE.Color();
+      for (let j=0;j<pa.count;j++){ const u = pa.getY(j)/L; c.set(cA).lerp(new THREE.Color(cB), u); a.push(c.r, c.g, c.b); c.set(cA2 || cA).lerp(new THREE.Color(cB2 || cB), u); b.push(c.r, c.g, c.b); }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(a.slice(), 3));
+      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0, depthWrite:false});
+      const pivot = new THREE.Group(); pivot.rotation.y = -az; const hinge = new THREE.Group(); hinge.position.x = r0; pivot.add(hinge);
+      const mesh = new THREE.Mesh(geo, mat); mesh.position.y = -0.02; hinge.add(mesh); G.add(pivot); R.petals.push({hinge, mat, geo, a, b}); }
+    rings.push(R); return R; };
+  ring(10, 0.56, 0.18, Math.PI/10, 0.20, 0x12804b, 0x8fe0b4);                      // 0 green
+  ring(8, 0.50, 0.16, 0, 0.16, 0x1f8f58, 0x9ae6c0, 0x1838b4, 0x7aa2ff);           // 1 green → blue (the yes)
+  ring(8, 0.40, 0.13, Math.PI/8, 0.12, 0x3a2aa8, 0x8a7cf0);                       // 2 indigo
+  ring(6, 0.30, 0.10, 0, 0.085, 0x7a2ab8, 0xd6aaff);                              // 3 violet
+  let lastBlu = -1;
+  updaters.push((dt, t) => { G.visible = W.lot7 > 0.01; if (!G.visible) return;
+    const vis = [W.lay0, 1, W.lay2, W.lay3], ang = [lerp(0.3, 1.32, W.lay0), lerp(0.12, 1.05, W.yes), lerp(0.1, 0.95, W.lay2), lerp(0.08, 0.72, W.lay3)];
+    rings.forEach((R, k) => R.petals.forEach((p, i) => { p.hinge.rotation.z = -ang[k] - 0.03*Math.sin(t*0.8 + i + k);
+      p.mat.opacity = W.lot7*vis[k]*(k === 1 ? 0.5 + 0.25*W.yes : k >= 2 ? 0.85 : 0.68); }));
+    if (Math.abs(W.blu7 - lastBlu) > 0.004) { lastBlu = W.blu7; rings[1].petals.forEach(p => { const at = p.geo.attributes.color;
+      for (let j=0;j<at.count*3;j++) at.array[j] = lerp(p.a[j], p.b[j], W.blu7); at.needsUpdate = true; }); }
+    G.scale.setScalar(1 + 0.3*W.lay0); });   // the heart enlarges as the layers unfold
+  return G; })();
+
+// the Christic Complex: the ankh as golden light, waiting behind the column, larger than it; called, it comes into the heart
+const cc7 = (() => { const G = new THREE.Group(); scene.add(G); const mats = [];
+  const reg = (m, op) => { m.transparent = true; m.depthWrite = false; m.userData.op = op; mats.push(m); return m; };
+  const tube = (curve, closed, r, hex, seg) => { for (const [k, op] of [[1, 0.75], [2.6, 0.14], [5, 0.04]]) G.add(new THREE.Mesh(new THREE.TubeGeometry(curve, seg, r*k, 8, closed), reg(new THREE.MeshBasicMaterial({color:hex, blending:THREE.AdditiveBlending}), op))); };
+  const loopPts = []; for (let k=0;k<96;k++){ const a = k/96*Math.PI*2; loopPts.push(new THREE.Vector3(0.32*Math.sin(a), 0.55 + 0.42*Math.cos(a), 0)); }
+  const loop = new THREE.CatmullRomCurve3(loopPts, true);
+  tube(loop, true, 0.018, 0xf0c860, 160);
+  tube(new THREE.LineCurve3(new THREE.Vector3(-0.56, 0.08, 0), new THREE.Vector3(0.56, 0.08, 0)), false, 0.018, 0xf0c860, 16);
+  tube(new THREE.LineCurve3(new THREE.Vector3(0, 0.13, 0), new THREE.Vector3(0, -1.25, 0)), false, 0.018, 0xf0c860, 24);
+  const nex = glowSprite(0xf6dc96, 0.5, 0); nex.position.y = 0.1; reg(nex.material, 0.45); G.add(nex);
+  const N = 60, pos = new Float32Array(N*3), g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pm = reg(new THREE.PointsMaterial({color:0xfff0c8, size:0.05, map:dotTex, blending:THREE.AdditiveBlending, sizeAttenuation:true}), 0.6); G.add(new THREE.Points(g, pm));
+  const U = Array.from({length:N}, (_, i) => i/N), v = new THREE.Vector3(), from = new THREE.Vector3(), to = new THREE.Vector3();
+  updaters.push((dt, t) => { const w = W.cc; G.visible = w > 0.01; if (!G.visible) return;
+    const e = W.ccIn, op = w*(0.26 + 0.74*e);   // faint while it waits
+    mats.forEach(m => m.opacity = m.userData.op*op);
+    const az = PRESETS.whole.az; from.set(-Math.sin(az)*3.4, -0.9, -Math.cos(az)*3.4);   // behind the column, as seen from the opening view
+    const sc = lerp(3.9, 0.42, e); to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);
+    G.scale.setScalar(sc); G.rotation.y = lerp(az, az + 0.6*t, e*e);   // faces us while waiting; turns through the sphere once settled
+    for (let i=0;i<N;i++){ U[i] = (U[i] + dt*0.08) % 1; loop.getPointAt(U[i], v); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z; } g.attributes.position.needsUpdate = true; });
+  return G; })();
+
+// the grace of forgiveness: a golden dew falling from the opened heart through the lower centers
+const grace7 = (() => { const N = 1100, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  const spawn = (p, fresh) => { const r = 1.25*Math.sqrt(Math.random()), a = Math.random()*Math.PI*2; p.x = r*Math.cos(a); p.z = r*Math.sin(a);
+    p.y = fresh ? GY + 0.3 + Math.random()*0.7 : GY + 0.3 - Math.random()*3.8; p.v = 0.32 + 0.3*Math.random(); p.w = Math.random() < 0.25; p.b = 0.55 + 0.45*Math.random(); };
+  for (let i=0;i<N;i++){ const p = {}; spawn(p, false); P.push(p); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const m = pointsMat(0.07), pts = new THREE.Points(g, m); scene.add(pts);
+  const gold = new THREE.Color(0xf2c858), soft = new THREE.Color(0xfff0d0);
+  updaters.push((dt, t) => { m.opacity = W.grace; pts.visible = W.grace > 0.01; if (!pts.visible) return;
+    for (let i=0;i<N;i++){ const p = P[i]; p.y -= dt*p.v; p.x += dt*0.05*Math.sin(t*0.7 + i); if (p.y < -3.3) spawn(p, true);
+      pos[i*3] = p.x; pos[i*3+1] = p.y; pos[i*3+2] = p.z;
+      const c = p.w ? soft : gold, k = p.b*(p.w ? 0.6 : 1)*smooth(p.y, -3.3, -2.6);
+      col[i*3] = c.r*k; col[i*3+1] = c.g*k; col[i*3+2] = c.b*k; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
+  return pts; })();
+
+// the golden aura around the whole: wholeness manifesting, the clothing with the sun
+const aura7 = (() => { const a1 = glowSprite(0xf2c14e, 1, 0), a2 = glowSprite(0xdca23a, 1, 0); a1.scale.set(4.4, 8.6, 1); a2.scale.set(7.4, 11.6, 1);
+  a1.position.y = a2.position.y = -0.9; a1.renderOrder = a2.renderOrder = -1; scene.add(a1, a2);
+  updaters.push((dt, t) => { const w = W.aura, pulse = 0.78 + 0.22*Math.sin(t*1.5); a1.visible = a2.visible = w > 0.005;
+    a1.material.opacity = 0.34*w*pulse; a2.material.opacity = 0.17*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6)); }); })();
+
+// the lower centers gather into a crescent moon beneath, a cradle of red, orange and yellow
+const moon7 = (() => { const G = new THREE.Group(); G.position.y = -3.05; scene.add(G);
+  const d = 0.3, r = 0.86, pts = [], yh = (1 - r*r + d*d)/(2*d), xh = Math.sqrt(1 - yh*yh);
+  const aL = Math.atan2(yh, -xh), aR = Math.atan2(yh, xh) + Math.PI*2, bR = Math.atan2(yh - d, xh), bL = Math.atan2(yh - d, -xh) - Math.PI*2;
+  for (let k=0;k<=80;k++){ const a = lerp(aL, aR, k/80); pts.push(new THREE.Vector2(Math.cos(a), Math.sin(a))); }
+  for (let k=0;k<=80;k++){ const a = lerp(bR, bL, k/80); pts.push(new THREE.Vector2(r*Math.cos(a), d + r*Math.sin(a))); }
+  const geo = new THREE.ShapeGeometry(new THREE.Shape(pts), 1), pa = geo.attributes.position, cols = [], c = new THREE.Color();
+  const RED = new THREE.Color(0xd2382c), ORA = new THREE.Color(0xe8802a), YEL = new THREE.Color(0xe8c838);
+  for (let j=0;j<pa.count;j++){ const u = (pa.getX(j) + 1)/2; if (u < 0.5) c.copy(RED).lerp(ORA, u*2); else c.copy(ORA).lerp(YEL, (u - 0.5)*2); cols.push(c.r, c.g, c.b); }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+  const fill = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide});
+  const glowM = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending});
+  const M = new THREE.Group(); M.add(new THREE.Mesh(geo, fill)); const halo = new THREE.Mesh(geo, glowM); halo.scale.setScalar(1.06); halo.position.z = -0.01; M.add(halo);
+  const edge = pts.map(q => new THREE.Vector3(q.x, q.y, 0.005)), eg = new THREE.BufferGeometry().setFromPoints(edge.concat([edge[0]])), ec = [];
+  edge.concat([edge[0]]).forEach(q => { const u = (q.x + 1)/2; if (u < 0.5) c.copy(RED).lerp(ORA, u*2); else c.copy(ORA).lerp(YEL, (u - 0.5)*2); ec.push(c.r, c.g, c.b); });
+  eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3));
+  const em = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending}); M.add(new THREE.Line(eg, em));
+  const gl = glowSprite(0xe8803a, 1, 0); gl.scale.set(2.8, 1.3, 1); gl.position.y = -0.55; M.add(gl);
+  M.scale.setScalar(1.05); G.add(M);
+  updaters.push((dt, t) => { const w = W.moon; G.visible = w > 0.01; if (!G.visible) return;
+    fill.opacity = 0.62*w; glowM.opacity = 0.22*w*(0.85 + 0.15*Math.sin(t*1.2)); em.opacity = 0.7*w; gl.material.opacity = 0.3*w;
+    G.rotation.y = orbit.az; G.position.y = -3.05 - 0.25*(1 - w); }); })();
+
+// the lower centers drawing down into the moon
+updaters.push(() => { if (W.merge < 0.005) return; triad.forEach((o, i) => { o.holder.position.y = lerp(CENTERS[i].y, -3.0, W.merge*W.merge*(3 - 2*W.merge)); o.holder.scale.multiplyScalar(1 - 0.7*W.merge); }); });
+updaters.push(() => { if (W.merge >= 0.005) return; triad.forEach((o, i) => { o.holder.position.y = CENTERS[i].y; }); });
+
 // ---------- captions ----------
 const CAPS = {
   1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (34.17).`,
@@ -609,23 +733,25 @@ const CAPS = {
   3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
   4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
   5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (27.8).`,
-  6: `<h2>Stage 6 · The Sacred Heart at the Nexus</h2>Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross. A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced. At its center is the Sacred Heart of Jesus, crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding. The heart is sculpted from the shared iconography of the traditional Sacred Heart paintings. This is the coincidence of opposites at the heart of it all: "Meanwhile the Creator lies within" (49.6).`
+  6: `<h2>Stage 6 · The Sacred Heart at the Nexus</h2>Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross. A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced. At its center is the Sacred Heart of Jesus, crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding. The heart is sculpted from the shared iconography of the traditional Sacred Heart paintings. This is the coincidence of opposites at the heart of it all: "Meanwhile the Creator lies within" (49.6).`,
+  7: `<h2>Stage 7 · The Marian Archetype</h2>Now the view turns to us: veiled, third-density beings here in space/time. The Christic Complex that arose in Yehoshua waits to be invited, and in each moment we're asked, as Mary was, whether we'll receive it. Our yes, "come in me," is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (18.12), falling like dew through the lower centers. "In forgiveness lies the stoppage of the wheel of action, or what you call karma" (17.20), and, as I read Ra on the Patton phenomenon (34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling. Called, the Christ comes into the heart, and the heart opens layer by layer, blue to indigo to violet at its center: the continual work of theosis, of becoming Christified, of wholeness-making, able now to taste "the sacramental nature of each experience" (49.6). "Yet not I, but Christ liveth in me" (Galatians 2:20). Lived to the fullest, the archetype becomes the woman of Revelation (12:1): clothed with the sun, the gold of wholeness made manifest, and standing upon the moon, the lower centers no longer driving our movement but gathered beneath us as a cradle.`
 };
 const capEl = document.getElementById('cap');
 const setStage = (n) => { if (n !== 3 && arrival.on) stopArrival(); stage = n; const ba = document.getElementById('bArrive'); if (ba) ba.style.display = n === 3 ? '' : 'none'; capEl.innerHTML = CAPS[n]; document.querySelectorAll('.stage').forEach(b => b.classList.toggle('on', +b.dataset.stage === n)); };
 document.querySelectorAll('.stage').forEach(b => b.addEventListener('click', () => { const n = +b.dataset.stage, was = stage; setStage(n);
   if (n === 3 && was !== 3) { startArrival(); return; }   // Stage 3 opens with the arrival (Doug, Nov 16)
-  if (n === 6) goCam('six'); else if (n === 5) goCam('five'); else if (n === 4 && was !== 4) goCam('kc'); else if (was >= 4 && n < 4) goCam('whole'); }));
+  if (n === 7) { startS7(); return; }   // Stage 7 plays its sequence each time it is pressed (Doug, Nov 18)
+  if (was === 7 && n < 4) goCam('whole'); if (n === 6) goCam('six'); else if (n === 5) goCam('five'); else if (n === 4 && was !== 4) goCam('kc'); else if (was >= 4 && n < 4) goCam('whole'); }));
 setStage(1);
 window.__setStage = setStage;
 window.__snapStage = (n) => { setStage(n); Object.assign(W, STAGES[n]); };
 
 // ---------- camera: spherical orbit around a moving target ----------
 const orbit = {az:0.75, el:0.12, dist:11.6, ty:-1.2};
-const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, six:{az:0.75, el:0.06, dist:2.3, ty:-1.0}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
+const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, six:{az:0.75, el:0.06, dist:2.3, ty:-1.0}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, heart7:{az:0.75, el:0.42, dist:5.9, ty:GY - 0.35}, whole7:{az:0.75, el:0.1, dist:12.6, ty:-1.0}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
 window.__orbit = orbit;
 let tween = null;
-const goCam = (k) => { const p = PRESETS[k]; tween = {from:Object.assign({}, orbit), to:Object.assign({}, p), t:0}; };
+const goCam = (k, dur = 1.1) => { const p = PRESETS[k]; tween = {from:Object.assign({}, orbit), to:Object.assign({}, p), t:0, dur}; };
 document.querySelectorAll('[data-cam]').forEach(b => b.addEventListener('click', () => goCam(b.dataset.cam)));
 document.getElementById('bArrive').addEventListener('click', () => startArrival());
 { const bp = document.getElementById('bPanel'), sb = document.getElementById('stagebar');
@@ -666,7 +792,7 @@ const frame = (now) => {
   const target = STAGES[stage], k = 1 - Math.exp(-rdt*1.6);   // smooth transitions, independent of speed
   for (const key in target) W[key] += (target[key] - W[key])*k;
   updaters.forEach(f => f(dt, simT));
-  if (tween) { tween.t = Math.min(1, tween.t + rdt/1.1); const e = ease(tween.t); for (const key in tween.to) orbit[key] = lerp(tween.from[key], tween.to[key], e); if (tween.t >= 1) tween = null; }
+  if (tween) { tween.t = Math.min(1, tween.t + rdt/(tween.dur || 1.1)); const e = ease(tween.t); for (const key in tween.to) orbit[key] = lerp(tween.from[key], tween.to[key], e); if (tween.t >= 1) tween = null; }
   else if (autoEl.checked && playing && ptrs.size === 0) orbit.az += rdt*0.045;
   camera.position.set(orbit.dist*Math.cos(orbit.el)*Math.sin(orbit.az), orbit.ty + orbit.dist*Math.sin(orbit.el), orbit.dist*Math.cos(orbit.el)*Math.cos(orbit.az));
   camera.lookAt(0, orbit.ty, 0);
