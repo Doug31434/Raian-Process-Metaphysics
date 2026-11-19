@@ -738,6 +738,12 @@ const moon7 = (() => { const G = new THREE.Group(); scene.add(G);
     else triad.forEach((o, i) => { o.holder.position.set(0, CENTERS[i].y, 0); }); });
   return G; })();
 
+// Stage 7 safeguard (Doug, Nov 19: colored spots seen in the aura on iPhone Safari): once the moon begins to rise, every
+// particle system except the Christic Complex's own light is switched off, whatever the browser does with faint opacities
+const ccPts = []; cc7.traverse(o => { if (o.isPoints) ccPts.push(o); });
+updaters.push(() => { if (stage !== 7 || !s7.on || s7.t < 41.5) return;
+  scene.traverse(o => { if (o.isPoints && !ccPts.includes(o)) o.visible = false; }); });
+
 // ---------- captions ----------
 const CAPS = {
   1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (34.17).`,
