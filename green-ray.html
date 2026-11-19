@@ -622,7 +622,7 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
     orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
-    memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22)*(1 - ph(40, 46)), pearl:0.45 + 0.55*ph(9, 13),
+    memb:0.2 + 0.5*ph(9, 13), ytor:0,   // Doug (Nov 19): no streaming field around the yellow sphere in Stage 7 pearl:0.45 + 0.55*ph(9, 13),
     triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(38, 42)),
     lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
@@ -673,7 +673,7 @@ const cc7 = (() => { const G = new THREE.Group(); scene.add(G); const mats = [];
     const e = W.ccIn, op = w*(0.26 + 0.74*e);   // faint while it waits
     mats.forEach(m => m.opacity = m.userData.op*op);
     const az = PRESETS.whole.az; from.set(-Math.sin(az)*3.4, -0.9, -Math.cos(az)*3.4);   // behind the column, as seen from the opening view
-    const sc = lerp(3.9, 0.42, e)*(1 + 0.55*W.mrise);   // larger at the end, so the ankh reads clearly to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);
+    const sc = lerp(3.9, 0.42, e)*(1 + 0.55*W.mrise); to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);   // its loop centered on the yellow sphere; larger at the end
     G.scale.setScalar(sc); G.rotation.y = lerp(az, az + 0.6*t, e*e);   // faces us while waiting; turns through the sphere once settled
     for (let i=0;i<N;i++){ U[i] = (U[i] + dt*0.08) % 1; loop.getPointAt(U[i], v); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z; } g.attributes.position.needsUpdate = true; });
   return G; })();
