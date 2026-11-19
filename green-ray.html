@@ -623,13 +623,13 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
     orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
     memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22)*(1 - ph(40, 46)), pearl:0.45 + 0.55*ph(9, 13),
-    triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(34, 41)),
+    triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(38, 42)),
     lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
-    aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(41, 48), merge:ph(34, 41), moon:ph(34.5, 41), mrise:ph(41, 48)});
+    aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(42, 49), merge:ph(34, 40), moon:ph(36.5, 42), mrise:ph(42, 49)});
   if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
   if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); }
-  if (t > 41 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); } });
+  if (t > 42 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); } });
 
 // the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
 const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
@@ -703,34 +703,40 @@ const aura7 = (() => { const a1 = glowSprite(0xf4c650, 1, 0), a2 = glowSprite(0x
     a1.material.opacity = lerp(0.34, 0.85, e)*w*pulse; a2.material.opacity = lerp(0.17, 0.48, e)*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6));
     a3.material.opacity = 0.42*e*w*(0.8 + 0.2*Math.sin(t*1.5 + 0.4)); }); })();
 
-// the lower centers gather into a crescent moon beneath, a cradle of red, orange and yellow
-const moon7 = (() => { const G = new THREE.Group(); G.position.y = -3.05; scene.add(G);
-  const d = 0.3, r = 0.86, pts = [], yh = (1 - r*r + d*d)/(2*d), xh = Math.sqrt(1 - yh*yh);
-  const aL = Math.atan2(yh, -xh), aR = Math.atan2(yh, xh) + Math.PI*2, bR = Math.atan2(yh - d, xh), bL = Math.atan2(yh - d, -xh) - Math.PI*2;
-  for (let k=0;k<=80;k++){ const a = lerp(aL, aR, k/80); pts.push(new THREE.Vector2(Math.cos(a), Math.sin(a))); }
-  for (let k=0;k<=80;k++){ const a = lerp(bR, bL, k/80); pts.push(new THREE.Vector2(r*Math.cos(a), d + r*Math.sin(a))); }
-  const geo = new THREE.ShapeGeometry(new THREE.Shape(pts), 1), pa = geo.attributes.position, cols = [], c = new THREE.Color();
+// the lower centers become the moon (Doug, Nov 19): red, orange and yellow each move to their place on a crescent
+// and turn into its three thirds, red the left horn, orange the bowl, yellow the right horn; the moon is solid (3-D),
+// about a third of the earlier size, and then rises to cradle the heart from beneath
+const moon7 = (() => { const G = new THREE.Group(); scene.add(G);
+  const RM = 0.36, TR = 0.105, aL = Math.PI*0.9, aR = Math.PI*2.1, NU = 60, NV = 18;
   const RED = new THREE.Color(0xd2382c), ORA = new THREE.Color(0xe8802a), YEL = new THREE.Color(0xe8c838);
-  for (let j=0;j<pa.count;j++){ const u = (pa.getX(j) + 1)/2; if (u < 0.5) c.copy(RED).lerp(ORA, u*2); else c.copy(ORA).lerp(YEL, (u - 0.5)*2); cols.push(c.r, c.g, c.b); }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
-  const fill = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide});
-  const glowM = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending});
-  const M = new THREE.Group(); M.add(new THREE.Mesh(geo, fill)); const halo = new THREE.Mesh(geo, glowM); halo.scale.setScalar(1.06); halo.position.z = -0.01; M.add(halo);
-  const edge = pts.map(q => new THREE.Vector3(q.x, q.y, 0.005)), eg = new THREE.BufferGeometry().setFromPoints(edge.concat([edge[0]])), ec = [];
-  edge.concat([edge[0]]).forEach(q => { const u = (q.x + 1)/2; if (u < 0.5) c.copy(RED).lerp(ORA, u*2); else c.copy(ORA).lerp(YEL, (u - 0.5)*2); ec.push(c.r, c.g, c.b); });
-  eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3));
-  const em = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending}); M.add(new THREE.Line(eg, em));
-  const gl = glowSprite(0xe8803a, 1, 0); gl.scale.set(2.8, 1.3, 1); gl.position.y = -0.55; M.add(gl);
-  M.scale.setScalar(1.05); G.add(M); M.traverse(o => { o.renderOrder = -2; });
-  updaters.push((dt, t) => { const w = W.moon; G.visible = w > 0.01; if (!G.visible) return;
-    const r = W.mrise, e = r*r*(3 - 2*r), sc = lerp(1, 1.36, e);
-    fill.opacity = 0.62*w; glowM.opacity = 0.22*w*(0.85 + 0.15*Math.sin(t*1.2)); em.opacity = 0.7*w; gl.material.opacity = 0.3*w*(1 - 0.75*e);
-    G.rotation.y = orbit.az; G.scale.setScalar(sc); G.position.y = lerp(-3.05 - 0.25*(1 - w), GY - 0.32*1.05*sc - 0.42, e);
-    G.position.x = -Math.sin(orbit.az)*0.9*e; G.position.z = -Math.cos(orbit.az)*0.9*e; }); })();   // rises behind and beneath the heart-womb, a cradle
-
-// the lower centers drawing down into the moon
-updaters.push(() => { if (W.merge < 0.005) return; triad.forEach((o, i) => { o.holder.position.y = lerp(CENTERS[i].y, -3.0, W.merge*W.merge*(3 - 2*W.merge)); o.holder.scale.multiplyScalar(1 - 0.7*W.merge); }); });
-updaters.push(() => { if (W.merge >= 0.005) return; triad.forEach((o, i) => { o.holder.position.y = CENTERS[i].y; }); });
+  const colAt = (u, c) => (u < 0.5 ? c.copy(RED).lerp(ORA, u*2) : c.copy(ORA).lerp(YEL, (u - 0.5)*2));
+  const ptAt = (u, v, out) => { const a = lerp(aL, aR, u), r = TR*Math.pow(Math.sin(Math.PI*u), 0.75) + 0.003, ph = v*Math.PI*2;
+    const cx = Math.cos(a), cy = Math.sin(a); return out.set(cx*(RM + r*Math.cos(ph)), cy*(RM + r*Math.cos(ph)), r*Math.sin(ph)); };
+  const segs = [], mats = [], halos = [];
+  for (let k=0;k<3;k++){ const u0 = k/3, u1 = (k + 1)/3, pos = [], col = [], idx = [], v = new THREE.Vector3(), c = new THREE.Color();
+    const mid = ptAt((u0 + u1)/2, 0.25, new THREE.Vector3()); mid.z = 0;
+    for (let i=0;i<=NU;i++){ const u = lerp(u0, u1, i/NU); colAt(u, c);
+      for (let j=0;j<=NV;j++){ ptAt(u, j/NV, v); pos.push(v.x - mid.x, v.y - mid.y, v.z); col.push(c.r, c.g, c.b); } }
+    for (let i=0;i<NU;i++) for (let j=0;j<NV;j++){ const a = i*(NV + 1) + j, b = a + NV + 1; idx.push(a, b, a + 1, b, b + 1, a + 1); }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.setAttribute('color', new THREE.Float32BufferAttribute(col, 3)); geo.setIndex(idx); geo.computeVertexNormals();
+    const m = new THREE.MeshStandardMaterial({vertexColors:true, roughness:0.45, metalness:0.1, emissive:new THREE.Color(colAt((u0 + u1)/2, c)), emissiveIntensity:0.35, transparent:true, opacity:0});
+    const mesh = new THREE.Mesh(geo, m); mesh.position.copy(mid);
+    const hm = new THREE.MeshBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.BackSide});
+    const halo = new THREE.Mesh(geo, hm); halo.scale.setScalar(1.25); mesh.add(halo);
+    G.add(mesh); segs.push({mesh, mid}); mats.push(m); halos.push(hm); }
+  const gl = glowSprite(0xe8a040, 1, 0); gl.scale.set(1.3, 0.8, 1); gl.position.y = -0.3; G.add(gl);
+  const yForm = CENTERS[1].y, yCradle = GY - 0.86, wp = new THREE.Vector3();
+  updaters.push((dt, t) => { const w = W.moon, mg = W.merge; G.visible = w > 0.01 || mg > 0.01;
+    const r = W.mrise, e = r*r*(3 - 2*r);
+    G.position.set(0, lerp(yForm, yCradle, e), 0); G.rotation.y = orbit.az; G.updateMatrixWorld(true);
+    segs.forEach((sg, k) => { const g = smooth(w, k*0.12, 0.64 + k*0.12); sg.mesh.scale.setScalar(Math.max(0.001, g));
+      mats[k].opacity = Math.min(1, g*1.3); halos[k].opacity = 0.16*g*(0.85 + 0.15*Math.sin(t*1.2 + k)); });
+    gl.material.opacity = 0.25*w;
+    // the three lower centers travel to their thirds of the crescent and dissolve into them
+    if (mg > 0.005) { const q = mg*mg*(3 - 2*mg); triad.forEach((o, i) => { wp.copy(segs[i].mid); G.localToWorld(wp);
+        o.holder.position.set(lerp(0, wp.x, q), lerp(CENTERS[i].y, wp.y, q), lerp(0, wp.z, q)); o.holder.scale.multiplyScalar(1 - 0.75*q); }); }
+    else triad.forEach((o, i) => { o.holder.position.set(0, CENTERS[i].y, 0); }); });
+  return G; })();
 
 // ---------- captions ----------
 const CAPS = {
