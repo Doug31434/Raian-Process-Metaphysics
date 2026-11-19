@@ -147,7 +147,7 @@ const STAGES = {
   5: {six:0, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
   6: {six:1, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:0.18}
 };
-const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise'];
+const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise','sh7'];
 for (const n in STAGES) S7KEYS.forEach(k => { if (!(k in STAGES[n])) STAGES[n][k] = 0; });
 STAGES[7] = Object.assign({}, STAGES[1]);   // Stage 7 (Doug, Nov 18): filled frame by frame from its timeline
 const W = Object.assign({}, STAGES[1]);
@@ -369,10 +369,10 @@ const pearl = (() => {
   const sGlow = glowSprite(0xffffff, 0.55, 0.6); green.add(sGlow);
   const DULL = new THREE.Color(0x9a5a2c), BRIGHT = new THREE.Color(0xffd23a);
   updaters.push((dt, t) => { const pre = W.orbO + W.orbY, f = pre > 1e-3 ? W.orbY/pre : 1;
-    sMat.uniforms.c.value.copy(DULL).lerp(BRIGHT, f); sMat.uniforms.a.value = Math.min(1, pre); sOrb.visible = pre > 0.01;
-    sOrb.scale.setScalar((0.85 + 0.15*Math.sin(t*1.1)*f)*(1 + 0.9*W.mrise));
+    sMat.uniforms.c.value.copy(DULL).lerp(BRIGHT, f); sMat.uniforms.a.value = Math.min(1, pre)*(1 - 0.45*W.sh7);   // Stage 7: translucent, holding the Sacred Heart sOrb.visible = pre > 0.01;
+    sOrb.scale.setScalar((0.85 + 0.15*Math.sin(t*1.1)*f)*(1 + 1.4*W.sh7 + 0.35*W.mrise));
     smoke.material.opacity = 0.5*W.orbO*(0.8 + 0.2*Math.sin(t*0.7)); smoke.scale.setScalar(0.5 + 0.05*Math.sin(t*0.5));
-    sGlow.material.color.copy(DULL).lerp(BRIGHT, f); sGlow.material.opacity = (0.15*W.orbO + 0.75*W.orbY)*(0.9 + 0.1*Math.sin(t*1.7)); sGlow.scale.setScalar(0.4 + 0.35*f); });
+    sGlow.material.color.copy(DULL).lerp(BRIGHT, f); sGlow.material.opacity = (0.15*W.orbO + 0.75*W.orbY)*(0.9 + 0.1*Math.sin(t*1.7))*(1 - 0.5*W.sh7); sGlow.scale.setScalar(0.4 + 0.35*f); });
   const wOrb = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), wMat); wOrb.renderOrder = 1; green.add(wOrb);
   const wGlow1 = glowSprite(0xffffff, 0.3, 1.0), wGlow2 = glowSprite(0xf4f7ff, 0.6, 0.5); wGlow1.renderOrder = wGlow2.renderOrder = 4; wGlow1.material.depthTest = wGlow2.material.depthTest = false; green.add(wGlow1, wGlow2);   // radiates through the yellow
   const orb = new THREE.Mesh(new THREE.SphereGeometry(0.21, 64, 48), yMat); orb.renderOrder = 3; green.add(orb);
@@ -530,14 +530,14 @@ const ankh = (() => { const G = new THREE.Group(); G.position.y = ORIG_TO_BLUE; 
     const gV = smooth(grow, 0, 0.6), gH = smooth(grow, 0.55, 1), op = W.ankh;   // the vertical field first, then the horizontal it gives rise to
     strands.forEach(st => { const g = st.kind === 'v' ? gV : gH; st.reach = g*st.total; const nIdx = Math.max(0, Math.floor(g*st.seg))*6*6; st.line.geometry.setDrawRange(0, nIdx);
       if (st.aura) { st.aura.geometry.setDrawRange(0, Math.max(0, Math.floor(g*st.seg))*8*6); st.aura.material.opacity = 0.06*op*W.five; st.aura.visible = W.five > 0.01; }
-      st.m.opacity = (st.white ? 0.5*(1 - 0.7*W.six) : 0.95*(1 - 0.35*W.six))*op*(1 - 0.4*W.five); });   // Doug (Nov 18): Stage 6's white light toned down
-    core.material.opacity = 0.55*op*gH*(1 - 0.6*W.six); pm.opacity = op*(1 - 0.4*W.six);
+      const dimW = Math.max(W.six, W.sh7); st.m.opacity = (st.white ? 0.5*(1 - 0.7*dimW) : 0.95*(1 - 0.35*dimW))*op*(1 - 0.4*W.five); });   // Stage 6 and Stage 7: white light softened   // Doug (Nov 18): Stage 6's white light toned down
+    core.material.opacity = 0.55*op*gH*(1 - 0.6*Math.max(W.six, W.sh7)); pm.opacity = op*(1 - 0.4*Math.max(W.six, W.sh7));
     const f5 = W.five*W.five*(3 - 2*W.five); G.position.y = lerp(ORIG_TO_BLUE, CENTERS[2].y - sweep.position.y, f5); G.scale.setScalar(lerp(1, 2.75, f5));
     core.scale.setScalar(0.7 + 0.5*f5); auraGlow.material.opacity = 0.28*op*W.five*(0.9 + 0.1*Math.sin(t*0.9));
     for (let i=0;i<N;i++){ const p = P[i], st = strands[p.s]; p.u = (p.u + dt*0.3/st.total) % 1; const d = p.u*st.total;
       if (d > st.reach) { pc[i*3] = pc[i*3+1] = pc[i*3+2] = 0; continue; }
       at(st, d, v); pp[i*3] = v.x; pp[i*3+1] = v.y; pp[i*3+2] = v.z;
-      if (st.white) { const wd = 1 - 0.6*W.six; pc[i*3] = wd; pc[i*3+1] = wd; pc[i*3+2] = 0.97*wd; } else { pc[i*3] = 1; pc[i*3+1] = 0.76; pc[i*3+2] = 0.12; } }
+      if (st.white) { const wd = 1 - 0.6*Math.max(W.six, W.sh7); pc[i*3] = wd; pc[i*3+1] = wd; pc[i*3+2] = 0.97*wd; } else { pc[i*3] = 1; pc[i*3+1] = 0.76; pc[i*3+2] = 0.12; } }
     pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; });
   return G; })();
 updaters.push((dt) => { sweep.rotation.y += dt*0.12; sweep.visible = W.fan > 0.01 || W.ankh > 0.01; });
@@ -603,9 +603,10 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
   // the figure spans y = -0.2 (the drop) to 0.36 (the cross); center it on the sphere's center
   H.position.y = -0.08*1.15;
   G.traverse(o => { o.renderOrder = 40; });
-  updaters.push((dt, t) => { const w = W.six; G.visible = w > 0.01; if (!G.visible) return;
+  updaters.push((dt, t) => { const in7 = W.sh7 > W.six, w = in7 ? 0.75*W.sh7 : W.six; G.visible = w > 0.01; if (!G.visible) return;
     mats.forEach(m => { if (m.uniforms && m.uniforms.k) m.uniforms.k.value = w; m.opacity = m.userData.op*w; });
-    G.scale.setScalar(0.6 + 0.4*w);
+    // Stage 7 (Doug, Nov 19): a sense of the Sacred Heart, small and soft, in the yellow sphere inside the ankh's circle
+    G.position.y = in7 ? GY : CENTERS[2].y; G.scale.setScalar(in7 ? 0.36*(0.8 + 0.2*W.sh7)*(1 + 0.3*W.mrise) : 0.6 + 0.4*w);   // the Sacred Heart in the middle of the sphere
     G.rotation.y = sweep.rotation.y;   // embedded in the yellow sphere, turning with the ankh
     const v = new THREE.Vector3();
     flows.forEach(f => { for (let i=0;i<f.n;i++){ f.u[i] = ((f.u[i] + dt*f.speed) % 1 + 1) % 1; f.curve.getPointAt(f.u[i], v); f.pos[i*3] = v.x; f.pos[i*3+1] = v.y; f.pos[i*3+2] = v.z; } f.g.attributes.position.needsUpdate = true; });
@@ -625,11 +626,11 @@ window.__s7t = () => s7.t;
 const startS7 = () => { s7.t = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGES[1]); W.lot7 = 1; goCam('whole', 1.6); };
 updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.t += dt;
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
-  Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
+  Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:ph(1, 5)*(0.4 + 0.6*ph(13, 21.5)), open:0,
     orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
     memb:0.2 + 0.5*ph(9, 13), ytor:0,   // Doug (Nov 19): no streaming field around the yellow sphere in Stage 7 pearl:0.45 + 0.55*ph(9, 13),
     triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(38, 42)),
-    lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
+    lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5), sh7:ph(19, 24),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
     aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(42, 49), merge:ph(34, 40), moon:ph(36.5, 42), mrise:ph(42, 49)});
   if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
@@ -689,13 +690,16 @@ const cc7 = (() => { const G = new THREE.Group(); scene.add(G); const mats = [];
   const N = 60, pos = new Float32Array(N*3), g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const pm = reg(new THREE.PointsMaterial({color:0xfff0c8, size:0.05, map:dotTex, blending:THREE.AdditiveBlending, sizeAttenuation:true}), 0.6); G.add(new THREE.Points(g, pm));
   const U = Array.from({length:N}, (_, i) => i/N), v = new THREE.Vector3(), from = new THREE.Vector3(), to = new THREE.Vector3();
-  updaters.push((dt, t) => { const w = W.cc; G.visible = w > 0.01; if (!G.visible) return;
-    const e = W.ccIn, op = w*(0.26 + 0.74*e);   // faint while it waits
-    mats.forEach(m => m.opacity = m.userData.op*op);
-    const az = PRESETS.whole.az; from.set(-Math.sin(az)*3.4, -0.9, -Math.cos(az)*3.4);   // behind the column, as seen from the opening view
-    const sc = lerp(3.9, 0.42, e)*(1 + 0.55*W.mrise); to.set(0, GY - 0.55*sc, 0); G.position.copy(from).lerp(to, e); G.position.y = lerp(from.y, GY - 0.55*sc, e);   // its loop centered on the yellow sphere; larger at the end
-    G.scale.setScalar(sc); G.rotation.y = lerp(az, az + 0.6*t, e*e);   // faces us while waiting; turns through the sphere once settled
-    for (let i=0;i<N;i++){ U[i] = (U[i] + dt*0.08) % 1; loop.getPointAt(U[i], v); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z; } g.attributes.position.needsUpdate = true; });
+  // Doug (Nov 19): Stage 7 uses the Christic Complex's own Living Ankh (Stages 4-6), not a separate drawing. This simple
+  // golden ankh stays hidden; the real ankh is moved here: behind the column and larger while it waits, then into the heart
+  // with its circle around the yellow sphere.
+  const wv = new THREE.Vector3();
+  updaters.push((dt, t) => { G.visible = false; if (stage !== 7 || W.cc < 0.01) return;
+    const e = W.ccIn, az = PRESETS.whole.az;
+    from.set(-Math.sin(az)*3.0, -0.15, -Math.cos(az)*3.0);   // behind the column, as seen from the opening view
+    const sc = lerp(1.9, 0.44, e)*(1 + 0.4*W.mrise);
+    wv.set(lerp(from.x, 0, e), lerp(from.y, GY, e), lerp(from.z, 0, e));   // settled (Doug, Nov 19): the crossing exactly at the center of the yellow sphere
+    sweep.updateMatrixWorld(true); sweep.worldToLocal(wv); ankh.position.copy(wv); ankh.scale.setScalar(sc); });
   return G; })();
 
 // the grace of forgiveness: a golden dew falling from the opened heart through the lower centers
@@ -760,7 +764,7 @@ const moon7 = (() => { const G = new THREE.Group(); scene.add(G);
 
 // Stage 7 safeguard (Doug, Nov 19: colored spots seen in the aura on iPhone Safari): once the moon begins to rise, every
 // particle system except the Christic Complex's own light is switched off, whatever the browser does with faint opacities
-const ccPts = []; cc7.traverse(o => { if (o.isPoints) ccPts.push(o); });
+const ccPts = []; [cc7, ankh, six].forEach(g => g.traverse(o => { if (o.isPoints) ccPts.push(o); }));
 updaters.push(() => { if (stage !== 7 || !s7.on || s7.t < 41.5) return;
   scene.traverse(o => { if (o.isPoints && !ccPts.includes(o)) o.visible = false; }); });
 
