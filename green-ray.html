@@ -634,11 +634,15 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
 // the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
 const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
   const shape = (L, Wd) => { const sh = new THREE.Shape(); sh.moveTo(0,0); sh.bezierCurveTo(Wd, L*0.25, Wd*0.9, L*0.7, 0, L); sh.bezierCurveTo(-Wd*0.9, L*0.7, -Wd, L*0.25, 0, 0); return new THREE.ShapeGeometry(sh, 16); };
-  const ring = (n, L, Wd, off, r0, cA, cB, cA2, cB2) => { const R = {petals:[], cols:[]};
+  // Doug (Nov 19): each petal clearer toward the center (near the yellow sphere), its tip as before
+  const fadeTex = (L) => { const c = document.createElement('canvas'); c.width = 4; c.height = 128; const x = c.getContext('2d');
+    const g = x.createLinearGradient(0, 128, 0, 0); g.addColorStop(0, 'rgb(28,28,28)'); g.addColorStop(0.25, 'rgb(90,90,90)'); g.addColorStop(0.6, 'rgb(255,255,255)'); g.addColorStop(1, 'rgb(255,255,255)');
+    x.fillStyle = g; x.fillRect(0, 0, 4, 128); const tx = new THREE.CanvasTexture(c); tx.wrapS = tx.wrapT = THREE.ClampToEdgeWrapping; tx.repeat.set(1, 1/L); return tx; };
+  const ring = (n, L, Wd, off, r0, cA, cB, cA2, cB2) => { const R = {petals:[], cols:[]}; const aTex = fadeTex(L);
     for (let i=0;i<n;i++){ const az = off + i/n*Math.PI*2, geo = shape(L, Wd), pa = geo.attributes.position, a = [], b = [], c = new THREE.Color();
       for (let j=0;j<pa.count;j++){ const u = pa.getY(j)/L; c.set(cA).lerp(new THREE.Color(cB), u); a.push(c.r, c.g, c.b); c.set(cA2 || cA).lerp(new THREE.Color(cB2 || cB), u); b.push(c.r, c.g, c.b); }
       geo.setAttribute('color', new THREE.Float32BufferAttribute(a.slice(), 3));
-      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0, depthWrite:false});
+      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0, depthWrite:false, alphaMap:aTex});
       const pivot = new THREE.Group(); pivot.rotation.y = -az; const hinge = new THREE.Group(); hinge.position.x = r0; pivot.add(hinge);
       const mesh = new THREE.Mesh(geo, mat); mesh.position.y = -0.02; hinge.add(mesh); G.add(pivot); R.petals.push({hinge, mat, geo, a, b}); }
     rings.push(R); return R; };
