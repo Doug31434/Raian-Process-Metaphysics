@@ -142,7 +142,7 @@ const STAGES = {
   5: {six:0, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
   6: {six:1, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:0.18}
 };
-const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon'];
+const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise'];
 for (const n in STAGES) S7KEYS.forEach(k => { if (!(k in STAGES[n])) STAGES[n][k] = 0; });
 STAGES[7] = Object.assign({}, STAGES[1]);   // Stage 7 (Doug, Nov 18): filled frame by frame from its timeline
 const W = Object.assign({}, STAGES[1]);
@@ -621,14 +621,15 @@ const startS7 = () => { s7.t = 0; s7.on = true; s7.cams = {}; Object.assign(W, S
 updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.t += dt;
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:0, open:0,
-    orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18),
+    orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
     memb:0.2 + 0.5*ph(9, 13), ytor:0.5*ph(16, 22), pearl:0.45 + 0.55*ph(9, 13),
     triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(34, 41)),
     lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(1, 5), ccIn:ph(13, 21.5),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
-    aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.61*ph(32, 39), merge:ph(34, 41), moon:ph(34.5, 41)});
+    aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(41, 48), merge:ph(34, 41), moon:ph(34.5, 41), mrise:ph(41, 48)});
   if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
-  if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); } });
+  if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); }
+  if (t > 41 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); } });
 
 // the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
 const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
@@ -694,10 +695,13 @@ const grace7 = (() => { const N = 1100, pos = new Float32Array(N*3), col = new F
   return pts; })();
 
 // the golden aura around the whole: wholeness manifesting, the clothing with the sun
-const aura7 = (() => { const a1 = glowSprite(0xf2c14e, 1, 0), a2 = glowSprite(0xdca23a, 1, 0); a1.scale.set(4.4, 8.6, 1); a2.scale.set(7.4, 11.6, 1);
-  a1.position.y = a2.position.y = -0.9; a1.renderOrder = a2.renderOrder = -1; scene.add(a1, a2);
-  updaters.push((dt, t) => { const w = W.aura, pulse = 0.78 + 0.22*Math.sin(t*1.5); a1.visible = a2.visible = w > 0.005;
-    a1.material.opacity = 0.34*w*pulse; a2.material.opacity = 0.17*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6)); }); })();
+const aura7 = (() => { const a1 = glowSprite(0xf4c650, 1, 0), a2 = glowSprite(0xe6ad3e, 1, 0), a3 = glowSprite(0xffd870, 1, 0);
+  a1.renderOrder = a2.renderOrder = a3.renderOrder = -1; scene.add(a1, a2, a3);
+  updaters.push((dt, t) => { const w = W.aura, r = W.mrise, e = r*r*(3 - 2*r), pulse = 0.78 + 0.22*Math.sin(t*1.5); a1.visible = a2.visible = a3.visible = w > 0.005;
+    const y = lerp(-0.9, GY - 0.4, e); a1.position.y = a2.position.y = y; a3.position.y = GY - 0.3;   // gathers around the heart and the risen moon
+    a1.scale.set(lerp(4.4, 3.4, e), lerp(8.6, 4.4, e), 1); a2.scale.set(lerp(7.4, 6.0, e), lerp(11.6, 7.2, e), 1); a3.scale.set(2.6, 2.9, 1);
+    a1.material.opacity = lerp(0.34, 0.62, e)*w*pulse; a2.material.opacity = lerp(0.17, 0.32, e)*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6));
+    a3.material.opacity = 0.3*e*w*(0.8 + 0.2*Math.sin(t*1.5 + 0.4)); }); })();
 
 // the lower centers gather into a crescent moon beneath, a cradle of red, orange and yellow
 const moon7 = (() => { const G = new THREE.Group(); G.position.y = -3.05; scene.add(G);
@@ -717,10 +721,12 @@ const moon7 = (() => { const G = new THREE.Group(); G.position.y = -3.05; scene.
   eg.setAttribute('color', new THREE.Float32BufferAttribute(ec, 3));
   const em = new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:0, depthWrite:false, blending:THREE.AdditiveBlending}); M.add(new THREE.Line(eg, em));
   const gl = glowSprite(0xe8803a, 1, 0); gl.scale.set(2.8, 1.3, 1); gl.position.y = -0.55; M.add(gl);
-  M.scale.setScalar(1.05); G.add(M);
+  M.scale.setScalar(1.05); G.add(M); M.traverse(o => { o.renderOrder = -2; });
   updaters.push((dt, t) => { const w = W.moon; G.visible = w > 0.01; if (!G.visible) return;
-    fill.opacity = 0.62*w; glowM.opacity = 0.22*w*(0.85 + 0.15*Math.sin(t*1.2)); em.opacity = 0.7*w; gl.material.opacity = 0.3*w;
-    G.rotation.y = orbit.az; G.position.y = -3.05 - 0.25*(1 - w); }); })();
+    const r = W.mrise, e = r*r*(3 - 2*r), sc = lerp(1, 1.36, e);
+    fill.opacity = 0.62*w; glowM.opacity = 0.22*w*(0.85 + 0.15*Math.sin(t*1.2)); em.opacity = 0.7*w; gl.material.opacity = 0.3*w*(1 - 0.75*e);
+    G.rotation.y = orbit.az; G.scale.setScalar(sc); G.position.y = lerp(-3.05 - 0.25*(1 - w), GY - 0.32*1.05*sc - 0.42, e);
+    G.position.x = -Math.sin(orbit.az)*0.9*e; G.position.z = -Math.cos(orbit.az)*0.9*e; }); })();   // rises behind and beneath the heart-womb, a cradle
 
 // the lower centers drawing down into the moon
 updaters.push(() => { if (W.merge < 0.005) return; triad.forEach((o, i) => { o.holder.position.y = lerp(CENTERS[i].y, -3.0, W.merge*W.merge*(3 - 2*W.merge)); o.holder.scale.multiplyScalar(1 - 0.7*W.merge); }); });
@@ -748,7 +754,7 @@ window.__snapStage = (n) => { setStage(n); Object.assign(W, STAGES[n]); };
 
 // ---------- camera: spherical orbit around a moving target ----------
 const orbit = {az:0.75, el:0.12, dist:11.6, ty:-1.2};
-const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, six:{az:0.75, el:0.06, dist:2.3, ty:-1.0}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, heart7:{az:0.75, el:0.42, dist:5.9, ty:GY - 0.35}, whole7:{az:0.75, el:0.1, dist:12.6, ty:-1.0}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
+const PRESETS = { whole:{az:0.75, el:0.12, dist:11.6, ty:-1.2}, heart:{az:0.75, el:0.45, dist:5.2, ty:GY - 0.9}, below:{az:0.4, el:-0.55, dist:7.6, ty:-0.9}, above:{az:0.9, el:0.95, dist:7.4, ty:-0.6}, kc:{az:0.75, el:0.05, dist:9.0, ty:2.2}, five:{az:0.75, el:0.08, dist:15, ty:-1.6}, six:{az:0.75, el:0.06, dist:2.3, ty:-1.0}, arrive:{az:0.75, el:0.22, dist:7.2, ty:GY - 0.6}, heart7:{az:0.75, el:0.42, dist:5.9, ty:GY - 0.35}, whole7:{az:0.75, el:0.1, dist:12.6, ty:-1.0}, cradle7:{az:0.75, el:0.12, dist:7.2, ty:GY - 0.45}, pyramid:{az:0.75, el:0.2, dist:34, ty:3.6} };
 window.__orbit = orbit;
 let tween = null;
 const goCam = (k, dur = 1.1) => { const p = PRESETS[k]; tween = {from:Object.assign({}, orbit), to:Object.assign({}, p), t:0, dur}; };
