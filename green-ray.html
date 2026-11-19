@@ -46,9 +46,13 @@ input[type=range]{width:110px;accent-color:var(--gold)}
 @media (max-width:640px){.stagebar{bottom:calc(var(--sb) + 34px)}}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--ink);padding:24px;text-align:center;font-size:17px;color:var(--text)}
 @media (max-width:640px){.thesis{display:none}.caption{font-size:14.5px;max-height:34vh;overflow:auto}.stages button.stage{min-width:70px}}
+  #s7cap { position:fixed; left:50%; top:calc(118px + 7vh); transform:translateX(-50%); width:min(88vw, 560px); text-align:center; pointer-events:none; z-index:5;
+    font-family:Georgia, 'Times New Roman', serif; font-size:clamp(19px, 4.6vw, 28px); line-height:1.3; color:#f6e7bf; letter-spacing:0.01em;
+    text-shadow:0 0 14px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9); opacity:0; }
 </style>
 </head>
 <body>
+<div id="s7cap" aria-live="polite"></div>
 <div class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
   <h1>The Green Ray in Seven Stages</h1>
@@ -629,7 +633,18 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
     aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(42, 49), merge:ph(34, 40), moon:ph(36.5, 42), mrise:ph(42, 49)});
   if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
   if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); }
-  if (t > 42 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); } });
+  if (t > 42 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); }
+  s7cap(t); });
+// a few words that fade in and out above the figure, so the viewer can follow (Doug, Nov 19)
+const S7CUES = [[0.6, 4.6, 'The heart, closed. The Great BASH circles below.'], [4.9, 8.6, 'The Christic Complex waits to be invited.'],
+  [9, 12.6, 'Yes. Come in me.'], [13, 17.6, 'Grace: forgiveness falls like dew.'], [18, 22.2, 'Called, the Christ enters the heart.'],
+  [22.6, 31, 'The heart opens, layer by layer.'], [32, 36.4, 'Clothed with the sun.'], [36.8, 42.2, 'The lower centers become the moon.'],
+  [43, 52, 'Cradled in wholeness.']];
+const s7El = document.getElementById("s7cap");
+const s7cap = (t) => { const c = S7CUES.find(q => t >= q[0] && t < q[1]);
+  if (!c) { s7El.style.opacity = 0; return; } if (s7El.textContent !== c[2]) s7El.textContent = c[2];
+  s7El.style.opacity = Math.min(1, (t - c[0])/0.8, (c[1] - t)/0.8).toFixed(3); };
+updaters.push(() => { if (stage !== 7) s7El.style.opacity = 0; });
 
 // the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
 const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
