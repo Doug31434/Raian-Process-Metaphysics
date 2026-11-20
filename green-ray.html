@@ -95,7 +95,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   <p>Ra doesn't describe the energy centers' fields, their colors of flow, or any vortex shape for the Great BASH. The tori, the onion and the vortex are my way of making a reading visible. The proportions are chosen for clarity, and the two fields at the heart are drawn as two shapes so that each stays legible. The heart sits at the Queen's Chamber position and the blue center at the King's Chamber position, spaced by their heights in the Great Pyramid. One more honest limit: when Don asked about a book linking the ankh shape to resonance in the pyramid, Ra called it "working with crayons" and said such shapes code mathematical relationships (55.14). The ankh here draws on Ra's other reading of it, as "an image of the eternal in and through manifestation" (93.24), and is my proposal.</p>
   <p>I'm offering these thoughts for what they are worth.</p>
 </div>
-<div id="s7nav" role="group" aria-label="Stage 7 phrases"><button id="s7back" class="s7arrow" aria-label="Previous phrase">❮</button><button id="s7next" class="s7arrow" aria-label="Next phrase">❯</button><span id="s7pos"></span></div>
+<div id="s7nav" role="group" aria-label="Phrases"><button id="s7back" class="s7arrow" aria-label="Previous phrase">❮</button><button id="s7next" class="s7arrow" aria-label="Next phrase">❯</button><span id="s7pos"></span></div>
 <button id="bPanel" class="paneltoggle" aria-expanded="true">Hide controls ▾</button>
 <div class="stagebar" id="stagebar">
   <div class="stages">
@@ -162,6 +162,7 @@ const STAGES = {
 const S7KEYS = ['gab','lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise','sh7'];
 for (const n in STAGES) S7KEYS.forEach(k => { if (!(k in STAGES[n])) STAGES[n][k] = 0; });
 STAGES[7] = Object.assign({}, STAGES[1]);   // Stage 7 (Doug, Nov 18): filled frame by frame from its timeline
+const STAGE1_BASE = Object.assign({}, STAGES[1]);   // Stage 1's full pose (its bash weight now builds with the phrases, Nov 20)
 const W = Object.assign({}, STAGES[1]);
 let stage = 1;
 
@@ -635,7 +636,7 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
 // lower centers gather into a crescent moon beneath, a cradle. White light is kept restrained throughout.
 const s7 = {t:0, r:0, on:false, cams:{}};
 window.__s7t = () => s7.t;
-const startS7 = () => { s7.t = 0; s7.r = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGES[1]); W.lot7 = 1; goCam('whole', 1.6); };
+const startS7 = () => { s7.t = 0; s7.r = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGE1_BASE); W.lot7 = 1; goCam('whole', 1.6); };
 updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.r += dt; s7.t = s7warp(s7.r);
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:ph(0, 1.5)*(0.1 + 0.25*ph(13, 21.5)), open:0,   // dull throughout, as in Stage 6
@@ -655,23 +656,23 @@ updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; re
 // 1.6 s fades); the scene timeline is warped piecewise so each scene segment lasts as long as its sentence.
 const S7BEATS = [   // [scene time at which the beat ends, text, Gabriel present?]  (draft v8, Nov 19 evening)
   [1.5,  'Now the view turns to us: veiled, third-density beings here in space/time.'],
-  [2.5,  '“The moment contains love. That is the lesson/goal of this illusion or density” (10.14).'],
+  [2.5,  '“The moment contains love. That is the lesson/goal of this illusion or density” (The Ra Contact, 10.14).'],
   [3.2,  'The Christic Complex that arose in Yehoshua is already implanted in the collective heart, and it waits to be invited.'],
   [3.7,  'Also present is the Great BASH. Each person inherits the current collective consciousness, with all its flourishing and all its distortions. This, as I understand it, is what is meant by original sin.'],
   [4.0,  'Greetings, favored one. The Lord is with you. Do not be afraid. (after Luke 1:28, 30)', 1],
-  [4.4,  '“Each opportunity is pregnant with the most extravagant magical possibilities for the far-seeing adept” (93.18).', 1],
+  [4.4,  '“Each opportunity is pregnant with the most extravagant magical possibilities for the far-seeing adept” (The Ra Contact, 93.18).', 1],
   [4.8,  'Every moment we are invited, as third-density beings endowed with self-awareness, to meet the fullness of the moment like Mary: balanced, harmonized, transparent in our desires, saying, “May it be done unto me according to your will.”', 1],
   [9,    '“This is my greatest desire: dwell within my heart. Yes.”'],
-  [12.5, 'Our yes is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (18.12), falling like dew through the lower centers.'],
-  [16.5, '“In forgiveness lies the stoppage of the wheel of action, or what you call karma” (17.20), and, as I read Ra on the Patton phenomenon (34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling.'],
+  [12.5, 'Our yes is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (The Ra Contact, 18.12), falling like dew through the lower centers.'],
+  [16.5, '“In forgiveness lies the stoppage of the wheel of action, or what you call karma” (The Ra Contact, 17.20), and, as I read Ra on the Patton phenomenon (The Ra Contact, 34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling.'],
   [21.5, 'Called, the Christ comes into the heart.'],
   [25,   'The heart opens layer by layer, blue to indigo to violet at its center: the continual work of theosis, of becoming Christified, of wholeness-making.'],
-  [28,   '“Transparent in personality” (74.11): able to communicate our whole being honestly, with full self-agency. As I read it, this is the blue ray activated, the fruit of the disciplines of the personality.'],
-  [31,   'At the center, violet: “the sacramental nature of each experience. Meanwhile the Creator lies within” (49.6).'],
+  [28,   '“Transparent in personality” (The Ra Contact, 74.11): able to communicate our whole being honestly, with full self-agency. As I read it, this is the blue ray activated, the fruit of the disciplines of the personality.'],
+  [31,   'At the center, violet: “the sacramental nature of each experience. Meanwhile the Creator lies within” (The Ra Contact, 49.6).'],
   [33,   '“Yet not I, but Christ liveth in me” (Galatians 2:20).'],
-  [35.5, '“The true adept lives more and more as it is” (73.20), manifesting “more and more of that which it always has been since before time: that is, the One Infinite Creator” (75.23).'],
-  [37,   '“To become the Creator is to become all that there is” (74.11).'],
-  [40,   'Lived to the fullest, the archetype becomes the woman of Revelation (12:1): clothed with the sun, the gold of wholeness made manifest,'],
+  [35.5, '“The true adept lives more and more as it is” (The Ra Contact, 73.20), manifesting “more and more of that which it always has been since before time: that is, the One Infinite Creator” (The Ra Contact, 75.23).'],
+  [37,   '“To become the Creator is to become all that there is” (The Ra Contact, 74.11).'],
+  [40,   'Lived to the fullest, the archetype becomes the woman of Revelation 12:1: clothed with the sun, the gold of wholeness made manifest,'],
   [45,   'and standing upon the moon, the lower centers no longer driving our movement but gathered beneath us as a cradle.'],
   [49,   'When we desire, and then attempt, to bring wholeness into the moment through an open heart, honesty, creative nuance, and even far-seeing within the subtle energy realms, then we are Mary incarnating the Christ. And this is a supreme act of service.']];
 const S7CUES = [], S7WARP = [[0, 0]], S7GAB = [-1, -1];   // S7GAB: real time Gabriel arrives, real time of the yes   // cues in real seconds; warp keys [real, scene]
@@ -687,7 +688,7 @@ const s7El = document.getElementById("s7cap");
 const s7cap = (t) => { const c = S7CUES.find(q => t >= q[0] && t < q[1]);
   if (!c) { s7El.style.opacity = 0; return; } if (s7El.textContent !== c[2]) s7El.textContent = c[2];
   s7El.style.opacity = Math.min(1, (t - c[0])/1.6, (c[1] - t)/1.6).toFixed(3); };   // slower fades (Doug, Nov 19)
-updaters.push(() => { if (stage !== 7) s7El.style.opacity = 0; });
+updaters.push(() => { if (stage !== 7 && !SCUES[stage]) s7El.style.opacity = 0; });
 
 // the layered lotus: ring 0 green (outermost), ring 1 the lotus of the yes (green, then blue), ring 2 indigo, ring 3 violet
 const lot7 = (() => { const G = new THREE.Group(); green.add(G); G.position.y = -0.1; const rings = [];
@@ -848,34 +849,100 @@ const s7idx = () => { let i = -1; S7CUES.forEach((c, k) => { if (s7.r >= c[0] - 
 const s7jump = (dir) => { if (stage !== 7) return; if (!s7.on) startS7();
   const i = s7idx(); let j;
   if (dir > 0) j = Math.min(S7CUES.length - 1, i + 1);
-  else j = (i >= 0 && s7.r - S7CUES[i][0] > 2.5) ? i : Math.max(0, i - 1);
+  else { if (i <= 0 && s7.r - (i >= 0 ? S7CUES[0][0] : 0) <= 2.5) { goStage(6, 'last'); return; }   // Back from Stage 7's first phrase: Stage 6's last
+    j = (i >= 0 && s7.r - S7CUES[i][0] > 2.5) ? i : Math.max(0, i - 1); }
   s7.r = Math.max(0, S7CUES[j][0] - 0.3); s7.t = s7warp(s7.r); const t = s7.t;
   if (t < 41.5) { s7hid.forEach(o => o.visible = true); s7hid.clear(); }
   s7.cams = {}; let cam = 'whole';
   if (t > 20.5) { s7.cams.heart = 1; cam = 'heart7'; } if (t > 31.5) { s7.cams.whole = 1; cam = 'whole7'; } if (t > 42) { s7.cams.cradle = 1; cam = 'cradle7'; }
   goCam(cam, 1.4); };
-document.getElementById('s7back').addEventListener('click', () => s7jump(-1));
-document.getElementById('s7next').addEventListener('click', () => s7jump(1));
-addEventListener('keydown', (e) => { if (stage !== 7 || e.target.closest && e.target.closest('input, textarea')) return;
-  if (e.key === 'ArrowLeft') s7jump(-1); else if (e.key === 'ArrowRight') s7jump(1); });
-updaters.push(() => { const on = stage === 7; s7navEl.style.display = on ? 'block' : 'none';
-  if (on) { const i = s7idx(); s7posEl.textContent = (Math.max(0, i) + 1) + ' / ' + S7CUES.length; } });
+// Stages 1–6: step by phrase; past a stage's last phrase, go on to the next stage; back from its first, to the previous stage's last
+const goStage = (n, where) => { const b = document.querySelector('.stage[data-stage="' + n + '"]'); if (b) b.click();
+  if (where === 'last' && SCUES[n]) sp.r = SCUES[n][SCUES[n].length - 1][0] - 0.3; };
+const navJump = (dir) => { if (stage === 7) return s7jump(dir); const C = SCUES[stage]; if (!C) return;
+  const i = spIdx(stage);
+  if (dir > 0) { if (i >= C.length - 1) { goStage(stage + 1); return; } sp.r = C[i + 1][0] - 0.3; return; }
+  if (i >= 0 && sp.r - C[i][0] > 2.5) { sp.r = C[i][0] - 0.3; return; }
+  if (i <= 0) { if (stage > 1) goStage(stage - 1, 'last'); else sp.r = 0; return; }
+  sp.r = C[i - 1][0] - 0.3; };
+document.getElementById('s7back').addEventListener('click', () => navJump(-1));
+document.getElementById('s7next').addEventListener('click', () => navJump(1));
+addEventListener('keydown', (e) => { if (e.target.closest && e.target.closest('input, textarea')) return;
+  if (e.key === 'ArrowLeft') navJump(-1); else if (e.key === 'ArrowRight') navJump(1); });
+updaters.push(() => { s7navEl.style.display = 'block';
+  if (stage === 7) { const i = s7idx(); s7posEl.textContent = (Math.max(0, i) + 1) + ' / ' + S7CUES.length; }
+  else if (SCUES[stage]) { s7posEl.textContent = (Math.max(0, spIdx(stage)) + 1) + ' / ' + SCUES[stage].length; } });
+
+// ---------- Stages 1–6: narrating phrases and Back / Next (Doug, Nov 20) ----------
+// Same reading pace and fades as Stage 7. Each stage's last phrase stays on screen; Next then goes on to the next stage.
+const SBEATS = {
+  1: ['Energy rises from red, through orange, into yellow, and there it stalls, falling back on itself short of the heart.',
+      'Ra says of our world, “In the case of your planetary sphere there is much inefficient use of catalyst” (The Ra Contact, 66.34).',
+      'And Ra names a law that meets us here: the Law of Responsibility. “As each lesson was understood… each lesson could be rejected in practice” (The Ra Contact, 22.5).',
+      'In other words, what we come to understand but do not embody, do not incarnate “in the moment by moment experience” (The Ra Contact, 60.16), carries consequences.',
+      'As I see it, through our inefficient use of the catalyst of bellicosity, humanity has built a great collective thoughtform. Ra speaks of our peoples becoming “open to the concepts of bellicosity and the greed of ownership” (The Ra Contact, 31.15).',
+      'It is like an egregore: we created it, and now it creates us. Ra says thought-forms created among a people become “a part of your society-memory complex. This mass consciousness, as you may call it, creates the experience once more” (The Ra Contact, 6.23).',
+      'So we live in a collective enmeshment. Even when our institutions affirm us, we often enmesh ourselves all the more in this thoughtform, without knowing it.',
+      'I call this collective thoughtform the Great BASH: Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility.',
+      'It is a vortex that feeds on the very energy it keeps circling, and it winds through all three lower centers. Ra places yellow ray “at the heart of bellicose actions” (The Ra Contact, 32.2).',
+      'Now and then the lotus at green parts for a moment, and closes again.',
+      'The Patton phenomenon, which Ra ties to “the rejection of the Law or Way of Responsibility; that is, seeing universal love, yet still it fought on” (The Ra Contact, 34.17).'],
+  2: ['Now the stream from below rises all the way into green, and the lotus opens.',
+      'At the heart is humanity’s own toroidal field, yellow: veiled third density, the field we share as a people.',
+      'It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.',
+      'Here experience begins to be seen “in terms of universal love” (The Ra Contact, 49.6).'],
+  3: ['At the heart, humanity’s own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos.',
+      'This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center.',
+      'The two fields pass through each other and neither dissolves. Each stays itself, and that is what makes it a union.',
+      'Ra describes invoking the higher self as making “a bridge betwixt space/time and time/space” (The Ra Contact, 75.36).',
+      'I read Yehoshua, by will and faith, as that bridge held open for all of us.',
+      'Then the Solar Logos experiences our condition face to face, and through it the nested Logoi, for “that which is learned by one is known to all” (The Ra Contact, 81.33).'],
+  4: ['Now we rise one spiral, from the heart at the Queen’s Chamber position to the blue center at the King’s Chamber position.',
+      '“The spiraling energy is beginning to be diffused at the point where it goes through the King’s Chamber position” (The Ra Contact, 56.6).',
+      'The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis.',
+      'In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh:',
+      'the Christic Complex, the coincidence of opposites made flesh.'],
+  5: ['Now the Living Ankh enlarges and settles.',
+      'Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart.',
+      'As I see it, this is the place of the indwelling: “Meanwhile the Creator lies within” (The Ra Contact, 49.6).',
+      'Here co-presencing lives after the Christ Event: the meeting point of a veiled third-density human and the Creator, through the portal of the Christic Complex,',
+      'much as Ra calls the kundalini “the meeting place of cosmic and inner, shall we say, vibratory understanding” (The Ra Contact, 49.5).',
+      'Ra calls the choice “the axis upon which the creation turns” (The Ra Contact, 76.16). Here that axis is also the one through which the Creator sees, feels and engages.',
+      'And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which “the Creator will know Itself” (The Ra Contact, 27.8).'],
+  6: ['Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross.',
+      'A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced.',
+      'At its center is the Sacred Heart of Jesus: crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding.',
+      'This is the coincidence of opposites at the heart of it all: “Meanwhile the Creator lies within” (The Ra Contact, 49.6).']
+};
+const SCUES = {};
+for (const n in SBEATS) { let r = 0.6; SCUES[n] = SBEATS[n].map(txt => { const dur = 3.4 + txt.split(/\s+/).length/2.3; const c = [r + 0.3, r + dur - 0.3, txt]; r += dur; return c; });
+  SCUES[n][SCUES[n].length - 1][1] = 1e9; }   // each stage's last phrase stays on screen
+const sp = {r:0};
+const spIdx = (n) => { let i = -1; SCUES[n].forEach((c, k) => { if (sp.r >= c[0] - 0.35) i = k; }); return i; };
+const spShow = (n) => { const c = SCUES[n].find(q => sp.r >= q[0] && sp.r < q[1]);
+  if (!c) { s7El.style.opacity = 0; return; } if (s7El.textContent !== c[2]) s7El.textContent = c[2];
+  s7El.style.opacity = Math.min(1, (sp.r - c[0])/1.6, (c[1] - sp.r)/1.6).toFixed(3); };
+updaters.push((dt) => { if (!SCUES[stage]) return; sp.r += dt; spShow(stage);
+  // Stage 1: the Great BASH is faint while the stall and the Law of Responsibility are told, gathers as the thoughtform is described,
+  // and is fully present once it is named (phrase 8)
+  if (stage === 1) { const c = SCUES[1], g = smooth(sp.r, c[4][0], c[6][1] - 1.6), f = smooth(sp.r, c[7][0], c[7][0] + 2.5);
+    STAGES[1].bash = STAGE1_BASE.bash*(0.22 + 0.38*g + 0.4*f); } });
 
 updaters.push(() => { const s7o = stage === 7;
   [ankh, six].forEach(g => g.traverse(o => { if (o.userData.ro === undefined) o.userData.ro = o.renderOrder; o.renderOrder = s7o ? 0 : o.userData.ro; })); });
 
 // ---------- captions ----------
 const CAPS = {
-  1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (34.17).`,
+  1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (The Ra Contact, 32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (The Ra Contact, 34.17).`,
   2: `<h2>Stage 2 · The Heart</h2>Now the stream from below rises all the way into green, and the lotus opens. At the heart is humanity's own toroidal field, yellow: veiled third density, the field we share as a people. It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.`,
-  3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
-  4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
-  5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (27.8).`,
-  6: `<h2>Stage 6 · The Sacred Heart at the Nexus</h2>Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross. A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced. At its center is the Sacred Heart of Jesus, crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding. The heart is sculpted from the shared iconography of the traditional Sacred Heart paintings. This is the coincidence of opposites at the heart of it all: "Meanwhile the Creator lies within" (49.6).`,
-  7: `<h2>Stage 7 · The Marian Archetype</h2>Now the view turns to us: veiled, third-density beings here in space/time. The Christic Complex that arose in Yehoshua waits to be invited, and in each moment we're asked, as Mary was, whether we'll receive it. Our yes, "dwell within my heart," is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (18.12), falling like dew through the lower centers. "In forgiveness lies the stoppage of the wheel of action, or what you call karma" (17.20), and, as I read Ra on the Patton phenomenon (34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling. Called, the Christ comes into the heart, and the heart opens layer by layer, blue to indigo to violet at its center: the continual work of theosis, of becoming Christified, of wholeness-making, able now to taste "the sacramental nature of each experience" (49.6). "Yet not I, but Christ liveth in me" (Galatians 2:20). Lived to the fullest, the archetype becomes the woman of Revelation (12:1): clothed with the sun, the gold of wholeness made manifest, and standing upon the moon, the lower centers no longer driving our movement but gathered beneath us as a cradle.`
+  3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (The Ra Contact, 75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
+  4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (The Ra Contact, 56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
+  5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (The Ra Contact, 49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (The Ra Contact, 49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (The Ra Contact, 76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (The Ra Contact, 27.8).`,
+  6: `<h2>Stage 6 · The Sacred Heart at the Nexus</h2>Here we come close to the nexus of the Christic Complex, on the yellow center, where the vertical and horizontal fields cross. A golden Star of David holds the place: two triangles, one ascending and one descending, interlaced. At its center is the Sacred Heart of Jesus, crowned with thorns, burning with love, the cross rising from its flames, its wound still bleeding. The heart is sculpted from the shared iconography of the traditional Sacred Heart paintings. This is the coincidence of opposites at the heart of it all: "Meanwhile the Creator lies within" (The Ra Contact, 49.6).`,
+  7: `<h2>Stage 7 · The Marian Archetype</h2>Now the view turns to us: veiled, third-density beings here in space/time. The Christic Complex that arose in Yehoshua waits to be invited, and in each moment we're asked, as Mary was, whether we'll receive it. Our yes, "dwell within my heart," is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (The Ra Contact, 18.12), falling like dew through the lower centers. "In forgiveness lies the stoppage of the wheel of action, or what you call karma" (The Ra Contact, 17.20), and, as I read Ra on the Patton phenomenon (The Ra Contact, 34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling. Called, the Christ comes into the heart, and the heart opens layer by layer, blue to indigo to violet at its center: the continual work of theosis, of becoming Christified, of wholeness-making, able now to taste "the sacramental nature of each experience" (The Ra Contact, 49.6). "Yet not I, but Christ liveth in me" (Galatians 2:20). Lived to the fullest, the archetype becomes the woman of Revelation 12:1: clothed with the sun, the gold of wholeness made manifest, and standing upon the moon, the lower centers no longer driving our movement but gathered beneath us as a cradle.`
 };
 const capEl = document.getElementById('cap');
-const setStage = (n) => { if (n !== 3 && arrival.on) stopArrival(); stage = n; const ba = document.getElementById('bArrive'); if (ba) ba.style.display = n === 3 ? '' : 'none'; capEl.innerHTML = CAPS[n]; document.querySelectorAll('.stage').forEach(b => b.classList.toggle('on', +b.dataset.stage === n)); };
+const setStage = (n) => { if (n !== 3 && arrival.on) stopArrival(); stage = n; const ba = document.getElementById('bArrive'); if (ba) ba.style.display = n === 3 ? '' : 'none'; capEl.innerHTML = CAPS[n]; if (typeof sp !== 'undefined') sp.r = 0; document.querySelectorAll('.stage').forEach(b => b.classList.toggle('on', +b.dataset.stage === n)); };
 document.querySelectorAll('.stage').forEach(b => b.addEventListener('click', () => { const n = +b.dataset.stage, was = stage; setStage(n);
   if (n === 3 && was !== 3) { startArrival(); return; }   // Stage 3 opens with the arrival (Doug, Nov 16)
   if (n === 7) { startS7(); return; }   // Stage 7 plays its sequence each time it is pressed (Doug, Nov 18)
