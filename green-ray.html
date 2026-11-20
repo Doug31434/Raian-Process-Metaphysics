@@ -41,19 +41,30 @@ button:hover{border-color:var(--gold-dim)}
 .controls button{padding:4px 10px;font-size:13px}
 input[type=range]{width:110px;accent-color:var(--gold)}
 
+#s7nav{display:none}
+.s7arrow{position:fixed;top:50%;transform:translateY(-50%);z-index:6;width:44px;height:44px;border-radius:50%;padding:0;font-size:18px;line-height:44px;text-align:center;opacity:.75;background:rgba(10,12,16,.55);border:1px solid rgba(233,192,90,.45);color:#e9c05a}
+.s7arrow:hover{opacity:1}
+#s7back{left:8px} #s7next{right:8px}
+#s7pos{position:fixed;right:8px;top:calc(50% + 30px);width:44px;text-align:center;z-index:6;font-size:11px;color:#c9b98e;text-shadow:0 0 6px #000}
 .paneltoggle{position:fixed;right:var(--sr);bottom:var(--sb);z-index:5;font-size:12px;padding:5px 10px;opacity:.85}
 .stagebar.hidden{display:none}
 @media (max-width:640px){.stagebar{bottom:calc(var(--sb) + 34px)}}
 #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:var(--ink);padding:24px;text-align:center;font-size:17px;color:var(--text)}
 @media (max-width:640px){.thesis{display:none}.caption{font-size:14.5px;max-height:34vh;overflow:auto}.stages button.stage{min-width:70px}}
   #s7cap { position:fixed; left:50%; top:162px; transform:translateX(-50%); width:min(88vw, 560px); text-align:center; pointer-events:none; z-index:5;
-    font-family:Georgia, 'Times New Roman', serif; font-size:clamp(19px, 4.6vw, 28px); line-height:1.3; color:#f6e7bf; letter-spacing:0.01em;
+    font-family:Georgia, 'Times New Roman', serif; font-size:clamp(16px, 3.9vw, 23px); line-height:1.35; color:#f6e7bf; letter-spacing:0.01em;
     text-shadow:0 0 14px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9); opacity:0; }
+  #gabLbl { position:fixed; left:0; top:0; transform:translate(-50%, 0); text-align:center; pointer-events:none; z-index:5; white-space:nowrap;
+    font-family:Georgia, 'Times New Roman', serif; font-size:clamp(13px, 3.2vw, 17px); line-height:1.35; color:#e9c05a;
+    text-shadow:0 0 10px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,0.95); opacity:0; }
+  #gabLbl span { font-size:0.92em; }
+  @media (min-width:701px) { #s7cap { left:16px; top:180px; transform:none; width:min(30vw, 400px); text-align:left; } }   /* desktop: the empty column under the title, clear of the heart and Gabriel (Nov 19) */
   @media (max-width:700px) { #s7cap { top:96px; } }   /* phones: in the space between the title and the figure (Doug, Nov 19) */
 </style>
 </head>
 <body>
 <div id="s7cap" aria-live="polite"></div>
+<div id="gabLbl" aria-hidden="true"><i>Gavri’el</i> [Gabriel]<br><span>“Do you wish to birth<br>the Christ?”</span></div>
 <div class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
   <h1>The Green Ray in Seven Stages</h1>
@@ -84,6 +95,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   <p>Ra doesn't describe the energy centers' fields, their colors of flow, or any vortex shape for the Great BASH. The tori, the onion and the vortex are my way of making a reading visible. The proportions are chosen for clarity, and the two fields at the heart are drawn as two shapes so that each stays legible. The heart sits at the Queen's Chamber position and the blue center at the King's Chamber position, spaced by their heights in the Great Pyramid. One more honest limit: when Don asked about a book linking the ankh shape to resonance in the pyramid, Ra called it "working with crayons" and said such shapes code mathematical relationships (55.14). The ankh here draws on Ra's other reading of it, as "an image of the eternal in and through manifestation" (93.24), and is my proposal.</p>
   <p>I'm offering these thoughts for what they are worth.</p>
 </div>
+<div id="s7nav" role="group" aria-label="Stage 7 phrases"><button id="s7back" class="s7arrow" aria-label="Previous phrase">❮</button><button id="s7next" class="s7arrow" aria-label="Next phrase">❯</button><span id="s7pos"></span></div>
 <button id="bPanel" class="paneltoggle" aria-expanded="true">Hide controls ▾</button>
 <div class="stagebar" id="stagebar">
   <div class="stages">
@@ -147,7 +159,7 @@ const STAGES = {
   5: {six:0, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:1},
   6: {six:1, five:1, orbO:0, orbY:0, union:1, bash:0, stall:0, rise:1, memb:0.7, ytor:0.8, wtor:0.8, pearl:1, open:1, triad:1, pyr:1, blue:1, fan:1, ankh:0.18}
 };
-const S7KEYS = ['lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise','sh7'];
+const S7KEYS = ['gab','lot7','blu7','yes','grace','cc','ccIn','lay0','lay2','lay3','aura','merge','moon','mrise','sh7'];
 for (const n in STAGES) S7KEYS.forEach(k => { if (!(k in STAGES[n])) STAGES[n][k] = 0; });
 STAGES[7] = Object.assign({}, STAGES[1]);   // Stage 7 (Doug, Nov 18): filled frame by frame from its timeline
 const W = Object.assign({}, STAGES[1]);
@@ -621,27 +633,56 @@ const six = (() => { const G = new THREE.Group(); G.position.set(0, CENTERS[2].y
 // the heart and meets the yellow third-density sphere; the lotus unfolds in layers, green outermost, then blue, indigo,
 // violet innermost, the golden aura growing with each; last, the aura (the clothing with the sun) is strong and the
 // lower centers gather into a crescent moon beneath, a cradle. White light is kept restrained throughout.
-const s7 = {t:0, on:false, cams:{}};
+const s7 = {t:0, r:0, on:false, cams:{}};
 window.__s7t = () => s7.t;
-const startS7 = () => { s7.t = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGES[1]); W.lot7 = 1; goCam('whole', 1.6); };
-updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.t += dt;
+const startS7 = () => { s7.t = 0; s7.r = 0; s7.on = true; s7.cams = {}; Object.assign(W, STAGES[1]); W.lot7 = 1; goCam('whole', 1.6); };
+updaters.push((dt) => { if (!s7.on) return; if (stage !== 7) { s7.on = false; return; } s7.r += dt; s7.t = s7warp(s7.r);
   const t = s7.t, ph = (a, b) => smooth(t, a, b), T = STAGES[7];
   Object.assign(T, {six:0, five:0, union:0, wtor:0, pyr:0, blue:0, fan:0, ankh:ph(0, 1.5)*(0.1 + 0.25*ph(13, 21.5)), open:0,   // dull throughout, as in Stage 6
     orbO:1 - ph(9, 13), orbY:ph(9, 13), bash:1 - ph(10, 19), stall:1 - ph(10, 16), rise:ph(12, 18)*(1 - ph(40, 45)),
     memb:0.2 + 0.5*ph(9, 13), ytor:0,   // Doug (Nov 19): no streaming field around the yellow sphere in Stage 7 pearl:0.45 + 0.55*ph(9, 13),
     triad:(0.7 + 0.3*ph(10, 18))*(1 - ph(38, 42)),
-    lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(0, 1.5), ccIn:ph(13, 21.5), sh7:ph(0, 1.5)*(0.45 + 0.55*ph(13, 21.5)),
+    gab:smooth(s7.r, S7GAB[0], S7GAB[0] + 2.5)*(1 - smooth(s7.r, S7GAB[1] + 1, S7GAB[1] + 5)), lot7:1, blu7:ph(5, 8.5), yes:ph(8.5, 12), grace:ph(8.5, 10)*(1 - ph(19, 25)), cc:ph(0, 1.5), ccIn:ph(13, 21.5), sh7:ph(0, 1.5)*(0.45 + 0.55*ph(13, 21.5)),
     lay0:ph(22, 25), lay2:ph(25, 28), lay3:ph(28, 31),
     aura:0.13*ph(22, 25) + 0.13*ph(25, 28) + 0.13*ph(28, 31) + 0.41*ph(32, 39) + 0.2*ph(42, 49), merge:ph(34, 40), moon:ph(36.5, 42), mrise:ph(42, 49)});
   if (t > 20.5 && !s7.cams.heart) { s7.cams.heart = 1; goCam('heart7', 3.2); }
   if (t > 31.5 && !s7.cams.whole) { s7.cams.whole = 1; goCam('whole7', 4.5); }
   if (t > 42 && !s7.cams.cradle) { s7.cams.cradle = 1; goCam('cradle7', 6); }
-  s7cap(t); });
+  s7cap(s7.r); });
 // a few words that fade in and out above the figure, so the viewer can follow (Doug, Nov 19)
-const S7CUES = [[0.6, 4.6, 'The heart, closed. The Great BASH circles below.'], [4.9, 8.6, 'The Christic Complex waits to be invited.'],
-  [8.8, 13.4, 'This is my greatest desire: dwell within my heart. Yes.'], [13.8, 17.8, 'Grace: forgiveness falls like dew.'], [18, 22.2, 'Called, the Christ enters the heart.'],
-  [22.6, 31, 'The heart opens, layer by layer.'], [32, 36.4, 'Clothed with the sun.'], [36.8, 42.2, 'The lower centers become the moon.'],
-  [43, 52, 'Cradled in wholeness.']];
+// Doug (Nov 19): Stage 7 slowed so the caption's own sentences fade in and out over the scene each describes.
+// Each beat: [scene time at which the beat ends, text]. Its real duration comes from its length (slow reading pace,
+// 1.6 s fades); the scene timeline is warped piecewise so each scene segment lasts as long as its sentence.
+const S7BEATS = [   // [scene time at which the beat ends, text, Gabriel present?]  (draft v8, Nov 19 evening)
+  [1.5,  'Now the view turns to us: veiled, third-density beings here in space/time.'],
+  [2.5,  '“The moment contains love. That is the lesson/goal of this illusion or density” (10.14).'],
+  [3.2,  'The Christic Complex that arose in Yehoshua is already implanted in the collective heart, and it waits to be invited.'],
+  [3.7,  'Also present is the Great BASH. Each person inherits the current collective consciousness, with all its flourishing and all its distortions. This, as I understand it, is what is meant by original sin.'],
+  [4.0,  'Greetings, favored one. The Lord is with you. Do not be afraid. (after Luke 1:28, 30)', 1],
+  [4.4,  '“Each opportunity is pregnant with the most extravagant magical possibilities for the far-seeing adept” (93.18).', 1],
+  [4.8,  'Every moment we are invited, as third-density beings endowed with self-awareness, to meet the fullness of the moment like Mary: balanced, harmonized, transparent in our desires, saying, “May it be done unto me according to your will.”', 1],
+  [9,    '“This is my greatest desire: dwell within my heart. Yes.”'],
+  [12.5, 'Our yes is itself the opening of grace: the grace of forgiveness, of ourselves and of others, which Ra says are one (18.12), falling like dew through the lower centers.'],
+  [16.5, '“In forgiveness lies the stoppage of the wheel of action, or what you call karma” (17.20), and, as I read Ra on the Patton phenomenon (34.17), forgiveness is what dissolves the bellicose mold the Great BASH keeps circling.'],
+  [21.5, 'Called, the Christ comes into the heart.'],
+  [25,   'The heart opens layer by layer, blue to indigo to violet at its center: the continual work of theosis, of becoming Christified, of wholeness-making.'],
+  [28,   '“Transparent in personality” (74.11): able to communicate our whole being honestly, with full self-agency. As I read it, this is the blue ray activated, the fruit of the disciplines of the personality.'],
+  [31,   'At the center, violet: “the sacramental nature of each experience. Meanwhile the Creator lies within” (49.6).'],
+  [33,   '“Yet not I, but Christ liveth in me” (Galatians 2:20).'],
+  [35.5, '“The true adept lives more and more as it is” (73.20), manifesting “more and more of that which it always has been since before time: that is, the One Infinite Creator” (75.23).'],
+  [37,   '“To become the Creator is to become all that there is” (74.11).'],
+  [40,   'Lived to the fullest, the archetype becomes the woman of Revelation (12:1): clothed with the sun, the gold of wholeness made manifest,'],
+  [45,   'and standing upon the moon, the lower centers no longer driving our movement but gathered beneath us as a cradle.'],
+  [49,   'When we desire, and then attempt, to bring wholeness into the moment through an open heart, honesty, creative nuance, and even far-seeing within the subtle energy realms, then we are Mary incarnating the Christ. And this is a supreme act of service.']];
+const S7CUES = [], S7WARP = [[0, 0]], S7GAB = [-1, -1];   // S7GAB: real time Gabriel arrives, real time of the yes   // cues in real seconds; warp keys [real, scene]
+(() => { let r = 0, sc = 0; S7BEATS.forEach(([end, txt, gab]) => { const words = txt.split(/\s+/).length;
+  const dur = 3.4 + words/2.3;   // about 140 words a minute, plus both fades and a breath
+  S7CUES.push([r + 0.3, r + dur - 0.3, txt]); if (gab && S7GAB[0] < 0) S7GAB[0] = r; if (!gab && S7GAB[0] >= 0 && S7GAB[1] < 0) S7GAB[1] = r; r += dur; sc = end; S7WARP.push([r, sc]); }); })();
+const S7END = S7WARP[S7WARP.length - 1][0];
+S7CUES[S7CUES.length - 1][1] = 1e9;   // the closing phrase stays on screen (Doug, Nov 20)
+const s7warp = (r) => { for (let i = 1; i < S7WARP.length; i++) { const [r1, t1] = S7WARP[i], [r0, t0] = S7WARP[i-1];
+    if (r < r1) return t0 + (t1 - t0)*(r - r0)/(r1 - r0); }
+  const [rl, tl] = S7WARP[S7WARP.length - 1]; return tl + (r - rl); };
 const s7El = document.getElementById("s7cap");
 const s7cap = (t) => { const c = S7CUES.find(q => t >= q[0] && t < q[1]);
   if (!c) { s7El.style.opacity = 0; return; } if (s7El.textContent !== c[2]) s7El.textContent = c[2];
@@ -727,6 +768,39 @@ const aura7 = (() => { const a1 = glowSprite(0xf4c650, 1, 0), a2 = glowSprite(0x
     a1.material.opacity = lerp(0.34, 0.85, e)*w*pulse; a2.material.opacity = lerp(0.17, 0.48, e)*w*(0.85 + 0.15*Math.sin(t*1.5 - 0.6));
     a3.material.opacity = 0.42*e*w*(0.8 + 0.2*Math.sin(t*1.5 + 0.4)); }); })();
 
+// Gabriel (Doug, Nov 19): a swirling orb of blue, red and green energy, the focusing (coalescing) nature of love, that
+// comes to the viewer's right of the heart just before the lotus turns blue, greets us, and fades as we say yes.
+// Colors per Doug: red (fire, Gevurah), blue (water; Daskalos's sky-blue), green (the heart; Jibril's green).
+const gab7 = (() => { const G = new THREE.Group(); scene.add(G);
+  const right = new THREE.Vector3(Math.cos(0.75), 0, -Math.sin(0.75));   // the viewer's right at the default azimuth
+  G.position.copy(right.multiplyScalar(1.45)).add(new THREE.Vector3(0, GY + 0.25, 0));
+  const R = 0.34, cols = [0x4a8cff, 0xe0402c, 0x38c86a], ribbons = [], mats = [];
+  cols.forEach((c, i) => { const pts = [], tilt = new THREE.Euler(0.9*i + 0.4, 1.3*i, 0.5*i);
+    for (let j = 0; j <= 160; j++) { const u = j/160*Math.PI*2, w = 1 + 0.18*Math.sin(3*u + i*2.1);
+      pts.push(new THREE.Vector3(Math.cos(u)*R*w, Math.sin(2*u + i)*R*0.28, Math.sin(u)*R*w).applyEuler(tilt)); }
+    const m = lmat(c, 0.9); mats.push(m); const L = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), m);
+    const H = new THREE.Group(); H.add(L); G.add(H); ribbons.push(H); });
+  const N = 360, pos = new Float32Array(N*3), col = new Float32Array(N*3), seed = [], cc = new THREE.Color();
+  for (let i = 0; i < N; i++) { cc.set(cols[i % 3]); col[i*3] = cc.r; col[i*3+1] = cc.g; col[i*3+2] = cc.b;
+    seed.push([Math.random()*Math.PI*2, Math.acos(2*Math.random() - 1), 0.4 + 0.6*Math.random(), 0.6 + Math.random()]); }
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); pg.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  const pm = pointsMat(0.05); const P = new THREE.Points(pg, pm); G.add(P);
+  const core = glowSprite(0xdfe9ff, 0.55, 0.0), halo = glowSprite(0x7fd0b0, 1.5, 0.0); G.add(halo, core);
+  updaters.push((dt, t) => { const w = stage === 7 ? W.gab : 0; G.visible = w > 0.005; if (!G.visible) return;
+    ribbons.forEach((H, i) => { H.rotation.y += dt*(0.9 + 0.35*i)*(i === 1 ? -1 : 1); H.rotation.x += dt*0.25*(i - 1); });
+    mats.forEach(m => m.opacity = 0.85*w);
+    for (let i = 0; i < N; i++) { const [th, ph0, rr, sp] = seed[i], a = th + t*sp*(i % 2 ? 1 : -1), r = R*rr*(1 + 0.08*Math.sin(t*2 + i));
+      pos[i*3] = r*Math.sin(ph0)*Math.cos(a); pos[i*3+1] = r*Math.cos(ph0); pos[i*3+2] = r*Math.sin(ph0)*Math.sin(a); }
+    pg.attributes.position.needsUpdate = true; pm.opacity = w;
+    const pulse = 0.85 + 0.15*Math.sin(t*2.2); core.material.opacity = 0.75*w*pulse; halo.material.opacity = 0.32*w*pulse;
+    G.scale.setScalar(0.6 + 0.4*w); });
+  // the name beneath the orb, in gold (Doug, Nov 20): Gavri'el [Gabriel], then the question
+  const lbl = document.getElementById('gabLbl'), v = new THREE.Vector3();
+  updaters.push(() => { const w = stage === 7 ? W.gab : 0; if (w < 0.005) { lbl.style.opacity = 0; return; }
+    v.copy(G.position); v.y -= 0.48*G.scale.y; v.project(camera);
+    const hw = lbl.offsetWidth/2 + 8; lbl.style.left = Math.min(innerWidth - hw, Math.max(hw, (v.x + 1)/2*innerWidth)).toFixed(1) + 'px'; lbl.style.top = ((1 - v.y)/2*innerHeight).toFixed(1) + 'px';
+    lbl.style.opacity = Math.min(1, w*1.2).toFixed(3); }); })();
+
 // the lower centers become the moon (Doug, Nov 19): red, orange and yellow each move to their place on a crescent
 // and turn into its three thirds, red the left horn, orange the bowl, yellow the right horn; the moon is solid (3-D),
 // about a third of the earlier size, and then rises to cradle the heart from beneath
@@ -764,9 +838,28 @@ const moon7 = (() => { const G = new THREE.Group(); scene.add(G);
 
 // Stage 7 safeguard (Doug, Nov 19: colored spots seen in the aura on iPhone Safari): once the moon begins to rise, every
 // particle system except the Christic Complex's own light is switched off, whatever the browser does with faint opacities
-const ccPts = []; [cc7, ankh, six].forEach(g => g.traverse(o => { if (o.isPoints) ccPts.push(o); }));
+const s7hid = new Set(); const ccPts = []; [cc7, ankh, six].forEach(g => g.traverse(o => { if (o.isPoints) ccPts.push(o); }));
 updaters.push(() => { if (stage !== 7 || !s7.on || s7.t < 41.5) return;
-  scene.traverse(o => { if (o.isPoints && !ccPts.includes(o)) o.visible = false; }); });
+  scene.traverse(o => { if (o.isPoints && !ccPts.includes(o) && o.visible) { o.visible = false; s7hid.add(o); } }); });
+
+// Stage 7 Back / Next (Doug, Nov 20): step to the previous or next phrase; the scene moves with it
+const s7navEl = document.getElementById('s7nav'), s7posEl = document.getElementById('s7pos');
+const s7idx = () => { let i = -1; S7CUES.forEach((c, k) => { if (s7.r >= c[0] - 0.35) i = k; }); return i; };
+const s7jump = (dir) => { if (stage !== 7) return; if (!s7.on) startS7();
+  const i = s7idx(); let j;
+  if (dir > 0) j = Math.min(S7CUES.length - 1, i + 1);
+  else j = (i >= 0 && s7.r - S7CUES[i][0] > 2.5) ? i : Math.max(0, i - 1);
+  s7.r = Math.max(0, S7CUES[j][0] - 0.3); s7.t = s7warp(s7.r); const t = s7.t;
+  if (t < 41.5) { s7hid.forEach(o => o.visible = true); s7hid.clear(); }
+  s7.cams = {}; let cam = 'whole';
+  if (t > 20.5) { s7.cams.heart = 1; cam = 'heart7'; } if (t > 31.5) { s7.cams.whole = 1; cam = 'whole7'; } if (t > 42) { s7.cams.cradle = 1; cam = 'cradle7'; }
+  goCam(cam, 1.4); };
+document.getElementById('s7back').addEventListener('click', () => s7jump(-1));
+document.getElementById('s7next').addEventListener('click', () => s7jump(1));
+addEventListener('keydown', (e) => { if (stage !== 7 || e.target.closest && e.target.closest('input, textarea')) return;
+  if (e.key === 'ArrowLeft') s7jump(-1); else if (e.key === 'ArrowRight') s7jump(1); });
+updaters.push(() => { const on = stage === 7; s7navEl.style.display = on ? 'block' : 'none';
+  if (on) { const i = s7idx(); s7posEl.textContent = (Math.max(0, i) + 1) + ' / ' + S7CUES.length; } });
 
 updaters.push(() => { const s7o = stage === 7;
   [ankh, six].forEach(g => g.traverse(o => { if (o.userData.ro === undefined) o.userData.ro = o.renderOrder; o.renderOrder = s7o ? 0 : o.userData.ro; })); });
