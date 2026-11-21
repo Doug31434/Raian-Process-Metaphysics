@@ -906,9 +906,9 @@ function buildGreen(){ // green as in Stage 2 of The Green Ray in Six Stages: th
     reg("chamberLabels", cl); cl.visible = false; }
   // screen-space chamber labels: fixed at the right, small text, thin line and arrowhead to each chamber
   const CH_LABELS = [
-    { name:"King's Chamber", sub:"Ra: (Place of Healing)", at:C(0, 85.5, -25), col:"#b8ccf8" },
-    { name:"Queen's Chamber", sub:"Ra: (Place of Initiation)", at:C(0, 55.0, 0), col:"#9fe8bc" },
-    { name:"Resonating Chamber", sub:"Ra: (Dying to Self to Become a Healer)", at:C(14, -56.25, 0), col:"#e8d0a0" }
+    { name:"King's Chamber", sub:"(Ra: Place of Healing)", at:C(0, 85.5, -25), col:"#b8ccf8" },
+    { name:"Queen's Chamber", sub:"(Ra: Place of Initiation)", at:C(0, 55.0, 0), col:"#9fe8bc" },
+    { name:"Resonating Chamber", sub:"(Ra: Dying to Self to Become a Healer)", at:C(14, -56.25, 0), col:"#e8d0a0" }
   ];
   const chSvg = document.getElementById("chlabels"), SVGNS = "http://www.w3.org/2000/svg";
   CH_LABELS.forEach(L=>{
