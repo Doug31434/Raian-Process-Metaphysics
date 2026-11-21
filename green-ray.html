@@ -54,6 +54,10 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   #s7cap { position:fixed; left:50%; top:162px; transform:translateX(-50%); width:min(88vw, 560px); text-align:center; pointer-events:none; z-index:5;
     font-family:Georgia, 'Times New Roman', serif; font-size:clamp(16px, 3.9vw, 23px); line-height:1.35; color:#f6e7bf; letter-spacing:0.01em;
     text-shadow:0 0 14px rgba(0,0,0,0.9), 0 0 4px rgba(0,0,0,0.9); opacity:0; }
+  #s1Lbl { position:fixed; left:0; top:0; transform:translate(-50%, 0); text-align:center; pointer-events:none; z-index:5; white-space:nowrap;
+    font-family:Georgia, 'Times New Roman', serif; font-size:clamp(14px, 3.6vw, 19px); line-height:1.35; color:#e9c05a;
+    text-shadow:0 0 10px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,0.95); opacity:0; }
+  #s1Lbl span { font-size:0.9em; color:#d8cba4; }
   #gabLbl { position:fixed; left:0; top:0; transform:translate(-50%, 0); text-align:center; pointer-events:none; z-index:5; white-space:nowrap;
     font-family:Georgia, 'Times New Roman', serif; font-size:clamp(13px, 3.2vw, 17px); line-height:1.35; color:#e9c05a;
     text-shadow:0 0 10px rgba(0,0,0,0.95), 0 0 3px rgba(0,0,0,0.95); opacity:0; }
@@ -64,6 +68,7 @@ input[type=range]{width:110px;accent-color:var(--gold)}
 </head>
 <body>
 <div id="s7cap" aria-live="polite"></div>
+<div id="s1Lbl" aria-hidden="true">Stage One: Blockage<br><span>due to an activated Law of Responsibility</span></div>
 <div id="gabLbl" aria-hidden="true"><i>Gavri’el</i> [Gabriel]<br><span>“Do you wish to birth<br>the Christ?”</span></div>
 <div class="title">
   <div class="eyebrow">Raian Process · Field Studies</div>
@@ -96,8 +101,8 @@ input[type=range]{width:110px;accent-color:var(--gold)}
   <p>I'm offering these thoughts for what they are worth.</p>
 </div>
 <div id="s7nav" role="group" aria-label="Phrases"><button id="s7back" class="s7arrow" aria-label="Previous phrase">❮</button><button id="s7next" class="s7arrow" aria-label="Next phrase">❯</button><span id="s7pos"></span></div>
-<button id="bPanel" class="paneltoggle" aria-expanded="true">Hide controls ▾</button>
-<div class="stagebar" id="stagebar">
+<button id="bPanel" class="paneltoggle" aria-expanded="false">Show controls ▴</button>
+<div class="stagebar hidden" id="stagebar">
   <div class="stages">
     <button class="stage on" data-stage="1"><b>Stage 1</b><span>Blockage</span></button>
     <button class="stage" data-stage="2"><b>Stage 2</b><span>The heart</span></button>
@@ -802,6 +807,14 @@ const gab7 = (() => { const G = new THREE.Group(); scene.add(G);
     v.copy(G.position); v.y -= 0.48*G.scale.y; v.project(camera);
     const hw = lbl.offsetWidth/2 + 8; lbl.style.left = Math.min(innerWidth - hw, Math.max(hw, (v.x + 1)/2*innerWidth)).toFixed(1) + 'px'; lbl.style.top = ((1 - v.y)/2*innerHeight).toFixed(1) + 'px';
     lbl.style.opacity = Math.min(1, w*1.2).toFixed(3); }); })();
+
+// Stage 1's label, written beneath the lowest center (Doug, Nov 20): shown in Stage 1 only, below the vortex's tail
+{ const lbl = document.getElementById('s1Lbl'), v = new THREE.Vector3(); let a = 0;
+  updaters.push((dt) => { a += ((stage === 1 ? 1 : 0) - a)*Math.min(1, dt*2.5); if (a < 0.005) { lbl.style.opacity = 0; return; }
+    v.set(0, CENTERS[0].y - 0.85, 0).project(camera);
+    const hw = lbl.offsetWidth/2 + 8; lbl.style.left = Math.min(innerWidth - hw, Math.max(hw, (v.x + 1)/2*innerWidth)).toFixed(1) + 'px';
+    lbl.style.top = Math.min(innerHeight - lbl.offsetHeight - 52, (1 - v.y)/2*innerHeight).toFixed(1) + 'px';
+    lbl.style.opacity = a.toFixed(3); }); }
 
 // the lower centers become the moon (Doug, Nov 19): red, orange and yellow each move to their place on a crescent
 // and turn into its three thirds, red the left horn, orange the bowl, yellow the right horn; the moon is solid (3-D),
