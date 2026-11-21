@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Rising Flow in the Pyramid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Alegreya+Sans:ital,wght@0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-bleed 3D stage; title upper-left, control drawers upper-right,
+   correspondence card lower-left, playback bar lower-center. Single dark look (deep space). */
+:root{
+  --ink:#07080c;
+  --panel:rgba(13,14,20,.88);
+  --panel-solid:#0f1017;
+  --line:#2b2a33;
+  --text:#ebe4d2;
+  --muted:#a0977f;
+  --gold:#d8a648;
+  --gold-dim:#8a6a2c;
+  --rain:#9cc4e8;
+  --silver:#eef3fa;
+  --ring:#e9d9b4;
+  --f-display:"Marcellus","Cinzel","Trajan Pro",Georgia,serif;
+  --f-body:"Alegreya Sans","Gill Sans","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SF Mono",Menlo,monospace;
+  color-scheme:dark;
+}
+html,body{height:100%;}
+body{background:var(--ink);color:var(--text);font-family:var(--f-body);font-size:15px;overflow:hidden;}
+#stage{position:fixed;inset:0;}
+#stage canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab;}
+#stage canvas:active{cursor:grabbing;}
+
+.title{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));left:16px;max-width:min(440px,calc(100% - 32px));pointer-events:none;}
+.eyebrow{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);}
+.title h1{font-family:var(--f-display);font-weight:400;font-size:clamp(22px,3.4vw,34px);line-height:1.1;margin:.25em 0 .2em;text-wrap:balance;letter-spacing:.01em;}
+.title p{margin:0;color:var(--muted);font-size:14px;line-height:1.45;max-width:38ch;}
+
+.topbar{position:fixed;top:calc(14px + env(safe-area-inset-top,0px));right:16px;display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;z-index:5;}
+button{font-family:var(--f-body);font-size:14px;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 11px;cursor:pointer;}
+button:hover{border-color:var(--gold-dim);}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+button[aria-expanded="true"]{border-color:var(--gold);color:var(--gold);}
+
+.drawer{position:fixed;top:calc(56px + env(safe-area-inset-top,0px));right:16px;width:min(330px,calc(100% - 32px));max-height:calc(100% - 140px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:4px;padding:12px 14px;z-index:6;}
+.drawer h2{font-family:var(--f-display);font-weight:400;font-size:17px;margin:0 0 6px;}
+.sec{border-top:1px solid var(--line);padding-block:8px 6px;}
+.sec:first-of-type{border-top:0;}
+.sec-h{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px;}
+.sec-h.ra{color:var(--silver);}
+label.row{display:flex;gap:8px;align-items:flex-start;padding:3px 0;font-size:14px;line-height:1.3;cursor:pointer;}
+label.row input{margin-top:2px;accent-color:var(--gold);}
+label.row .sw{width:10px;height:10px;border-radius:50%;flex:none;margin-top:4px;}
+label.row small{display:block;color:var(--muted);font-size:12.5px;}
+.drawer-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+.cam-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.scale-box{margin-top:6px;padding:8px;border:1px solid var(--line);border-radius:3px;display:grid;gap:6px;}
+.scale-h{font-size:12.5px;color:var(--muted);}
+.scale-btns{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.scale-btns button{font-size:12.5px;padding:4px 6px;}
+.scale-btns button.on{border-color:var(--gold);color:var(--gold);}
+.scale-box input[type=range]{width:100%;accent-color:var(--gold);}
+
+#about{width:min(460px,calc(100% - 32px));}
+#about details{border-top:1px solid var(--line);padding-block:8px;}
+#about summary{cursor:pointer;font-family:var(--f-display);font-size:15.5px;}
+#about p{margin:.55em 0;line-height:1.55;font-size:14.5px;color:var(--text);}
+#about blockquote{margin:.6em 0;padding-left:10px;border-left:2px solid var(--silver);color:var(--silver);font-style:italic;line-height:1.5;}
+.cite{font-family:var(--f-mono);font-size:12px;color:var(--gold);font-style:normal;}
+
+.corr{position:fixed;left:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(380px,calc(100% - 32px));background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:10px 12px;z-index:4;}
+.corr-h{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.corr-h span{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);}
+.corr-h button{padding:2px 8px;font-size:12px;}
+.corr table{width:100%;border-collapse:collapse;margin-top:6px;font-size:13.5px;}
+.corr th{font-weight:500;text-align:left;color:var(--muted);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 4px;border-bottom:1px solid var(--line);}
+.corr td{padding:5px 4px;vertical-align:top;border-bottom:1px solid rgba(43,42,51,.6);line-height:1.3;}
+.corr td:first-child{color:var(--text);}
+.corr td:last-child{color:var(--ring);}
+
+.playbar{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:6px 10px;z-index:4;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 32px);}
+.playbar label{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);}
+.playbar input[type=range]{width:110px;accent-color:var(--gold);}
+.readout{font-family:var(--f-mono);font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;}
+
+@media (max-width:640px){
+  .title p{display:none;}
+  .corr{bottom:calc(108px + env(safe-area-inset-bottom,0px));}
+  .drawer{top:auto;bottom:calc(64px + env(safe-area-inset-bottom,0px));max-height:58%;}
+  .playbar input[type=range]{width:80px;}
+}
+@media (max-width:640px){
+  .title{top:calc(58px + env(safe-area-inset-top,0px));}
+  .corr{bottom:calc(150px + env(safe-area-inset-bottom,0px));}
+}
+[hidden]{display:none!important;}
+/* vertical move control: up and down arrows on the right edge */
+.vpan{position:fixed;right:16px;top:30%;display:flex;flex-direction:column;gap:8px;z-index:5;}
+.vpan button{width:46px;height:46px;padding:0;font-size:20px;line-height:1;border-radius:50%;background:var(--panel);border:1px solid var(--gold-dim);color:var(--gold);touch-action:none;user-select:none;-webkit-user-select:none;}
+.vpan button:active{border-color:var(--gold);background:rgba(216,166,72,.18);}
+
+/* zone reader: tap a zone to read the flow, Ra, and my reading */
+.zinfo{position:fixed;left:16px;bottom:calc(64px + env(safe-area-inset-bottom,0px));width:min(430px,calc(100% - 32px));max-height:min(58vh,560px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(6px);border:1px solid var(--line);border-left:4px solid var(--zc,var(--gold));border-radius:4px;padding:12px 14px 14px;z-index:7;}
+body.bar-off .zinfo{bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+.zinfo-h{display:flex;align-items:flex-start;gap:8px;}
+.zinfo-h h2{font-family:var(--f-display);font-weight:400;font-size:19px;line-height:1.2;margin:0;flex:1;color:var(--zc,var(--text));}
+.zinfo-h .where{display:block;font-family:var(--f-body);font-size:12.5px;color:var(--muted);margin-top:2px;}
+.zinfo-nav{display:flex;gap:4px;flex:none;}
+.zinfo-nav button{padding:3px 9px;font-size:15px;line-height:1;}
+.zlab{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin:12px 0 2px;}
+.zlab.ra{color:var(--silver);}
+.zinfo p{margin:.35em 0;line-height:1.5;font-size:14.5px;}
+.zinfo .ra-block p{color:var(--silver);}
+.zinfo .mine p{color:var(--muted);font-style:italic;}
+.zhint{position:fixed;left:16px;top:30%;white-space:nowrap;line-height:1.35;text-align:left;background:var(--panel);border:1px solid var(--gold-dim);border-radius:4px;padding:6px 12px;font-size:13.5px;color:var(--text);z-index:6;transition:opacity .8s;pointer-events:none;}
+@media (max-width:640px){ .zinfo{max-height:46vh;bottom:calc(150px + env(safe-area-inset-bottom,0px));} body.bar-off .zinfo{max-height:60vh;} .zhint{top:30%;} }
+
+body.bar-off .corr{bottom:calc(14px + env(safe-area-inset-bottom,0px));}
+@media (prefers-reduced-motion:reduce){ *{scroll-behavior:auto;} }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<header class="title">
+  <div class="eyebrow">Raian Process · Field Studies</div>
+  <h1>The Rising Flow in the Pyramid</h1>
+  <p>The same eight zones as the first model, drawn this time by moving energy. Each strand, cell and helix is the trail the flow leaves as it rises.</p>
+</header>
+
+<nav class="topbar" aria-label="Controls">
+  <button id="btn-overlays" aria-expanded="false" aria-controls="overlays">Overlays ▾</button>
+  <button id="btn-camera" aria-expanded="false" aria-controls="camera">Camera ▾</button>
+  <button id="btn-about" aria-expanded="false" aria-controls="about">About</button>
+  <button id="btn-zones" aria-controls="zinfo">Zones</button>
+  <button id="btn-bar" aria-pressed="true" aria-controls="playbar" title="Show or hide the play controls">Play bar</button>
+</nav>
+
+<section class="drawer" id="overlays" hidden aria-label="Overlays">
+  <h2>Overlays</h2>
+  <div class="sec">
+    <div class="sec-h">The flow</div>
+    <label class="row"><input type="checkbox" data-key="core"><span class="sw" style="background:#e0a028"></span><span>Rising core<small>Particles spiraling in under the base and climbing the column, Zones 1 to 7</small></span></label>
+    <label class="row"><input type="checkbox" data-key="cell"><span class="sw" style="background:#7cf0a0"></span><span>Reversed cell at the Queen's Chamber<small>Flow caught in the bubble, circling down the axis and up the outside</small></span></label>
+    <label class="row"><input type="checkbox" data-key="circuit"><span class="sw" style="background:#f1cf7e"></span><span>Apex jet<small>The flow bursting out above the stone apex</small></span></label>
+    
+  </div>
+  <div class="sec">
+    <div class="sec-h">Fixed forms</div>
+    <label class="row"><input type="checkbox" data-key="heart"><span class="sw" style="background:#36c47e"></span><span>Green flows at Zone 4 *<small>From the seven energy center model: the heart's own toroidal field, running counter to the great field, and its onion membrane</small></span></label>
+    <label class="row"><input type="checkbox" data-key="hull"><span class="sw" style="background:#3d8a5c"></span><span>Bubble outline<small>The lens-shaped cell between the two stillpoints</small></span></label>
+    <label class="row"><input type="checkbox" data-key="bell"><span class="sw" style="background:#b02030"></span><span>Separatrix bell<small>The surface past which flow is committed to the core</small></span></label>
+    <label class="row"><input type="checkbox" data-key="rings"><span class="sw" style="background:var(--gold-dim)"></span><span>Zone boundaries<small>Rings at the six thresholds</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">The pyramid</div>
+    <label class="row"><input type="checkbox" data-key="pyramid"><span class="sw" style="background:var(--gold)"></span><span>Pyramid outline<small>440 cubits at the base, 280 high</small></span></label>
+    <label class="row"><input type="checkbox" data-key="chambers"><span class="sw" style="background:var(--text)"></span><span>Chambers<small>Resonating, Queen's and King's Chambers</small></span></label>
+    <label class="row"><input type="checkbox" data-key="qcSphere"><span class="sw" style="background:#eef3fa"></span><span>Sphere of light in the Queen's Chamber<small>As in the first model: the centered being (55.11)</small></span></label>
+    <label class="row"><input type="checkbox" data-key="p2"><span class="sw" style="background:#c9a0e8"></span><span>Position 2 *<small>About 210 cubits up, at Threshold 5</small></span></label>
+  </div>
+  <div class="sec">
+    <div class="sec-h">Display</div>
+    <label class="row"><input type="checkbox" data-key="labels"><span class="sw" style="background:var(--muted)"></span><span>Zone labels</span></label>
+  </div>
+  <div class="drawer-actions">
+    <button id="btn-clear">Clear all overlays</button>
+    <button id="btn-reset">Reset defaults</button>
+  </div>
+  <p style="color:var(--muted);font-size:12px;margin:.6em 0 0">* Speculative overlay — the Raian reading of the pyramid.</p>
+</section>
+
+<section class="drawer" id="camera" hidden aria-label="Camera angles">
+  <h2>Camera angles</h2>
+  <div class="cam-grid">
+    <button data-cam="side">Whole column</button>
+    <button data-cam="base">Semi-spiral and pinch</button>
+    <button data-cam="bubble">Queen's Chamber cell</button>
+    <button data-cam="kings">King's Chamber helices</button>
+    <button data-cam="p2">Position 2</button>
+    <button data-cam="apex">Apex and jet</button>
+    <button data-cam="above">Down the axis</button>
+    <button data-cam="circuit">Whole circuit</button>
+  </div>
+  <p style="color:var(--muted);font-size:12.5px;margin:.7em 0 0">Drag to orbit · scroll or pinch to zoom.</p>
+</section>
+
+<section class="drawer" id="about" hidden aria-label="About">
+  <h2>About this model</h2>
+  <details open>
+    <summary><strong>What This Shows</strong></summary>
+    <p>The first pyramid model drew the poloidal core as fixed lines — the semi-spiral, the bubble at the Queen's Chamber, the spectrum of helices at the King's Chamber, and so on up through the apex. This companion piece lets the flow itself do the drawing. Particles spiral in under the base, climb the central column, and leave trails; the familiar shapes appear as the places where those trails gather.</p>
+    <p>In other words, the static picture is what the moving picture leaves behind. Turn on <em>Long trails</em> in the play bar and give it half a minute — the column fills in until it reads like the first model.</p>
+  </details>
+  <details>
+    <summary><strong>How the Motion Builds the Shapes</strong></summary>
+    <p><strong>A steady flow.</strong> The field here doesn't change from moment to moment, so the path any particle follows is a streamline. That is why trails laid down by many particles add up to a stable form.</p>
+    <p><strong>Speed follows the channel.</strong> Where the column narrows the flow speeds up; where it widens, or presses against a stagnation point, it slows. Watch the particles crawl through the pinch at the top of the semi-spiral and race up the cone toward the apex. Slow places crowd with particles and glow brighter — the stillest places look the fullest.</p>
+    <p><strong>Spin follows radius.</strong> Angular momentum is conserved, so swirl grows as the flow pulls inward. At the pinch the particles barely rise but spin hard; that is the tightening corkscrew of the semi-spiral, and it is what tips the flow into breakdown.</p>
+    <p><strong>The bubble turns over.</strong> At the lower stillpoint part of the flow stalls and is caught. Those particles (green) rise up the outside of the cell, turn in at the top, fall down the axis, and circle again a time or two before slipping out the top. Their spin keeps its sense; only the up-and-down circulation reverses. The rest of the flow (gold) parts around the cell.</p>
+    <p><strong>Order forms and dissolves.</strong> In the organized zones, particles drift toward a few preferred angles around the axis, so strands appear — five in the semi-spiral, a spectrum of them at the King's Chamber, three in the building spiral. In the two turbulent zones that pull is gone and the strands scatter. That is the physics of mode selection and breakdown, made visible.</p>
+    <p><strong>Compression calms.</strong> In the narrowing cone above Position 2 the turbulence dies away (relaminarization), a dark gap follows at the apex, and the flow bursts out as a jet. The return over the outside of the field is left undrawn here so the column stays clear; the particles you see spiraling in under the base are that return arriving.</p>
+  </details>
+  <details>
+    <summary><strong>Watching Zone by Zone</strong></summary>
+    <p><strong>Zone 1 and the separatrix (red).</strong> Flow spirals in under the base from every side, speeding up and spinning faster as it nears the axis, and is captured by the core at the bell.</p>
+    <p><strong>Zone 2 (red to orange).</strong> Streams from every side collide; the trails churn with no common direction, then a faint shared spin shows near the top.</p>
+    <p><strong>Zone 3, the semi-spiral (yellow).</strong> The chaos finds its center: five threads gather, tighten and slow, then flare into the cradle.</p>
+    <p><strong>Zone 4, the Queen's Chamber (green).</strong> The heart of the column. Inside, the Queen's Chamber with its sphere of light, and the heart's own toroidal field in deep emerald — rising up the outside, turning in over the top, falling down the axis, counter to the great field. Around it, the rising flow itself rides up over the onion-shaped membrane as a thick, translucent sheet: green-yellow at the root, true green at the equator, green-blue as it closes over the top. It slows at the wide equator and quickens toward the poles, as continuity requires. As Zone 3 gathers the chaos of Zone 2 into order at the base of the bubble, Zone 4 gathers its outer flow at the top — not into a point but into a collar about a quarter as wide as the equator, just above the upper stillpoint. The flow runs faster and fuller on the King's Chamber side, so it reaches that collar unevenly, and the unevenness decides how it leaves: the whole bundle swings toward the King's Chamber as it spins off, so the first release heads for the chamber, diffusing into the spectrum as it goes, before the column recentres and winds on upward. In the physics this is the wake above a breakdown bubble, where the core is pushed off the axis and begins to precess — the start of the spiral.</p>
+    <p><strong>Zone 5, the King's Chamber (spectrum).</strong> At the King's Chamber the flow opens into the spectrum, red through violet, spiraling up the column. The spectrum runs three times around the column, so that a whole spectrum, every color from red to violet, passes through the chamber itself. At the chamber's level the lowest wave of the spectrum leans toward the chamber's side, swelling out through the room to touch its back wall, while the far side of the column keeps its shape (my reading, not Ra's). ~Ra describes the spiraling energy beginning to diffuse into red-through-violet color values at the King's Chamber position, with half of the diffusion angle passing through that chamber <span class="cite">56.6–56.7</span>, and the light there configured in "the seven distinctive color, or energy, vibratory rates" <span class="cite">57.12</span>.</p>
+    <p><strong>Threshold 4 and Zone 6 (breakdown, then the red funnel).</strong> Above the King's Chamber the spectrum breaks down: the strands waver and grey, and the first helix lets go. Out of that loosened flow the second helix forms, a red spiral that narrows like the end of a funnel, winding and moving faster as it tightens (59.9).</p>
+    <p><strong>Threshold 5, Position 2 (plum and grey).</strong> The building spiral comes apart.</p>
+    <p><strong>Zone 7 (violet), the apex gap, and Zone 8 (gold).</strong> Calm, a pause, then emission.</p>
+  </details>
+  <details>
+    <summary><strong>What Ra Says</strong></summary>
+    <p>Ra calls the lowest spiral "the foundation semi-spiral which supplies the prana for all that may be affected by the three following upward spirals of light" <span class="cite">59.10</span>. Of the Queen's Chamber position, Ra says the light "reaches the point of turning. This acts as a compression of the light" <span class="cite">59.13</span>.</p>
+    <p>Of the higher position, Ra describes "a transformation across boundaries of dimension" that "causes an apparent diffusion and weakness of the spiraling energy," and adds that "in position two, as you have called it, much work may be done inter-dimensionally" <span class="cite">59.14</span>. ~Ra places the third full spiral as radiating from the top of the pyramid <span class="cite">59.10</span>.</p>
+    <p>The zone physics comes from the literature on vortex breakdown; the placement of Ra's spirals and positions on that physics is my reading.</p>
+  </details>
+  <details>
+    <summary><strong>Where the Model Bends</strong></summary>
+    <p>This is a kinematic model, not a full fluid simulation. I wrote down the speed, spin and radius of the flow zone by zone, following the physics of swirling columns, and let the particles move through that field. The turn counts and radii are set to match the July model so the two can be compared directly. A true Navier–Stokes solution of this geometry would differ in its details.</p>
+    <p>The turbulence is drawn as a jitter laid over the mean flow, the return circuit is schematic, and the time scale is chosen for watching, not measurement. The pyramid outline and chambers use the first model's coordinates (one world unit to about 31.5 cubits).</p>
+    <p>The green ray at the Queen's Chamber, the blue at the King's, and Position 2 at Threshold 5 are my synthesis; Ra doesn't set the energy centers along the pyramid's axis. I'm offering these thoughts for what they are worth.</p>
+  </details>
+</section>
+
+<aside class="corr" id="corr" aria-label="What to watch for">
+  <div class="corr-h"><span>What to watch for · tap a zone to read</span><button id="btn-corr" aria-expanded="true">Hide</button></div>
+  <table id="corr-table">
+    <thead><tr><th>Where</th><th>What the flow does</th></tr></thead>
+    <tbody>
+      <tr><td>Top of the semi-spiral</td><td>Barely rises, spins hard</td></tr>
+      <tr><td>Queen's Chamber</td><td>Green particles circle backward</td></tr>
+      <tr><td>King's Chamber</td><td>Spectrum of strands, one turn</td></tr>
+      <tr><td>Above the King's Chamber</td><td>Spectrum frays; red funnel forms</td></tr>
+      <tr><td>Position 2</td><td>The building spiral scatters</td></tr>
+      <tr><td>Apex</td><td>Dark gap, then blue ignition, then gold</td></tr>
+    </tbody>
+  </table>
+</aside>
+
+<aside class="zinfo" id="zinfo" hidden aria-live="polite" aria-label="About this zone">
+  <div class="zinfo-h"><h2 id="zi-title">Zone</h2>
+    <div class="zinfo-nav"><button id="zi-prev" aria-label="Previous zone">‹</button><button id="zi-next" aria-label="Next zone">›</button><button id="zi-close" aria-label="Close">×</button></div></div>
+  <div id="zi-body"></div>
+</aside>
+<div class="zhint" id="zhint">Tap or click any zone<br>to read about it</div>
+<div class="vpan" aria-label="Move the view up or down"><button id="vp-up" aria-label="Move the image up" title="Move the image up">▲</button><button id="vp-dn" aria-label="Move the image down" title="Move the image down">▼</button></div>
+<svg id="chlabels" aria-hidden="true" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:3;overflow:visible"></svg>
+<div class="playbar" id="playbar">
+  <button id="btn-barhide" aria-label="Hide the play controls" title="Hide" style="padding:2px 8px">×</button>
+  <button id="btn-play" aria-label="Pause animation">Pause</button>
+  <label for="speed">Speed <input type="range" id="speed" min="0" max="3" step="0.05" value="1"></label>
+  <label><input type="checkbox" id="longtrails"> Long trails</label>
+  <label><input type="checkbox" id="spin" checked> Auto-orbit</label>
+  <span class="readout" id="readout">t = 0.0</span>
+</div>
+
+<div id="err" hidden style="position:fixed;left:16px;right:16px;top:45%;padding:12px 14px;background:var(--panel-solid);border:1px solid var(--gold);border-radius:4px;color:var(--text);font-family:var(--f-mono);font-size:12.5px;z-index:9"></div>
+<script>
+window.addEventListener("error", function(e){
+  if (window.__sceneRunning){ if (window.console) console.warn("Ignored after start:", e.message); return; }
+  var t = e.target;
+  if (t && t !== window && t.tagName && t.tagName !== "SCRIPT") return; // ignore fonts, stylesheets, images
+  var el = document.getElementById("err");
+  if (el){ el.hidden = false; el.textContent = "The 3D view could not start: " + (e.message || "a script failed to load") + ". Try reloading the page."; }
+}, true);
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  if (typeof THREE === "undefined"){
+    var el = document.getElementById("err"); el.hidden = false;
+    el.textContent = "The 3D library (three.js) did not load, so the scene can't be drawn. Reload the page, or open the HTML file directly in a browser.";
+    return;
+  }
+  try { var probe = document.createElement("canvas"); if (!(probe.getContext("webgl") || probe.getContext("experimental-webgl"))) throw 0; }
+  catch(_){ var el2 = document.getElementById("err"); el2.hidden = false; el2.textContent = "This browser or view has WebGL turned off, so the 3D scene can't be drawn. Try opening the page in Chrome, Safari or Firefox on a computer."; return; }
+
+  const stage = document.getElementById("stage");
+  const renderer = new THREE.WebGLRenderer({ antialias:true, alpha:false });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0x07080c, 1);
+  stage.appendChild(renderer.domElement);
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(42, 1, 0.05, 600);
+  const system = new THREE.Group();
+  scene.add(system);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.32));
+  const sun = new THREE.DirectionalLight(0xfff4e0, 1.15); sun.position.set(12, 8, 8); scene.add(sun);
+
+  const GOLD = 0xd8a648, GOLD_LIGHT = 0xf1cf7e, GOLD_DARK = 0x9a6f22, GOLD_MID = 0xc98f3a;
+  const SHOW_ARROWS = false;
+
+  // ---------- helpers ----------
+  const refs = {}, labels = [], updaters = [];
+  function reg(key, obj){ refs[key] = obj; system.add(obj); return obj; }
+  function az(r, a, y){ return new THREE.Vector3(r*Math.cos(a), y, -r*Math.sin(a)); } // CCW from above
+  function dotTexture(){
+    const c = document.createElement("canvas"); c.width = c.height = 64;
+    const g = c.getContext("2d"); const grd = g.createRadialGradient(32,32,0,32,32,32);
+    grd.addColorStop(0,"rgba(255,255,255,1)"); grd.addColorStop(0.35,"rgba(255,255,255,0.7)"); grd.addColorStop(1,"rgba(255,255,255,0)");
+    g.fillStyle = grd; g.fillRect(0,0,64,64); return new THREE.CanvasTexture(c);
+  }
+  const DOT = dotTexture();
+  function lineFrom(points, color, opacity){
+    const geo = new THREE.BufferGeometry().setFromPoints(points);
+    return new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent:true, opacity, depthWrite:false }));
+  }
+  function makeLabel(text, color, height){
+    const c = document.createElement("canvas"); const g = c.getContext("2d"); const fs = 44;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    const w = Math.ceil(g.measureText(text).width) + 28; c.width = w; c.height = 64;
+    g.font = `500 ${fs}px "Alegreya Sans", system-ui, sans-serif`;
+    g.fillStyle = "rgba(7,8,12,0.55)"; g.fillRect(0,6,w,52);
+    g.fillStyle = color; g.textBaseline = "middle"; g.fillText(text, 14, 33);
+    const tex = new THREE.CanvasTexture(c); tex.minFilter = THREE.LinearFilter;
+    const s = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true, depthTest:false, depthWrite:false }));
+    const h = 0.11 + 0.22*(height || 0.32); s.scale.set(h*w/64, h, 1); s.renderOrder = 20;
+    labels.push(s); return s;
+  }
+  function addLabel(group, text, pos, color, h){ const l = makeLabel(text, color, h); l.position.copy(pos); group.add(l); return l; }
+  const clamp = (x,a,b)=> Math.max(a, Math.min(b, x));
+  const lerp = (a,b,t)=> a + (b-a)*t;
+  const smooth = t=> t*t*(3-2*t);
+  const TAU = Math.PI*2;
+  const wrapPi = a=> a - TAU*Math.floor((a + Math.PI)/TAU);
+
+  // ---------- geometry of the column (world units; 1 unit = column radius = 31.48 cubits) ----------
+  const Y = { sep0:-3.5, sep1:-2.8, z2:-1.2, stagLo:0.204, stagHi:1.304, wake:1.654, z5:3.154, t4:4.154, z6:5.154, t5:6.454, z7:8.0, apex:8.5, jtop:12.5 };
+  const BUB_C = 0.754, BUB_HH = 0.55, BUB_HW = 0.82;
+  const Z3_A = Y.z2 + 0.65*(Y.stagLo - Y.z2), Z3_B = Y.z2 + 0.85*(Y.stagLo - Y.z2);
+  const KC_Y = 1.822;
+  const FIELD = { yc:1.822, aTop:6.178, aBot:5.422, b:11.72 };
+
+  function bubbleHull(y){ const u = (y - BUB_C)/BUB_HH; return u*u >= 1 ? 0 : BUB_HW*Math.sqrt(1 - u*u); }
+  function bellR(y){ const t = clamp((y - Y.sep0)/(Y.sep1 - Y.sep0), 0, 1); return 1.85 - 0.95*Math.pow(t, 0.55); }
+  function semiR(y){
+    const t = clamp((y - Y.z2)/(Y.stagLo - Y.z2), 0, 1);
+    if (t < 0.65) return 0.92 - 0.52*t/0.65;
+    if (t < 0.85) return 0.40 - 0.22*(t-0.65)/0.20;
+    const u = (t-0.85)/0.15; return 0.18 + 0.33*(1 - Math.cos(Math.PI*u))/2;
+  }
+  function env5(y){ // the King's Chamber envelope, exactly as in the July model (zone5StrandRadiusAt without the strand factor)
+    if (y <= Y.wake) return 1.00; if (y >= Y.z5) return 0.85;
+    if (y <= KC_Y) return 1.00 + 0.45*(y - Y.wake)/(KC_Y - Y.wake);
+    return 1.45 - 0.60*(y - KC_Y)/(Y.z5 - KC_Y);
+  }
+  function z5R(sr, y){ // strand radius with the 75% pull toward 0.82 through the King's Chamber band
+    const nat = sr*env5(y); let c = 0;
+    if (y >= 1.647 && y <= 1.997){ const d = Math.abs(y - 1.822)/0.175; c = 0.75*0.5*(1 + Math.cos(d*Math.PI)); }
+    return nat*(1 - c) + 0.82*c;
+  }
+  // the spectrum, red through violet, repeated three times around the column (every 120°), so that wherever
+  // the King's Chamber sits, one whole spectrum passes through it
+  const Z5_HUE = i=> ((i % 8)/7)*0.80;
+  const srOf = p=> 0.25 + 0.40*p.k24/23;
+  // Zone 6, two layers (59.9): the red end spiraled once again, inside; the large spiral, every color, outside
+  // Threshold 4 gathers the whole spectrum through a waist; Zone 6 rebuilds it as one ordered red spiral:
+  // two nested, evenly spaced rings of twelve strands, all winding in step
+  const WAIST_Y = (Y.z5 + Y.t4)/2;
+  const waistR = p=> 0.16 + 0.05*(p.k24 % 2);
+  const z6R = p=> (p.k24 % 2) ? 0.44 : 0.30;
+  // Zone 6 as a funnel: the radius narrows to 45% as it rises; spin conserved means turns per height grow as 1/r^2
+  const FUN_A = 0.55, funnel = t=> 1 - FUN_A*t, funTwist = t=> (1/(1 - FUN_A*t) - 1)/FUN_A;
+  // the first wave of the spectrum leans toward the King's Chamber: on the chamber's side, at the chamber's level,
+  // the spiral swells out through the room to its back (south) wall, 30 cubits off the axis; the far side is unchanged
+  const KC_DIR = -Math.PI/2, KC_BACK = 30/31.4815 + 0.02;
+  function kcReach(r, y, phi){
+    if (y < 1.58 || y > 2.08) return r;
+    const band = 0.5*(1 + Math.cos(Math.PI*(y - 1.83)/0.25));
+    const w = Math.pow(Math.max(0, Math.cos(wrapPi(phi - KC_DIR))), 2.2);
+    const tgt = KC_BACK - releaseLean(y); return lerp(r, Math.max(r, tgt), band*w);
+  }
+  // Zone 7 closes like the bottom of a funnel: an oval profile, rounded at its shoulders, tapering to a point
+  // just under the stone apex (y = 8.0) and kept inside the pyramid's faces
+  const PT_Y = 8.0, OV_H = PT_Y - Y.t5;
+  const z7Oval = u=> 0.78*Math.pow(Math.max(0, Math.cos(Math.PI/2*clamp(u, 0, 1))), 0.9);
+  const stoneHalf = y=> 0.786*(8.0 - y);
+  function coneR(y){ return Math.max(0.02, Math.min(z7Oval((y - Y.t5)/OV_H), 0.8*stoneHalf(y))); }
+  // Zone 8 picks up the same angle, mirrored: the jet opens out of the point as Zone 7 closed into it, then spreads
+  function jetR(y){ const d = y - Y.apex; if (d < OV_H) return Math.max(0.02, z7Oval(1 - d/OV_H)); return 0.78 + 0.32*Math.sqrt(clamp((d - OV_H)/(Y.jtop - Y.apex - OV_H), 0, 1)); }
+
+  // ---------- swirl: cumulative turns of the flow frame along the column ----------
+  // The flow's own rotation, integrated up the column. Turn counts match the July model;
+  // most of the semi-spiral's winding happens in the pinch, where axial speed collapses.
+  const TW = [
+    [Y.sep0, Y.sep1, 0.05], [Y.sep1, Y.z2, 0.40], [Y.z2, Z3_A, 0.50], [Z3_A, Z3_B, 2.20, 1.6], [Z3_B, Y.stagLo, 0.0],
+    [Y.stagLo, Y.stagHi, 0.50], [Y.stagHi, Y.wake, 0.30], [Y.wake, Y.z5, 1.00], [Y.z5, Y.t4, 0.30],
+    [Y.t4, Y.z6, 1.50], [Y.z6, Y.t5, 0.40], [Y.t5, Y.z7, 0.20], [Y.z7, Y.apex, 0.10], [Y.apex, Y.jtop, 1.50]
+  ];
+  const PHI_Y0 = -3.6, PHI_DY = 0.004, PHI_N = Math.ceil((13.0 - PHI_Y0)/PHI_DY) + 1;
+  const PHI = new Float32Array(PHI_N);
+  (function(){
+    let acc = 0, prevY = PHI_Y0;
+    function turnsTo(y){ let s = 0; for (const [a,b,n,e] of TW){ if (y <= a) break; const u = clamp((y-a)/(b-a),0,1); s += n*(e ? Math.pow(u, e) : u); } return s*TAU; }
+    for (let i = 0; i < PHI_N; i++) PHI[i] = turnsTo(PHI_Y0 + i*PHI_DY);
+  })();
+  function phiAt(y){ const f = (y - PHI_Y0)/PHI_DY; const i = clamp(Math.floor(f), 0, PHI_N-2); const t = clamp(f - i, 0, 1); return PHI[i] + (PHI[i+1]-PHI[i])*t; }
+  function extraTwist(p, y){ // the red core bundle in Zone 7 and the inner jet filaments wind faster
+    let e = 0;
+    if (y > Y.t4) e += TAU*0.75*funTwist(clamp((y - Y.t4)/(Y.z6 - Y.t4), 0, 1));
+    if (p.filament && y > Y.apex) e += 0.6*TAU*clamp((y - Y.apex)/(Y.jtop - Y.apex), 0, 1);
+    return e;
+  }
+  function frameAt(p, y){ return phiAt(y) + extraTwist(p, y); }
+
+  // ---------- axial speed (world units per second at speed 1) ----------
+  function vyAt(y, p){
+    if (y < Y.sep1) return 0.9;
+    if (y < Y.z2) return 0.7;
+    if (y < Y.stagLo){
+      const t = (y - Y.z2)/(Y.stagLo - Y.z2);
+      if (t < 0.65) return 0.75 + 0.30*t/0.65;               // contraction accelerates the flow
+      if (t < 0.85) return lerp(1.05, 0.14, smooth((t-0.65)/0.20)); // swirl pressure brakes it
+      return 0.10;                                            // creeping toward the lower stillpoint
+    }
+    if (y < Y.stagHi){ const r = Math.max(0.15, onionWorld(y)); return 0.30*clamp(0.55/r, 0.6, 2.0)*(1 + 0.35*asym(p)); }
+    if (y < Y.wake) return lerp(0.42, 0.6, (y - Y.stagHi)/(Y.wake - Y.stagHi)) * (0.6 + 0.4*clamp(p.r/0.8, 0, 1)); // centerline deficit
+    if (y < Y.z5) return 0.6;
+    if (y < Y.t4) return 0.5;
+    if (y < Y.z6) return 0.6/funnel((y - Y.t4)/(Y.z6 - Y.t4)); // narrower, faster
+    if (y < Y.t5) return 0.45;
+    if (y < Y.z7) return lerp(0.6, 1.6, (y - Y.t5)/(Y.z7 - Y.t5)); // relaminarizing cone speeds the flow
+    if (y < Y.apex) return 1.3;
+    return 1.4 - 0.75*Math.sqrt(clamp((y - Y.apex)/(Y.jtop - Y.apex), 0, 1)); // jet slows as it entrains and widens
+  }
+
+  // ---------- per-zone structure: target radius, strands, pull strength, turbulence ----------
+  const Z6R = [0.35, 0.42, 0.50];
+  // the Zone 4 membrane surface (same profile as the imported onion, closed at the north pole), in world units
+  const ON_PROF = [[-1.60,0.10],[-1.34,0.105],[-1.17,0.16],[-1.03,0.36],[-0.86,0.62],[-0.62,0.84],[-0.32,0.97],[0.0,1.0]];
+  function onionWorld(y){
+    const l = y - BUB_C, OH = BUB_HH*1.3, RM = BUB_HW + 0.05;
+    return RM*Math.sqrt(Math.max(0, 1 - (l/BUB_HH)*(l/BUB_HH))); // closed on both stillpoints, no root
+    const u = l/OH; if (u <= ON_PROF[0][0]) return RM*ON_PROF[0][1];
+    for (let k = 0; k < ON_PROF.length - 1; k++) if (u <= ON_PROF[k+1][0]){ const t = (u - ON_PROF[k][0])/(ON_PROF[k+1][0] - ON_PROF[k][0]); return RM*lerp(ON_PROF[k][1], ON_PROF[k+1][1], smooth(t)); }
+    return RM;
+  }
+  // m = 1 asymmetry: the outer flow runs faster and fuller on the King's Chamber side, so it reaches the pole unevenly;
+  // that unevenness is what tips the column into the helix above (the precessing core of spiral breakdown)
+  const asym = (p)=> Math.cos(wrapPi(p.phi - KC_DIR));
+  // the gathering place at the top of Zone 4: not a point, a collar about a quarter of the equator's diameter
+  const THROAT = (p)=> 0.15 + 0.11*p.rho;
+  // the release: just above the collar the whole bundle swings toward the King's Chamber (the m = 1 displacement of
+  // spiral breakdown), so the first wave out heads for the chamber, then the column recentres into the spectrum
+  function releaseLean(y){
+    if (y <= Y.stagHi || y >= 2.2) return 0;
+    if (y < 1.74) return 0.40*smooth((y - Y.stagHi)/(1.74 - Y.stagHi));
+    return 0.40*(1 - smooth((y - 1.74)/(2.2 - 1.74)));
+  }
+  function zoneInfo(p, y){
+    // returns {r, n (strands), k (assigned strand or -1 for nearest), pull, diff, amp}
+    const o = { r:0, n:0, k:-1, pull:0, diff:0, amp:0.01 };
+    const sq = Math.sqrt(p.rho);
+    if (y < Y.sep1){ o.r = bellR(y)*(0.35 + 0.65*sq); o.amp = 0.03; o.diff = 0.3; }
+    else if (y < Y.z2){ const t = (y - Y.sep1)/(Y.z2 - Y.sep1); o.r = 0.95*(0.12 + 0.88*sq); o.amp = 0.44*(1 - 0.6*t); o.diff = 1.9*(1 - 0.6*t); }
+    else if (y < Y.stagLo){ const t = (y - Y.z2)/(Y.stagLo - Y.z2); o.r = semiR(y)*(0.25 + 0.75*sq); o.n = 5; o.pull = t < 0.15 ? 1.2 : 3.0; o.amp = t < 0.65 ? 0.12*Math.pow(1 - t/0.65, 2) : 0.004; }
+    else if (y < Y.stagHi){ const on = onionWorld(y), g = on/(BUB_HW + 0.05), sheet = (0.03 + 0.30*p.rho)*g; const k = smooth(clamp((y - Y.stagLo)/0.30, 0, 1)); const throat = y > BUB_C ? THROAT(p) : 0.10 + 0.25*p.rho; o.r = lerp(0.51*(0.25 + 0.75*sq), Math.max(throat, on + sheet + 0.07*asym(p)*g), k); o.n = 24; o.k = p.k24; o.pull = 1.4*k; o.amp = 0.006; o.rRate = 5; }
+    else if (y < Y.wake){ const t = (y - Y.stagHi)/(Y.wake - Y.stagHi); o.r = lerp(THROAT(p), z5R(srOf(p), Y.wake), smooth(t)) + 0.08*asym(p)*t; o.n = 24; o.k = p.k24; o.pull = 1.2*t; o.diff = 0.12*(1 - t); o.amp = 0.012; o.rRate = 9; }
+    else if (y < Y.z5){ o.r = kcReach(z5R(srOf(p), y), y, p.phi); o.n = 24; o.k = p.k24; o.pull = 4.0; o.amp = 0.004; o.rRate = 14; }
+    else if (y < Y.t4){ const t = (y - Y.z5)/(Y.t4 - Y.z5), w = 0.10*Math.sin(6*y + p.s1*9)*Math.sin(Math.PI*t), f = smooth(clamp((t - 0.7)/0.3, 0, 1)); o.r = lerp(srOf(p)*0.85*(1 + w), z6R(p), f); o.n = 24; o.k = p.k24; o.pull = lerp(1.2*(1 - t), 3.0, f); o.diff = 0.40*Math.sin(Math.PI*Math.min(1, t/0.85)); o.amp = 0.02 + 0.07*Math.sin(Math.PI*t)*(1 - f); o.rRate = 8; }
+    else if (y < Y.z6){ o.r = z6R(p)*funnel((y - Y.t4)/(Y.z6 - Y.t4)); o.n = 24; o.k = p.k24; o.pull = 4.0; o.amp = 0.002; o.rRate = 12; }
+    else if (y < Y.t5){ const t = (y - Y.z6)/(Y.t5 - Y.z6); o.r = 0.9*Math.sqrt(p.rho); o.diff = 1.1; o.amp = 0.05 + 0.26*Math.sqrt(Math.sin(Math.PI*t)); }
+    else if (y < Y.z7){ const t = (y - Y.t5)/(Y.z7 - Y.t5); const c = coneR(y); o.r = c*(0.25 + 0.75*Math.sqrt(p.rho)); o.n = 12; o.pull = 3.0*smooth(Math.min(1, t/0.35)); o.amp = 0.06*Math.pow(Math.max(0, 1 - t/0.35), 2); o.rRate = 14; } // relaminarized: smooth, mostly upward, faint residual spin
+    else if (y < Y.apex){ o.r = coneR(y)*(0.25 + 0.75*Math.sqrt(p.rho)); o.n = 12; o.pull = 3; o.amp = 0.002; o.rRate = 14; }
+    else { const rj = jetR(y); if (p.filament){ o.r = rj*0.45; o.n = 6; } else { o.r = rj*(0.85 + 0.15*p.rho); o.n = 3; } o.pull = 3; o.amp = 0.01; }
+    return o;
+  }
+
+  // ---------- colors along the column ----------
+  const col = new THREE.Color(), colB = new THREE.Color(), GREY = new THREE.Color(0x8a8a92);
+  const PLUMS = [0xa04858, 0x8a8a96, 0x8a5aa0, 0x7a3a48];
+  function colorAt(p, y, out){
+    if (p.mode === 1){ out.setHex(0x7cf0a0); return 1; }
+    if (p.mode === 2){ out.setHex(0xb48a3c); return 0; }
+    if (p.mode === 3){ out.setHex(0xe24040); return 0.75; }
+    if (y < Y.sep1){ out.setHex(0xd03040); return 0.9; }
+    if (y < Y.z2){ const t = (y - Y.sep1)/(Y.z2 - Y.sep1); if (t < 0.5) out.setHex(0xc83838).lerp(colB.setHex(0xe87020), t*2); else out.setHex(0xe87020).lerp(colB.setHex(0xf0a828), (t-0.5)*2); return 0.95; }
+    if (y < Y.stagLo){ const t = (y - Y.z2)/(Y.stagLo - Y.z2); out.setHex(0xe8c828); if (t > 0.88) out.lerp(colB.setHex(0xc8e040), (t - 0.88)/0.12); return 1; }
+    if (y < Y.stagHi){ const u = (y - BUB_C)/(BUB_HH*1.3); if (u < 0) out.setHex(0xc8e040).lerp(colB.setHex(0x34d264), clamp((u + 0.77)/0.77, 0, 1)); else out.setHex(0x34d264).lerp(colB.setHex(0x3a9ce8), clamp(u/0.77, 0, 1)); return 0.62; }
+    if (y < Y.wake){ const t = (y - Y.stagHi)/(Y.wake - Y.stagHi); out.setHex(0x3a9ce8).lerp(colB.setHSL(Z5_HUE(p.k24), 0.92, 0.57), smooth(t)); return lerp(0.62, 1, t); }
+    if (y < Y.z5){ out.setHSL(Z5_HUE(p.k24), 0.92, 0.57); return 1; }
+    if (y < Y.t4){ const t = (y - Y.z5)/(Y.t4 - Y.z5), f = smooth(clamp((t - 0.7)/0.3, 0, 1)); out.setHSL(Z5_HUE(p.k24), 0.92, 0.57).lerp(GREY, smooth(Math.min(1, t/0.7))*0.85).lerp(colB.setHex((p.k24 % 2) ? 0xff2a14 : 0xff4a1c), f); return lerp(lerp(1, 0.55, Math.min(1, t/0.7)), 0.85, f)*(p.k24 % 3 === 0 && f < 0.5 ? 0.6 : 1); }
+    if (y < Y.z6){ out.setHex((p.k24 % 2) ? 0xff2a14 : 0xff4a1c); return 0.85; }
+    if (y < Y.t5){ out.setHex(PLUMS[p.k3 + (p.s2 < 0.5 ? 0 : 1)]); return 0.8; }
+    if (y < Y.z7){ const t = (y - Y.t5)/(Y.z7 - Y.t5); out.setHex(0x9a5cd8).lerp(colB.setHex(0xc8b0f0), 0.35*t); return lerp(0.8, 0.55, t); }
+    if (y < Y.apex){ const t = (y - Y.z7)/(Y.apex - Y.z7); out.setHex(0x2a2440); return 0.10*(1 - smooth(clamp(t/0.25, 0, 1))) + 0.02; } // the dark gap before ignition
+    if (p.filament){ out.setHex(0xc0402a); return 0.95; }
+    { const u = clamp((y - Y.apex)/0.9, 0, 1); out.setHex(0x6aa8ff).lerp(colB.setHex(GOLD_LIGHT), smooth(u)); return lerp(1.3, 1, u); } // blue at the base of the flame, then gold
+  }
+
+  // ---------- particles ----------
+  const N = 1250, LMAX = 160, L_SHORT = 44, L_LONG = 158;
+  let L = L_SHORT;
+  const SAMPLE = 0.05; // seconds of flow time between trail samples
+  const P = [];
+  function rnd(seed){ let s = seed >>> 0; return ()=>{ s = (s*1664525 + 1013904223) >>> 0; return s/4294967296; }; }
+  const R = rnd(20261121);
+  for (let i = 0; i < N; i++){
+    const p = { mode:0, y:0, r:1, phi:R()*TAU, rho:R(), s1:R(), s2:R(), s3:R(), seed:R()*100,
+      theta:0, thetaEnd:0, retS:0, retK:1, rStart:0.5, head:0, acc:0, nextBubble:true,
+      x:0, yy:0, z:0, cr:1, cg:1, cb:1, a:1, cls:0 };
+    p.k24 = Math.floor(p.rho*24) % 24;
+    p.k3 = Math.floor(p.s1*3) % 3;
+    p.bundle = p.s2 > 0.72;
+    p.redEnd = (p.k24 % 8) <= 1;
+    p.braid = false; p.bj = Math.floor(p.s1*3) % 3; // the inner braid: three plaited strands // the red end of the spectrum: red and red-orange
+    p.filament = p.s3 < 0.4;
+    p.captures = p.rho < 0.12; // most of the flow now takes the outer path over Zone 4
+    P.push(p);
+  }
+  const hist = new Float32Array(N*LMAX*3), histC = new Float32Array(N*LMAX*3), histK = new Uint8Array(N*LMAX);
+
+  // ---------- the reversed cell at the Queen's Chamber ----------
+  // Loop parameter θ: 0 at the lower stillpoint, π/2 up the outside, π at the upper stillpoint, 3π/2 down the axis.
+  function cellPos(theta, mu, out){
+    const th = ((theta % TAU) + TAU) % TAU;
+    let rb, yb;
+    if (th < Math.PI){ rb = 0.80*Math.sin(th); yb = BUB_C - 0.52*Math.cos(th); }
+    else { rb = 0.05*Math.sin(th - Math.PI); yb = BUB_C + 0.52*Math.cos(th - Math.PI); }
+    const ri = 0.45 + 0.12*Math.sin(th), yi = BUB_C - 0.16*Math.cos(th);
+    out.r = lerp(rb, ri, mu); out.y = lerp(yb, yi, mu);
+  }
+  const tmp = { r:0, y:0 };
+
+  // ---------- the return circuit ----------
+  function shellPt(alpha, k){
+    const ky = 0.7 + 0.3*k; const c = Math.cos(alpha);
+    return { r: k*FIELD.b*Math.sin(alpha), y: FIELD.yc + (c >= 0 ? FIELD.aTop : FIELD.aBot)*ky*c };
+  }
+  function bez(a, b, c, t){ const u = 1-t; return u*u*a + 2*u*t*b + t*t*c; }
+  function retPos(p, s, out){
+    const k = p.retK, A0 = 0.24*Math.PI, A1 = 0.90*Math.PI;
+    if (s < 0.18){
+      const t = s/0.18, e = shellPt(A0, k);
+      out.r = bez(p.rStart, p.rStart + 2.4*k, e.r, t); out.y = bez(Y.jtop, Y.jtop + 1.6, e.y, t);
+    } else if (s < 0.84){
+      const e = shellPt(lerp(A0, A1, (s - 0.18)/0.66), k); out.r = e.r; out.y = e.y;
+    } else {
+      const t = (s - 0.84)/0.16, e = shellPt(A1, k);
+      out.r = bez(e.r, 2.4 + 0.6*k, 1.85, t); out.y = bez(e.y, -4.5, Y.sep0, t);
+    }
+  }
+
+  function placeHead(p, t){
+    const zi = p.mode === 0 ? zoneInfo(p, p.y) : null;
+    let ox = 0, oy = 0, oz = 0;
+    const amp = zi ? zi.amp : (p.mode === 3 ? 0.02 : 0.004);
+    if (amp > 0.005){
+      const s = p.seed, y = p.y;
+      ox = amp*(Math.sin(1.7*t + s*1.3 + 3.1*y) + 0.6*Math.sin(2.9*t + s*0.7 - 5.3*y))/1.6;
+      oz = amp*(Math.sin(2.1*t + s*2.1 - 2.7*y) + 0.6*Math.sin(3.7*t + s*1.1 + 4.4*y))/1.6;
+      oy = 0.5*amp*Math.sin(2.5*t + s*1.7 + 6.1*y);
+    }
+    if (p.mode === 0){ const L = releaseLean(p.y); ox += L*Math.cos(KC_DIR); oz += L*Math.sin(KC_DIR); }
+    p.x = p.r*Math.cos(p.phi) + ox; p.yy = p.y + oy; p.z = p.r*Math.sin(p.phi) + oz;
+    p.a = colorAt(p, p.y, col); p.cr = col.r; p.cg = col.g; p.cb = col.b;
+    p.cls = p.mode === 1 ? 1 : p.mode === 2 ? 3 : p.y >= Y.apex ? 2 : (p.y > Y.stagLo + 0.02 && p.y < Y.stagHi) ? 4 : 0; // 4: the outer flow wrapping the bubble, not drawn
+  }
+  function pushHist(i, p){
+    p.head = (p.head + 1) % LMAX;
+    const j = i*LMAX + p.head;
+    hist[j*3] = p.x; hist[j*3+1] = p.yy; hist[j*3+2] = p.z;
+    histC[j*3] = p.cr*p.a; histC[j*3+1] = p.cg*p.a; histC[j*3+2] = p.cb*p.a;
+    histK[j] = p.cls;
+  }
+  function fillHist(i, p){ for (let n = 0; n < LMAX; n++) pushHist(i, p); }
+
+  let simT = 0;
+  function stepParticle(i, p, dt){
+    if (p.mode === 0){
+      const y0 = p.y, f0 = frameAt(p, y0);
+      p.y += vyAt(y0, p)*dt;
+      // spin: the flow frame's rotation carried up the column
+      p.phi += frameAt(p, p.y) - f0;
+      const zi = zoneInfo(p, p.y);
+      // mode selection: organized zones pull particles toward a few preferred angles
+      if (zi.pull > 0 && zi.n > 0){
+        const rel = p.phi - frameAt(p, p.y), sp = TAU/zi.n;
+        const target = zi.k >= 0 ? zi.k*sp : Math.round(rel/sp)*sp;
+        p.phi += wrapPi(target - rel)*Math.min(1, zi.pull*dt);
+      }
+      if (zi.diff > 0) p.phi += zi.diff*Math.sqrt(dt)*(R() - 0.5)*2.4;
+      p.r += (zi.r - p.r)*Math.min(1, (zi.rRate || 6)*dt);
+      // capture into the reversed cell at the lower stillpoint
+      if (p.captures && y0 < 0.17 && p.y >= 0.17){
+        p.mode = 1; p.theta = 0; p.thetaEnd = Math.PI + TAU*(p.s3 < 0.5 ? 1 : 2);
+      } else if (p.y >= Y.jtop){
+        p.mode = 2; p.retS = 0; p.retK = 0.45 + 0.55*p.rho; p.rStart = p.r;
+      }
+    } else if (p.mode === 1){
+      p.theta += 0.95*dt;
+      const prog = clamp(p.theta/p.thetaEnd, 0, 1);
+      cellPos(p.theta, 0.85*Math.sin(Math.PI*prog), tmp);
+      p.r = tmp.r; p.y = tmp.y;
+      p.phi += dt*0.32/(p.r*p.r + 0.07); // swirl keeps its sense inside the cell
+      if (p.theta >= p.thetaEnd){ p.mode = 0; p.y = Y.stagHi + 0.005; }
+    } else if (p.mode === 2){
+      p.retS += dt/9;
+      p.phi += dt*(Math.PI/9); // toroidal procession: half a turn per sweep
+      retPos(p, Math.min(1, p.retS), tmp); p.r = tmp.r; p.y = tmp.y;
+      if (p.retS >= 1){ p.mode = 3; p.r = 3.6 + 1.0*p.rho; p.y = -3.66; placeHead(p, simT); fillHist(i, p); return; }
+    } else {
+      // Zone 1: radial convergence; inflow and swirl both rise as the radius shrinks
+      p.r -= dt*0.85*1.85/p.r;
+      p.phi += dt*2.6/(p.r*p.r);
+      p.y = lerp(Y.sep0, -3.66, clamp((p.r - 1.85)/2.75, 0, 1));
+      if (p.r <= 1.85){ p.mode = 0; p.r = 1.85; p.y = Y.sep0; }
+    }
+    placeHead(p, simT);
+    p.acc += dt;
+    if (p.acc >= SAMPLE){ p.acc -= SAMPLE; if (p.acc > SAMPLE) p.acc = 0; pushHist(i, p); }
+  }
+
+  // seed along the circuit, then let the flow run so trails and the cell fill in
+  P.forEach((p, i)=>{
+    if (R() < 0.68){ p.mode = 0; p.y = lerp(Y.sep0, Y.jtop, R()); p.r = zoneInfo(p, p.y).r; p.phi = frameAt(p, p.y) + R()*TAU; }
+    else { p.mode = 2; p.retK = 0.45 + 0.55*p.rho; p.rStart = 0.5; p.retS = R(); retPos(p, p.retS, tmp); p.r = tmp.r; p.y = tmp.y; }
+    placeHead(p, 0); fillHist(i, p);
+  });
+  for (let w = 0; w < 900; w++){ simT += 0.05; for (let i = 0; i < N; i++) stepParticle(i, P[i], 0.05); }
+
+  // ---------- trail and head geometry ----------
+  const segPos = new Float32Array(N*LMAX*2*3), segCol = new Float32Array(N*LMAX*2*3);
+  const segGeo = new THREE.BufferGeometry();
+  segGeo.setAttribute("position", new THREE.BufferAttribute(segPos, 3).setUsage(THREE.DynamicDrawUsage));
+  segGeo.setAttribute("color", new THREE.BufferAttribute(segCol, 3).setUsage(THREE.DynamicDrawUsage));
+  const trails = new THREE.LineSegments(segGeo, new THREE.LineBasicMaterial({ vertexColors:true, transparent:true, opacity:0.9, blending:THREE.AdditiveBlending, depthWrite:false }));
+  trails.frustumCulled = false; system.add(trails);
+  const headPos = new Float32Array(N*3), headCol = new Float32Array(N*3);
+  const headGeo = new THREE.BufferGeometry();
+  headGeo.setAttribute("position", new THREE.BufferAttribute(headPos, 3).setUsage(THREE.DynamicDrawUsage));
+  headGeo.setAttribute("color", new THREE.BufferAttribute(headCol, 3).setUsage(THREE.DynamicDrawUsage));
+  const heads = new THREE.Points(headGeo, new THREE.PointsMaterial({ size:0.11, map:DOT, vertexColors:true, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true }));
+  heads.frustumCulled = false; system.add(heads);
+  const show = [true, true, true, false, true];
+
+  const QCW = new THREE.Vector3(0, BUB_C, 0), camP = new THREE.Vector3(), dN = new THREE.Vector3();
+  let camL = 1;
+  function qcWindow(x, y, z){ // 1 = draw, 0 = hidden; a cone from the eye to the chamber, about 0.33 wide at the chamber
+    const vx = x - camP.x, vy = y - camP.y, vz = z - camP.z;
+    const t = vx*dN.x + vy*dN.y + vz*dN.z; if (t <= 0 || t > camL - 0.05) return 1;
+    const perp = Math.sqrt(Math.max(0, vx*vx + vy*vy + vz*vz - t*t)), rw = 0.33*t/camL;
+    return perp >= rw*1.7 ? 1 : perp <= rw ? 0 : (perp - rw)/(rw*0.7);
+  }
+  function writeGeometry(){
+    camP.copy(camera.position); dN.copy(QCW).sub(camP); camL = dN.length(); dN.multiplyScalar(1/camL);
+    let v = 0;
+    const longMode = L === L_LONG, base = longMode ? 0.55 : 0.85;
+    for (let i = 0; i < N; i++){
+      const p = P[i];
+      const hv = show[p.cls] ? 1 : 0;
+      headPos[i*3] = p.x; headPos[i*3+1] = p.yy; headPos[i*3+2] = p.z;
+      const hw = p.cls === 4 ? qcWindow(p.x, p.yy, p.z) : 1;
+      headCol[i*3] = p.cr*p.a*hv*hw; headCol[i*3+1] = p.cg*p.a*hv*hw; headCol[i*3+2] = p.cb*p.a*hv*hw;
+      // segment from the head back to the newest sample, then sample to sample
+      const tv = p.cls === 1 ? 0 : hv; // the reversed cell shows as moving points only, no trails
+      let px = p.x, py = p.yy, pz = p.z, pr = p.cr*p.a*tv*hw, pg = p.cg*p.a*tv*hw, pb = p.cb*p.a*tv*hw;
+      for (let n = 0; n < L - 1; n++){
+        const j = i*LMAX + ((p.head - n + LMAX) % LMAX);
+        const vis = (show[histK[j]] && histK[j] !== 1 && !(n === 0 && tv === 0)) ? 1 : 0;
+        const f = base*(1 - n/(L-1));
+        const f2 = base*(1 - (n+1)/(L-1));
+        const qx = hist[j*3], qy = hist[j*3+1], qz = hist[j*3+2], qw = histK[j] === 4 ? qcWindow(qx, qy, qz) : 1;
+        segPos[v*3] = px; segPos[v*3+1] = py; segPos[v*3+2] = pz;
+        segCol[v*3] = pr*f*vis; segCol[v*3+1] = pg*f*vis; segCol[v*3+2] = pb*f*vis; v++;
+        segPos[v*3] = qx; segPos[v*3+1] = qy; segPos[v*3+2] = qz;
+        segCol[v*3] = histC[j*3]*f2*vis*qw; segCol[v*3+1] = histC[j*3+1]*f2*vis*qw; segCol[v*3+2] = histC[j*3+2]*f2*vis*qw; v++;
+        px = qx; py = qy; pz = qz; pr = histC[j*3]*qw; pg = histC[j*3+1]*qw; pb = histC[j*3+2]*qw;
+      }
+    }
+    segGeo.setDrawRange(0, v);
+    segGeo.attributes.position.needsUpdate = true; segGeo.attributes.color.needsUpdate = true;
+    headGeo.attributes.position.needsUpdate = true; headGeo.attributes.color.needsUpdate = true;
+  }
+  updaters.push(dt=>{ if (dt > 0){ simT += dt; for (let i = 0; i < N; i++) stepParticle(i, P[i], dt); } writeGeometry(); });
+
+  // ---------- fixed forms ----------
+  { const g = new THREE.Group();
+    for (let m = 0; m < 12; m++){ const a = m/12*TAU, pts = []; for (let j = 0; j <= 40; j++){ const y = Y.stagLo + (Y.stagHi - Y.stagLo)*j/40; pts.push(az(bubbleHull(y), a, y)); } g.add(lineFrom(pts, 0x48b070, 0.32)); }
+    [0.45, 0.754, 1.06].forEach(y=>{ const pts = []; for (let j = 0; j <= 64; j++) pts.push(az(bubbleHull(y), j/64*TAU, y)); g.add(lineFrom(pts, 0x3d8a5c, 0.30)); });
+    [Y.stagLo, Y.stagHi].forEach(y=>{ const s = new THREE.Points(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, y, 0)]), new THREE.PointsMaterial({ color:0xd8f0c0, size:0.22, map:DOT, transparent:true, depthWrite:false, blending:THREE.AdditiveBlending })); g.add(s); });
+    reg("hull", g); }
+  { const g = new THREE.Group();
+    for (let m = 0; m < 12; m++){ const a = m/12*TAU, pts = []; for (let j = 0; j <= 20; j++){ const y = Y.sep0 + (Y.sep1 - Y.sep0)*j/20; pts.push(az(bellR(y), a, y)); } g.add(lineFrom(pts, 0xb02030, 0.32)); }
+    [Y.sep0, Y.sep1].forEach(y=>{ const pts = []; for (let j = 0; j <= 64; j++) pts.push(az(bellR(y), j/64*TAU, y)); g.add(lineFrom(pts, 0xb02030, 0.4)); });
+    reg("bell", g); }
+  { const g = new THREE.Group();
+    [[Y.sep1, 0.95], [Y.stagLo, 0.6], [Y.stagHi, 0.6], [Y.wake, 1.0], [Y.z5, 0.85], [Y.t4, 0.85], [Y.z6, 0.85], [Y.t5, 0.78], [Y.z7, 0.32], [Y.apex, 0.4]].forEach(([y, r])=>{
+      const pts = []; for (let j = 0; j <= 64; j++) pts.push(az(r + 0.15, j/64*TAU, y)); g.add(lineFrom(pts, GOLD_DARK, 0.45)); });
+    reg("rings", g); }
+
+
+
+
+
+  // ---------- Zone 4: the green energy center, imported from "Energy Centers in Motion" (Nov 18) ----------
+  // Its onion membrane was drawn on the bubble's own proportions (half-height 0.55, half-width 0.82),
+  // so it sits on the Queen's Chamber cell at scale 1.
+  { const smooth = THREE.MathUtils.smoothstep;
+    const glowSprite = (color, size, op) => { const s = new THREE.Sprite(new THREE.SpriteMaterial({map:DOT, color, transparent:true, opacity:op, depthWrite:false, blending:THREE.AdditiveBlending})); s.scale.setScalar(size); s.userData.op = op; return s; };
+    const pointsMat = (size) => new THREE.PointsMaterial({size, map:DOT, vertexColors:true, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending, sizeAttenuation:true});
+const HEX = { white:0xf4f2ec, red:0xd2382c, orange:0xe8802a, yellow:0xe2c830, green:0x2fb45e, blue:0x2f78d8, indigo:0x5a48c8, violet:0x9050c0, wgold:0xfff0c2 };
+const ORDER = ['white','red','orange','yellow','green','blue','indigo','violet','wgold'];
+const HH = 0.55, HW = 0.82, ONION_H = HH*1.3, RMAX = HW + 0.05;
+const PROF = [[-1.60,0.10],[-1.34,0.105],[-1.17,0.16],[-1.03,0.36],[-0.86,0.62],[-0.62,0.84],[-0.32,0.97],[0.0,1.0],[0.30,0.965],[0.56,0.84],[0.78,0.63],[0.97,0.38],[1.12,0.20],[1.27,0.12],[1.45,0.10],[1.62,0.10]];
+const pchip = (() => { const xs = PROF.map(p => p[0]), ys = PROF.map(p => p[1]), n = xs.length, h = [], d = [], m = new Array(n);
+  for (let i=0;i<n-1;i++){ h.push(xs[i+1]-xs[i]); d.push((ys[i+1]-ys[i])/h[i]); } m[0] = d[0]; m[n-1] = d[n-2];
+  for (let i=1;i<n-1;i++){ if (d[i-1]*d[i] <= 0) m[i] = 0; else { const w1 = 2*h[i]+h[i-1], w2 = h[i]+2*h[i-1]; m[i] = (w1+w2)/(w1/d[i-1] + w2/d[i]); } }
+  return (x) => { if (x <= xs[0]) return ys[0]; if (x >= xs[n-1]) return ys[n-1]; let i = 0; while (x > xs[i+1]) i++;
+    const t = (x - xs[i])/h[i], t2 = t*t, t3 = t2*t; return (2*t3-3*t2+1)*ys[i] + (t3-2*t2+t)*h[i]*m[i] + (-2*t3+3*t2)*ys[i+1] + (t3-t2)*h[i]*m[i+1]; }; })();
+// no neck: above the equator the membrane closes on the bubble's own north pole (the upper stillpoint), so nothing reaches into Zone 5
+const onionR = (y) => RMAX*Math.sqrt(Math.max(0, 1 - (y/HH)*(y/HH))); // root and neck both removed: closes on the two stillpoints
+const yBot = -HH, yTop = HH, yRoot = -HH*0.86, yNeck = HH*0.86;
+const fadeMat = (op, add) => new THREE.ShaderMaterial({ transparent:true, depthWrite:false, blending: add ? THREE.AdditiveBlending : THREE.NormalBlending, uniforms:{ op:{ value:op } },
+  vertexShader:`attribute vec3 color; attribute float alpha; varying vec3 vC; varying float vA; void main(){ vC = color; vA = alpha; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+  fragmentShader:`uniform float op; varying vec3 vC; varying float vA; void main(){ gl_FragColor = vec4(vC, op*vA); }` });
+const endFade = (y) => Math.min(smooth(y, yBot, yRoot), 1 - smooth(y, yNeck, yTop));
+
+function flowMembrane(root, key){
+  const i0 = ORDER.indexOf(key), below = ORDER[i0-1], above = ORDER[i0+1];
+  const mixH = (a, b, t) => new THREE.Color(HEX[a]).lerp(new THREE.Color(HEX[b]), t).getHex();
+  const STOPS = key === 'green' ? [[-0.77,0xe2d830],[-0.4,0xa8d838],[0.0,0x2fb45e],[0.45,0x1fa8b0],[0.77,0x3a7fe8]]
+    : [[-1.5, HEX[below]], [-0.8, mixH(below, key, 0.6)], [0.0, HEX[key]], [0.8, mixH(key, above, 0.45)], [1.6, HEX[above]]];
+  const colAt = (y) => { const u = y/ONION_H, c = new THREE.Color();
+    if (u <= STOPS[0][0]) return c.setHex(STOPS[0][1]); if (u >= STOPS[4][0]) return c.setHex(STOPS[4][1]);
+    for (let i=0;i<4;i++) if (u <= STOPS[i+1][0]) return c.setHex(STOPS[i][1]).lerp(new THREE.Color(STOPS[i+1][1]), (u-STOPS[i][0])/(STOPS[i+1][0]-STOPS[i][0]));
+    return c; };
+  const G = new THREE.Group(); root.add(G);
+  // 96 fine lines with a half turn of twist
+  const pos = [], cols = [], al = [];
+  for (let i=0;i<96;i++){ const phi = i/96*Math.PI*2; let prev = null;
+    for (let k=0;k<=90;k++){ const t = k/90, y = yBot + (yTop - yBot)*t, r = onionR(y), tw = phi + 0.5*smooth(t, 0.12, 0.88);
+      const p = new THREE.Vector3(r*Math.cos(tw), y, r*Math.sin(tw)), c = colAt(y), a = endFade(y);
+      if (prev){ pos.push(prev.p.x, prev.p.y, prev.p.z, p.x, p.y, p.z); cols.push(prev.c.r, prev.c.g, prev.c.b, c.r, c.g, c.b); al.push(prev.a, a); }
+      prev = {p, c, a}; } }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pos,3)); g.setAttribute('color', new THREE.Float32BufferAttribute(cols,3)); g.setAttribute('alpha', new THREE.Float32BufferAttribute(al,1));
+  G.add(new THREE.LineSegments(g, fadeMat(0.15, true)));
+  // light moving along the membrane, south to north: the one vector
+  // the outer flow: brighter, lighter streaks climbing the membrane, so it reads apart from the inner torus
+  const N = 0, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, t:Math.random(), sp:0.05 + 0.015*Math.random()});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
+  G.add(new THREE.Points(pg, pointsMat(0.058)));
+  const TL = 0.05, tp = new Float32Array(N*6), tcl = new Float32Array(N*6);
+  const tg = new THREE.BufferGeometry(); tg.setAttribute('position', new THREE.BufferAttribute(tp,3)); tg.setAttribute('color', new THREE.BufferAttribute(tcl,3));
+  const tl = new THREE.LineSegments(tg, new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending})); tl.frustumCulled = false; G.add(tl);
+  const c = new THREE.Color();
+  // outer flow colors: green-yellow at the root, true green at the equator, green-blue at the neck
+  const OST = [[-1.5,0xc8e040],[-0.8,0xa4dc48],[0.0,0x34d264],[0.45,0x22c0a8],[0.77,0x3a9ce8]];
+  const outerCol = (y, out)=>{ const u = y/ONION_H; if (u <= OST[0][0]) return out.setHex(OST[0][1]); if (u >= OST[4][0]) return out.setHex(OST[4][1]);
+    for (let k=0;k<4;k++) if (u <= OST[k+1][0]) return out.setHex(OST[k][1]).lerp(new THREE.Color(OST[k+1][1]), (u - OST[k][0])/(OST[k+1][0] - OST[k][0])); return out; };
+  // continuity on a thin sheet: speed goes as 1/radius, so fast at the root and neck, slowest at the wide equator
+  const speedAt = (t)=>{ const y = yBot + (yTop - yBot)*t; return Math.max(0.5, Math.min(2.0, 0.5/(onionR(y)/RMAX))); };
+  const at = (q, t, out)=>{ const y = yBot + (yTop - yBot)*t, r = onionR(y)*1.01, tw = q.phi + 0.5*smooth(t, 0.12, 0.88); out[0] = r*Math.cos(tw); out[1] = y; out[2] = r*Math.sin(tw); return y; };
+  const a = [0,0,0], b = [0,0,0];
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const q = P[i]; const f = speedAt(q.t); q.t = (q.t + dt*q.sp*f) % 1;
+      const y = at(q, q.t, a); at(q, Math.max(0, q.t - TL*f), b);
+      pp[i*3] = a[0]; pp[i*3+1] = a[1]; pp[i*3+2] = a[2];
+      outerCol(y, c).multiplyScalar(1.2*endFade(y));
+      pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b;
+      tp[i*6] = a[0]; tp[i*6+1] = a[1]; tp[i*6+2] = a[2]; tp[i*6+3] = b[0]; tp[i*6+4] = b[1]; tp[i*6+5] = b[2];
+      tcl[i*6] = c.r; tcl[i*6+1] = c.g; tcl[i*6+2] = c.b; tcl[i*6+3] = 0; tcl[i*6+4] = 0; tcl[i*6+5] = 0; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true;
+    tg.attributes.position.needsUpdate = true; tg.attributes.color.needsUpdate = true; G.rotation.y += dt*0.05; };
+  // red receives intelligent energy as white light rising from everywhere below in soft waves (59.11, 54.27)
+  return G;
+}
+
+// ---------- shared pieces from The Green Ray in Six Stages ----------
+const lotusOf = (parent) => { const G = new THREE.Group(); parent.add(G); const petals = [];
+  const shape = (L, Wd) => { const s = new THREE.Shape(); s.moveTo(0,0); s.bezierCurveTo(Wd, L*0.25, Wd*0.9, L*0.7, 0, L); s.bezierCurveTo(-Wd*0.9, L*0.7, -Wd, L*0.25, 0, 0); return new THREE.ShapeGeometry(s, 16); };
+  const ring = (n, L, Wd, off, colA, colB, r0) => { for (let i=0;i<n;i++){ const az = off + i/n*Math.PI*2;
+      const geo = shape(L, Wd), cols = [], pa = geo.attributes.position, c = new THREE.Color();
+      for (let j=0;j<pa.count;j++){ c.copy(new THREE.Color(colA)).lerp(new THREE.Color(colB), pa.getY(j)/L); cols.push(c.r, c.g, c.b); }
+      geo.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3));
+      const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.DoubleSide, transparent:true, opacity:0.62, depthWrite:false});
+      const pivot = new THREE.Group(); pivot.rotation.y = -az; const hinge = new THREE.Group(); hinge.position.x = r0; pivot.add(hinge);
+      const mesh = new THREE.Mesh(geo, mat); mesh.position.y = -0.02; hinge.add(mesh); G.add(pivot); petals.push({hinge, mat}); } };
+  ring(8, 0.40, 0.13, 0, 0x12804b, 0x6fd3a2, 0.15);
+  ring(8, 0.48, 0.16, Math.PI/8, 0x1f8f58, 0x9ae6c0, 0.18);
+  G.position.y = -0.1;
+  // openW 1: open and steady (Stage 2); 0: closed, with a brief parting every ~10 s, never held (Stage 1)
+  const set = (t, openW) => { const cyc = (t % 10.5)/10.5, pulse = Math.pow(Math.max(0, Math.sin(Math.PI*THREE.MathUtils.clamp((cyc - 0.55)/0.3, 0, 1))), 1.6)*0.75;
+    const o = THREE.MathUtils.lerp(pulse, 1, openW);
+    petals.forEach((p, i) => { p.hinge.rotation.z = -THREE.MathUtils.lerp(0.12, 1.12, o) - (i >= 8 ? 0.12*o : 0) - 0.03*Math.sin(t*0.8 + i); p.mat.opacity = 0.42 + 0.3*o; }); return o; };
+  return set; };
+const orbVS = `varying vec3 vN; varying vec3 vV; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); gl_Position = projectionMatrix*mv; }`;
+const smallOrb = (parent, hex) => { // the small orb at the lotus's center 
+  const m = new THREE.ShaderMaterial({ uniforms:{c:{value:new THREE.Color(hex)}}, transparent:true, depthWrite:false, vertexShader:orbVS,
+    fragmentShader:`uniform vec3 c; varying vec3 vN; varying vec3 vV; void main(){ float ndv = max(dot(vN, vV), 0.0); vec3 col = mix(c*0.55, c, pow(ndv, 0.9)); gl_FragColor = vec4(col, 1.0); }` });
+  const o = new THREE.Mesh(new THREE.SphereGeometry(0.075, 40, 28), m); parent.add(o); return o; };
+const torusField = (parent, o) => { const G = new THREE.Group(); parent.add(G);
+  const loopPt = (phi, th) => new THREE.Vector3((o.R + o.rr*Math.cos(th))*Math.cos(phi), o.rv*Math.sin(th), (o.R + o.rr*Math.cos(th))*Math.sin(phi));
+  const lm = new THREE.LineBasicMaterial({color:o.col, transparent:true, opacity:o.lop, depthWrite:false, blending:THREE.AdditiveBlending});
+  for (let i=0;i<o.nl;i++){ const phi = o.off + i/o.nl*Math.PI*2, pts = []; for (let k=0;k<=96;k++) pts.push(loopPt(phi, k/96*Math.PI*2));
+    G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lm)); }
+  const N = o.np, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, th:Math.random()*Math.PI*2, j:0.85 + 0.3*Math.random(), sp:0.45 + 0.3*Math.random(), b:0.6 + 0.4*Math.random()});
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
+  G.add(new THREE.Points(g, pointsMat(o.ps))); const base = new THREE.Color(o.pcol);
+  // short comet tails so the direction of circulation reads at a glance
+  const tp = new Float32Array(N*6), tc = new Float32Array(N*6);
+  const tg = new THREE.BufferGeometry(); tg.setAttribute('position', new THREE.BufferAttribute(tp,3)); tg.setAttribute('color', new THREE.BufferAttribute(tc,3));
+  const tails = new THREE.LineSegments(tg, new THREE.LineBasicMaterial({vertexColors:true, transparent:true, opacity:1, depthWrite:false, blending:THREE.AdditiveBlending})); tails.frustumCulled = false; G.add(tails);
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const p = P[i];
+      p.th = (p.th + dt*p.sp) % (Math.PI*2); // up the outside, in over the top, down the axis: counter to the macro field
+      p.phi += dt*o.drift;
+      const v = loopPt(p.phi, p.th).multiplyScalar(p.j); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
+      const w = loopPt(p.phi - 0.05, p.th - (o.tail || 0.32)).multiplyScalar(p.j);
+      tp[i*6] = v.x; tp[i*6+1] = v.y; tp[i*6+2] = v.z; tp[i*6+3] = w.x; tp[i*6+4] = w.y; tp[i*6+5] = w.z;
+      col[i*3] = base.r*p.b; col[i*3+1] = base.g*p.b; col[i*3+2] = base.b*p.b;
+      tc[i*6] = base.r*p.b*0.9; tc[i*6+1] = base.g*p.b*0.9; tc[i*6+2] = base.b*p.b*0.9; tc[i*6+3] = 0; tc[i*6+4] = 0; tc[i*6+5] = 0; }
+    g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true;
+    tg.attributes.position.needsUpdate = true; tg.attributes.color.needsUpdate = true; };
+  return G; };
+
+function buildGreen(){ // green as in Stage 2 of The Green Ray in Six Stages: the lotus open, the bright yellow orb, humanity's own toroidal field
+  const G = new THREE.Group(); let t = 0;
+  const tor = torusField(G, {R:0.47, rr:0.33, rv:0.46, nl:30, off:0, col:0x0aa860, lop:0.5, np:900, ps:0.05, pcol:0x12c878, drift:0.16, tail:0.32});
+  // the stream from below rising freely along the axis into the heart
+  const N = 0, pp = new Float32Array(N*3), pc = new Float32Array(N*3), P = [];
+  for (let i=0;i<N;i++) P.push({u:Math.random(), ph:Math.random()*Math.PI*2, r:0.03 + 0.09*Math.random(), sp:0.18 + 0.1*Math.random()});
+  const pg = new THREE.BufferGeometry(); pg.setAttribute('position', new THREE.BufferAttribute(pp,3)); pg.setAttribute('color', new THREE.BufferAttribute(pc,3));
+  G.add(new THREE.Points(pg, pointsMat(0.045)));
+  const y0 = yBot, y1 = -0.1, cA = new THREE.Color(0xa8d838), cB = new THREE.Color(0x3fcf7a), c = new THREE.Color();
+  G.userData.tick = (dt) => { t += dt; tor.userData.tick(dt);
+    for (let i=0;i<N;i++){ const q = P[i]; q.u = (q.u + dt*q.sp) % 1; q.ph += dt*0.5; const y = y0 + (y1 - y0)*q.u, r = q.r*(1 + 0.5*Math.sin(q.u*12 + q.ph));
+      pp[i*3] = r*Math.cos(q.ph); pp[i*3+1] = y; pp[i*3+2] = r*Math.sin(q.ph);
+      const f = smooth(q.u, 0, 0.1)*(1 - smooth(q.u, 0.85, 1)); c.copy(cA).lerp(cB, q.u).multiplyScalar(f); pc[i*3] = c.r; pc[i*3+1] = c.g; pc[i*3+2] = c.b; }
+    pg.attributes.position.needsUpdate = true; pg.attributes.color.needsUpdate = true; };
+  return {G, mats:[]}; }
+
+    const heart = new THREE.Group(); heart.position.y = BUB_C;
+    const memb = flowMembrane(heart, 'green');
+    const spin = new THREE.Group(); heart.add(spin);
+    const form = buildGreen(); spin.add(form.G);
+    updaters.push(dt=>{ memb.userData.tick(dt); spin.rotation.y += dt*0.18; form.G.userData.tick(dt); });
+    reg("heart", heart);
+  }
+
+  // ---------- the pyramid (first model's frame: 1 unit = 31.4815 cubits, base at y = −0.8941) ----------
+  const CUB = 31.4815, PY0 = -0.8941;
+  const C = (x, y, z)=> new THREE.Vector3(x/CUB, y/CUB + PY0, z/CUB);
+  { const g = new THREE.Group(), h = 220, apex = C(0, 280, 0);
+    const base = [C(h,0,h), C(-h,0,h), C(-h,0,-h), C(h,0,-h)];
+    g.add(lineFrom([...base, base[0]], GOLD, 0.45));
+    base.forEach(b=> g.add(lineFrom([b, apex], GOLD, 0.45)));
+    // faint faces so the column reads as inside the stone
+    const fg = new THREE.BufferGeometry(); const fp = [];
+    for (let k = 0; k < 4; k++){ const a = base[k], b = base[(k+1)%4]; fp.push(a.x,a.y,a.z, b.x,b.y,b.z, apex.x,apex.y,apex.z); }
+    fg.setAttribute("position", new THREE.Float32BufferAttribute(fp, 3));
+    g.add(new THREE.Mesh(fg, new THREE.MeshBasicMaterial({ color:GOLD, transparent:true, opacity:0.035, side:THREE.DoubleSide, depthWrite:false })));
+    reg("pyramid", g); }
+  { const g = new THREE.Group();
+    // chambers drawn as tinted glass: a faint fill, a crisp edge, and a soft glow along each edge
+    function glowEdges(parent, pts, color, rad, op){
+      const mat = new THREE.MeshBasicMaterial({ color, transparent:true, opacity:op, depthWrite:false, blending:THREE.AdditiveBlending });
+      for (let i = 0; i < pts.length; i += 2){ const a = pts[i], b = pts[i+1];
+        const tube = new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(a, b), 1, rad, 6, false), mat); tube.renderOrder = 30; parent.add(tube); }
+    }
+    function boxAt(w, hgt, d, x, y, z, color, fillCol){
+      const grp = new THREE.Group(); grp.position.copy(C(x, y, z));
+      const bg = new THREE.BoxGeometry(w/CUB, hgt/CUB, d/CUB);
+      const fill = new THREE.Mesh(bg, new THREE.MeshBasicMaterial({ color:fillCol, transparent:true, opacity:0.11, depthWrite:false, side:THREE.DoubleSide })); fill.renderOrder = 29; grp.add(fill);
+      const eg = new THREE.EdgesGeometry(bg), line = new THREE.LineSegments(eg, new THREE.LineBasicMaterial({ color, transparent:true, opacity:1, depthWrite:false })); line.renderOrder = 31; grp.add(line);
+      const p = eg.attributes.position, pts = []; for (let i = 0; i < p.count; i++) pts.push(new THREE.Vector3(p.getX(i), p.getY(i), p.getZ(i)));
+      glowEdges(grp, pts, color, 0.012, 0.35); g.add(grp);
+    }
+    boxAt(27, 7.5, 16, 14, -56.25, 0, 0xf0d8a8, 0xd8b070);   // resonating chamber: warm stone
+    // Queen's Chamber as in the first model: box with a gable roof, top edges of the box left open where the gable sits
+    { const qcFill = new THREE.MeshBasicMaterial({ color:0x7fe0a8, transparent:true, opacity:0.12, depthWrite:false, side:THREE.DoubleSide });
+      const qc = new THREE.Group(); qc.position.copy(C(0, 51.89, 0)); qc.scale.setScalar(1/CUB);
+      qc.add(new THREE.Mesh(new THREE.BoxGeometry(10, 8, 10), qcFill));
+      const hw = 5, hh = 4, hd = 5, P8 = [[-hw,-hh,-hd],[hw,-hh,-hd],[hw,-hh,hd],[-hw,-hh,hd],[-hw,hh,-hd],[hw,hh,-hd],[hw,hh,hd],[-hw,hh,hd]];
+      const ed = []; [[0,1],[1,2],[2,3],[3,0],[0,4],[1,5],[2,6],[3,7]].forEach(([a,b])=> ed.push(new THREE.Vector3(...P8[a]), new THREE.Vector3(...P8[b])));
+      const F = [[-5,4,-5],[5,4,-5],[0,7,-5]], Bk = [[-5,4,5],[5,4,5],[0,7,5]];
+      [[F[0],F[1]],[F[1],F[2]],[F[2],F[0]],[Bk[0],Bk[1]],[Bk[1],Bk[2]],[Bk[2],Bk[0]],[F[0],Bk[0]],[F[1],Bk[1]],[F[2],Bk[2]]].forEach(([a,b])=> ed.push(new THREE.Vector3(...a), new THREE.Vector3(...b)));
+      const qcl = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints(ed), new THREE.LineBasicMaterial({ color:0xe0fff0, transparent:true, opacity:1, depthWrite:false })); qcl.renderOrder = 31; qc.add(qcl);
+      glowEdges(qc, ed, 0xb8f8d4, 0.012*CUB, 0.35);
+      const gs = new THREE.Shape(); gs.moveTo(-5, 0); gs.lineTo(5, 0); gs.lineTo(0, 3); gs.closePath();
+      const gable = new THREE.Mesh(new THREE.ExtrudeGeometry(gs, { depth:10, bevelEnabled:false }), qcFill); gable.position.set(0, 4, -5); qc.add(gable);
+      g.add(qc); }
+    boxAt(20, 11, 10, 0, 85.5, -25, 0xc8dcff, 0x6a98f0);     // King's Chamber: blue-white
+    reg("chambers", g);
+    // the sphere of light inside the Queen's Chamber, as in the first model: "the configuration of the centered being" (55.11)
+    { const q = new THREE.Group(), at = C(0, 51.89, 0);
+      const coreMat = new THREE.MeshStandardMaterial({ color:0xffffff, emissive:0xf8f8ff, emissiveIntensity:1.8, roughness:0.15, metalness:0.45, transparent:true, opacity:0.95, depthTest:false, depthWrite:false });
+      const haloMat = new THREE.MeshStandardMaterial({ color:0xeaf0fa, emissive:0xb8c8e0, emissiveIntensity:0.95, roughness:0.30, metalness:0.30, transparent:true, opacity:0.50, depthTest:false, depthWrite:false });
+      const glowMat = new THREE.MeshBasicMaterial({ color:0xdce6f4, transparent:true, opacity:0.20, depthTest:false, depthWrite:false });
+      [[8.0, glowMat, 200], [4.5, haloMat, 201], [2.0, coreMat, 202]].forEach(([r, m, o])=>{ const s = new THREE.Mesh(new THREE.SphereGeometry(r/CUB, 24, 18), m); s.position.copy(at); s.renderOrder = o; q.add(s); });
+      let ct = 0;
+      updaters.push(()=>{ ct += 1/60; const pulse = Math.pow(0.5 + 0.5*Math.sin(ct*3.9), 1.4);
+        coreMat.emissiveIntensity = 1.8*(0.35 + 0.65*pulse); haloMat.emissiveIntensity = 0.95*(0.30 + 0.70*pulse);
+        coreMat.opacity = 0.95*(0.55 + 0.45*pulse); haloMat.opacity = 0.50*(0.50 + 0.50*pulse); glowMat.opacity = 0.20*(0.40 + 0.60*pulse); });
+      reg("qcSphere", q); }
+    const cl = new THREE.Group();
+    addLabel(cl, "Resonating Chamber", C(14, -40, 0).add(new THREE.Vector3(1.1, 0, 0)), "#cfc4a8", 0.3);
+    addLabel(cl, "Queen's Chamber", C(0, 51.89, 0).add(new THREE.Vector3(-1.9, 0, 0)), "#7fe0a0", 0.3);
+    addLabel(cl, "King's Chamber", C(0, 85.5, -25).add(new THREE.Vector3(-1.9, 0.1, 0)), "#8fb0f0", 0.3);
+    reg("chamberLabels", cl); cl.visible = false; }
+  // screen-space chamber labels: fixed at the right, small text, thin line and arrowhead to each chamber
+  const CH_LABELS = [
+    { name:"King's Chamber", sub:"Ra: (Place of Healing)", at:C(0, 85.5, -25), col:"#b8ccf8" },
+    { name:"Queen's Chamber", sub:"Ra: (Place of Initiation)", at:C(0, 55.0, 0), col:"#9fe8bc" },
+    { name:"Resonating Chamber", sub:"Ra: (Dying to Self to Become a Healer)", at:C(14, -56.25, 0), col:"#e8d0a0" }
+  ];
+  const chSvg = document.getElementById("chlabels"), SVGNS = "http://www.w3.org/2000/svg";
+  CH_LABELS.forEach(L=>{
+    L.line = document.createElementNS(SVGNS, "line"); L.line.setAttribute("stroke", L.col); L.line.setAttribute("stroke-width", "0.8"); L.line.setAttribute("stroke-opacity", "0.9");
+    L.head = document.createElementNS(SVGNS, "path"); L.head.setAttribute("fill", L.col); L.head.setAttribute("fill-opacity", "0.9");
+    L.text = document.createElementNS(SVGNS, "text"); L.text.textContent = L.name; L.text.setAttribute("fill", L.col); L.text.setAttribute("text-anchor", "end");
+    L.text.setAttribute("font-size", "10.5"); L.text.setAttribute("font-family", "Alegreya Sans, system-ui, sans-serif"); L.text.setAttribute("dominant-baseline", "middle");
+    L.subT = document.createElementNS(SVGNS, "text"); L.subT.textContent = L.sub; L.subT.setAttribute("fill", L.col); L.subT.setAttribute("fill-opacity", "0.8");
+    L.subT.setAttribute("text-anchor", "middle"); L.subT.setAttribute("font-size", "9.5"); L.subT.setAttribute("font-style", "italic");
+    L.subT.setAttribute("font-family", "Alegreya Sans, system-ui, sans-serif"); L.subT.setAttribute("dominant-baseline", "middle");
+    chSvg.append(L.line, L.head, L.text, L.subT);
+  });
+  const chV = new THREE.Vector3();
+  function placeChamberLabels(){
+    const on = refs.chambers && refs.chambers.visible, W = window.innerWidth, H = window.innerHeight;
+    const xText = W - 12, used = [];
+    const vb = document.querySelector(".vpan").getBoundingClientRect();
+    CH_LABELS.forEach(L=>{
+      chV.copy(L.at).applyMatrix4(system.matrixWorld).project(camera);
+      const vis = on && chV.z < 1 && Math.abs(chV.x) < 1.2 && Math.abs(chV.y) < 1.2;
+      [L.line, L.head, L.text, L.subT].forEach(e=> e.style.display = vis ? "" : "none"); if (!vis) return;
+      const px = (chV.x + 1)/2*W, py = (1 - chV.y)/2*H;
+      const ce = document.getElementById("corr"), ze = document.getElementById("zinfo"); let floorY = H - 150;
+      [ce, ze].forEach(el=>{ if (el && !el.hidden){ const r = el.getBoundingClientRect(); if (r.height > 0) floorY = Math.min(floorY, r.top - 12); } });
+      let ty = Math.max(110, Math.min(floorY, py));
+      if (ty > vb.top - 10 && ty < vb.bottom + 10) ty = (py < (vb.top + vb.bottom)/2) ? vb.top - 12 : vb.bottom + 12; // keep clear of the up/down buttons
+      used.forEach(u=>{ if (Math.abs(ty - u) < 30) ty = u + 30; }); used.push(ty);
+      L.text.setAttribute("x", xText); L.text.setAttribute("y", ty);
+      const tw = L.text.getComputedTextLength ? L.text.getComputedTextLength() : L.name.length*5.2, x0 = xText - tw - 5, y0 = ty;
+      const sw = L.subT.getComputedTextLength ? L.subT.getComputedTextLength() : L.sub.length*4.6; L.subT.setAttribute("x", Math.min(xText - tw/2, xText - sw/2)); L.subT.setAttribute("y", ty + 12);
+      const dx = px - x0, dy = py - y0, d = Math.hypot(dx, dy) || 1, ux = dx/d, uy = dy/d, stop = 7;
+      const ex = px - ux*stop, ey = py - uy*stop;
+      L.line.setAttribute("x1", x0); L.line.setAttribute("y1", y0); L.line.setAttribute("x2", ex); L.line.setAttribute("y2", ey);
+      const hx = ex, hy = ey, bx = hx - ux*5, by = hy - uy*5, nx = -uy*2.4, ny = ux*2.4;
+      L.head.setAttribute("d", `M${hx + ux*1},${hy + uy*1} L${bx + nx},${by + ny} L${bx - nx},${by - ny} Z`);
+    });
+  }
+  updaters.push(()=> placeChamberLabels());
+  { const g = new THREE.Group(), y = 210/CUB + PY0;
+    const m = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(0.16)), new THREE.LineBasicMaterial({ color:0xc9a0e8, transparent:true, opacity:0.9 }));
+    m.position.set(0, y, 0); g.add(m);
+    addLabel(g, "Position 2", new THREE.Vector3(-1.5, y, 0), "#c9a0e8", 0.3);
+    updaters.push(dt=>{ m.rotation.y += dt*0.4; });
+    reg("p2", g); }
+
+  // zone labels in a column beside the flow
+  { const g = new THREE.Group(), X = 2.4;
+    [["Zone 1 · Convergence", -3.75, "#d03040"], ["Threshold 1 · Separatrix", -3.15, "#d03040"], ["Zone 2 · Turbulence", -2.0, "#e0782c"],
+     ["Zone 3 · Semi-spiral", -0.6, "#d8c030"], ["Zone 4 · Bubble", 0.754, "#5fd08a"], ["Threshold 3 · Wake", 1.48, "#b8c890"],
+     ["Zone 5 · First helix", 2.4, "#8fb0f0"], ["Threshold 4 · Helical breakdown", 3.65, "#a0a0a8"], ["Zone 6 · Second helix", 4.65, "#e04438"],
+     ["Threshold 5 · Turbulent negotiation", 5.8, "#a06878"], ["Zone 7 · Relaminarization", 7.1, "#8a7af0"], ["Threshold 6 · Apex", 8.12, "#a098b8"],
+     ["Zone 8 · Outflow", 10.2, "#f1cf7e"]].forEach(([t, y, c])=> addLabel(g, t, new THREE.Vector3(X, y, 0), c, 0.28));
+    reg("zoneLabels", g); }
+
+  // ---------- visibility ----------
+  const DEFAULTS = { qcSphere:true, core:true, cell:false, circuit:true, heart:true, hull:false, bell:true, rings:false, pyramid:true, chambers:true, p2:false, labels:false };
+  const boxes = Array.from(document.querySelectorAll("#overlays input[data-key]"));
+  function applyVisibility(){
+    const st = {}; boxes.forEach(b=> st[b.dataset.key] = b.checked);
+    show[0] = st.core; show[1] = st.cell; show[2] = st.circuit; show[4] = st.core;
+    ["qcSphere","heart","hull","bell","rings","pyramid","chambers","p2"].forEach(k=> refs[k].visible = st[k]);
+    labels.forEach(l=> l.visible = st.labels);
+    refs.zoneLabels.visible = st.labels;
+    refs.chamberLabels.visible = false;
+    refs.p2.children.forEach(c=>{ if (c.isSprite) c.visible = true; });
+  }
+  function setAll(obj){ boxes.forEach(b=> b.checked = !!obj[b.dataset.key]); applyVisibility(); }
+  boxes.forEach(b=> b.addEventListener("change", applyVisibility));
+  setAll(DEFAULTS);
+  document.getElementById("btn-clear").addEventListener("click", ()=>{ const o = {}; boxes.forEach(b=> o[b.dataset.key] = false); setAll(o); });
+  document.getElementById("btn-reset").addEventListener("click", ()=> setAll(DEFAULTS));
+
+  // ---------- drawers ----------
+  const drawers = { overlays:"btn-overlays", camera:"btn-camera", about:"btn-about" };
+  Object.entries(drawers).forEach(([id, btnId])=>{
+    const btn = document.getElementById(btnId), el = document.getElementById(id);
+    btn.addEventListener("click", ()=>{
+      const open = el.hidden;
+      Object.entries(drawers).forEach(([oid,ob])=>{ document.getElementById(oid).hidden = true; document.getElementById(ob).setAttribute("aria-expanded","false"); });
+      if (open){ el.hidden = false; btn.setAttribute("aria-expanded","true"); }
+    });
+  });
+  const corrBtn = document.getElementById("btn-corr"), corrTable = document.getElementById("corr-table");
+  corrBtn.addEventListener("click", ()=>{ corrTable.hidden = !corrTable.hidden; corrBtn.textContent = corrTable.hidden ? "Show" : "Hide"; corrBtn.setAttribute("aria-expanded", String(!corrTable.hidden)); });
+  if (window.innerWidth < 640){ corrTable.hidden = true; corrBtn.textContent = "Show"; corrBtn.setAttribute("aria-expanded","false"); }
+
+  // ---------- camera (spherical orbit around a point on the axis) ----------
+  const orbit = { az:0.8, el:0.1, dist:27, ty:3.6 };
+  window.__orbit = orbit;
+  let tween = null;
+  const PRESETS = {
+    side:{ az:0.8, el:0.1, dist:27, ty:3.6 },
+    base:{ az:0.8, el:0.12, dist:6.5, ty:-1.0 },
+    bubble:{ az:0.8, el:0.14, dist:4.4, ty:0.75 },
+    kings:{ az:0.8, el:0.10, dist:6.8, ty:2.6 },
+    p2:{ az:0.8, el:0.10, dist:6.5, ty:5.4 },
+    apex:{ az:0.8, el:0.16, dist:10, ty:9.2 },
+    above:{ az:0.0, el:1.50, dist:15, ty:3.0 },
+    circuit:{ az:0.7, el:0.22, dist:40, ty:3.5 }
+  };
+  function updateCamera(){
+    const c = Math.cos(orbit.el);
+    camera.position.set(orbit.dist*c*Math.sin(orbit.az), orbit.ty + orbit.dist*Math.sin(orbit.el), orbit.dist*c*Math.cos(orbit.az));
+    camera.lookAt(0, orbit.ty, 0);
+  }
+  document.querySelectorAll("[data-cam]").forEach(b=> b.addEventListener("click", ()=>{
+    const p = PRESETS[b.dataset.cam];
+    const daz = ((p.az - orbit.az) % TAU + Math.PI*3) % TAU - Math.PI;
+    tween = { from:{...orbit}, to:{ az: orbit.az + daz, el:p.el, dist:p.dist, ty:p.ty }, t:0 };
+  }));
+  const ptrs = new Map(); let pinch0 = 0, dist0 = orbit.dist, dragging = false;
+  const cv = renderer.domElement;
+  cv.addEventListener("pointerdown", e=>{ try { cv.setPointerCapture(e.pointerId); } catch(_){} ptrs.set(e.pointerId, {x:e.clientX, y:e.clientY}); dragging = true; tween = null;
+    if (ptrs.size === 2){ const [a,b] = [...ptrs.values()]; pinch0 = Math.hypot(a.x-b.x, a.y-b.y); dist0 = orbit.dist; } });
+  cv.addEventListener("pointermove", e=>{
+    if (!ptrs.has(e.pointerId)) return;
+    const prev = ptrs.get(e.pointerId), cur = {x:e.clientX, y:e.clientY}; ptrs.set(e.pointerId, cur);
+    if (ptrs.size === 1){ orbit.az -= (cur.x-prev.x)*0.0055; orbit.el = clamp(orbit.el + (cur.y-prev.y)*0.0055, -1.54, 1.54); }
+    else if (ptrs.size === 2){ const [a,b] = [...ptrs.values()]; const d = Math.hypot(a.x-b.x, a.y-b.y); if (pinch0 > 0) orbit.dist = clamp(dist0*pinch0/d, 2.4, 90); }
+  });
+  const endPtr = e=>{ ptrs.delete(e.pointerId); if (ptrs.size === 0) dragging = false; pinch0 = 0; };
+  cv.addEventListener("pointerup", endPtr); cv.addEventListener("pointercancel", endPtr);
+  cv.addEventListener("wheel", e=>{ e.preventDefault(); tween = null; orbit.dist = clamp(orbit.dist*Math.exp(e.deltaY*0.0012), 2.4, 90); }, { passive:false });
+
+  // ---------- zone texts: the flow (physics), Ra (verified in the volumes), my reading ----------
+  const ZINFO = [
+   { key:"z1", name:"Zone 1 · Convergence", where:"Under the base, about 60–80 cubits below it", y0:-4.3, y1:-3.5, r:4.6, col:"#e24040",
+     flow:`<p>The return flow arrives under the base and draws in toward the axis from every side. The ring it crosses keeps shrinking, so the flow speeds up as it comes in, roughly as one over the radius. It brings the field's spin with it, and that spin grows the same way as the radius shrinks: a skater pulling in her arms, a bathtub drain.</p><p>Watch the red streaks: slow and wide at the rim, fast and tightly curved near the center.</p>`,
+     ra:`<p>Ra describes the first movement as "the scoop, the light energy being scooped in through the attraction of the pyramid shape through the bottom or base" <span class="cite">59.6</span>. Asked whether this is like the vortex in a draining bathtub, Ra agrees, except that here "the vortex is that of upward spiraling light being attracted by the electromagnetic fields engendered by the shape of the pyramid" <span class="cite">59.7</span>.</p>`,
+     mine:`<p>I read this as the red ray: the foundation, gathered in from everywhere before it has any shape of its own.</p>` },
+   { key:"t1", name:"Threshold 1 · The Separatrix", where:"The crimson bell, about 60–82 cubits below the base", y0:-3.5, y1:-2.8, r:2.0, col:"#d03040",
+     flow:`<p>A separatrix is the surface that divides flow still free to swing back around the outer field from flow that is captured by the core. Outside the bell a parcel can still recirculate; once inside, it is committed to the upward passage. The boundary isn't fixed: it shifts with the balance between the core's draw and the outer field's momentum.</p>`,
+     ra:`<p>Of the crossing between densities Ra says, "To cross that threshold is difficult. There is resistance at the edge, shall we say, of each density. The faculty of faith or will needs to be understood, nourished, and developed in order to have an entity which seeks past the boundary of third density" <span class="cite">82.29</span>.</p>`,
+     mine:`<p>Ra speaks there of densities. I extend the principle to every threshold in this column: each is a place where the old pattern resists letting go and the new one resists forming.</p>` },
+   { key:"z2", name:"Zone 2 · Collision and Turbulence", where:"From about 60 cubits below the base to just below it", y0:-2.8, y1:-1.2, r:1.6, col:"#e87020",
+     flow:`<p>Past the bell, streams from every direction meet in the confined base of the column. They arrive with different histories, so they shear against one another, and the sudden turn from inward to upward adds to it. The result is turbulence: eddies of every size, no common direction.</p><p>Higher in the zone the mixing evens things out, and the field's own spin begins to show as a slight bias, one direction of rotation a little more common than the other. Order hasn't formed yet; its seed has.</p>`,
+     ra:`<p>Ra doesn't describe this stage on its own. ~It belongs to the scoop, the light drawn up through the base before the semi-spiral forms <span class="cite">59.6</span>.</p>`,
+     mine:`<p>I read this churn as the orange ray: a self not yet integrated, negotiating between the one below and the many above.</p>` },
+   { key:"z3", name:"Zone 3 · The Foundation Semi-Spiral", where:"From just below the base up to the Queen's Chamber bubble (Threshold 2 as well)", y0:-1.2, y1:0.204, r:1.2, col:"#e8c828",
+     flow:`<p>Here the chaos finds its center. The net spin wins out, small eddies are absorbed into one rotation, and five threads appear. As the core narrows it spins faster, and the swirl climbs toward a critical value. Past it the flow can no longer carry disturbances downstream and must change state.</p><p>Spin pressure brakes the upward flow, so the threads barely rise while they wind hard through the pinch. Then they flare outward into a cradle that holds the bubble from beneath. That is why this element is both a zone and a threshold: a coherent spiral that is also the passage from chaos to stillness.</p>`,
+     ra:`<p>"Thus the first configuration is a semi-spiral" <span class="cite">59.6</span>. Ra adds, "It is well to reckon with the foundation semi-spiral which supplies the prana for all that may be affected by the three following upward spirals of light" <span class="cite">59.10</span>.</p>`,
+     mine:`<p>The yellow ray: a self gathered enough to hold a center. Only a stabilized self can rise into the heart above it.</p>` },
+   { key:"z4", name:"Zone 4 · The Queen's Chamber", where:"About 35–69 cubits up, between the two stillpoints", y0:0.204, y1:1.304, r:1.3, col:"#34d264",
+     flow:`<p>At the lower stillpoint the upward flow on the axis stops. Above it the flow on the axis runs downward, while flow farther out keeps rising, and the two close into a ring of circulation: a small torus inside the great one, its up-and-down motion reversed while its spin keeps the same sense. This is bubble-type vortex breakdown. The center is the stillest place in the column.</p><p>Around the bubble the outer flow climbs as a sheet, slowest at the wide equator, and gathers into a collar at the top. It arrives unevenly, fuller on the King's Chamber side, and that unevenness tips the column into the spiral above.</p>`,
+     ra:`<p>The first spiral "begins at, or slightly below, the Queen's Chamber position" <span class="cite">59.8</span>, where the light "reaches the point of turning. This acts as a compression of the light" <span class="cite">59.13</span>. "Thus this is the place of the initiate, for many extraneous items, or distortions, will leave the entity as it intensifies its seeking so that it may become one with this centralized and purified incoming light" <span class="cite">57.14</span>. Ra contrasts the healing work of the King's Chamber with "the configuration of the centered being" here <span class="cite">55.11</span>.</p>`,
+     mine:`<p>The green ray, the heart: a bounded stillness where what rises and what returns meet and turn about one center. The sphere of light marks the centered being.</p>` },
+   { key:"t3", name:"Threshold 3 · The Wake", where:"About 69–80 cubits up, just above the bubble", y0:1.304, y1:1.654, r:1.3, col:"#3a9ce8",
+     flow:`<p>Above the upper stillpoint the flow gathers, then rises again, reorganized. Flow that went around the bubble and flow that went through it travel at different speeds and have to merge, and the core leaves the axis. Small disturbances that the bubble's symmetry held down now grow, and the flow begins to choose a few preferred patterns around the circumference.</p><p>Here the first release swings toward the King's Chamber and spins off as the beginning of the spiral.</p>`,
+     ra:`<p>"The spiraling energy is beginning to be diffused at the point where it goes through the King's Chamber position" <span class="cite">56.6</span>.</p>`,
+     mine:`<p>The heart's testing: love leaving its shelter and keeping its shape in moving water.</p>` },
+   { key:"z5", name:"Zone 5 · The King's Chamber", where:"About 80–127 cubits up; the chamber sits near 86 cubits", y0:1.654, y1:3.154, r:1.6, col:"#7aa8e8",
+     flow:`<p>The column is now a clean corkscrew: the spiral form of vortex breakdown, the most regular it will ever be. The envelope swells at the King's Chamber level, then tapers. The flow has separated into strands, and here they carry the spectrum, red through violet. Because the column leans toward the chamber, the first wave sweeps through the room to its back wall, and a whole spectrum passes through it.</p>`,
+     ra:`<p>The first spiral "moves through the King's Chamber position in a sharply delineated form" <span class="cite">59.8</span>. ~The spiraling energies, red through violet color values, begin to diffuse at the King's Chamber position, and half of the diffusion angle passes through the chamber <span class="cite">56.6–56.7</span>. ~There the light is configured in "the seven distinctive color, or energy, vibratory rates" <span class="cite">57.12</span>.</p>`,
+     mine:`<p>The blue ray: the first outward radiation, the place of healing, where each color can be met on its own.</p>` },
+   { key:"t4", name:"Threshold 4 · Helical Breakdown", where:"About 127–159 cubits up", y0:3.154, y1:4.154, r:1.2, col:"#a0a0a8",
+     flow:`<p>The first corkscrew degrades. Its pitch lengthens, the strands waver in and out, and the small instabilities it had held down begin to grow. Each strand loses its color toward grey, and some thin away. This isn't turbulence yet: it is one organized pattern letting go before the next forms. In the last stretch of the threshold the second helix takes shape out of the loosened flow, and red appears.</p>`,
+     ra:`<p>The first spiral "ends at the point whereby the top approximate third of the pyramid may be seen to be intensifying the energy" <span class="cite">59.8</span>.</p>`,
+     mine:`<p>The constructed spectrum surrendering its distinctions, so that something stronger can form from what is left.</p>` },
+   { key:"z6", name:"Zone 6 · The Building Spiral", where:"About 159–191 cubits up", y0:4.154, y1:5.154, r:1.0, col:"#e04438",
+     flow:`<p>The second helix narrows like the end of a funnel, a drain vortex running upward. As the flow draws in toward the axis it keeps its spin, so the spin speeds up as the radius shrinks: the strands wind faster and faster and the flow quickens as the funnel tightens. Strong rotation steadies a flow and damps its disturbances, so the inner funnel is the most ordered part of the vortex. The red strands form out of the loosened flow of the breakdown below and wind in step as the funnel tightens. In a narrowing channel like this one, squeezing feeds the second helix and makes it strong; in open swirling jets the second helix is usually the weaker one.</p>`,
+     ra:`<p>"The large spiral is drawn into the vortex of the apex of the pyramid. However, some light energy—which is of the more intense nature of the red, shall we say, end of the spectrum—is spiraled once again, causing an enormous strengthening and focusing of energy which is then of use for building" <span class="cite">59.9</span>.</p>`,
+     mine:`<p>The red ray begun again, ordered and symmetrical: my picture of Ra's "enormous strengthening and focusing." Ra uses the draining bathtub for the scoop at the base (59.7); I see the same funnel here, turned toward the apex. Ra speaks of "some light energy" of the red end being spiraled once again; I draw the whole flow re-forming here as this one red spiral. I place the indigo center near here, about 175 cubits up: the form-maker, gathering the light into a focused work.</p>` },
+   { key:"t5", name:"Threshold 5 · Position 2", where:"About 191–231 cubits up; Position 2 near 210", y0:5.154, y1:6.454, r:1.2, col:"#a06878",
+     flow:`<p>The second helix breaks into fully developed turbulence, energy cascading from large eddies to small ones. This chaos differs from Zone 2's. Below, it was streams that hadn't yet found order; here it is order that has been spent, after three organizations and two dissolutions.</p>`,
+     ra:`<p>Ra describes "a transformation across boundaries of dimension" that "causes an apparent diffusion and weakness of the spiraling energy. However, in position two, as you have called it, much work may be done inter-dimensionally" <span class="cite">59.14</span>. There was no chamber there; the position "is useful only to those whose abilities are such that they are capable of serving as conductors of this type of focused spiral" <span class="cite">59.15</span>.</p>`,
+     mine:`<p>Ra's "apparent diffusion and weakness" is the language of a coherent spiral coming apart, so I set Position 2 in this turbulent passage rather than in the calm above it.</p>` },
+   { key:"z7", name:"Zone 7 · Relaminarization", where:"About 231–280 cubits up, closing on the stone apex", y0:6.454, y1:8.0, r:1.0, col:"#9a5cd8",
+     flow:`<p>As the cone narrows toward the apex, the squeeze speeds the flow up, stretches the eddies along the axis and starves the turbulence; rotation steadies what is left. This is relaminarization. What returns is simpler than anything below it: smooth, mostly upward, with only a faint leftover spin. Nothing here competes. Its outline is an oval, rounded at the shoulders and tapering to a point at the very top of the stone, so the flow fills the cone to the apex without leaving it. The complexity is gone; the energy remains.</p>`,
+     ra:`<p>"The large spiral is drawn into the vortex of the apex of the pyramid" <span class="cite">59.9</span>.</p>`,
+     mine:`<p>The violet ray: simplicity on the far side of complexity, a calm corridor after the doorway.</p>` },
+   { key:"t6", name:"Threshold 6 · Apex Ignition", where:"From the stone apex at 280 cubits to about 296", y0:8.0, y1:8.5, r:0.8, col:"#a098b8",
+     flow:`<p>Zone 7 closes like the bottom of a funnel, to almost a point at the stone apex itself. Beyond the point lies the gap, and then the jet opens out of it at the same angle the funnel closed, its mirror image. At the apex the narrowing ends and confined flow has to become outward emission. In a flame, the same transition shows as a dark zone just above the wick: the fuel is present and moving, but it hasn't reached ignition, so nothing glows (combustion engineers call it the quenching or standoff distance). Then the flame begins, blue at its base, then gold. The column shows the same: the flow dims almost to nothing through the gap, then lights blue at the apex and turns gold as the jet rises.</p>`,
+     ra:`<p>Asked what is meant by "the third spiral," Ra answers: "If you picture the candle flame, you may see the third spiral" <span class="cite">58.24</span>. ~The large spiral is drawn into the apex vortex before the third spiral radiates from the top <span class="cite">59.9–59.10</span>.</p>`,
+     mine:`<p>Ra gives the candle flame as the picture of the third spiral. A candle flame has a dark space just above the wick before the flame begins, and I read this gap as that space: the energy present and moving, not yet alight. My own watching of fire led me to the same image. A pause before giving.</p>` },
+   { key:"z8", name:"Zone 8 · Outflow", where:"Above the apex", y0:8.5, y1:12.6, r:1.2, col:"#f1cf7e",
+     flow:`<p>The flow leaves the apex as a narrow swirling jet. It draws in the surrounding fluid as it rises, so it widens and slows; farther out it spreads, turns over and descends the outside of the field to be drawn back in under the base. The circuit closes.</p>`,
+     ra:`<p>"If you picture the candle flame, you may see the third spiral" <span class="cite">58.24</span>. "The third complete spiral" radiates from the top of the pyramid <span class="cite">59.10</span>. "The third spiral is extremely full of the positive effects of directed prana, and that which is placed over such a shape will receive shocks energizing the electromagnetic fields" <span class="cite">59.16</span>.</p>`,
+     mine:`<p>The same substance that was gathered at the base, now in a changed state, given back.</p>` }
+  ];
+
+  // highlight rings for the zone being read
+  const zHi = new THREE.Group(); system.add(zHi); zHi.visible = false;
+  const ringGeo = (()=>{ const pts = []; for (let j = 0; j <= 96; j++){ const a = j/96*TAU; pts.push(new THREE.Vector3(Math.cos(a), 0, Math.sin(a))); } return new THREE.BufferGeometry().setFromPoints(pts); })();
+  const zRingMat = new THREE.LineBasicMaterial({ color:0xffffff, transparent:true, opacity:0.75, depthWrite:false });
+  const zRingA = new THREE.Line(ringGeo, zRingMat), zRingB = new THREE.Line(ringGeo, zRingMat); zHi.add(zRingA, zRingB);
+  let zPulse = 0; updaters.push(()=>{ if (zHi.visible){ zPulse += 1/60; zRingMat.opacity = 0.45 + 0.35*(0.5 + 0.5*Math.sin(zPulse*2.4)); } });
+  const zinfo = document.getElementById("zinfo"), ziTitle = document.getElementById("zi-title"), ziBody = document.getElementById("zi-body");
+  const corrEl = document.getElementById("corr");
+  let zIdx = -1;
+  function showZone(i){
+    zIdx = (i + ZINFO.length) % ZINFO.length; const z = ZINFO[zIdx];
+    zinfo.style.setProperty("--zc", z.col);
+    ziTitle.innerHTML = z.name + `<span class="where">${z.where}</span>`;
+    ziBody.innerHTML = `<div class="zlab">The flow</div>${z.flow}<div class="zlab ra">Ra</div><div class="ra-block">${z.ra}</div><div class="zlab">My reading</div><div class="mine">${z.mine}</div>`;
+    zinfo.hidden = false; zinfo.scrollTop = 0; corrEl.hidden = true;
+    const rr = Math.min(z.r, 2.2);
+    zRingA.position.y = Math.max(z.y0, -4.2); zRingB.position.y = Math.min(z.y1, 12.4);
+    zRingA.scale.setScalar(rr); zRingB.scale.setScalar(rr); zRingMat.color.set(z.col); zHi.visible = true;
+    hideHint();
+  }
+  function closeZone(){ zinfo.hidden = true; zHi.visible = false; zIdx = -1; corrEl.hidden = false; }
+  document.getElementById("zi-prev").addEventListener("click", ()=> showZone(zIdx - 1));
+  document.getElementById("zi-next").addEventListener("click", ()=> showZone(zIdx + 1));
+  document.getElementById("zi-close").addEventListener("click", closeZone);
+  document.getElementById("btn-zones").addEventListener("click", ()=> zinfo.hidden ? showZone(zIdx >= 0 ? zIdx : 4) : closeZone());
+  document.addEventListener("keydown", e=>{ if (zinfo.hidden) return; if (e.key === "ArrowRight") showZone(zIdx + 1); else if (e.key === "ArrowLeft") showZone(zIdx - 1); else if (e.key === "Escape") closeZone(); });
+  // a tap (not a drag) picks the zone nearest along the axis
+  const hint = document.getElementById("zhint"); let hintGone = false;
+  function hideHint(){ if (hintGone) return; hintGone = true; hint.style.opacity = 0; setTimeout(()=> hint.hidden = true, 900); }
+  setTimeout(hideHint, 9000);
+  const rc = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  let tapStart = null;
+  cv.addEventListener("pointerdown", e=>{ tapStart = { x:e.clientX, y:e.clientY, t:performance.now(), n:ptrs.size }; });
+  // a tap picks the zone nearest along the axis; generous tolerances so a real fingertip counts as a tap
+  let lastPick = 0;
+  function pickAt(cx, cy){
+    const now = performance.now(); if (now - lastPick < 350) return; 
+    const rect = cv.getBoundingClientRect();
+    ndc.set(((cx - rect.left)/rect.width)*2 - 1, -((cy - rect.top)/rect.height)*2 + 1);
+    rc.setFromCamera(ndc, camera);
+    const o = rc.ray.origin, d = rc.ray.direction;           // closest approach of the ray to the vertical axis
+    const b = d.y, dd = d.x*o.x + d.y*o.y + d.z*o.z, den = 1 - b*b; if (den < 1e-4) return;
+    const t = (b*o.y - dd)/den, sY = (o.y - b*dd)/den;
+    const px = o.x + d.x*t, pz = o.z + d.z*t, dist = Math.hypot(px, pz);
+    const i = ZINFO.findIndex(z => sY >= z.y0 && sY < z.y1);
+    if (i < 0) return;
+    if (dist > Math.max(2.5, ZINFO[i].r*1.6)) return;
+    lastPick = now; showZone(i);
+  }
+  cv.addEventListener("pointerup", e=>{
+    if (!tapStart || tapStart.n > 1) { tapStart = null; return; }
+    const moved = Math.hypot(e.clientX - tapStart.x, e.clientY - tapStart.y), dtp = performance.now() - tapStart.t; tapStart = null;
+    if (moved > 16 || dtp > 800) return;
+    pickAt(e.clientX, e.clientY);
+  });
+  cv.addEventListener("pointercancel", ()=>{ tapStart = null; });
+  // fallback: some phones deliver a tap only as a click
+  cv.addEventListener("click", e=> pickAt(e.clientX, e.clientY));
+  // and a touch fallback, in case pointer events are swallowed by the app frame
+  let tStart = null;
+  cv.addEventListener("touchstart", e=>{ if (e.touches.length === 1){ const t = e.touches[0]; tStart = { x:t.clientX, y:t.clientY, t:performance.now() }; } else tStart = null; }, { passive:true });
+  cv.addEventListener("touchend", e=>{ if (!tStart || e.changedTouches.length !== 1) return; const t = e.changedTouches[0];
+    if (Math.hypot(t.clientX - tStart.x, t.clientY - tStart.y) <= 16 && performance.now() - tStart.t <= 800) pickAt(t.clientX, t.clientY); tStart = null; }, { passive:true });
+
+  // ---------- vertical move: tap to step, hold to glide; the view follows the column up or down ----------
+  { const TY_MIN = -4.5, TY_MAX = 13;
+    function nudge(d){ tween = null; orbit.ty = clamp(orbit.ty + d, TY_MIN, TY_MAX); }
+    [["vp-up", -1], ["vp-dn", 1]].forEach(([id, sgn])=>{
+      const b = document.getElementById(id); let hold = null, rep = null;
+      const stop = ()=>{ clearTimeout(hold); clearInterval(rep); hold = rep = null; };
+      b.addEventListener("pointerdown", e=>{ e.preventDefault(); const step = Math.max(0.25, orbit.dist*0.05);
+        nudge(sgn*step); hold = setTimeout(()=>{ rep = setInterval(()=> nudge(sgn*Math.max(0.04, orbit.dist*0.008)), 16); }, 300); });
+      ["pointerup","pointerleave","pointercancel"].forEach(ev=> b.addEventListener(ev, stop));
+    });
+    document.addEventListener("keydown", e=>{ if (e.key === "PageUp"){ nudge(-orbit.dist*0.08); } else if (e.key === "PageDown"){ nudge(orbit.dist*0.08); } });
+  }
+  // ---------- playback ----------
+  let paused = false, speed = 1, clockT = 0;
+  const playBtn = document.getElementById("btn-play");
+  playBtn.addEventListener("click", ()=>{ paused = !paused; playBtn.textContent = paused ? "Play" : "Pause"; playBtn.setAttribute("aria-label", paused ? "Play animation" : "Pause animation"); });
+  document.getElementById("speed").addEventListener("input", e=> speed = parseFloat(e.target.value));
+  const spinBox = document.getElementById("spin");
+  document.getElementById("longtrails").addEventListener("change", e=>{ L = e.target.checked ? L_LONG : L_SHORT; });
+  if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){ spinBox.checked = false; speed = 0.4; document.getElementById("speed").value = 0.4; }
+  const readout = document.getElementById("readout");
+  // play bar: hide and show
+  const bar = document.getElementById("playbar"), barBtn = document.getElementById("btn-bar");
+  function setBar(on){ bar.hidden = !on; document.body.classList.toggle("bar-off", !on); barBtn.setAttribute("aria-pressed", String(on)); barBtn.style.borderColor = on ? "" : "var(--gold-dim)"; barBtn.style.color = on ? "" : "var(--muted)";
+    try { localStorage.setItem("risingFlowBar", on ? "1" : "0"); } catch(_){} }
+  barBtn.addEventListener("click", ()=> setBar(bar.hidden));
+  document.getElementById("btn-barhide").addEventListener("click", ()=> setBar(false));
+  try { if (localStorage.getItem("risingFlowBar") === "0") setBar(false); } catch(_){}
+
+  function resize(){ const w = stage.clientWidth, h = stage.clientHeight; renderer.setSize(w, h, false); camera.aspect = w/Math.max(1,h); camera.updateProjectionMatrix(); }
+  window.addEventListener("resize", resize); resize();
+
+  let last = performance.now();
+  function frame(now){
+    const rdt = Math.max(0, Math.min(0.05, (now - last)/1000)); last = now;
+    const dt = paused ? 0 : rdt*speed;
+    clockT += dt;
+    updaters.forEach(f=> f(dt));
+    if (tween){
+      tween.t = Math.min(1, tween.t + rdt/1.1);
+      const k = tween.t < .5 ? 2*tween.t*tween.t : 1 - Math.pow(-2*tween.t + 2, 2)/2;
+      ["az","el","dist","ty"].forEach(q=> orbit[q] = tween.from[q] + (tween.to[q] - tween.from[q])*k);
+      if (tween.t >= 1) tween = null;
+    } else if (spinBox.checked && !dragging){ orbit.az += rdt*0.045; }
+    updateCamera();
+    readout.textContent = "t = " + clockT.toFixed(1);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  window.__sceneRunning = true;
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body>
+</html>
