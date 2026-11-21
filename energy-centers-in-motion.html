@@ -130,7 +130,7 @@ const CENTERS = [
       ['Experience','<q>In terms of universal love</q> <span class="cite">(49.6)</span>'],
       ['Blockage','<q>Difficulties in expressing what you may call universal love, or compassion</q> <span class="cite">(15.12)</span>']],
   arch:'The compassionate witness. Acceptance and understanding.', purview:'Absorption, turning, exchange, witnessing observation, perception, interplay, kenosis, protection.',
-  render:'Green as in Stage 2 of <i>The Green Ray in Six Stages</i>: the stream from below rises freely into the heart and the lotus opens. At its center shines an emerald orb, and around it circulates the heart\'s own toroidal field in green, held at the heart and no longer stalled below it.'},
+  render:'Green as in Stage 2 of <i>The Green Ray in Six Stages</i>: the stream from below rises freely into the heart and the lotus opens. At its center shines an emerald orb, and around it circulates the heart\'s own toroidal field in green: down through its center and up around the outside, turning against the larger stream that rises through it, held at the heart and no longer stalled below it.'},
  {key:'blue', name:'Blue', color:'#3d8cf0', glow:'#8cc2ff', num:'Energy center 5 · 4th of the five · primary', sub:'The faceted gem — radiance',
   form:'The blue energy center capable of having perhaps one hundred facets and capable of great flashing brilliance.',
   ra:[['Activity','<q>The first ray of radiation of self regardless of any actions from another… The blue-ray entity is a co-Creator</q> <span class="cite">(41.25)</span>'],
@@ -479,7 +479,7 @@ const torusField = (parent, o) => { const G = new THREE.Group(); parent.add(G);
   for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, th:Math.random()*Math.PI*2, j:0.85 + 0.3*Math.random(), sp:0.45 + 0.3*Math.random(), b:0.6 + 0.4*Math.random()});
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
   G.add(new THREE.Points(g, pointsMat(o.ps))); const base = new THREE.Color(o.pcol);
-  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th - dt*p.sp + Math.PI*2) % (Math.PI*2); p.phi += dt*o.drift;
+  G.userData.tick = (dt) => { for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th + dt*p.sp) % (Math.PI*2);   // reversed (Doug, Nov 20): down the center, up the outside, as in the poloidal core's Zone 4 bubble p.phi += dt*o.drift;
       const v = loopPt(p.phi, p.th).multiplyScalar(p.j); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
       col[i*3] = base.r*p.b; col[i*3+1] = base.g*p.b; col[i*3+2] = base.b*p.b; }
     g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; };

@@ -402,7 +402,8 @@ const torus = (o) => { const G = new THREE.Group(); green.add(G);
   const lmat = new THREE.LineBasicMaterial({color:o.col, transparent:true, opacity:o.lop, depthWrite:false, blending:THREE.AdditiveBlending});
   for (let i=0;i<o.nl;i++){ const phi = o.off + i/o.nl*Math.PI*2, pts = []; for (let k=0;k<=96;k++) pts.push(loopPt(phi, k/96*Math.PI*2));
     G.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lmat)); }
-  // poloidal flow: up the inside, out over the top, down the outside, in at the bottom; toroidal drift in its own direction
+  // poloidal flow, reversed against the larger rising stream (Doug, Nov 20; Poloidal Core Dynamics §7, the Zone 4 bubble):
+  // down the center, outward at the bottom, up the outside, inward over the top; toroidal drift in its own direction
   const N = o.np, pos = new Float32Array(N*3), col = new Float32Array(N*3), P = [];
   for (let i=0;i<N;i++) P.push({phi:Math.random()*Math.PI*2, th:Math.random()*Math.PI*2, j:0.85 + 0.3*Math.random(), sp:0.45 + 0.3*Math.random(), b:0.6 + 0.4*Math.random()});
   const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(pos,3)); g.setAttribute('color', new THREE.BufferAttribute(col,3));
@@ -410,7 +411,7 @@ const torus = (o) => { const G = new THREE.Group(); green.add(G);
   updaters.push((dt) => { const w = W[o.key]; G.visible = w > 0.01; if (!G.visible) return; lmat.opacity = o.lop*w; pm.opacity = w;
     const s = (0.7 + 0.3*w)*(G.userData.extra || 1);  // the field gathers as it arrives
     G.scale.set(s, s, s);
-    for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th - dt*p.sp + Math.PI*2) % (Math.PI*2); p.phi += dt*o.drift;
+    for (let i=0;i<N;i++){ const p = P[i]; p.th = (p.th + dt*p.sp) % (Math.PI*2);   // reversed (Doug, Nov 20): down the center, up the outside, as in the poloidal core's Zone 4 bubble p.phi += dt*o.drift;
       const v = loopPt(p.phi, p.th).multiplyScalar(p.j); pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
       col[i*3] = base.r*p.b; col[i*3+1] = base.g*p.b; col[i*3+2] = base.b*p.b; }
     g.attributes.position.needsUpdate = true; g.attributes.color.needsUpdate = true; });
@@ -889,7 +890,7 @@ const SBEATS = {
       'The Patton phenomenon, which Ra ties to “the rejection of the Law or Way of Responsibility; that is, seeing universal love, yet still it fought on” (The Ra Contact, 34.17).'],
   2: ['Now the stream from below rises all the way into green, and the lotus opens.',
       'At the heart is humanity’s own toroidal field, yellow: veiled third density, the field we share as a people.',
-      'It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.',
+      'It circulates on its own, down through the center and up around the outside, turning against the larger stream that rises through it, held at the heart and no longer stalled below it.',
       'Here experience begins to be seen “in terms of universal love” (The Ra Contact, 49.6).'],
   3: ['At the heart, humanity’s own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos.',
       'This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center.',
@@ -934,7 +935,7 @@ updaters.push(() => { const s7o = stage === 7;
 // ---------- captions ----------
 const CAPS = {
   1: `<h2>Stage 1 · Blockage</h2>Energy rises from red through orange into yellow, and there it stalls, falling back on itself short of the heart. Winding through all three is the Great BASH (Bellicose Attitude, Aggressive Actions, Scarred and Scared, Hope through Hostility), a vortex that feeds on the very energy it keeps circling. Ra places yellow ray "at the heart of bellicose actions" (The Ra Contact, 32.2). Now and then the lotus at green parts for a moment and closes again: the Patton phenomenon, "seeing universal love, yet still it fought on" (The Ra Contact, 34.17).`,
-  2: `<h2>Stage 2 · The Heart</h2>Now the stream from below rises all the way into green, and the lotus opens. At the heart is humanity's own toroidal field, yellow: veiled third density, the field we share as a people. It circulates on its own, up through the center and back around, held at the heart and no longer stalled below it.`,
+  2: `<h2>Stage 2 · The Heart</h2>Now the stream from below rises all the way into green, and the lotus opens. At the heart is humanity's own toroidal field, yellow: veiled third density, the field we share as a people. It circulates on its own, down through the center and up around the outside, turning against the larger stream that rises through it, held at the heart and no longer stalled below it.`,
   3: `<h2>Stage 3 · Yehoshua as the Collective Green-Ray Center</h2>At the heart, humanity's own field (yellow, veiled third density) is interpenetrated by a second field, white: the Solar Logos. This is the dynamic union inside Yehoshua, in his role as the collective human green-ray center. The two fields pass through each other and neither dissolves; each stays itself, and that is what makes it a union. Ra describes invoking the higher self as making "a bridge betwixt space/time and time/space" (The Ra Contact, 75.36). I read Yehoshua, by will and faith, as that bridge held open for all of us.`,
   4: `<h2>Stage 4 · The King's Chamber and the Living Ankh</h2>Now we rise one spiral, from the heart at the Queen's Chamber position to the blue center at the King's Chamber position. Ra says the spiraling energy "is beginning to be diffused at the point where it goes through the King's Chamber position" (The Ra Contact, 56.6). The light that was centered and compressed at the heart opens into its spectrum, red through violet, each color holding its own place as it spirals up and around the axis. In the middle of the blue center, on its axis, that sweeping light draws a Living Ankh: the Christic Complex, the coincidence of opposites made flesh.`,
   5: `<h2>Stage 5 · The Christic Complex</h2>Now the Living Ankh enlarges and settles. Its nexus, where the vertical and horizontal fields cross, comes to rest on the yellow center, and its circle circulates through the heart. As I see it, this is the place of the indwelling: "Meanwhile the Creator lies within" (The Ra Contact, 49.6). Here co-presencing lives after the Christ Event, the meeting point between a veiled third-density human and the Creator through the portal of the Christic Complex, much as Ra calls the kundalini "the meeting place of cosmic and inner" (The Ra Contact, 49.5). The coincidence of opposites sits exactly on the third center. Ra calls the choice "the axis upon which the creation turns" (The Ra Contact, 76.16); here that axis is also the one through which the Creator sees, feels and engages. And here creation, after the veil, comes to awareness of itself, recapitulating the cosmogenesis in which "the Creator will know Itself" (The Ra Contact, 27.8).`,
