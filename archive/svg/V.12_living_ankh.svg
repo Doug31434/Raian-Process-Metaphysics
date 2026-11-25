@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1000" viewBox="0 0 1200 1000">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="75%">
+      <stop offset="0%" stop-color="#1d2340"/>
+      <stop offset="100%" stop-color="#0b0e1c"/>
+    </radialGradient>
+    <linearGradient id="descent" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fff3cf"/>
+      <stop offset="100%" stop-color="#d9a446"/>
+    </linearGradient>
+    <linearGradient id="embrace" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#9fb8ff"/>
+      <stop offset="50%" stop-color="#e8eeff"/>
+      <stop offset="100%" stop-color="#9fb8ff"/>
+    </linearGradient>
+    <radialGradient id="loopfill" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#fff6dc" stop-opacity="0.55"/>
+      <stop offset="70%" stop-color="#f4cf7a" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#f4cf7a" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="heart" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="35%" stop-color="#7fe0a6"/>
+      <stop offset="100%" stop-color="#34b56a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="7" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <marker id="arrDown" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#d9a446"/>
+    </marker>
+    <marker id="arrIn" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c9d6ff"/>
+    </marker>
+  </defs>
+  <rect width="1200" height="1000" fill="url(#bg)"/>
+
+  <text x="600" y="70" text-anchor="middle" font-family="Caladea" font-size="46" fill="#f3ecd8">The Living Ankh</text>
+  <text x="600" y="108" text-anchor="middle" font-family="Inter" font-weight="300" font-size="20" fill="#b9b3a3" letter-spacing="1">kenosis meeting consent</text>
+
+  <!-- loop -->
+  <ellipse cx="600" cy="300" rx="120" ry="150" fill="url(#loopfill)"/>
+  <ellipse cx="600" cy="300" rx="120" ry="150" fill="none" stroke="#f4cf7a" stroke-width="16" filter="url(#glow)" opacity="0.9"/>
+
+  <!-- vertical beam: descent -->
+  <rect x="588" y="450" width="24" height="440" rx="10" fill="url(#descent)" filter="url(#glow)"/>
+  <g stroke="#d9a446" stroke-width="3" fill="none" marker-end="url(#arrDown)" opacity="0.85">
+    <line x1="640" y1="610" x2="640" y2="690"/>
+    <line x1="640" y1="740" x2="640" y2="820"/>
+  </g>
+
+  <!-- crossbeam: embrace -->
+  <rect x="380" y="500" width="440" height="24" rx="10" fill="url(#embrace)" filter="url(#glow)"/>
+  <g stroke="#c9d6ff" stroke-width="3" fill="none" marker-end="url(#arrIn)" opacity="0.85">
+    <line x1="400" y1="560" x2="480" y2="560"/>
+    <line x1="800" y1="560" x2="720" y2="560"/>
+  </g>
+
+  <!-- heart at the crossing -->
+  <circle cx="600" cy="512" r="60" fill="url(#heart)"/>
+  <circle cx="600" cy="512" r="12" fill="#ffffff" filter="url(#glow)"/>
+
+  <!-- labels -->
+  <g font-family="Inter">
+    <!-- loop -->
+    <line x1="722" y1="250" x2="850" y2="210" stroke="#8d88a0" stroke-width="1.5"/>
+    <text x="862" y="205" font-family="Caladea" font-size="30" fill="#f4dc9c">The loop · co-presencing</text>
+    <text x="862" y="238" font-size="19" fill="#d8d2c2">the space kenosis and</text>
+    <text x="862" y="262" font-size="19" fill="#d8d2c2">consent open together:</text>
+    <text x="862" y="286" font-size="19" fill="#d8d2c2">eternal life</text>
+
+    <!-- crossbeam -->
+    <line x1="380" y1="512" x2="300" y2="456" stroke="#8d88a0" stroke-width="1.5"/>
+    <text x="290" y="336" text-anchor="end" font-family="Caladea" font-size="30" fill="#cdd9ff">The crossbeam</text>
+    <text x="290" y="370" text-anchor="end" font-family="Caladea" font-size="26" fill="#cdd9ff">the embrace</text>
+    <text x="290" y="402" text-anchor="end" font-size="19" fill="#d8d2c2">the creature opening to</text>
+    <text x="290" y="426" text-anchor="end" font-size="19" fill="#d8d2c2">the Creator in consent:</text>
+    <text x="290" y="450" text-anchor="end" font-size="19" fill="#d8d2c2">Mary’s <tspan font-style="italic">fiat</tspan></text>
+
+    <!-- heart -->
+    <line x1="660" y1="520" x2="850" y2="560" stroke="#8d88a0" stroke-width="1.5"/>
+    <text x="862" y="560" font-family="Caladea" font-size="30" fill="#a6ecc1">The crossing · the heart</text>
+    <text x="862" y="592" font-size="19" fill="#d8d2c2">where Creator and creature</text>
+    <text x="862" y="616" font-size="19" fill="#d8d2c2">meet and both are changed</text>
+
+    <!-- vertical -->
+    <line x1="588" y1="760" x2="330" y2="760" stroke="#8d88a0" stroke-width="1.5"/>
+    <text x="318" y="711" text-anchor="end" font-family="Caladea" font-size="30" fill="#f4dc9c">The beam</text>
+    <text x="318" y="745" text-anchor="end" font-family="Caladea" font-size="26" fill="#f4dc9c">kenotic descent</text>
+    <text x="318" y="777" text-anchor="end" font-size="19" fill="#d8d2c2">the Creator emptying</text>
+    <text x="318" y="801" text-anchor="end" font-size="19" fill="#d8d2c2">into creation (Phil. 2:7)</text>
+  </g>
+
+  <text x="600" y="950" text-anchor="middle" font-family="Caladea" font-style="italic" font-size="24" fill="#e8e3d6">“I live; yet not I, but Christ liveth in me.” — Galatians 2:20</text>
+  <text x="1170" y="985" text-anchor="end" font-family="Inter" font-size="14" fill="#6f6a7d">Doug Scott · cosmicchrist.net</text>
+</svg>
